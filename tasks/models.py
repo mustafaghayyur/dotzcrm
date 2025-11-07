@@ -1,74 +1,99 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+
+from . import QuerySets
 
 
 # The main task table
 class Task(models.Model):
     description = models.CharField(max_length=255)
-    creator_user_id = models.ForeignKey(
+    creator_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
-    parent_id = models.ForeignKey('self', on_delete=models.CASCADE)
-    visibility = models.CharField(max_length=20)  # enum of ['private' | 'assigned' | 'organization' | 'stakeholders']
-    deadline = models.DateTimeField()
-    create_time = models.DateTimeField()
-    update_time = models.DateTimeField()
-    delete_time = models.DateTimeField()
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    create_time = models.DateTimeField(default=timezone.now)
+    update_time = models.DateTimeField(null=True, blank=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TasksQuerySet.as_manager()
 
 
 class TaskDetails(models.Model):
-    Task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
     description = models.TextField()
-    create_time = models.DateTimeField()
-    update_time = models.DateTimeField()
-    delete_time = models.DateTimeField()
+    create_time = models.DateTimeField(default=timezone.now)
+    update_time = models.DateTimeField(null=True, blank=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TaskDetailQuerySet.as_manager()
 
 
 class TaskDeadline(models.Model):
-    Task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField()
-    delete_time = models.DateTimeField()
+    create_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TaskDeadlineQuerySet.as_manager()
 
 class TaskStatus(models.Model):
-    Task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)  # enum of ['assigned' | 'viewed' | 'queued' | 'started' | 'onhold' | 'abandoned' | 'reassigned' | 'awaitingfeedback' | 'completed' | 'failed']
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField()
-    delete_time = models.DateTimeField()
+    create_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TaskStatusQuerySet.as_manager()
+
+class TaskVisibility(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    visibility = models.CharField(max_length=20)  # enum of ['private' | 'assigned' | 'organization' | 'stakeholders']
+    # note: updates are banned on this table.
+    # application level control to be implemented.
+    create_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TaskVisibilityQuerySet.as_manager()
 
 class TaskWatcher(models.Model):
-    Task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
-    watcher_user_id = models.ForeignKey(
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    watcher_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField()
-    delete_time = models.DateTimeField()
+    create_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TaskWatacherQuerySet.as_manager()
 
 
 # The table to manage assignor/assignee for each task
 class TaskUserAssignment(models.Model):
-    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
-    assignor_user_id = models.ForeignKey(
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    assignor_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
+        related_name='asasignor_user'
     )
-    assignee_user_id = models.ForeignKey(
+    assignee_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
+        related_name='asasignee_user'
     )
 
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField()
-    delete_time = models.DateTimeField()
+    create_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    rawobjects = QuerySets.TaskAssignmentQuerySet.as_manager()
 
 
 # @todo - link tasks with tickets
@@ -76,7 +101,8 @@ class TaskUserAssignment(models.Model):
 #class TaskTicketAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    ticket_id = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-#    linked_on = models.DateTimeField()
+#    create_time = models.DateTimeField(default=timezone.now)
+#    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
 
@@ -86,7 +112,8 @@ class TaskUserAssignment(models.Model):
 #class TaskCustomerAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
-#    linked_on = models.DateTimeField()
+#    create_time = models.DateTimeField(default=timezone.now)
+#    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
 
@@ -96,7 +123,8 @@ class TaskUserAssignment(models.Model):
 #class TaskCustomerAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    document_id = models.ForeignKey(Document, on_delete=models.CASCADE)
-#    linked_on = models.DateTimeField()
+#    create_time = models.DateTimeField(default=timezone.now)
+#    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
 
@@ -106,7 +134,8 @@ class TaskUserAssignment(models.Model):
 #class TaskCommentAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE)
-#    linked_on = models.DateTimeField()
+#    create_time = models.DateTimeField(default=timezone.now)
+#    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
 
@@ -117,7 +146,7 @@ class TaskUserAssignment(models.Model):
 #################################################################
 
 # run:
-#  > python manage.py makemigrations --empty <app_name>
+#  > python manage.py makemigrations --empty <app_name>  # empty option makes an empty Migration file that you can fill in manually
 #
 # Edit the generated migration file: (e.g., 0002_alter_my_table_engine.py)
 # and add a RunSQL operation within the operations list. 

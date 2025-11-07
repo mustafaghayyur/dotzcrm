@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %} Tasks Home {% endblock %}
+
+{% block page_heading %}{{records.task.description}}{% endblock %}
+
+{% block content %}
+    <div id="dates" class="info">Created: {{records.task.create_time}} | Updated: {{records.task.update_time}}</div>
+    <div id="author" class="author">Creator: {{records.task.creator_user_id_id}}</div>
+    {% fields = {} %}
+    {% for rec in records.status %}
+        {% fields['status'] = rec.status %}
+    {% endfor %}
+    {% for rec in records.details %}
+        {% fields['details'] = rec.description %}
+    {% endfor %}
+
+    <div id="description" class="copy">
+        {{fields['details']}}
+    </div>
+
+    <div id="status" class="status">
+        {{fields['status']}}
+    </div>
+
+{% endblock %}
