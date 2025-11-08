@@ -8,44 +8,47 @@ from .helpers.misc import log
 # The QuerySet family of definitions will be essential to maintaining
 # strict data-integrity and database-interactions standards.
 # Where Python ORM's standard functions are not used to operate
-# on the MySQL DB, these QuerySet methods should be used to 
+# on the MySQL DB, these QuerySet methods should be used to
 # interact with the MySQL DB.
 # DO NOT use raw queries anywhere outside of QuerySets in this CRM.
 ##########################################################################
 class TasksQuerySet(models.QuerySet):
     
-    # Fetches full Task records with latest records (of sub tables).
-    # Can be used on user's dashboard to fetch all recent private tasks
-    # PARAMS:
-    #  - user_id: the current user's ID
-    #  - interval: string of integer value for how many days old tasks can be
-    def user_tasks(self, user_id, keys = None):
-        
-        where_statements = []
+    # these are all the column names callable in the fetchTasks() query generator
+    # individual child table's create/delete datetime cols cannot be fetched in the fetchTasks() call
+    tableCols = ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id', 'details', 'deadline', 'status', 'visibility', 'assignor_id', 'assignee_id', 'watcher_id', 'latest']
+
+
+    def fetchTasks(self, user_id, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
+        """
+        # Fetches full Task records with latest records (of sub tables).
+        # The 'keys' dictionary defines which tasks will be fetched.
+        # PARAMS:
+        #  - user_id: [int] the current user's ID
+        #  - selectors: [list] list of columns you wish the result set to carry (from all Tasks' tables combined)
+        #  - conditions: [dictionary] book of parameters for which tasks should be fetched.
+        """        
+        defaultConditions = self.generateDefaultConditions()
+
+        if conditions is None:
+            conditions = {}
+
+        actualConditions = self.mergeConditions(defaultConditions, conditions)
+
+        whereStatements = []
+        params = {}
         i = 0
         tbl = self.generateTablesList()
 
-        for key, item in keys:
-            where_statements[i] = self.validate(item, tbl[key], key)
+        for key, item in actualConditions:
+            whereStatements[i] = self.generateWhereStatements(i, tbl[key], key)
+            params[key] = item
             i += 1
 
-        if keys is None:
-            keys = self.generateDefaultKeys()
-            #status = [settings.task.keys.status.completed, settings.task.keys.status.failed]
+        # sub it any column names you wish to output differently in the ORM
+        translations = {}
 
-        qkeys = {
-            "user_id": user_id,
-            "visibility": visibility or settings.task.keys.visibility.private,
-            "recent_interval": interval or settings.task.recent_interval,
-            "status": status
-            "archive": settings.task.keys.latest.archive,
-        }
-
-        new_labels = {
-
-        }
-
-        rq1 = """
+        start = """
             SELECT t.id, t.description, t.create_time, t.update_time, t.creator_id, t.parent_id
                 d.description AS details,
                 l.deadline, s.status, a.assignor_id
@@ -55,58 +58,97 @@ class TasksQuerySet(models.QuerySet):
                 LEFT JOIN tasks_taskstatus AS s ON t.id = s.task_id
                 LEFT JOIN tasks_taskuserassignment AS a ON t.id = a.task_id
                 LEFT JOIN tasks_taskvisibility AS v ON t.id = v.task_id
-            WHERE a.assignee_id = %(user_id)s AND"""
-                
-        rq2 = """
-                t.delete_time IS NULL AND (
-                t.update_time >= NOW() - INTERVAL %(recent_interval)s DAY OR t.update_time IS NULL ) AND
-                s.status IN (%(status)s) AND
-               
-                d.latest <> %(archive)s AND l.latest <> %(archive)s AND s.latest <> %(archive)s AND
-                a.latest <> %(archive)s AND v.latest <> %(archive)s
-            ;"""
+            WHERE """
+        
+        if 'latest' in actualConditions:
+            latest = """ d.latest <> %(latest)s AND l.latest <> %(latest)s AND s.latest <> %(latest)s
+                AND a.latest <> %(latest)s AND v.latest <> %(latest)s"""
+        else:
+            latest = ''
 
-        wheres = strings.concatenate(where_statements)
-        query = strings.concatenate([rq1, wheres, rq2])
+        end = " ORDER BY " + orderBy + " LIMIT " + limit + ";"
+
+        wheres = strings.concatenate(whereStatements)
+        query = strings.concatenate([start, wheres, latest, end])
         log(query, 'REMEMBER MG: THE inputs CANNOT have quotes around them!!!!')
 
-        return self.raw(query, qkeys, new_labels)
+        return self.raw(query, params, translations)
 
-    def validate(self, item, tbl, key):
+    def generateWhereStatements(self, i, tbl, key):
+        if i > 0:
+            andPref = ' AND '
+
         if key == 'latest':
             return ''
 
+        if key = 'update_time':
+            return andPref + '(' + tbl + '.' + key + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + key + ' IS NULL )'
+
         if isinstance(item, list):
-            return tbl + '.' + key + ' IN (%(' + item + ')s)'
+            return andPref + tbl + '.' + key + ' IN (%(' + key + ')s)'
         
         if isinstance(item, str):
-            return tbl + '.' + key + ' = %(' + item + ')s'
+            return andPref + tbl + '.' + key + ' = %(' + key + ')s'
 
         return ''
 
     def generateTablesList(self):
-        return {
-            'id' = 't',
-            'description' = 't',
-            'create_time' = 't',
-            'update_time' = 't',
-            'delete_time' = 't',
-            'creator_id' = 't',
-            'parent_id' = 't',
-            'details' = 'd',
-            'deadline' = 'l',
-            'status' = 's',
-            'visibility' = 'v',
-            'assignor_id' = 'a',
-            'assignee_id' = 'a',
-            'watcher_id' = 'w',
-            'latest' = '',
+        """
+        # Generates table acronyms for all col_names in fetchTasks() query.
+        """
+        tablesCols = {}
+        i = 0
+
+        for col in self.tableCols:
+            if col in ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id']:
+                tableCols[col] = 't'
+            if col in ['details']:
+                tableCols[col] = 'd'
+            if col in ['deadline']:
+                tableCols[col] = 'l'
+            if col in ['status']:
+                tableCols[col] = 's'
+            if col in ['visibility']:
+                tableCols[col] = 'v'
+            if col in ['assignor_id', 'assignee_id']:
+                tableCols[col] = 'a'
+            if col in ['watcher_id']:
+                tableCols[col] = 'w'
+            if col == 'latest':
+                tableCols[col] = ''
+
+            i += 1
+
+        return tableCols
+
+    def generateDefaultConditions(self, user_id):
+        params = {
+            "assignee_id": user_id
+            "delete_time": 'IS NULL'
+            "update_time": settings.task.recent_interval,
+            "latest": settings.task.keys.latest.archive,
+            "visibility": settings.task.keys.visibility.private,
+            "status": [settings.task.keys.status.completed, settings.task.keys.status.failed]
         }
 
-    def generateDefaultKeys(self):
-        return {
+        return params
 
-        }
+    def mergeConditions(self, defaults, provided):
+        conditions = defaults | provided  # merge provided conditions into the defaults
+        final = self.validateConditions(conditions)
+        return final
+
+    def validateConditions(self, conditions):
+
+        for k, v in conditions:
+            if k in keys:
+                if isinstance(v, str) or isinstance(v, list):
+                    continue
+                else:
+                    conditions[k] = ''
+            else:
+                del conditions[k]  # delete the key from dictionary
+                
 
 
 class TaskDetailQuerySet(models.QuerySet):

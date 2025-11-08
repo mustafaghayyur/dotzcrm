@@ -14,7 +14,7 @@ class Task(models.Model):
     )
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     create_time = models.DateTimeField(default=timezone.now)
-    update_time = models.DateTimeField(null=True, blank=True)
+    update_time = models.DateTimeField(default=timezone.now, null=False, blank=False)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     rawobjects = QuerySets.TasksQuerySet.as_manager()
