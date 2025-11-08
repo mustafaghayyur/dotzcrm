@@ -8,7 +8,7 @@ from . import QuerySets
 # The main task table
 class Task(models.Model):
     description = models.CharField(max_length=255)
-    creator_user = models.ForeignKey(
+    creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
@@ -22,7 +22,8 @@ class Task(models.Model):
 
 class TaskDetails(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    description = models.TextField()
+    description = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio() 
+    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(null=True, blank=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -33,6 +34,7 @@ class TaskDetails(models.Model):
 class TaskDeadline(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
+    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -43,6 +45,7 @@ class TaskDeadline(models.Model):
 class TaskStatus(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)  # enum of ['assigned' | 'viewed' | 'queued' | 'started' | 'onhold' | 'abandoned' | 'reassigned' | 'awaitingfeedback' | 'completed' | 'failed']
+    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -53,6 +56,7 @@ class TaskStatus(models.Model):
 class TaskVisibility(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20)  # enum of ['private' | 'assigned' | 'organization' | 'stakeholders']
+    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -62,10 +66,11 @@ class TaskVisibility(models.Model):
 
 class TaskWatcher(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    watcher_user = models.ForeignKey(
+    watcher = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
+    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -77,17 +82,17 @@ class TaskWatcher(models.Model):
 # The table to manage assignor/assignee for each task
 class TaskUserAssignment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    assignor_user = models.ForeignKey(
+    assignor = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
         related_name='asasignor_user'
     )
-    assignee_user = models.ForeignKey(
+    assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
         related_name='asasignee_user'
     )
-
+    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
