@@ -1,15 +1,10 @@
-from django.shortcuts import render
-from django.shortcuts import render
 from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
-from django.views.generic.dates import YearArchiveView
+#from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
+#from django.views.generic.dates import YearArchiveView
 
 from .models import Task
-from .models import TaskDetails
-from .models import TaskDeadline
-from .models import TaskStatus
-from .models import TaskWatcher
-from .models import TaskUserAssignment
+
+from core.helpers import misc
 
 # Create your views here.
 
@@ -18,35 +13,29 @@ class TasksListView(ListView):
     context_object_name = "data"
     template_name = "index.html"
 
+    def get_queryset(self):
+        results = Task.rawobjects.fetchTasks('1', ['id', 'description', 'create_time', 'update_time', 'status', 'visibility'])
+        misc.log(results, 'Query Results....')
+
+        return results
+
 
 class TaskDetailView(DetailView):
     model = Task
     context_object_name = "records"
     template_name = "record.html"
 
-    def get_context_data(self, **kwargs):      
-        """Insert the single object into the context dict."""
-        context = {}
-        
-        if self.object:
-            context["object"] = self.object
-            context_object_name = self.get_context_object_name(self.object)
+    def get_object(self, query_set = None):
+        results = Task.rawobjects.fetchTasks('1', ['id', 'description', 'create_time', 'update_time', 'status', 'visibility', 'details', 'assignor_id'])
+        try:
+            obj = results[0]
+        except IndexError:
+            # Handle the case where the object is not found
+            from django.http import Http404
+            raise Http404("No Person found matching the query")
             
-            if context_object_name:
-                context[context_object_name] = {}
-                context[context_object_name]["task"] = self.object
-                context[context_object_name]["details"] = TaskDetails.objects.all()
-                context[context_object_name]["deadlines"] = TaskDeadline.objects.all()
-                context[context_object_name]["status"] = TaskStatus.objects.all()
-                context[context_object_name]["watchers"] = TaskWatcher.objects.all()
-                context[context_object_name]["assignments"] = TaskUserAssignment.objects.all()
+        return obj
         
-
-        # context['status'][0].status gets you the status
-        context.update(kwargs)
-        return super().get_context_data(**context)
-        
-
 
 # Create your views here.
 #def index(request):

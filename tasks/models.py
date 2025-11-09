@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-from . import QuerySets
+from core.querysets.tasks import *
 
 
 # The main task table
@@ -17,21 +17,21 @@ class Task(models.Model):
     update_time = models.DateTimeField(default=timezone.now, null=False, blank=False)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TasksQuerySet.as_manager()
+    rawobjects = TasksQuerySet.as_manager()
 
 
-class TaskDetails(models.Model):
+class Details(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    description = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio() 
+    details = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio()
     latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(null=True, blank=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TaskDetailQuerySet.as_manager()
+    rawobjects = DetailQuerySet.as_manager()
 
 
-class TaskDeadline(models.Model):
+class Deadline(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
     latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
@@ -40,9 +40,9 @@ class TaskDeadline(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TaskDeadlineQuerySet.as_manager()
+    rawobjects = DeadlineQuerySet.as_manager()
 
-class TaskStatus(models.Model):
+class Status(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)  # enum of ['assigned' | 'viewed' | 'queued' | 'started' | 'onhold' | 'abandoned' | 'reassigned' | 'awaitingfeedback' | 'completed' | 'failed']
     latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
@@ -51,9 +51,9 @@ class TaskStatus(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TaskStatusQuerySet.as_manager()
+    rawobjects = StatusQuerySet.as_manager()
 
-class TaskVisibility(models.Model):
+class Visibility(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20)  # enum of ['private' | 'assigned' | 'organization' | 'stakeholders']
     latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
@@ -62,9 +62,9 @@ class TaskVisibility(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TaskVisibilityQuerySet.as_manager()
+    rawobjects = VisibilityQuerySet.as_manager()
 
-class TaskWatcher(models.Model):
+class Watcher(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     watcher = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
@@ -76,11 +76,11 @@ class TaskWatcher(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TaskWatacherQuerySet.as_manager()
+    rawobjects = WatacherQuerySet.as_manager()
 
 
 # The table to manage assignor/assignee for each task
-class TaskUserAssignment(models.Model):
+class Assignment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     assignor = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
@@ -98,7 +98,7 @@ class TaskUserAssignment(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = QuerySets.TaskAssignmentQuerySet.as_manager()
+    rawobjects = AssignmentQuerySet.as_manager()
 
 
 # @todo - link tasks with tickets

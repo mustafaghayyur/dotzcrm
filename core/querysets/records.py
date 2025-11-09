@@ -1,6 +1,4 @@
 from django.db import models
-from core.settings import tasks
-from core.helpers import strings, misc
 
 
 ##########################################################################
@@ -26,8 +24,7 @@ class QuerySet(models.QuerySet):
     # This dictionary carries list of all the column names callable in the fetch****() query call.
     # The dictionary has 'column_name': 'table_abbreviation_used_in_SQL' format to its organization.
     # individual child table's create/delete datetime cols cannot be fetched in the Master Tables' Fetch*All() calls
-    tableCols = {
-        }
+    tableCols = {}
 
     def _compileVariables(self, user_id, selectors = [], conditions = None, orderBy = '', limit = '20'):
         """
@@ -45,36 +42,39 @@ class QuerySet(models.QuerySet):
         i = 0
         tbl = self.tableCols
 
-        for key, item in actualConditions:
-            whereStatements[i] = self._generateWhereStatements(i, tbl[key], key)
-            params[key] = item
+        for key, item in actualConditions.items():
+            whereStatements.append(self._generateWhereStatements(i, tbl[key], key, item))
+            if isinstance(item, list):
+                params[key] = tuple(item)
+            else:
+                params[key] = item
             i += 1
 
         selectString = self._generateProperSelectors(selectors, tbl)
-
-        
 
         return {
             'selectString': selectString,
             'conditions': actualConditions,
             'whereStatements': whereStatements,
             'params': params,
-            'translations': translations,
         }
 
     def _generateProperSelectors(self, selectors, table):
+        """
+            This helper function forms parts of the SELECT statement in the query.
+        """
         string = ''
         
         for key in selectors:
-            if key == 'details':
-                string += ' ' + table[key] + '.description AS ' + key + ','
-                continue
-
-            string += ' ' + table[key] + '.' + key +','
+            if key in self.tableCols:
+                string += ' ' + table[key] + '.' + key + ','
 
         return string[:-1]
 
-    def _generateWhereStatements(self, i, tbl, key):
+    def _generateWhereStatements(self, i, tbl, key, item):
+        """
+            This helper function forms parts of the WHERE statement in the query.
+        """
         andPref = ''
 
         if i > 0:
@@ -83,11 +83,11 @@ class QuerySet(models.QuerySet):
         if key == 'latest':
             return ''
 
-        if key in ['update_time', 'delete_time', 'create_time']:
+        if key in ['update_time', 'create_time']:
             return andPref + '(' + tbl + '.' + key + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + key + ' IS NULL )'
 
         if isinstance(item, list):
-            return andPref + tbl + '.' + key + ' IN (%(' + key + ')s)'
+            return andPref + tbl + '.' + key + ' IN %(' + key + ')s'
         
         if isinstance(item, str):
             return andPref + tbl + '.' + key + ' = %(' + key + ')s'
@@ -107,32 +107,79 @@ class QuerySet(models.QuerySet):
         return params
 
     def _mergeConditions(self, defaults, provided):
+        """
+            Simply merges default conditions with object-instance provided conditions.
+            The provided conditions over-write the defaults.
+        """
         conditions = defaults | provided  # merge provided conditions into the defaults
         final = self._validateConditions(conditions)
         return final
 
     def _validateConditions(self, conditions):
+        """
+            Make sure all condition inputs are strings or lists.
+        """
+        tableCols = list(self.tableCols.keys())
 
-        for k, v in conditions:
-            if k in keys:
+        from core.helpers import misc
+        misc.log(tableCols, 'Is this a proper list of Tasks module keys [self.tableCol]?')
+
+        for k, v in conditions.items():
+            if k in tableCols:
                 if isinstance(v, str) or isinstance(v, list):
                     continue
                 else:
-                    conditions[k] = ''
+                    if isinstance(v, float) or isinstance(v, int) or isinstance(v, complex):
+                        conditions[k] = str(v)
+                        continue
+                    else:
+                        conditions[k] = ''
+                        continue
             else:
                 del conditions[k]  # delete the key from dictionary
+
+        return conditions
                 
 
 #######################################
 # Child Tables QuerySet Helper functions
 # This class is not meant to retrieve actual data.
-# This class carries common helper functions needed by all children tables of Master Record tables:
-#  -> Tasks Master Table
-#  -> Tickets Master Table
-#  -> Customers Master Table
-#  -> Documents Master Table
+#
+# This class carries common helper functions needed by all children tables of Master Table.
+#
+# When dealing with revisions we try not to fetch IDs of all revisions. 
+# This is wasteful spending.
+#
+# We instead refer to revisions by their chronological place (in reverse). 
+# So index[0] will be the current record. Then index[1] will be the last revision before the current one. And so forth.
 #######################################
 class ChildrenQuerySet(models.QuerySet):
-    def _firstHelper(self, user_id):
-        return {}
+    def fetchRevision(self, user_id, task_id, revision = 0):
+        """
+            Fetch a specific revision of child table record.
+        """
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.master_col} = %s 
+                    AND user_id = %s 
+                ORDER BY create_time DESC
+                LIMIT 1 OFFSET (%s);
+            """
+
+        return self.raw(query, [task_id, user_id, revision])
+
+    def fetchAllRevisions(self, user_id, task_id):
+        """
+            Fetch all revisions of child table record.
+        """
+        query = f"""
+            SELECT * FROM {self.tbl} 
+                WHERE {self.master_col} = %s 
+                    AND user_id = %s 
+                ORDER BY create_time DESC;
+            """
+
+        return self.raw(query, [task_id, user_id])
+
+
 

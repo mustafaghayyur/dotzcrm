@@ -20,8 +20,8 @@ tasks = {
     'recentInterval': '30',
     'keys': {
         'latest': {
-            'archive': 'archive',
-            'latest': 'latest',
+            'archive': '2',
+            'latest': '1',
         },
         'visibility': {
             'private': 'private',

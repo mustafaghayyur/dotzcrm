@@ -5,12 +5,5 @@
 {% block page_heading %}Tasks Management Console{% endblock %}
 
 {% block content %}
-    <pre>{{ data }}</pre>
-    <ul class="list-group">
-        {% for task in data %}
-            <a class="list-group-item list-group-item-action">{{task.id}}: {{task.description}}</a>
-        {% endfor %}
-        <a class="list-group-item list-group-item-action active" aria-current="true">Test1: One</a>
-        <a class="list-group-item list-group-item-action disabled">Tests Two: Two</a>
-    <ul>
+    
 {% endblock %}

@@ -1,15 +1,42 @@
-def log(string, log_message = 'SIMPLE TEST OF VALUES:'):
+def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file = "/Users/mustafa/Sites/python/server1/DEBUGGER.log"):
     """
-        Always pass the variable you wish to log in string format.
+        Simple logger. Use by importing core.helpers.misc
 
         Params:
-            - string: the variable (in string format) you wish to log
-            - log_message: any additional meta data you wish to tack on
+            - subject: the variable you wish to log
+            - log_message: additional meta data you wish to tack on
+            - level [int]: 1 = simple parse of object. 2 = More introspection.
     """
-    import pprint
-    import inspect
+    
     from django.utils import timezone
 
-    with open("/Users/mustafa/Sites/python/server1/DEBUGGER.log", "at") as f:
-        log = pprint.pformat(inspect.getmembers(string))
-        f.write("\n" + str(timezone.now().strftime("%Y-%m-%d %H:%M:%S")) + "\n---------------\n" + log_message + "\n---------------\n" + log + "\n")
+    varType = type(subject)
+    nowobj = timezone.now()
+    now = nowobj.strftime("%Y-%m-%d %H:%M:%S")
+
+    if isinstance(subject, str):
+        log = subject
+    else:
+        if isinstance(subject, float) or isinstance(subject, int) or isinstance(subject, complex):
+            log = str(subject)
+        else:
+            import pprint
+            if level > 1:
+                import inspect
+                log = pprint.pformat(inspect.getmembers(subject))
+            else:
+                log = pprint.pformat(subject)
+
+    msg = f"""
+        "{now}
+        ---------------
+        {log_message}
+        ---------------
+        Variable type: {varType}
+        ---------------
+        {log}
+        ---------------
+
+        """
+    with open(logger_file, "at") as f:
+        f.write(msg)
