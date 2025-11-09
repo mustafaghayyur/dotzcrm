@@ -12,44 +12,33 @@ from core.helpers import strings, misc
 # interact with the MySQL DB.
 #
 # DO NOT use raw queries anywhere outside of QuerySets in this project.
+#
+# Master Record QuerySet Helper functions
+# This class is not meant to retrieve actual data.
+# This class carries common helper functions needed by all types of records (of Master tables) in the CRM.
+#  -> Tasks Master Table
+#  -> Tickets Master Table
+#  -> Customers Master Table
+#  -> Documents Master Table
 ##########################################################################
-class TasksQuerySet(models.QuerySet):
+class QuerySet(models.QuerySet):
     
-    # these are all the column names callable in the fetchTasks() query generator
-    # individual child table's create/delete datetime cols cannot be fetched in the fetchTasks() call
+    # This dictionary carries list of all the column names callable in the fetch****() query call.
+    # The dictionary has 'column_name': 'table_abbreviation_used_in_SQL' format to its organization.
+    # individual child table's create/delete datetime cols cannot be fetched in the Master Tables' Fetch*All() calls
     tableCols = {
-        'id': 't',
-        'description': 't',
-        'create_time': 't',
-        'update_time': 't',
-        'delete_time': 't',
-        'creator_id': 't',
-        'parent_id': 't',
-        'details': 'd',
-        'deadline': 'l',
-        'status': 's',
-        'visibility': 'v',
-        'assignor_id': 'a',
-        'assignee_id': 'a',
-        'watcher_id': 'w',
-        'latest': ''
         }
 
-    def fetchTasks(self, user_id, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
+    def _compileVariables(self, user_id, selectors = [], conditions = None, orderBy = '', limit = '20'):
         """
-        # Fetches full Task records with latest records (of sub tables).
-        # The 'keys' dictionary defines which tasks will be fetched.
-        # PARAMS:
-        #  - user_id: [int] the current user's ID
-        #  - selectors: [list] list of columns you wish the result set to carry (from all Tasks' tables combined)
-        #  - conditions: [dictionary] book of parameters for which tasks should be fetched.
-        """        
-        defaultConditions = self.generateDefaultConditions()
+        # Compiles all inputs provided and readies them for use in the specified Query.
+        """
+        defaultConditions = self._generateDefaultConditions(user_id)
 
         if conditions is None:
             conditions = {}
 
-        actualConditions = self.mergeConditions(defaultConditions, conditions)
+        actualConditions = self._mergeConditions(defaultConditions, conditions)
 
         whereStatements = []
         params = {}
@@ -57,41 +46,23 @@ class TasksQuerySet(models.QuerySet):
         tbl = self.tableCols
 
         for key, item in actualConditions:
-            whereStatements[i] = self.generateWhereStatements(i, tbl[key], key)
+            whereStatements[i] = self._generateWhereStatements(i, tbl[key], key)
             params[key] = item
             i += 1
 
-        selectString = self.generateProperSelectors(selectors, tbl)
+        selectString = self._generateProperSelectors(selectors, tbl)
 
-        # sub it any column names you wish to output differently in the ORM
-        translations = {}
-
-        start = 'SELECT ' + selectString
         
-        start += """
-            FROM tasks_task AS t
-                LEFT JOIN tasks_taskdetails AS d ON t.id = d.task_id
-                LEFT JOIN tasks_taskdeadline AS l ON t.id = l.task_id
-                LEFT JOIN tasks_taskstatus AS s ON t.id = s.task_id
-                LEFT JOIN tasks_taskuserassignment AS a ON t.id = a.task_id
-                LEFT JOIN tasks_taskvisibility AS v ON t.id = v.task_id
-            WHERE """
-        
-        if 'latest' in actualConditions:
-            latest = """ d.latest <> %(latest)s AND l.latest <> %(latest)s AND s.latest <> %(latest)s
-                AND a.latest <> %(latest)s AND v.latest <> %(latest)s"""
-        else:
-            latest = ''
 
-        end = " ORDER BY " + orderBy + " LIMIT " + limit + ";"
+        return {
+            'selectString': selectString,
+            'conditions': actualConditions,
+            'whereStatements': whereStatements,
+            'params': params,
+            'translations': translations,
+        }
 
-        wheres = strings.concatenate(whereStatements)
-        query = strings.concatenate([start, wheres, latest, end])
-        misc.log(query, 'REMEMBER MG: THE inputs CANNOT have quotes around them!!!!')
-
-        return self.raw(query, params, translations)
-
-    def generateProperSelectors(self, selectors, table):
+    def _generateProperSelectors(self, selectors, table):
         string = ''
         
         for key in selectors:
@@ -103,7 +74,7 @@ class TasksQuerySet(models.QuerySet):
 
         return string[:-1]
 
-    def generateWhereStatements(self, i, tbl, key):
+    def _generateWhereStatements(self, i, tbl, key):
         andPref = ''
 
         if i > 0:
@@ -123,24 +94,24 @@ class TasksQuerySet(models.QuerySet):
 
         return ''
 
-    def generateDefaultConditions(self, user_id):
+    def _generateDefaultConditions(self, user_id):
+        """
+            Should be overwritten in actual QuerySet.
+            Contains a dictionary of default conditions to use for QuerySet type.
+        """
         params = {
             "assignee_id": user_id,
             "delete_time": 'IS NULL',
-            "update_time": tasks.recentInterval,
-            "latest": tasks.keys.latest.archive,
-            "visibility": tasks.keys.visibility.private,
-            "status": [tasks.keys.status.completed, tasks.keys.status.failed],
         }
 
         return params
 
-    def mergeConditions(self, defaults, provided):
+    def _mergeConditions(self, defaults, provided):
         conditions = defaults | provided  # merge provided conditions into the defaults
-        final = self.validateConditions(conditions)
+        final = self._validateConditions(conditions)
         return final
 
-    def validateConditions(self, conditions):
+    def _validateConditions(self, conditions):
 
         for k, v in conditions:
             if k in keys:
@@ -152,32 +123,16 @@ class TasksQuerySet(models.QuerySet):
                 del conditions[k]  # delete the key from dictionary
                 
 
-
-class TaskDetailQuerySet(models.QuerySet):
-    def by_author(self, user_id):
-        return self.raw('SELECT * FROM tasks_task WHERE user_id = %s', [user_id])
-
-
-class TaskDeadlineQuerySet(models.QuerySet):
-    def by_author(self, user_id):
-        return self.raw('SELECT * FROM tasks_task WHERE user_id = %s', [user_id])
-
-
-class TaskStatusQuerySet(models.QuerySet):
-    def by_author(self, user_id):
-        return self.raw('SELECT * FROM tasks_task WHERE user_id = %s', [user_id])
-
-class TaskVisibilityQuerySet(models.QuerySet):
-    def by_author(self, user_id):
-        return self.raw('SELECT * FROM tasks_task WHERE user_id = %s', [user_id])
-
-
-class TaskWatacherQuerySet(models.QuerySet):
-    def by_author(self, user_id):
-        return self.raw('SELECT * FROM tasks_task WHERE user_id = %s', [user_id])
-
-
-class TaskAssignmentQuerySet(models.QuerySet):
-    def by_author(self, user_id):
-        return self.raw('SELECT * FROM tasks_task WHERE user_id = %s', [user_id])
+#######################################
+# Child Tables QuerySet Helper functions
+# This class is not meant to retrieve actual data.
+# This class carries common helper functions needed by all children tables of Master Record tables:
+#  -> Tasks Master Table
+#  -> Tickets Master Table
+#  -> Customers Master Table
+#  -> Documents Master Table
+#######################################
+class ChildrenQuerySet(models.QuerySet):
+    def _firstHelper(self, user_id):
+        return {}
 

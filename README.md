@@ -1,15 +1,15 @@
 ## Overview
-This project is meant to be freely distributed under MIT Lincense as a modern Enterprise level CRM for organizations sized 10-1000 people in number. It will offer standard modern CRM features, some of which include:
+This project is meant to be freely distributed under MIT License as a modern Enterprise level CRM for organizations sized 10-1000 people in number. It will offer standard modern CRM features, some of which include:
 
  -> Customer/Prospects ticket management system
  
- -> Marketing/Sales Dept. Template Documents Libarray
+ -> Marketing/Sales Dept. Template Documents Library
  
  -> Corporate Documents Online Repository
  
  -> Customer Portal and full Profile Management System
  
- -> Organization Full Tasks Management system: since customer enquiries are referred to as Tickets. Internal Organizational tools of assigning and managing tasks are termed "Tasks" in our CRM.
+ -> Organization Full Tasks Management system: since customer inquiries are referred to as Tickets. Internal Organizational tools of assigning and managing tasks are termed "Tasks" in our CRM.
  
  -> Top Management Overview Screens for CRM stats.
 
