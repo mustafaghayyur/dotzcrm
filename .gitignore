@@ -3,7 +3,7 @@ __pycache__/
 *.pyo
 *.pyd
 node_modules/
-server1/settings.py
+project/settings.py
 COMMANDS.md
 .env
 *.log
