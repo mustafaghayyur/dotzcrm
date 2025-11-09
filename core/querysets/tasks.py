@@ -1,8 +1,7 @@
 from django.db import models
-from dotzcore import settings
-from .helpers.strings
+from core.settings import tasks
+from core.helpers import strings, misc
 
-from .helpers.misc import log
 
 ##########################################################################
 # The QuerySet family of definitions will be essential to maintaining
@@ -16,8 +15,23 @@ class TasksQuerySet(models.QuerySet):
     
     # these are all the column names callable in the fetchTasks() query generator
     # individual child table's create/delete datetime cols cannot be fetched in the fetchTasks() call
-    tableCols = ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id', 'details', 'deadline', 'status', 'visibility', 'assignor_id', 'assignee_id', 'watcher_id', 'latest']
-
+    tableCols = {
+        'id': 't',
+        'description': 't',
+        'create_time': 't',
+        'update_time': 't',
+        'delete_time': 't',
+        'creator_id': 't',
+        'parent_id': 't',
+        'details': 'd',
+        'deadline': 'l',
+        'status': 's',
+        'visibility': 'v',
+        'assignor_id': 'a',
+        'assignee_id': 'a',
+        'watcher_id': 'w',
+        'latest': ''
+        }
 
     def fetchTasks(self, user_id, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         """
@@ -38,20 +52,21 @@ class TasksQuerySet(models.QuerySet):
         whereStatements = []
         params = {}
         i = 0
-        tbl = self.generateTablesList()
+        tbl = self.tableCols
 
         for key, item in actualConditions:
             whereStatements[i] = self.generateWhereStatements(i, tbl[key], key)
             params[key] = item
             i += 1
 
+        selectString = self.generateProperSelectors(selectors, tbl)
+
         # sub it any column names you wish to output differently in the ORM
         translations = {}
 
-        start = """
-            SELECT t.id, t.description, t.create_time, t.update_time, t.creator_id, t.parent_id
-                d.description AS details,
-                l.deadline, s.status, a.assignor_id
+        start = 'SELECT ' + selectString
+        
+        start += """
             FROM tasks_task AS t
                 LEFT JOIN tasks_taskdetails AS d ON t.id = d.task_id
                 LEFT JOIN tasks_taskdeadline AS l ON t.id = l.task_id
@@ -70,18 +85,32 @@ class TasksQuerySet(models.QuerySet):
 
         wheres = strings.concatenate(whereStatements)
         query = strings.concatenate([start, wheres, latest, end])
-        log(query, 'REMEMBER MG: THE inputs CANNOT have quotes around them!!!!')
+        misc.log(query, 'REMEMBER MG: THE inputs CANNOT have quotes around them!!!!')
 
         return self.raw(query, params, translations)
 
+    def generateProperSelectors(self, selectors, table):
+        string = ''
+        
+        for key in selectors:
+            if key == 'details':
+                string += ' ' + table[key] + '.description AS ' + key + ','
+                continue
+
+            string += ' ' + table[key] + '.' + key +','
+
+        return string[:-1]
+
     def generateWhereStatements(self, i, tbl, key):
+        andPref = ''
+
         if i > 0:
             andPref = ' AND '
 
         if key == 'latest':
             return ''
 
-        if key = 'update_time':
+        if key in ['update_time', 'delete_time', 'create_time']:
             return andPref + '(' + tbl + '.' + key + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + key + ' IS NULL )'
 
         if isinstance(item, list):
@@ -92,43 +121,14 @@ class TasksQuerySet(models.QuerySet):
 
         return ''
 
-    def generateTablesList(self):
-        """
-        # Generates table acronyms for all col_names in fetchTasks() query.
-        """
-        tablesCols = {}
-        i = 0
-
-        for col in self.tableCols:
-            if col in ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id']:
-                tableCols[col] = 't'
-            if col in ['details']:
-                tableCols[col] = 'd'
-            if col in ['deadline']:
-                tableCols[col] = 'l'
-            if col in ['status']:
-                tableCols[col] = 's'
-            if col in ['visibility']:
-                tableCols[col] = 'v'
-            if col in ['assignor_id', 'assignee_id']:
-                tableCols[col] = 'a'
-            if col in ['watcher_id']:
-                tableCols[col] = 'w'
-            if col == 'latest':
-                tableCols[col] = ''
-
-            i += 1
-
-        return tableCols
-
     def generateDefaultConditions(self, user_id):
         params = {
-            "assignee_id": user_id
-            "delete_time": 'IS NULL'
-            "update_time": settings.task.recent_interval,
-            "latest": settings.task.keys.latest.archive,
-            "visibility": settings.task.keys.visibility.private,
-            "status": [settings.task.keys.status.completed, settings.task.keys.status.failed]
+            "assignee_id": user_id,
+            "delete_time": 'IS NULL',
+            "update_time": tasks.recentInterval,
+            "latest": tasks.keys.latest.archive,
+            "visibility": tasks.keys.visibility.private,
+            "status": [tasks.keys.status.completed, tasks.keys.status.failed],
         }
 
         return params
