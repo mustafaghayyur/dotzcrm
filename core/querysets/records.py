@@ -56,7 +56,6 @@ class QuerySet(models.QuerySet):
 
         return {
             'selectString': selectString,
-            'conditions': actualConditions,
             'whereStatements': whereStatements,
             'params': params,
             'joins': joins,

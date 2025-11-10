@@ -2,16 +2,15 @@
 
 {% block title %} Tasks Home {% endblock %}
 
-{% block page_heading %}tmp{% endblock %}
+{% block page_heading %}Record: {{record.description}}{% endblock %}
 
 {% block content %}
-    <h2>Record: {{records.description}}</h2>
-    <div id="dates" class="info">Created: {{records.create_time}} | Updated: {{records.update_time}}</div>
-    <div id="author" class="author">Creator: {{records.creator_id}}</div>
+    <div id="dates" class="info">Created: {{record.create_time}} | Updated: {{record.update_time}}</div>
+    <div id="author" class="author">Creator: {{record.creator_id}}</div>
     <div id="description" class="copy">
-        {{records.details}}
+        {{record.details}}
     </div>
     <div id="status" class="status">
-        {{records.status}}
+        {{record.status}}
     </div>
 {% endblock %}

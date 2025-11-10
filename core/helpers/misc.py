@@ -40,3 +40,14 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
         """
     with open(logger_file, "at") as f:
         f.write(msg)
+
+def getInfo(name = None, type = 'class', getDunders = True):
+    
+    pref = '&*&' if getDunders else '__'
+
+    if type == 'class':
+        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith(pref)]
+
+    if type == 'instance':
+        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith('__')]
+

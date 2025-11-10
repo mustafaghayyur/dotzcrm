@@ -42,7 +42,6 @@ class TasksQuerySet(records.QuerySet):
 
         selectString = obj['selectString']
         whereStatements = strings.concatenate(obj['whereStatements'])
-        conditions = obj['conditions']
         params = obj['params']
         joins = obj['joins']
 

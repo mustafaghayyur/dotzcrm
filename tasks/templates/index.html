@@ -7,7 +7,7 @@
 {% block content %}
     <ul>
         {% for task in tasks %}
-            <li><div>{{task.id}}: {{task.description}}</div>
+            <li><div><a href="{% url 'task_info' task.id %}">: {{task.description}}</a></div>
                 <div>{{task.visibility}} | {{task.status}}</div></li>
         {% endfor %}
     </ul>
