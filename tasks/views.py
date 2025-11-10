@@ -15,7 +15,9 @@ class TasksListView(ListView):
 
     def get_queryset(self):
         results = Task.rawobjects.fetchTasks('1', ['id', 'description', 'create_time', 'update_time', 'status', 'visibility'])
-        misc.log(results, 'Query Results....')
+        
+        for rec in results:
+            misc.log(rec, 'Individual record')
 
         return results
 

@@ -52,11 +52,14 @@ class QuerySet(models.QuerySet):
 
         selectString = self._generateProperSelectors(selectors, tbl)
 
+        joins = self._generateJoinStatements(selectors, actualConditions)
+
         return {
             'selectString': selectString,
             'conditions': actualConditions,
             'whereStatements': whereStatements,
             'params': params,
+            'joins': joins,
         }
 
     def _generateProperSelectors(self, selectors, table):
@@ -121,9 +124,6 @@ class QuerySet(models.QuerySet):
         """
         tableCols = list(self.tableCols.keys())
 
-        from core.helpers import misc
-        misc.log(tableCols, 'Is this a proper list of Tasks module keys [self.tableCol]?')
-
         for k, v in conditions.items():
             if k in tableCols:
                 if isinstance(v, str) or isinstance(v, list):
@@ -139,6 +139,25 @@ class QuerySet(models.QuerySet):
                 del conditions[k]  # delete the key from dictionary
 
         return conditions
+
+    # this method will need to be filled for each Master Table QuerySet
+    def _generateJoinStatements(self, selectors, conditions):
+        pass
+            
+        
+    def _getValidTablesUsed(self, selectors, conditions):
+        tablesUsed = []
+
+        for key in selectors:
+            if key in self.tableCols:
+                tablesUsed.append(self.tableCols[key])
+
+        for key in conditions.keys():
+            if key in self.tableCols:
+                tablesUsed.append(self.tableCols[key])
+
+        # return unique table names
+        return list(set(tablesUsed))
                 
 
 #######################################

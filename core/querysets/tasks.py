@@ -61,7 +61,7 @@ class TasksQuerySet(records.QuerySet):
             WHERE """
         
         if 'latest' in conditions:
-            latest = """ d.latest <> %(latest)s AND l.latest <> %(latest)s AND s.latest <> %(latest)s
+            latest = """ AND d.latest <> %(latest)s AND l.latest <> %(latest)s AND s.latest <> %(latest)s
                 AND a.latest <> %(latest)s AND v.latest <> %(latest)s AND w.latest <> %(latest)s"""
         else:
             latest = ''
@@ -87,7 +87,13 @@ class TasksQuerySet(records.QuerySet):
         }
 
         return params
-                
+
+    # define how each join statement should be formed:
+    def _generateJoinStatements(self, selectors, conditions)
+        tbls = self.getValidTablesUsed(selectors, conditions)
+
+        for tbl in tbls:
+            
 
 
 class DetailQuerySet(records.ChildrenQuerySet):

@@ -23,7 +23,7 @@ class Task(models.Model):
 class Details(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     details = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio()
-    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(null=True, blank=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -34,7 +34,7 @@ class Details(models.Model):
 class Deadline(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
-    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -45,7 +45,7 @@ class Deadline(models.Model):
 class Status(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)  # enum of ['assigned' | 'viewed' | 'queued' | 'started' | 'onhold' | 'abandoned' | 'reassigned' | 'awaitingfeedback' | 'completed' | 'failed']
-    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -56,7 +56,7 @@ class Status(models.Model):
 class Visibility(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20)  # enum of ['private' | 'assigned' | 'organization' | 'stakeholders']
-    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -70,7 +70,7 @@ class Watcher(models.Model):
         settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
-    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
@@ -92,7 +92,7 @@ class Assignment(models.Model):
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
         related_name='asasignee_user'
     )
-    latest = models.SmallIntegerField(default=1)  # enum of [1 | 2]
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
     create_time = models.DateTimeField(default=timezone.now)
