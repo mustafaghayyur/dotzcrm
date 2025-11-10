@@ -5,5 +5,10 @@
 {% block page_heading %}Tasks Management Console{% endblock %}
 
 {% block content %}
-    
+    <ul>
+        {% for task in tasks %}
+            <li><div>{{task.id}}: {{task.description}}</div>
+                <div>{{task.visibility}} | {{task.status}}</div></li>
+        {% endfor %}
+    </ul>
 {% endblock %}

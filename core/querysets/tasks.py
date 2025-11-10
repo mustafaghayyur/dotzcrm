@@ -1,6 +1,6 @@
 from . import records
 from core.settings import tasks
-from core.helpers import strings, misc
+from core.helpers import strings
 
 
 ##########################################################################
@@ -41,38 +41,21 @@ class TasksQuerySet(records.QuerySet):
         obj = self._compileVariables(user_id, selectors, conditions, orderBy, limit)
 
         selectString = obj['selectString']
-        whereStatements = obj['whereStatements']
+        whereStatements = strings.concatenate(obj['whereStatements'])
         conditions = obj['conditions']
         params = obj['params']
+        joins = obj['joins']
 
         # sub it any column names you wish to output differently in the ORM
         translations = {}
-
-        start = 'SELECT ' + selectString
         
-        start += """
+        query = f"""
+            SELECT {selectString}
             FROM tasks_task AS t
-                LEFT JOIN tasks_details AS d ON t.id = d.task_id
-                LEFT JOIN tasks_deadline AS l ON t.id = l.task_id
-                LEFT JOIN tasks_status AS s ON t.id = s.task_id
-                LEFT JOIN tasks_assignment AS a ON t.id = a.task_id
-                LEFT JOIN tasks_visibility AS v ON t.id = v.task_id
-                LEFT JOIN tasks_watcher AS w ON t.id = w.task_id
-            WHERE """
-        
-        if 'latest' in conditions:
-            latest = """ AND d.latest <> %(latest)s AND l.latest <> %(latest)s AND s.latest <> %(latest)s
-                AND a.latest <> %(latest)s AND v.latest <> %(latest)s AND w.latest <> %(latest)s"""
-        else:
-            latest = ''
-
-        end = " ORDER BY " + orderBy + " LIMIT " + limit + ";"
-
-        wheres = strings.concatenate(whereStatements)
-        query = strings.concatenate([start, wheres, latest, end])
-        misc.log(query, 'REMEMBER MG: THE inputs CANNOT have quotes around them!!!!')
-        misc.log(params, 'params')
-
+            {joins}
+            WHERE {whereStatements} 
+            ORDER BY {orderBy} LIMIT {limit};
+            """
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self, user_id):
@@ -81,7 +64,7 @@ class TasksQuerySet(records.QuerySet):
             "assignee_id": user_id,
             #"delete_time": 'IS NULL',  # needs to be handled
             "update_time": tasks['recentInterval'],
-            "latest": tasks['keys']['latest']['archive'],
+            "latest": tasks['keys']['latest']['latest'],
             "visibility": tasks['keys']['visibility']['private'],
             "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
         }
@@ -89,11 +72,31 @@ class TasksQuerySet(records.QuerySet):
         return params
 
     # define how each join statement should be formed:
-    def _generateJoinStatements(self, selectors, conditions)
-        tbls = self.getValidTablesUsed(selectors, conditions)
+    def _generateJoinStatements(self, selectors, conditions):
+        tbls = self._getValidTablesUsed(selectors, conditions)
+        joins = []
 
         for tbl in tbls:
-            
+            if tbl == 't' or tbl == '':
+                continue
+            if tbl == 'd':
+                joins.append(' LEFT JOIN tasks_details AS d ON t.id = d.task_id')
+            if tbl == 'l':
+                joins.append(' LEFT JOIN tasks_deadline AS l ON t.id = l.task_id')
+            if tbl == 's':
+                joins.append(' LEFT JOIN tasks_status AS s ON t.id = s.task_id')
+            if tbl == 'a':
+                joins.append(' LEFT JOIN tasks_assignment AS a ON t.id = a.task_id')
+            if tbl == 'v':
+                joins.append(' LEFT JOIN tasks_visibility AS v ON t.id = v.task_id')
+            if tbl == 'w':
+                joins.append(' LEFT JOIN tasks_watcher AS w ON t.id = w.task_id')
+
+            if 'latest' in conditions:
+                joins.append(' AND '+tbl+'.latest = %(latest)s')
+
+        return strings.concatenate(joins)
+
 
 
 class DetailQuerySet(records.ChildrenQuerySet):
