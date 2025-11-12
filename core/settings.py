@@ -130,3 +130,49 @@ customers = {
     },
     
 }
+
+rdms = {
+    'regex': {
+        'stringsA': '',
+        'ints_big': '^[0-9]{1,9999}$',
+        'dates': '^[0-9]{4}\-[0-9]{2}\-[0-9]{2}\s[0-9]{2}\:[0-9]{2}\:[0-9]{2}$',
+    }
+    'tasks': {
+        'all': {
+            # Key's carry tbl_abbr[first letter] + column name
+            # values carry regex used for that column
+            'tid': 'ints_big',
+            
+            #ISO 8601 string format: 'YYYY-MM-DD HH:MM:SS'
+            'tct': 'dates',
+            'tut': 'dates',
+            'tdt': 'dates',
+            
+            'did': 'ints_big',
+            'lid': 'ints_big',
+            'sid': 'ints_big',
+            'vid': 'ints_big',
+            'aid': 'ints_big',
+
+            'description': 'description',
+            'deadline': 'deadline',
+            'status': 'status',
+            'visibility': 'visibility',
+            'assignor': 'assignor',
+            'assignee': 'assignee',
+
+            'dct': 'dates',
+            'lct': 'dates',
+            'sct': 'dates',
+            'vct': 'dates',
+            'act': 'dates',
+
+            'ddt': 'dates',
+            'ldt': 'dates',
+            'sdt': 'dates',
+            'vdt': 'dates',
+            'adt': 'dates',
+
+        }
+    }
+}

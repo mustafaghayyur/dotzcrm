@@ -2,7 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-from core.querysets.tasks import *
+# get our querysets (the core of our RDMS logic)
+from core.Models.querysets.tasks import *
 
 
 # The main task table
