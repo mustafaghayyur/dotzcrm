@@ -137,41 +137,45 @@ rdms = {
         'ints_big': '^[0-9]{1,9999}$',
         'dates': '^[0-9]{4}\-[0-9]{2}\-[0-9]{2}\s[0-9]{2}\:[0-9]{2}\:[0-9]{2}$',
     }
-    'tasks': {
+    'tasks_keys': {
         'all': {
             # Key's carry tbl_abbr[first letter] + column name
-            # values carry regex used for that column
-            'tid': 'ints_big',
+            'tid': 't',
             
-            #ISO 8601 string format: 'YYYY-MM-DD HH:MM:SS'
-            'tct': 'dates',
-            'tut': 'dates',
-            'tdt': 'dates',
+            'tcreate_time': 't',
+            'tupdate_time': 't',
+            'tdelete_time': 't',
             
-            'did': 'ints_big',
-            'lid': 'ints_big',
-            'sid': 'ints_big',
-            'vid': 'ints_big',
-            'aid': 'ints_big',
+            'did': 'd',
+            'lid': 'l',
+            'sid': 's',
+            'vid': 'v',
+            'aid': 'a',
 
-            'description': 'description',
-            'deadline': 'deadline',
-            'status': 'status',
-            'visibility': 'visibility',
-            'assignor': 'assignor',
-            'assignee': 'assignee',
+            'description': 't',
+            'details': 'd',
+            'deadline': 'l',
+            'status': 's',
+            'visibility': 'v',
+            'assignor_id': 'a',
+            'assignee_id': 'a',
+            'creator_id': 't',
+            'parent_id': 't',
 
-            'dct': 'dates',
-            'lct': 'dates',
-            'sct': 'dates',
-            'vct': 'dates',
-            'act': 'dates',
 
-            'ddt': 'dates',
-            'ldt': 'dates',
-            'sdt': 'dates',
-            'vdt': 'dates',
-            'adt': 'dates',
+            'dcreate_time': 'd',
+            'lcreate_time': 'l',
+            'screate_time': 's',
+            'vcreate_time': 'v',
+            'acreate_time': 'a',
+
+            'ddelete_time': 'd',
+            'ldelete_time': 'l',
+            'sdelete_time': 's',
+            'vdelete_time': 'v',
+            'adelete_time': 'a',
+
+            'latest': ''
 
         }
     }

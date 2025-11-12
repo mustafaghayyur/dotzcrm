@@ -4,8 +4,9 @@
 
 from querysets.tasks import *
 from tasks.models import *
+from . import CRUD as crud
 
-class CRUD:
+class CRUD(crud):
     def __init__(self):
         # some logic...
 
@@ -19,9 +20,11 @@ class CRUD:
         Watcher.save(obj.['watcher'])
         Assignment.save(obj.['assignment'])
 
-    def read(self, selectors, conditions, extras, orderBy, limit):
+    def read(self, selectors, conditions, orderBy, limit):
         # some logic...
-        rawObj = Task.rawobjects.fetchTasks('1', ['id', 'description', 'create_time', 'update_time', 'status', 'visibility'])
+
+        user_id = 1
+        rawObj = Task.rawobjects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
 
         if rawObj:
             return rawObj

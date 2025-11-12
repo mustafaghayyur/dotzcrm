@@ -24,7 +24,16 @@ class QuerySet(models.QuerySet):
     # This dictionary carries list of all the column names callable in the fetch****() query call.
     # The dictionary has 'column_name': 'table_abbreviation_used_in_SQL' format to its organization.
     # individual child table's create/delete datetime cols cannot be fetched in the Master Tables' Fetch*All() calls
-    tableCols = {}
+    tableCols = None
+
+    # This list carries 'problematic' keys in selectors and conditions that are found in
+    # all tables (IDs or data_stamp cols). These keys conjoin the table abbreviation 
+    # with the col reference. Will need to be handled differently
+    problematicKeys = ['id', 'create_time', 'update_time', 'delete_time']
+
+    def __init__(self):
+        pass
+
 
     def _compileVariables(self, user_id, selectors = [], conditions = None, orderBy = '', limit = '20'):
         """
@@ -50,7 +59,7 @@ class QuerySet(models.QuerySet):
                 params[key] = item
             i += 1
 
-        selectString = self._generateProperSelectors(selectors, tbl)
+        selectString = self._generateProperSelectors(selectors)
 
         joins = self._generateJoinStatements(selectors, actualConditions)
 
@@ -61,17 +70,33 @@ class QuerySet(models.QuerySet):
             'joins': joins,
         }
 
-    def _generateProperSelectors(self, selectors, table):
+    def _generateProperSelectors(self, selectors):
         """
-            This helper function forms parts of the SELECT statement in the query.
+            This helper function forms the SELECT statement in the query.
         """
         string = ''
         
         for key in selectors:
             if key in self.tableCols:
-                string += ' ' + table[key] + '.' + key + ','
+                table = self.tableCols[key]  # grab the table name
+                
+                if self._isProblematicKey(table, key):
+                    # the table abbreviation is conjoined to key name. Separate:
+                    key = key[1:]  # slice off first character
 
+                string += ' ' + table + '.' + key + ','
+
+        # chop off the last comma from returned string
         return string[:-1]
+
+    def _isProblematicKey(self, tbl, key):
+        """
+            Catches any problematic keys as defined near the top of this class
+        """
+        for k in self.problematicKeys:
+            if k = tbl + key:
+                return True
+        return False
 
     def _generateWhereStatements(self, i, tbl, key, item):
         """
@@ -85,7 +110,11 @@ class QuerySet(models.QuerySet):
         if key == 'latest':
             return ''
 
-        if key in ['update_time', 'create_time']:
+        if self._isProblematicKey(tbl, key):
+            # the table abbreviation is conjoined to key name. Separate:
+            key = key[1:]
+
+        if key in ['create_time', 'update_time', 'delete_time']:
             return andPref + '(' + tbl + '.' + key + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + key + ' IS NULL )'
 
         if isinstance(item, list):
@@ -145,6 +174,10 @@ class QuerySet(models.QuerySet):
             
         
     def _getValidTablesUsed(self, selectors, conditions):
+        """
+            Determines all tables used in this select operation.
+            Used for generating appropriate JOINS.
+        """
         tablesUsed = []
 
         for key in selectors:

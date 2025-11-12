@@ -1,5 +1,5 @@
 from . import records
-from core.settings import tasks
+from core.settings import tasks, rdms, 
 from core.helpers import strings
 
 
@@ -9,24 +9,14 @@ from core.helpers import strings
 # DO NOT use raw queries anywhere outside of QuerySets in this CRM.
 ##########################################################################
 class TasksQuerySet(records.QuerySet):
-    tableCols = {
-        'id': 't',
-        'description': 't',
-        'create_time': 't',
-        'update_time': 't',
-        'delete_time': 't',
-        'creator_id': 't',
-        'parent_id': 't',
-        'details': 'd',
-        'deadline': 'l',
-        'status': 's',
-        'visibility': 'v',
-        'assignor_id': 'a',
-        'assignee_id': 'a',
-        'watcher_id': 'w',
-        'latest': ''
-        }
+
+    def __init__(self):
+        self.tableCols = rdms.tasks_keys
+
+        return super.__init__()
         
+    # NOTE: Watchers table is not query-able in this comprehensive search.
+    #       Will have to query all watchers separately.
     def fetchTasks(self, user_id, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         """
         # Fetches full Task records with latest records (of sub tables).
@@ -121,6 +111,15 @@ class VisibilityQuerySet(records.ChildrenQuerySet):
 class WatacherQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_watcher'
     master_col = 'task_id'
+
+    def fetchAllCurrentWatchers(self, user_id, task_id):
+        pass
+
+    def fetchAllWatchersHistory(self, user_id, task_id):
+        pass
+
+    def fetchSpecificWatcherHistory(self, user_id, task_id):
+        
 
 
 class AssignmentQuerySet(records.ChildrenQuerySet):
