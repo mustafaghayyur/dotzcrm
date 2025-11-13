@@ -1,5 +1,6 @@
 from django.db import models
 from core.helpers import crud
+from core.settings import rdbms
 
 
 ##########################################################################
@@ -76,9 +77,8 @@ class QuerySet(models.QuerySet):
         
         for key in selectors:
             if key in self.tableCols:
-                table = self.tableCols[key]  # grab the table name
                 
-                if crud.isProblematicKey(self.space, table, key):
+                if crud.isProblematicKey(rdbms, self.space, key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
 
@@ -101,7 +101,7 @@ class QuerySet(models.QuerySet):
         if key == 'latest':
             return ''
 
-        if crud.isProblematicKey(self.space, tbl, key):
+        if crud.isProblematicKey(rdbms, self.space, tbl, key):
             # the table abbreviation is conjoined to key name. Separate:
             key = key[1:]
 

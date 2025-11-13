@@ -22,11 +22,12 @@ LAWS OF CRUD Operations:
 Create Read Update Delete Operations
 ------------------------------------
 
- 1) All crud operations will be done in these Model files (those found in core/Models). And
-    the related core/querysets folder (which carries the actual raw SQL queries.)
+ 1) All crud operations will be done with these core.Models files/folders. Operation 
+    modification can be done in the actual core.Models files. While query modification 
+    in the core.Models.querysets directory. THIS IS ABSOLUTE.
 
  2) If a certain crud operation is missing. It must be added/modified in this same directory.
-    And the related core/querysets folder (which carries the actual raw SQL queries.)
+    And the related core.Models.querysets folder (which carries the actual raw SQL queries.)
 
  3) The django models are not be touched unless for adding/modifying tables structures
     in the DotzCRM MySQL database structure.

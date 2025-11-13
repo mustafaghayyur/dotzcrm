@@ -4,11 +4,11 @@
 
 from querysets.tasks import *
 from tasks.models import *
-from . import CRUD as crud  # generic, parent crud class
+from .CRUD import Generic  # generic, parent crud class
 from core import settings
 from core.helpers import crud
 
-class CRUD(crud):
+class CRUD(Generic):
     idCols = None
     space = 'tasks'
 
@@ -29,12 +29,10 @@ class CRUD(crud):
                 continue
 
             tbl = pk[0]  # table abbreviation
-            model = settings['rdbms']['tasks']['model_names'][tbl]  # identify model
-            table = settings['rdbms']['tasks']['table_names'][tbl]  # identify table
-            cols = settings['rdbms']['tables'][table]  # grab column names
+            t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
             dictionary['tid'] = task_id
 
-            self.createChildTable(model, table, cols, dictionary)
+            self.createChildTable(t['model'], t['table'], t['cols'], dictionary)
             
     def read(self, selectors, conditions, orderBy, limit):
         # some logic...
@@ -62,17 +60,16 @@ class CRUD(crud):
 
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
+            tbl = pk[0]  # table abbreviation
+
             if pk == 'tid':
-                self.updateMasterTable('tasks', task, dictionary)
+                self.updateMasterTable('tasks', tbl, task, dictionary)
                 continue
 
-            tbl = pk[0]  # table abbreviation
-            model = settings['rdbms']['tasks']['model_names'][tbl]  # identify model
-            table = settings['rdbms']['tasks']['table_names'][tbl]  # identify table
-            cols = settings['rdbms']['tables'][table]  # grab column names
+            t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
 
             if pk not in dictionary:  # create a new record for child table
-                self.createChildTable(model, table, cols, dictionary)
+                self.createChildTable(t['model'], t['table'], t['cols'], dictionary)
                 continue
 
             # we have a proper record to update
@@ -80,12 +77,12 @@ class CRUD(crud):
             updateRequired = False
 
             if not latest:
-                self.createChildTable(model, table, cols, dictionary)
+                self.createChildTable(t['model'], t['table'], t['cols'], dictionary)
                 continue
 
             rec = {}  # initiate new dictionary
             for key in dictionary:
-                if crud.isProblematicKey(self.space, tbl, key):
+                if crud.isProblematicKey(settings['rdbms'], self.space, key):
                     key = key[1:]  # chop off first character
 
                 if key in cols:  # check if this key is relevant to the current table
@@ -95,7 +92,7 @@ class CRUD(crud):
                         updateRequired = True  # changes found in dictionary record
 
             if updateRequired:  # update record for child table
-                self.updateChildTable(model, table, cols, rec, latest.id)
+                self.updateChildTable(t['model'], t['table'], t['cols'], rec, latest.id)
                     
 
                     

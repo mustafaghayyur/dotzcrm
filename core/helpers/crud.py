@@ -1,15 +1,19 @@
-from core.settings import rdbms
 
-def isProblematicKey(space = 'tasks', tbl_abbreviation, key):
+def isProblematicKey(rdbms, space = 'tasks', key, noPrefix = False):
         """
             Catches any problematic keys as defined near the top of this class
         """
-        # This list carries 'problematic' keys in selectors and conditions that are found in
-        # all tables (IDs or data_stamp cols). These keys conjoin the table abbreviation 
-        # with the col reference. Will need to be handled differently
-        problematicKeys = rdbms[space]['keys']['problematic']
+        k = key if noPrefix else key[1:]  # grab correct key to compare
 
-        for k in problematicKeys:
-            if key == tbl_abbreviation + k:
-                return True
+        if k in rdbms[space]['keys']['problematic']:
+            return True
+
         return False
+
+def generateModelInfo(rdbms, space, tbl):
+    return {
+        'model': rdbms[space]['model_names'][tbl]  # identify model
+        'table': rdbms[space]['table_names'][tbl]  # identify table
+        'cols': rdbms['tables'][rdbms[space]['table_names'][tbl]]  # grab column names
+    }
+    
