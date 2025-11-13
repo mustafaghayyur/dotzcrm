@@ -11,7 +11,8 @@ from core.helpers import strings
 class TasksQuerySet(records.QuerySet):
 
     def __init__(self):
-        self.tableCols = rdbms.tasks_keys.full_record
+        self.tableCols = rdbms['tasks']['keys']['full_record']
+        self.space = 'tasks'  # used by some modules
 
         return super.__init__()
         
@@ -48,13 +49,13 @@ class TasksQuerySet(records.QuerySet):
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self, user_id):
-        s = tasks['keys']['status']
+        s = tasks['values']['status']
         params = {
             "assignee_id": user_id,
             #"delete_time": 'IS NULL',  # needs to be handled
             "update_time": tasks['recentInterval'],
-            "latest": tasks['keys']['latest']['latest'],
-            "visibility": tasks['keys']['visibility']['private'],
+            "latest": tasks['values']['latest']['latest'],
+            "visibility": tasks['values']['visibility']['private'],
             "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
         }
 

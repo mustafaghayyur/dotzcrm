@@ -1,4 +1,5 @@
 from django.db import models
+from core.helpers import crud
 
 
 ##########################################################################
@@ -26,10 +27,7 @@ class QuerySet(models.QuerySet):
     # individual child table's create/delete datetime cols cannot be fetched in the Master Tables' Fetch*All() calls
     tableCols = None
 
-    # This list carries 'problematic' keys in selectors and conditions that are found in
-    # all tables (IDs or data_stamp cols). These keys conjoin the table abbreviation 
-    # with the col reference. Will need to be handled differently
-    problematicKeys = ['id', 'create_time', 'update_time', 'delete_time']
+    space = None
 
     def __init__(self):
         pass
@@ -80,7 +78,7 @@ class QuerySet(models.QuerySet):
             if key in self.tableCols:
                 table = self.tableCols[key]  # grab the table name
                 
-                if self._isProblematicKey(table, key):
+                if crud.isProblematicKey(self.space, table, key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
 
@@ -89,14 +87,7 @@ class QuerySet(models.QuerySet):
         # chop off the last comma from returned string
         return string[:-1]
 
-    def _isProblematicKey(self, tbl, key):
-        """
-            Catches any problematic keys as defined near the top of this class
-        """
-        for k in self.problematicKeys:
-            if k = tbl + key:
-                return True
-        return False
+    
 
     def _generateWhereStatements(self, i, tbl, key, item):
         """
@@ -110,7 +101,7 @@ class QuerySet(models.QuerySet):
         if key == 'latest':
             return ''
 
-        if self._isProblematicKey(tbl, key):
+        if crud.isProblematicKey(self.space, tbl, key):
             # the table abbreviation is conjoined to key name. Separate:
             key = key[1:]
 
@@ -212,7 +203,7 @@ class ChildrenQuerySet(models.QuerySet):
     valTbl = None  # Name of table that can validate if user has access to this record(s)
     valCol = None  # Name of column (in valTbl) that specifically can confirm user's right to records
 
-    def fetchLatest(self, user_id, task_id, revision = 0):
+    def fetchLatest(self, user_id, task_id):
         """
             Fetch a specific revision of child table record.
         """

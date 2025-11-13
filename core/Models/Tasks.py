@@ -4,14 +4,15 @@
 
 from querysets.tasks import *
 from tasks.models import *
-from . import CRUD as crud
-from . import settings
+from . import CRUD as crud  # generic, parent crud class
+from core import settings
+from core.helpers import crud
 
 class CRUD(crud):
     idCols = None
 
     def __init__(self):
-        self.idCols = settings.rdbms.tasks_keys.only_pk
+        self.idCols = settings['rdbms']['tasks']['keys']['only_pk']
 
     def create(self, obj):
         # some logic...
@@ -42,24 +43,27 @@ class CRUD(crud):
                 for pk in self.idCols:
                     if pk in dictionary:
                         # we have a proper record to update
-                        Model = settings['tasks']['model_names'][pk[0]]  # identify model
-                        latest = {Model}.rawobjects.fetchRevision(1, 1, 0)  # fetch latest record for table:
+                        model = settings['tasks']['model_names'][pk[0]]  # identify model
+                        latest = {model}.rawobjects.fetchLatest(user_id=1, task_id=1)  # fetch latest record for table:
                         
                         updateRequired = False
                         table = settings['tasks']['table_names'][pk[0]]  # identify table
-                        cols = settings['rdbms']['table']  # grab column names
+                        cols = settings['rdbms']['tables'][table]  # grab column names
 
                         if latest:
                             rec = {}  # initiate new dictionary
                             for key in dictionary:
-                                if key in cols:  # this key is relevant to the current table
+                                if crud.isProblematicKey(self.space, pk[0], key):
+                                    key = key[1:]  # chop off first character
+
+                                if key in cols:  # check if this key is relevant to the current table
                                     rec[key] = dictionary[key]  # store in rec in case an update is necessary
                                     
                                     if dictionary[key] != latest.{col}
                                         updateRequired = True  # changes found in dictionary record
 
                         if updateRequired:
-                            self._updateModel(Model, table, cols, rec, latest)
+                            self._updateModel(model, table, cols, rec, latest.id)
                             # So what of the scenario where this child table has no existing
                             #  record to compare against?
 

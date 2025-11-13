@@ -7,5 +7,5 @@ class Generic:
     def __init__(self):
         # some code..
 
-    def _updateModel(self, model_name, table_name, columns_list, record_dictionary):
-        
+    def _updateModel(self, model_name, table_name, columns_list, record_dictionary, latest_record_id):
+
