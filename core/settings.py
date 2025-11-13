@@ -43,16 +43,6 @@ tasks = {
         },
     },
 
-    # NOT NOT TOUCH PLEASE:
-    'table_names': {  # index of all names by their abbreviations used in CRUD operations
-        't': 'tasks_task',
-        'd': 'tasks_details',
-        'l': 'tasks_deadline',
-        's': 'tasks_status',
-        'v': 'tasks_visibility',
-        'a': 'tasks_assignment',
-        'w': 'tasks_watcher',
-    },
 }
 
 ####################################################################
@@ -114,7 +104,26 @@ rdbms = {
                 'parent_id': 't',
                 'latest': ''
             },  # end of full_record
-        }  # end of keys
+        },  # end of keys
+
+        'table_names': {  # index of all names by their abbreviations used in CRUD operations
+            't': 'tasks_task',
+            'd': 'tasks_details',
+            'l': 'tasks_deadline',
+            's': 'tasks_status',
+            'v': 'tasks_visibility',
+            'a': 'tasks_assignment',
+            'w': 'tasks_watcher',
+        },
+        'model_names': {  # index of all names by their abbreviations used in CRUD operations
+            't': 'Task',
+            'd': 'Details',
+            'l': 'Deadline',
+            's': 'Status',
+            'v': 'Visibility',
+            'a': 'Assignment',
+            'w': 'Watcher',
+        },
     },  # end of tasks
     'tables': {
         'tasks_task': ['id', 'create_time', '...']
