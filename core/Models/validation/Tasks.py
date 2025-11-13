@@ -2,10 +2,11 @@ import re
 from tasks.models import *
 from core.Models import Tasks
 
-
+"""
+    Access Roles Validation
+"""
 class Standard:
     record = {}
-
 
     def __init__(self, pk):
         # some logic
@@ -27,11 +28,8 @@ class Standard:
             self.record['assignor'] = record.assignor
             self.record['assignee'] = record.assignee
 
-
-
-    def validate(self, record):
-
-        pattern = r"^[a-zA-Z]{3,10}$" # Using a raw string is a common Python practice
+    def _testOfREGEX(self):
+        pattern = r"^[a-zA-Z]{3,10}$"  # Using a raw string is a common Python practice
 
         test_strings = ["abc", "python", "toolongword", "ab", "abc1", "fine"]
 

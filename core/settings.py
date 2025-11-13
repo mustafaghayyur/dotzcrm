@@ -131,37 +131,30 @@ customers = {
     
 }
 
-rdms = {
-    'regex': {
-        'stringsA': '',
-        'ints_big': '^[0-9]{1,9999}$',
-        'dates': '^[0-9]{4}\-[0-9]{2}\-[0-9]{2}\s[0-9]{2}\:[0-9]{2}\:[0-9]{2}$',
-    }
+rdbms = {
     'tasks_keys': {
-        'all': {
-            # Key's carry tbl_abbr[first letter] + column name
+        # all primary_keys for Tasks (and children tables) should be
+        # listed here:
+        'only_pk': ['tid', 'did', 'lid', 'sid', 'vid', 'aid', 'wid'],
+
+        ############################################################################
+        # Full Record: those keys that can be queried by core.Models.querysets.tasks
+        # as a whole record with one-to-one relations. This means they can only have
+        # one active record for a single active task record.
+        # Many-to-one records like watchers are not included in the 'full_record'
+        ############################################################################
+        'full_record': {
+            # Key's carry tbl_abbrv[first letter] + column name
             'tid': 't',
-            
-            'tcreate_time': 't',
-            'tupdate_time': 't',
-            'tdelete_time': 't',
-            
             'did': 'd',
             'lid': 'l',
             'sid': 's',
             'vid': 'v',
             'aid': 'a',
 
-            'description': 't',
-            'details': 'd',
-            'deadline': 'l',
-            'status': 's',
-            'visibility': 'v',
-            'assignor_id': 'a',
-            'assignee_id': 'a',
-            'creator_id': 't',
-            'parent_id': 't',
-
+            'tcreate_time': 't',
+            'tupdate_time': 't',
+            'tdelete_time': 't',
 
             'dcreate_time': 'd',
             'lcreate_time': 'l',
@@ -175,8 +168,17 @@ rdms = {
             'vdelete_time': 'v',
             'adelete_time': 'a',
 
+            # These keys don't carry table identifiers in key name
+            'description': 't',
+            'details': 'd',
+            'deadline': 'l',
+            'status': 's',
+            'visibility': 'v',
+            'assignor_id': 'a',
+            'assignee_id': 'a',
+            'creator_id': 't',
+            'parent_id': 't',
             'latest': ''
-
-        }
+        },
     }
 }

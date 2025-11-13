@@ -1,5 +1,5 @@
 from . import records
-from core.settings import tasks, rdms, 
+from core.settings import tasks, rdbms, 
 from core.helpers import strings
 
 
@@ -11,7 +11,7 @@ from core.helpers import strings
 class TasksQuerySet(records.QuerySet):
 
     def __init__(self):
-        self.tableCols = rdms.tasks_keys
+        self.tableCols = rdbms.tasks_keys.full_record
 
         return super.__init__()
         
@@ -91,26 +91,36 @@ class TasksQuerySet(records.QuerySet):
 class DetailQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_details'
     master_col = 'task_id'
+    valTbl = 'tasks_assignment'
+    valCol = 'assignor_id'
 
 
 class DeadlineQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_deadline'
     master_col = 'task_id'
+    valTbl = 'tasks_assignment'
+    valCol = 'assignor_id'
 
 
 class StatusQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_status'
     master_col = 'task_id'
+    valTbl = 'tasks_assignment'
+    valCol = 'assignor_id'
 
 
 class VisibilityQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_assignment'
     master_col = 'task_id'
+    valTbl = 'tasks_assignment'
+    valCol = 'assignor_id'
 
 
 class WatacherQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_watcher'
     master_col = 'task_id'
+    valTbl = 'tasks_assignment'
+    valCol = 'assignor_id'
 
     def fetchAllCurrentWatchers(self, user_id, task_id):
         pass

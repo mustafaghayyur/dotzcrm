@@ -205,14 +205,37 @@ class QuerySet(models.QuerySet):
 # So index[0] will be the current record. Then index[1] will be the last revision before the current one. And so forth.
 #######################################
 class ChildrenQuerySet(models.QuerySet):
+    
+    # These are to be set in inherited class:
+    tbl = None  # Your table for this QuerySet 
+    master_col = None  # The foreign key of master table (i.e. Tasks)
+    valTbl = None  # Name of table that can validate if user has access to this record(s)
+    valCol = None  # Name of column (in valTbl) that specifically can confirm user's right to records
+
+    def fetchLatest(self, user_id, task_id, revision = 0):
+        """
+            Fetch a specific revision of child table record.
+        """
+        query = f"""
+            SELECT * FROM {self.tbl} AS A
+                INNER JOIN {self.validationTbl} AS B ON B.{self.master_col} = A.{self.master_col} AND A.latest = 1
+                WHERE A.{self.master_col} = %s
+                AND B.{self.valCol} = %s
+                ORDER BY create_time DESC
+                LIMIT 1;
+            """
+
+        return self.raw(query, [task_id, user_id, revision])
+
     def fetchRevision(self, user_id, task_id, revision = 0):
         """
             Fetch a specific revision of child table record.
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.master_col} = %s 
-                    AND user_id = %s 
+            SELECT * FROM {self.tbl} AS A
+                INNER JOIN {self.validationTbl} AS B ON B.{self.master_col} = A.{self.master_col}
+                WHERE A.{self.master_col} = %s
+                AND B.{self.valCol} = %s
                 ORDER BY create_time DESC
                 LIMIT 1 OFFSET (%s);
             """
@@ -224,10 +247,11 @@ class ChildrenQuerySet(models.QuerySet):
             Fetch all revisions of child table record.
         """
         query = f"""
-            SELECT * FROM {self.tbl} 
-                WHERE {self.master_col} = %s 
-                    AND user_id = %s 
-                ORDER BY create_time DESC;
+            SELECT * FROM {self.tbl} AS A
+                INNER JOIN {self.validationTbl} AS B ON B.{self.master_col} = A.{self.master_col}
+                WHERE A.{self.master_col} = %s
+                AND B.{self.valCol} = %s
+                ORDER BY create_time DESC
             """
 
         return self.raw(query, [task_id, user_id])
