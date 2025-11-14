@@ -18,7 +18,7 @@ class CRUD(Generic):
     def create(self, dictionary):
         self.dictValidation(self.space, 'create', dictionary)
 
-        task_id = self.createMasterTable(dictionary)
+        task_id = self.createMasterTable(Task, dictionary)
 
         if not task_id or isinstance(task_id, int):
             raise Exception('Something went wrong. Task could not be created in: Tasks.CRUD.create().')
@@ -68,18 +68,17 @@ class CRUD(Generic):
 
             t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
-            Model = model()  # Instantiate Model class instance
 
             if pk not in dictionary:  # create a new record for child table
-                self.createChildTable(Model, t['table'], t['cols'], dictionary)
+                self.createChildTable(model, t['table'], t['cols'], dictionary)
                 continue
 
             # we have a proper record to update
-            latest = Model.rawobjects.fetchLatest(user_id=1, dictionary['tid'])  # fetch latest record for table:
+            latest = model().rawobjects.fetchLatest(1, dictionary['tid'])  # fetch latest record for table:
             updateRequired = False
 
             if not latest:
-                self.createChildTable(Model, t['table'], t['cols'], dictionary)
+                self.createChildTable(model, t['table'], t['cols'], dictionary)
                 continue
 
             rec = {}  # initiate new dictionary
@@ -90,15 +89,11 @@ class CRUD(Generic):
                 if key in dictionary:
                     rec[col] = dictionary[key]  # store in rec in case an update is necessary
                     
-                    if dictionary[key] != getattr(latest, col)
+                    if dictionary[key] != getattr(latest, col):
                         updateRequired = True  # changes found in dictionary record
 
             if updateRequired:  # update record for child table
-                self.updateChildTable(Model, latest, tbl, t['table'], t['cols'], rec)
-                    
-
-                    
-        
+                self.updateChildTable(model, latest, tbl, t['table'], t['cols'], rec)
 
     def delete(self, modelName, obj):
         # Delete the tasks

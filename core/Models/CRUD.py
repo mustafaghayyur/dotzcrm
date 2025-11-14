@@ -20,7 +20,7 @@ class Generic:
         return None
         
 
-    def updateChildTable(self, ModelInstance, latestRecord, tbl, tableName, columnsList, newRecordDictionary, dicKey):
+    def updateChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, newRecordDictionary, dicKey):
         ignore = rdbms[self.space]['updates']['ignore'][tableName]
         fields = {
             'delete_time': timezone.now(),
@@ -29,50 +29,54 @@ class Generic:
 
         latestRecord.update(**fields)  # update old record with deletion info
 
-        for col in columnsList:
-            if col in ignore:
-                continue
+        newRecordDictionary['create_time'] = timezone.now()
+        newRecordDictionary['latest'] = 1
 
-            if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], col, True):
-                key = tbl + col  # needs prefix added to column name to match dict key
+        if 'id' in newRecordDictionary:
+            del newRecordDictionary['id']
+
+        if 'delete_time' in newRecordDictionary:
+            del newRecordDictionary['delete_time']
+
+        return self.createChildTable(modelClass, tableName, columnsList, newRecordDictionary)
+
+    def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
+        if rdbms[self.space]['master_id'] not in newRecordDictionary:
+            raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
+
+        record = modelClass(**newRecordDictionary)
+        return record.save()
+
+    def createMasterTable(self, modelClass, newRecordDictionary):
+        if 'id' in newRecordDictionary:
+            raise Exception(f'Could not create master record; id already set. In {self.space}.CRUD.create()')
+        if rdbms[self.space]['master_id'] in newRecordDictionary:
+            raise Exception(f'Could not create master record; id already set. In {self.space}.CRUD.create()')
+
+        tbl = self.space[0]
+        acrnym = tbl + 'id'
+
+        if acrnym in newRecordDictionary:
+            raise Exception(f'Could not create master record; id already set. In {self.space}.CRUD.create()')
+
+        tblColumns = rdbms['tables'][rdbms[self.space]['master_table']]
+        record = {}
+
+        for col in tblColumns:
+            if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], self.space, col, True):
+                key = tbl + col  # add on a prefix to match newRecordDictionary keys
             else:
                 key = col
 
-            fields[col] = newRecordDictionary[key]
+            if key in newRecordDictionary:
+                record[col] = newRecordDictionary[key]
 
-
-
-
-
-        Details.save(obj['details'])
-        Deadline.save(obj.['deadline'])
-        Status.save(obj.['status'])
-        Visibility.save(obj.['visibility'])
-        Watcher.save(obj.['watcher'])
-        Assignment.save(obj.['assignment'])
-        pass
-
-    def createChildTable(self, modelName, tableName, columnsList, newRecordDictionary):
-        pass
-
-    def createMasterTable(self, newRecordDictionary):
-        pass
-
-    def getCorrectUpdateValue(self, column, tbl, dic, qSet):
-        
-        
-
-        if newRecordDictionary[key] is None:
-            if column == 'update_time':
-                return timezone.now()
-
-            return qSet.{column}
-
-
+        record = modelClass(**record)
+        return record.save()
 
     def dictValidation(self, space, operation, dictionary):
         if not isinstance(dictionary, dict):
-            raise Exception(f'Invalid input provided to Tasks.CRUD.{operation}(). Expecting Dictionary.')
+            raise Exception(f'Invalid input provided to {space}.CRUD.{operation}(). Expecting Dictionary.')
     
         if len(dictionary) < 1:
             raise Exception(f'Provided dictionary length zero in: {space}.CRUD.{operation}().')
