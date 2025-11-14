@@ -63,36 +63,38 @@ class CRUD(Generic):
             tbl = pk[0]  # table abbreviation
 
             if pk == 'tid':
-                self.updateMasterTable('tasks', tbl, task, dictionary)
+                self.updateMasterTable('tasks', task, dictionary)
                 continue
 
             t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
+            model = globals()[t['model']]  # retrieve Model class with global scope
+            Model = model()  # Instantiate Model class instance
 
             if pk not in dictionary:  # create a new record for child table
-                self.createChildTable(t['model'], t['table'], t['cols'], dictionary)
+                self.createChildTable(Model, t['table'], t['cols'], dictionary)
                 continue
 
             # we have a proper record to update
-            latest = {model}.rawobjects.fetchLatest(user_id=1, dictionary['tid'])  # fetch latest record for table:
+            latest = Model.rawobjects.fetchLatest(user_id=1, dictionary['tid'])  # fetch latest record for table:
             updateRequired = False
 
             if not latest:
-                self.createChildTable(t['model'], t['table'], t['cols'], dictionary)
+                self.createChildTable(Model, t['table'], t['cols'], dictionary)
                 continue
 
             rec = {}  # initiate new dictionary
-            for key in dictionary:
-                if crud.isProblematicKey(settings['rdbms'], self.space, key):
-                    key = key[1:]  # chop off first character
+            for col in t['cols']:
+                if crud.isProblematicKey(settings['rdbms'][self.space]['keys']['problematic'], self.space, col, True):
+                    key = tbl + col  # need tbl_abbrv for comparison
 
-                if key in cols:  # check if this key is relevant to the current table
-                    rec[key] = dictionary[key]  # store in rec in case an update is necessary
+                if key in dictionary:
+                    rec[col] = dictionary[key]  # store in rec in case an update is necessary
                     
-                    if dictionary[key] != latest.{key}
+                    if dictionary[key] != getattr(latest, col)
                         updateRequired = True  # changes found in dictionary record
 
             if updateRequired:  # update record for child table
-                self.updateChildTable(t['model'], t['table'], t['cols'], rec, latest.id)
+                self.updateChildTable(Model, latest, tbl, t['table'], t['cols'], rec)
                     
 
                     

@@ -124,6 +124,17 @@ rdbms = {
             'a': 'Assignment',
             'w': 'Watcher',
         },
+        'updates': {
+            'ignore': {
+                'tasks_task': ['id', 'create_time', 'delete_time', 'creator_id'],
+                'tasks_details': ['id', 'create_time', 'task_id', 'details'],
+                'tasks_deadline': ['id', 'create_time', 'task_id', 'deadline'],
+                'tasks_status': ['id', 'create_time', 'task_id', 'status'],
+                'tasks_visibility': ['id', 'create_time', 'task_id', 'visibility'],
+                'tasks_assignment': ['id', 'create_time', 'task_id', 'assignee_id', 'assignor_id'],
+                'tasks_watcher': ['id', 'create_time', 'task_id', 'watcher_id'],
+            }
+        }
     },  # end of tasks
     'tables': {
         'tasks_task': ['id', 'create_time', '...']

@@ -1,11 +1,11 @@
 
-def isProblematicKey(rdbms, space = 'tasks', key, noPrefix = False):
+def isProblematicKey(promlematicsList, key, noPrefix = False):
         """
             Catches any problematic keys as defined near the top of this class
         """
         k = key if noPrefix else key[1:]  # grab correct key to compare
 
-        if k in rdbms[space]['keys']['problematic']:
+        if k in promlematicsList:
             return True
 
         return False

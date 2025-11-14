@@ -10,16 +10,40 @@ class Generic:
     def __init__(self):
         # some code..
 
-    def updateMasterTable(self, space, tbl, QuerySet, newRecordDictionary):
-        t = generateModelInfo(rdbms, space, tbl)
-        query = ''
-        for col in t['cols']:
-            val = self.getCorrectUpdateValue(col, tbl, newRecordDictionary, QuerySet)
-            query += col + '=' + newRecordDictionary[col]
-        QuerySet.save(obj['master'])
-        pass
+    def updateMasterTable(self, space, QuerySet, newRecordDictionary):
+        # update the QuerySet
+        fields = {}
+        fields['description'] = newRecordDictionary['description']
+        fields['parant_id'] = newRecordDictionary['parent_id']
+        fields['update_time'] = timezone.now()
+        QuerySet.update(**fields)  # double-asterisk operator can be used to pass a dictionary as a collection of individual key=param arguments in Python
+        return None
+        
 
-    def updateChildTable(self, modelName, tableName, columnsList, newRecordDictionary, latestRecordId):
+    def updateChildTable(self, ModelInstance, latestRecord, tbl, tableName, columnsList, newRecordDictionary, dicKey):
+        ignore = rdbms[self.space]['updates']['ignore'][tableName]
+        fields = {
+            'delete_time': timezone.now(),
+            'latest': 2
+        }
+
+        latestRecord.update(**fields)  # update old record with deletion info
+
+        for col in columnsList:
+            if col in ignore:
+                continue
+
+            if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], col, True):
+                key = tbl + col  # needs prefix added to column name to match dict key
+            else:
+                key = col
+
+            fields[col] = newRecordDictionary[key]
+
+
+
+
+
         Details.save(obj['details'])
         Deadline.save(obj.['deadline'])
         Status.save(obj.['status'])
@@ -36,14 +60,12 @@ class Generic:
 
     def getCorrectUpdateValue(self, column, tbl, dic, qSet):
         
-        if crud.isProblematicKey(rdbms, self.space, column, True):
-            # needs prefix added to column name to match dict key
-            key = tbl + column
+        
 
         if newRecordDictionary[key] is None:
             if column == 'update_time':
                 return timezone.now()
-            
+
             return qSet.{column}
 
 

@@ -78,7 +78,7 @@ class QuerySet(models.QuerySet):
         for key in selectors:
             if key in self.tableCols:
                 
-                if crud.isProblematicKey(rdbms, self.space, key):
+                if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
 
@@ -101,7 +101,7 @@ class QuerySet(models.QuerySet):
         if key == 'latest':
             return ''
 
-        if crud.isProblematicKey(rdbms, self.space, tbl, key):
+        if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], tbl, key):
             # the table abbreviation is conjoined to key name. Separate:
             key = key[1:]
 
@@ -216,7 +216,10 @@ class ChildrenQuerySet(models.QuerySet):
                 LIMIT 1;
             """
 
-        return self.raw(query, [task_id, user_id, revision])
+        recs = self.raw(query, [task_id, user_id, revision])
+
+        for rec in recs:
+            return rec  # this returns only the model instance
 
     def fetchRevision(self, user_id, task_id, revision = 0):
         """
@@ -231,7 +234,10 @@ class ChildrenQuerySet(models.QuerySet):
                 LIMIT 1 OFFSET (%s);
             """
 
-        return self.raw(query, [task_id, user_id, revision])
+        recs = self.raw(query, [task_id, user_id, revision])
+
+        for rec in recs:
+            return rec  # this returns only the model instance
 
     def fetchAllRevisions(self, user_id, task_id):
         """
@@ -245,7 +251,7 @@ class ChildrenQuerySet(models.QuerySet):
                 ORDER BY create_time DESC
             """
 
-        return self.raw(query, [task_id, user_id])
+        return self.raw(query, [task_id, user_id])  # returns the whole rawqueryset
 
 
 

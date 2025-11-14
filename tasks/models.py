@@ -26,7 +26,6 @@ class Details(models.Model):
     details = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio()
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(default=timezone.now)
-    update_time = models.DateTimeField(null=True, blank=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     rawobjects = DetailQuerySet.as_manager()
