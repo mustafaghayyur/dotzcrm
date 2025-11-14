@@ -20,45 +20,55 @@ class Generic:
         return None
         
 
-    def updateChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, newRecordDictionary, dicKey):
-        ignore = rdbms[self.space]['updates']['ignore'][tableName]
-        fields = {
-            'delete_time': timezone.now(),
-            'latest': 2
-        }
+    def updateChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, newRecordDictionary):
+        rec = {}  # initiate new dictionary
+        updateRequired = False
 
-        latestRecord.update(**fields)  # update old record with deletion info
+        for col in columnsList:
+            if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], self.space, col, True):
+                key = tbl + col  # need tbl_abbrv prefix for comparison
 
+            if key in newRecordDictionary:
+                rec[col] = newRecordDictionary[key]  # store in rec in case an update is necessary
+                
+                if newRecordDictionary[key] != getattr(latestRecord, col):
+                    updateRequired = True  # changes found in dictionary record
+
+        if updateRequired:  # update record for child table
+            latestRecord.delete_time = timezone.now()
+            latestRecord.latest = 2
+            latestRecord.save(update_fields=['delete_time', 'latest'])  # update old record with deletion info
+
+            self.createChildTable(modelClass, tbl, tableName, columnsList, newRecordDictionary)
+
+        return None
+
+    def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
+        """
+        """
         newRecordDictionary['create_time'] = timezone.now()
         newRecordDictionary['latest'] = 1
 
-        if 'id' in newRecordDictionary:
-            del newRecordDictionary['id']
-
-        if 'delete_time' in newRecordDictionary:
-            del newRecordDictionary['delete_time']
-
-        return self.createChildTable(modelClass, tableName, columnsList, newRecordDictionary)
-
-    def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
         if rdbms[self.space]['master_id'] not in newRecordDictionary:
             raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
 
-        record = modelClass(**newRecordDictionary)
+        record = {}
+
+        for col in columnsList:
+            if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], self.space, col, True):
+                key = tbl + col  # add on a prefix to match newRecordDictionary keys
+            else:
+                key = col
+
+            if key in newRecordDictionary:
+                if col not in ['delete_time', 'create_time', 'update_time', 'id']:
+                    record[col] = newRecordDictionary[key]
+
+        record = modelClass(**record)
         return record.save()
 
-    def createMasterTable(self, modelClass, newRecordDictionary):
-        if 'id' in newRecordDictionary:
-            raise Exception(f'Could not create master record; id already set. In {self.space}.CRUD.create()')
-        if rdbms[self.space]['master_id'] in newRecordDictionary:
-            raise Exception(f'Could not create master record; id already set. In {self.space}.CRUD.create()')
 
-        tbl = self.space[0]
-        acrnym = tbl + 'id'
-
-        if acrnym in newRecordDictionary:
-            raise Exception(f'Could not create master record; id already set. In {self.space}.CRUD.create()')
-
+    def createMasterTable(self, tbl, modelClass, newRecordDictionary):
         tblColumns = rdbms['tables'][rdbms[self.space]['master_table']]
         record = {}
 
@@ -69,7 +79,8 @@ class Generic:
                 key = col
 
             if key in newRecordDictionary:
-                record[col] = newRecordDictionary[key]
+                if col not in ['delete_time', 'create_time', 'update_time', 'id']:
+                    record[col] = newRecordDictionary[key]
 
         record = modelClass(**record)
         return record.save()

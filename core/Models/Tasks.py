@@ -18,7 +18,7 @@ class CRUD(Generic):
     def create(self, dictionary):
         self.dictValidation(self.space, 'create', dictionary)
 
-        task_id = self.createMasterTable(Task, dictionary)
+        task_id = self.createMasterTable('t', Task, dictionary)
 
         if not task_id or isinstance(task_id, int):
             raise Exception('Something went wrong. Task could not be created in: Tasks.CRUD.create().')
@@ -32,7 +32,7 @@ class CRUD(Generic):
             t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
             dictionary['tid'] = task_id
 
-            self.createChildTable(t['model'], t['table'], t['cols'], dictionary)
+            self.createChildTable(t['model'], tbl, t['table'], t['cols'], dictionary)
             
     def read(self, selectors, conditions, orderBy, limit):
         # some logic...
@@ -70,30 +70,18 @@ class CRUD(Generic):
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk not in dictionary:  # create a new record for child table
-                self.createChildTable(model, t['table'], t['cols'], dictionary)
+                self.createChildTable(model, tbl, t['table'], t['cols'], dictionary)
                 continue
 
-            # we have a proper record to update
+            # we have a proper record to update(possibly)
             latest = model().rawobjects.fetchLatest(1, dictionary['tid'])  # fetch latest record for table:
-            updateRequired = False
 
             if not latest:
-                self.createChildTable(model, t['table'], t['cols'], dictionary)
+                self.createChildTable(model, tbl, t['table'], t['cols'], dictionary)
                 continue
 
-            rec = {}  # initiate new dictionary
-            for col in t['cols']:
-                if crud.isProblematicKey(settings['rdbms'][self.space]['keys']['problematic'], self.space, col, True):
-                    key = tbl + col  # need tbl_abbrv for comparison
-
-                if key in dictionary:
-                    rec[col] = dictionary[key]  # store in rec in case an update is necessary
-                    
-                    if dictionary[key] != getattr(latest, col):
-                        updateRequired = True  # changes found in dictionary record
-
-            if updateRequired:  # update record for child table
-                self.updateChildTable(model, latest, tbl, t['table'], t['cols'], rec)
+            # determine if an update is necessary and carry out update operations...
+            self.updateChildTable(model, latest, tbl, t['table'], t['cols'], dictionary)
 
     def delete(self, modelName, obj):
         # Delete the tasks
