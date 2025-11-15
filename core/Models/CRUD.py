@@ -1,4 +1,5 @@
 from django.utils import timezone
+from tasks.models import *
 from core.helpers import crud
 from core import settings
 
@@ -46,63 +47,102 @@ class Generic:
         if not isinstance(dictionary['tid'], int) or dictionary['tid'] < 1:
             raise Exception(f'{self.space} ID provided must be of int() format and greater than zero, in: {self.space}.CRUD.update().')
 
-        mtRecord = self.mtModel.objects.filter(id=dictionary[self.mtabbrv + 'id'])
-        if not mtRecord:
+        #mtRecord = self.mtModel.objects.filter(id=dictionary[self.mtabbrv + 'id'])
+        completeRecord = self.fetchFullRecordForUpdate(dictionary['tid'])
+
+        if not completeRecord:
             raise Exception(f'No valid record found for provided Task ID, in: {self.space}.CRUD.update().')
 
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
-
-            if pk == self.mtabbrv + 'id':
-                self.updateMasterTable(self.space, mtRecord, dictionary)
-                continue
-
             t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
+
+            if pk == self.mtabbrv + 'id':
+                self.updateMasterTable(self.space, completeRecord, dictionary, model, t['table'], t['cols'])
+                continue
 
             if pk not in dictionary:  # create a new record for child table
                 self.createChildTable(model, tbl, t['table'], t['cols'], dictionary)
                 continue
-
-            # we have a proper record to update(possibly)
-            latest = model().rawobjects.fetchLatest(1, dictionary[self.mtabbrv + 'id'])  # fetch latest record for table:
 
             if not latest:
                 self.createChildTable(model, tbl, t['table'], t['cols'], dictionary)
                 continue
 
             # determine if an update is necessary and carry out update operations...
-            self.updateChildTable(model, latest, tbl, t['table'], t['cols'], dictionary)
+            self.updateChildTable(model, completeRecord, tbl, t['table'], t['cols'], dictionary)
 
-    def updateMasterTable(self, space, QuerySet, newRecordDictionary):
+    def delete(self, masterId):
+        # Delete the tasks
+        if not isinstance(masterId, int) or masterId < 1:
+            raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
+
+        mtRecord = self.mtModel.objects.filter(id=masterId)
+
+        if not mtRecord:
+            raise Exception(f'Record for {self.space} could not be found. Therefore delete operation has failed, in {self.space}.CRUD.delete()')
+
+        for pk in self.idCols:
+            tbl = pk[0]  # table abbreviation
+
+            if pk == self.mtabbrv + 'id':
+                continue  # skip, we delete master table at the end.
+
+            t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
+            model = globals()[t['model']]  # retrieve Model class with global scope
+
+            latest = model.rawobjects.fetchLatest(user_id, masterId)
+
+            if not latest:
+                continue  # can't delete what doesn't exist
+
+            # run a 'delete' operation for latest child table record. 
+            self.deleteChildTable(model, latest, tbl, t['table'], t['cols'], masterId)
+
+        # once all children records have been updated with delete markers
+        self.deleteMasterTable(mtRecord)
+
+    def deleteChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, newRecordDictionary):
+        pass
+
+    def deleteMasterTable(self, masterRecord):
+        pass
+
+    def updateMasterTable(self, space, completeRecord, newRecordDictionary, mtModel, tableName, columnsList):
         # update the QuerySet
         fields = {}
-        fields['description'] = newRecordDictionary['description']
-        fields['parant_id'] = newRecordDictionary['parent_id']
+
+        for col in columnsList:
+            if crud.isProblematicKey(settings['rdbms'][self.space]['keys']['problematic'], self.space, col, True):
+                key = self.mtabbrv + col  # need tbl_abbrv prefix for comparison
+
+            if key in newRecordDictionary:                
+                if newRecordDictionary[key] != getattr(completeRecord, col):
+                    fields[col] = newRecordDictionary[key]
+
         fields['update_time'] = timezone.now()
-        QuerySet.update(**fields)  # double-asterisk operator can be used to pass a dictionary as a collection of individual key=param arguments in Python
+
+        mtModel.objects.filter(id=newRecordDictionary[self.mtabbrv + 'id']).update(**fields)
         return None
 
-    def updateChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, newRecordDictionary):
-        rec = {}  # initiate new dictionary
+    def updateChildTable(self, modelClass, completeRecord, tbl, tableName, columnsList, newRecordDictionary):
         updateRequired = False
-
         for col in columnsList:
             if crud.isProblematicKey(settings['rdbms'][self.space]['keys']['problematic'], self.space, col, True):
                 key = tbl + col  # need tbl_abbrv prefix for comparison
 
-            if key in newRecordDictionary:
-                rec[col] = newRecordDictionary[key]  # store in rec in case an update is necessary
-                
-                if newRecordDictionary[key] != getattr(latestRecord, col):
+            if key in newRecordDictionary:                
+                if newRecordDictionary[key] != getattr(completeRecord, col):
                     updateRequired = True  # changes found in dictionary record
 
         if updateRequired:  # update record for child table
-            latestRecord.delete_time = timezone.now()
-            latestRecord.latest = 2
-            latestRecord.save(update_fields=['delete_time', 'latest'])  # update old record with deletion info
-
+            fields = {}
+            fields['delete_time'] = timezone.now()
+            fields['latest'] = 2
+            
+            modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
             self.createChildTable(modelClass, tbl, tableName, columnsList, newRecordDictionary)
 
         return None
@@ -110,13 +150,10 @@ class Generic:
     def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
         """
         """
-        newRecordDictionary['create_time'] = timezone.now()
-        newRecordDictionary['latest'] = 1
-
         if settings['rdbms'][self.space]['master_id'] not in newRecordDictionary:
             raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
 
-        record = {}
+        fields = {}
 
         for col in columnsList:
             if crud.isProblematicKey(settings['rdbms'][self.space]['keys']['problematic'], self.space, col, True):
@@ -126,9 +163,11 @@ class Generic:
 
             if key in newRecordDictionary:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    record[col] = newRecordDictionary[key]
+                    fields[col] = newRecordDictionary[key]
 
-        record = modelClass(**record)
+        fields['create_time'] = timezone.now()
+        fields['latest'] = 1
+        record = modelClass(**fields)
         return record.save()
 
     def createMasterTable(self, tbl, modelClass, newRecordDictionary):

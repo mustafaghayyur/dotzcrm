@@ -78,11 +78,13 @@ class QuerySet(models.QuerySet):
         for key in selectors:
             if key in self.tableCols:
                 
+                table = self.tableCols[key]
                 if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
-
-                string += ' ' + table + '.' + key + ','
+                    string += ' ' + table + '.' + key + ' AS ' + table + key + ','
+                else:
+                    string += ' ' + table + '.' + key + ','
 
         # chop off the last comma from returned string
         return string[:-1]

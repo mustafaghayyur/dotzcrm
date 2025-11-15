@@ -53,7 +53,7 @@ class TasksQuerySet(records.QuerySet):
         params = {
             "assignee_id": user_id,
             #"delete_time": 'IS NULL',  # needs to be handled
-            "update_time": tasks['recentInterval'],
+            "tupdate_time": tasks['recentInterval'],
             "latest": tasks['values']['latest']['latest'],
             "visibility": tasks['values']['visibility']['private'],
             "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],

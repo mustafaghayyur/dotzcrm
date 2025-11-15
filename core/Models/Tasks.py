@@ -5,15 +5,14 @@
 from querysets.tasks import *
 from tasks.models import *
 from . import CRUD  # generic, parent crud class
-from core import settings
-from core.helpers import crud
+from core.settings import rdbms, tasks
 
 class CRUD(CRUD.Generic):
 
     def __init__(self):
-        self.idCols = settings['rdbms']['tasks']['keys']['only_pk']
+        self.idCols = rdbms['tasks']['keys']['only_pk']
         self.space = 'tasks'
-        self.mtabbrv = settings['rdbms']['tasks']['master_table_abbrv']
+        self.mtabbrv = rdbms['tasks']['master_table_abbrv']
         self.mtModel = Task
 
     def create(self, dictionary):
@@ -33,7 +32,26 @@ class CRUD(CRUD.Generic):
     def update(self, dictionary):
         return super.update(dictionary)
 
-    def delete(self, modelName, obj):
+    def delete(self, task_id):
         # Delete the tasks
-        model = self.fetchModel(modelName)
-        model.delete(obj)
+        super.delete(self, task_id)
+
+    def fetchFullRecordForUpdate(self, task_id):
+        user_id = 1
+
+        conditions = {
+            "assignee_id": None,
+            "update_time": None,
+            "latest": tasks['values']['latest']['latest'],
+            "visibility": None,
+            "status": None,
+            "tid": task_id,
+        }
+
+        selectors = list(rdbms.tasks.full_record.keys())
+        
+        rawObj = Task.rawobjects.fetchTasks(user_id, selectors, conditions, orderBy, 1)
+
+        if rawObj:
+            return rawObj
+
