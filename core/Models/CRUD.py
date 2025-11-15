@@ -79,8 +79,6 @@ class Generic:
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
-        mtRecord = self.mtModel.objects.filter(id=masterId)
-
         if not mtRecord:
             raise Exception(f'Record for {self.space} could not be found. Therefore delete operation has failed, in {self.space}.CRUD.delete()')
 
@@ -93,22 +91,27 @@ class Generic:
             t = crud.generateModelInfo(settings['rdbms'], self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
-            latest = model.rawobjects.fetchLatest(user_id, masterId)
-
-            if not latest:
-                continue  # can't delete what doesn't exist
-
             # run a 'delete' operation for latest child table record. 
             self.deleteChildTable(model, latest, tbl, t['table'], t['cols'], masterId)
 
         # once all children records have been updated with delete markers
-        self.deleteMasterTable(mtRecord)
+        self.deleteMasterTable(masterId)
 
-    def deleteChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, newRecordDictionary):
-        pass
+    def deleteChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, masterId):
+        fieldsF = {}
+        fieldsF[settings['rdbms'][self.space]['master_id']] = masterId
+        fieldsF['latest'] = settings[self.space]['values']['latest']['latest']
+        fieldsU = {}
+        fieldsU['delete_time'] = timezone.now()
+        fieldsU['latest'] = settings[self.space]['values']['latest']['archive']
+        
+        return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
-    def deleteMasterTable(self, masterRecord):
-        pass
+    def deleteMasterTable(self, masterId):
+        fieldsU['update_time'] = timezone.now()
+        fieldsU['delete_time'] = fieldsU['update_time']
+        
+        return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     def updateMasterTable(self, space, completeRecord, newRecordDictionary, mtModel, tableName, columnsList):
         # update the QuerySet
