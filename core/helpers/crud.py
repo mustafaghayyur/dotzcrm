@@ -12,8 +12,8 @@ def isProblematicKey(promlematicsList, key, noPrefix = False):
 
 def generateModelInfo(rdbms, space, tbl):
     return {
-        'model': rdbms[space]['model_names'][tbl]  # identify model
-        'table': rdbms[space]['table_names'][tbl]  # identify table
-        'cols': rdbms['tables'][rdbms[space]['table_names'][tbl]]  # grab column names
+        'model': rdbms[space]['model_names'][tbl], # identify model
+        'table': rdbms[space]['table_names'][tbl],  # identify table
+        'cols': rdbms['tables'][rdbms[space]['table_names'][tbl]],  # grab column names
     }
     

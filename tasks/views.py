@@ -1,42 +1,53 @@
 from django.views.generic import ListView, DetailView
-from django.views.generic.edit import FormView, DeleteView
+from django.views.generic.edit import FormView  #, DeleteView
 from core.modules.TasksEditForm import TasksEditForm
 from django import forms
 from django.shortcuts import get_object_or_404
+from django.http import Http404, HttpResponse
+
 
 
 #from django.views.generic.dates import YearArchiveView
 
-from .models import Task
+from core.Models.Tasks import CRUD
 from core.Models import Tasks
 from core.helpers import misc
 
 class TasksListView(ListView):
-    model = Task
     context_object_name = "tasks"
     template_name = "index.html"
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            HttpResponse("<h3>Error: {e}</h3>")
 
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
-        results = Tasks.read(['id', 'description', 'create_time', 'update_time', 'status', 'visibility'])
+        results = CRUD.read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility'])
         return results
 
 class TaskDetailView(DetailView):
-    model = Task
     context_object_name = "record"
     template_name = "record.html"
 
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            HttpResponse("<h3>Error: {e}</h3>")
+
     # object refers to the first 'object' found in the results' QuerySet
     # which in our case is a RawQuerySet
-    def get_object(self, query_set = None):
-        record = Tasks.read(['id', 'description', 'create_time', 'update_time', 'status', 'visibility', 'details', 'assignor_id'])
+    def get_object(self, query_set):
+        record = CRUD.read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility', 'details', 'assignor_id'])
         misc.log(record, 'results[detailed]')
         
         if record:
-            return record[0]
+            return record[0]  # extract the Model instance from the RawQuerySet
         else:
-            from django.http import Http404
             raise Http404("No record found matching the query")
         
 
@@ -67,58 +78,59 @@ class TaskEditView(FormView):
     form_class = TasksEditForm
     success_url = "/tasks/"
 
-    # Handles GET HTTPD method requests:
-    def get_initial(self):
-        """
-            We will modify the get() operations as such:
-            If there is an id provided (i.e. update operation)
-            We will retrieve relevant records & prefill form with that data
-        """
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            HttpResponse("<h3>Error: {e}</h3>")
 
+    def post(self, request, *args, **kwargs):
+        try:
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            HttpResponse("<h3>Error: {e}</h3>")
+
+    def get_initial(self):
         initial = super().get_initial().copy
         pk = self.kwargs['pk']
 
         if pk is not None:
-            taskRecord = Tasks.read(['all'], {id: pk})
+            taskRecord = CRUD.fetchFullRecordForUpdate(pk)
 
-            # taskRecord is a RawQuerySet; which can be evaluated with a simple
-            # if statement to carry valid results:
+            # taskRecord is a RawQuerySet; which can be evaluated with a simple if
             if taskRecord:
-                # do somethings...
                 # Map model data to form fields
-                initial['field1'] = taskRecord.field1
-                initial['field2'] = taskRecord.field2
+                initial['tid'] = taskRecord.task_id
+                initial['task_id'] = taskRecord.task_id
+                initial['did'] = taskRecord.details_id
+                initial['lid'] = taskRecord.deadline_id
+                initial['sid'] = taskRecord.status_id
+                initial['vid'] = taskRecord.visibility_id
+                initial['aid'] = taskRecord.assignment_id
+
+                initial['description'] = taskRecord.description
+                initial['status'] = taskRecord.status
+                initial['visibility'] = taskRecord.visibility
+
+                initial['details'] = taskRecord.details
+
+                initial['deadline'] = taskRecord.deadline
+                initial['parent_id'] = taskRecord.parent_id
+
+                initial['assignor_id'] = taskRecord.assignor_id
+                initial['assignee_id'] = taskRecord.assigne_id
             
-        # Return the populated dictionary
-        return initial
-
-
-        # DEBUG CODE:
-        # info1 = [attr for attr in dir(TaskEditView) if callable(getattr(TaskEditView, attr)) and not attr.startswith('__')]
-        # info2 = [attr for attr in dir(TasksEditForm) if callable(getattr(TasksEditForm, attr)) and not attr.startswith('__')]
-        # misc.log(info1, 'FormView Details:')
-        # misc.log(info2, 'TasksEditForm Details:')
-
+        return initial  # Return the populated dictionary
     
     def form_valid(self, form):
         """
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        # If the validation for the submitted form passes.
-        # This function is called. Save the models.
         """
-
-        # Step 1: do some final checks:
-
-        # Step 2: create seperate objects for each model:
-
-
-        # Step 3: save the models:
-        
-
-        
-
-
+        if 'tid' in form and form['tid'] is not None:
+            CRUD.update(form)
+        else:
+            CRUD.create(form)
 
         # proceed with the original plans..
         return super().form_valid(form)

@@ -1,5 +1,5 @@
 from . import records
-from core.settings import tasks, rdbms, 
+from core.settings import tasks, rdbms
 from core.helpers import strings
 
 
@@ -10,11 +10,11 @@ from core.helpers import strings
 ##########################################################################
 class TasksQuerySet(records.QuerySet):
 
-    def __init__(self):
+    def __init__(self, model=None, query=None, using=None, hints=None):
         self.tableCols = rdbms['tasks']['keys']['full_record']
         self.space = 'tasks'  # used by some modules
 
-        return super.__init__()
+        super().__init__(model, query, using, hints)
         
     # NOTE: Watchers table is not query-able in this comprehensive search.
     #       Will have to query all watchers separately.
@@ -130,8 +130,7 @@ class WatacherQuerySet(records.ChildrenQuerySet):
         pass
 
     def fetchSpecificWatcherHistory(self, user_id, task_id):
-        
-
+        pass
 
 class AssignmentQuerySet(records.ChildrenQuerySet):
     tbl = 'tasks_visibility'

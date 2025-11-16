@@ -18,7 +18,7 @@ class Task(models.Model):
     update_time = models.DateTimeField(default=timezone.now, null=False, blank=False)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = TasksQuerySet.as_manager()
+    objects = TasksQuerySet.as_manager()
 
 
 class Details(models.Model):
@@ -28,7 +28,7 @@ class Details(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = DetailQuerySet.as_manager()
+    objects = DetailQuerySet.as_manager()
 
 
 class Deadline(models.Model):
@@ -40,7 +40,7 @@ class Deadline(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = DeadlineQuerySet.as_manager()
+    objects = DeadlineQuerySet.as_manager()
 
 class Status(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -51,7 +51,7 @@ class Status(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = StatusQuerySet.as_manager()
+    objects = StatusQuerySet.as_manager()
 
 class Visibility(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -62,7 +62,7 @@ class Visibility(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = VisibilityQuerySet.as_manager()
+    objects = VisibilityQuerySet.as_manager()
 
 class Watcher(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -76,7 +76,7 @@ class Watcher(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = WatacherQuerySet.as_manager()
+    objects = WatacherQuerySet.as_manager()
 
 
 # The table to manage assignor/assignee for each task
@@ -98,7 +98,7 @@ class Assignment(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    rawobjects = AssignmentQuerySet.as_manager()
+    objects = AssignmentQuerySet.as_manager()
 
 
 # @todo - link tasks with tickets

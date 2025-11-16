@@ -2,7 +2,7 @@
     Please read the README.md in this folder before using.
 """
 
-from querysets.tasks import *
+from .querysets.tasks import *
 from tasks.models import *
 from . import CRUD  # generic, parent crud class
 from core.settings import rdbms, tasks
@@ -16,13 +16,17 @@ class CRUD(CRUD.Generic):
         self.mtModel = Task
 
     def create(self, dictionary):
-        return super.create(dictionary)
+        return super().create(dictionary)
 
     def read(self, selectors, conditions, orderBy, limit):
-        # some logic...
+        if not isinstance(selectors, list) or len(selectors) < 1:
+            raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
+        if 'all' in selectors:
+            selectors = list(rdbms.tasks.full_record.keys())
+        
         user_id = 1
-        rawObj = Task.rawobjects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
+        rawObj = Task.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
 
         if rawObj:
             return rawObj
@@ -30,15 +34,13 @@ class CRUD(CRUD.Generic):
         return None
 
     def update(self, dictionary):
-        return super.update(dictionary)
+        return super().update(dictionary)
 
     def delete(self, task_id):
         # Delete the tasks
-        super.delete(self, task_id)
+        super().delete(task_id)
 
     def fetchFullRecordForUpdate(self, task_id):
-        user_id = 1
-
         conditions = {
             "assignee_id": None,
             "update_time": None,
@@ -48,10 +50,9 @@ class CRUD(CRUD.Generic):
             "tid": task_id,
         }
 
-        selectors = list(rdbms.tasks.full_record.keys())
-        
-        rawObj = Task.rawobjects.fetchTasks(user_id, selectors, conditions, orderBy, 1)
+        rawObj = self.read(selectors, conditions, orderBy, 1)
 
         if rawObj:
-            return rawObj
+            return rawObj[0]  # we only want one
+        return None
 

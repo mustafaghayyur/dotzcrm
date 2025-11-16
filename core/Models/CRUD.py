@@ -47,7 +47,6 @@ class Generic:
         if not isinstance(dictionary['tid'], int) or dictionary['tid'] < 1:
             raise Exception(f'{self.space} ID provided must be of int() format and greater than zero, in: {self.space}.CRUD.update().')
 
-        #mtRecord = self.mtModel.objects.filter(id=dictionary[self.mtabbrv + 'id'])
         completeRecord = self.fetchFullRecordForUpdate(dictionary['tid'])
 
         if not completeRecord:
@@ -79,9 +78,6 @@ class Generic:
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
-        if not mtRecord:
-            raise Exception(f'Record for {self.space} could not be found. Therefore delete operation has failed, in {self.space}.CRUD.delete()')
-
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
 
@@ -108,6 +104,7 @@ class Generic:
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
     def deleteMasterTable(self, masterId):
+        fieldsU = {}
         fieldsU['update_time'] = timezone.now()
         fieldsU['delete_time'] = fieldsU['update_time']
         

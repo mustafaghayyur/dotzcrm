@@ -23,15 +23,11 @@ from core.settings import rdbms
 ##########################################################################
 class QuerySet(models.QuerySet):
     
-    # This dictionary carries list of all the column names callable in the fetch****() query call.
-    # The dictionary has 'column_name': 'table_abbreviation_used_in_SQL' format to its organization.
-    # individual child table's create/delete datetime cols cannot be fetched in the Master Tables' Fetch*All() calls
     tableCols = None
-
     space = None
 
-    def __init__(self):
-        pass
+    def __init__(self, model=None, query=None, using=None, hints=None):
+        super().__init__(model, query, using, hints)
 
 
     def _compileVariables(self, user_id, selectors = [], conditions = None, orderBy = '', limit = '20'):
