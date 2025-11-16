@@ -78,7 +78,12 @@ class QuerySet(models.QuerySet):
                 if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
-                    string += ' ' + table + '.' + key + ' AS ' + table + key + ','
+                    addition = ' AS ' + table + key
+                    
+                    if table + key == rdbms[self.space]['master_table_abbrv'] + 'id':
+                        addition = ''
+                    
+                    string += ' ' + table + '.' + key + addition + ','
                 else:
                     string += ' ' + table + '.' + key + ','
 
@@ -99,18 +104,19 @@ class QuerySet(models.QuerySet):
         if key == 'latest':
             return ''
 
-        if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], tbl, key):
-            # the table abbreviation is conjoined to key name. Separate:
-            key = key[1:]
+        keyDb = key  # keyDb refers to the column name recognized by the DB.
 
-        if key in ['create_time', 'update_time', 'delete_time']:
-            return andPref + '(' + tbl + '.' + key + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + key + ' IS NULL )'
+        if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
+            keyDb = key[1:]  # the table abbreviation is conjoined to key name. Separate:
+
+        if keyDb in ['create_time', 'update_time', 'delete_time']:
+            return andPref + '(' + tbl + '.' + keyDb + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + keyDb + ' IS NULL )'
 
         if isinstance(item, list):
-            return andPref + tbl + '.' + key + ' IN %(' + key + ')s'
+            return andPref + tbl + '.' + keyDb + ' IN %(' + key + ')s'
         
         if isinstance(item, str):
-            return andPref + tbl + '.' + key + ' = %(' + key + ')s'
+            return andPref + tbl + '.' + keyDb + ' = %(' + key + ')s'
 
         return ''
 

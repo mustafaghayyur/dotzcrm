@@ -7,6 +7,8 @@ from tasks.models import *
 from . import CRUD  # generic, parent crud class
 from core.settings import rdbms, tasks
 
+from core.helpers import misc
+
 class CRUD(CRUD.Generic):
 
     def __init__(self):
@@ -18,16 +20,16 @@ class CRUD(CRUD.Generic):
     def create(self, dictionary):
         return super().create(dictionary)
 
-    def read(self, selectors, conditions, orderBy, limit):
+    def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         if not isinstance(selectors, list) or len(selectors) < 1:
             raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
         if 'all' in selectors:
             selectors = list(rdbms.tasks.full_record.keys())
-        
+
         user_id = 1
         rawObj = Task.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
-
+        misc.log(rawObj, 'Inspect SQL response.')
         if rawObj:
             return rawObj
 
@@ -42,7 +44,7 @@ class CRUD(CRUD.Generic):
 
     def fetchFullRecordForUpdate(self, task_id):
         conditions = {
-            "assignee_id": None,
+            #"assignee_id": None,
             "update_time": None,
             "latest": tasks['values']['latest']['latest'],
             "visibility": None,

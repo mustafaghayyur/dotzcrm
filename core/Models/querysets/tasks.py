@@ -1,6 +1,6 @@
 from . import records
 from core.settings import tasks, rdbms
-from core.helpers import strings
+from core.helpers import strings, misc
 
 
 ##########################################################################
@@ -46,6 +46,9 @@ class TasksQuerySet(records.QuerySet):
             WHERE {whereStatements} 
             ORDER BY {orderBy} LIMIT {limit};
             """
+
+        misc.log(query, 'Inspect query before injection to SQL.')
+        misc.log(params, 'Inspect parameters of the above query')
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self, user_id):

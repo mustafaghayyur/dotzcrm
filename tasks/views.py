@@ -16,29 +16,30 @@ from core.helpers import misc
 class TasksListView(ListView):
     context_object_name = "tasks"
     template_name = "index.html"
-
+    """
     def get(self, request, *args, **kwargs):
         try:
             return super().get(request, *args, **kwargs)
         except Exception as e:
             HttpResponse("<h3>Error: {e}</h3>")
-
+    """
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
-        results = CRUD.read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility'])
+        selectors = ['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility']
+        results = CRUD().read(selectors)
         return results
 
 class TaskDetailView(DetailView):
     context_object_name = "record"
     template_name = "record.html"
-
+    """
     def get(self, request, *args, **kwargs):
         try:
             return super().get(request, *args, **kwargs)
         except Exception as e:
             HttpResponse("<h3>Error: {e}</h3>")
-
+    """
     # object refers to the first 'object' found in the results' QuerySet
     # which in our case is a RawQuerySet
     def get_object(self, query_set):
@@ -77,7 +78,7 @@ class TaskEditView(FormView):
     template_name = "edit.html"
     form_class = TasksEditForm
     success_url = "/tasks/"
-
+    """
     def get(self, request, *args, **kwargs):
         try:
             return super().get(request, *args, **kwargs)
@@ -89,7 +90,7 @@ class TaskEditView(FormView):
             return super().post(request, *args, **kwargs)
         except Exception as e:
             HttpResponse("<h3>Error: {e}</h3>")
-
+    """
     def get_initial(self):
         initial = super().get_initial().copy
         pk = self.kwargs['pk']

@@ -13,6 +13,7 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
     varType = type(subject)
     nowobj = timezone.now()
     now = nowobj.strftime("%Y-%m-%d %H:%M:%S")
+    log = ''
 
     if isinstance(subject, str):
         log = subject
@@ -20,12 +21,17 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
         if isinstance(subject, float) or isinstance(subject, int) or isinstance(subject, complex):
             log = str(subject)
         else:
-            import pprint
-            if level > 1:
-                import inspect
-                log = pprint.pformat(inspect.getmembers(subject))
-            else:
-                log = pprint.pformat(subject)
+            try:
+                import pprint
+                if level > 1:
+                    import inspect
+                    log = pprint.pformat(inspect.getmembers(subject))
+                else:
+                    log = pprint.pformat(subject)
+                
+            except KeyError as e:
+                pass
+            
 
     msg = f"""
         "{now}
