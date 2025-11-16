@@ -26,8 +26,7 @@ class TasksListView(ListView):
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
-        selectors = ['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility']
-        results = CRUD().read(selectors)
+        results = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility'])
         return results
 
 class TaskDetailView(DetailView):
@@ -42,8 +41,8 @@ class TaskDetailView(DetailView):
     """
     # object refers to the first 'object' found in the results' QuerySet
     # which in our case is a RawQuerySet
-    def get_object(self, query_set):
-        record = CRUD.read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility', 'details', 'assignor_id'])
+    def get_object(self, queryset=None):
+        record = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility', 'details', 'assignor_id'])
         misc.log(record, 'results[detailed]')
         
         if record:
@@ -92,22 +91,27 @@ class TaskEditView(FormView):
             HttpResponse("<h3>Error: {e}</h3>")
     """
     def get_initial(self):
-        initial = super().get_initial().copy
-        pk = self.kwargs['pk']
+        initial = {}
 
-        if pk is not None:
-            taskRecord = CRUD.fetchFullRecordForUpdate(pk)
+        if 'pk' in self.kwargs:
+            pk = self.kwargs['pk']
+            misc.log(pk)
+            if not isinstance(pk, int) or pk < 1:
+                raise Exception(f'Record\'s ID missing. Cannot edit.')
+
+            taskRecord = CRUD().fetchFullRecordForUpdate(pk)
+            misc.log(taskRecord, 'this is for form edit view')
 
             # taskRecord is a RawQuerySet; which can be evaluated with a simple if
             if taskRecord:
                 # Map model data to form fields
-                initial['tid'] = taskRecord.task_id
-                initial['task_id'] = taskRecord.task_id
-                initial['did'] = taskRecord.details_id
-                initial['lid'] = taskRecord.deadline_id
-                initial['sid'] = taskRecord.status_id
-                initial['vid'] = taskRecord.visibility_id
-                initial['aid'] = taskRecord.assignment_id
+                initial['tid'] = taskRecord.id
+                initial['task_id'] = taskRecord.id
+                initial['did'] = taskRecord.did
+                initial['lid'] = taskRecord.lid
+                initial['sid'] = taskRecord.sid
+                initial['vid'] = taskRecord.vid
+                initial['aid'] = taskRecord.aid
 
                 initial['description'] = taskRecord.description
                 initial['status'] = taskRecord.status
@@ -119,9 +123,10 @@ class TaskEditView(FormView):
                 initial['parent_id'] = taskRecord.parent_id
 
                 initial['assignor_id'] = taskRecord.assignor_id
-                initial['assignee_id'] = taskRecord.assigne_id
+                initial['assignee_id'] = taskRecord.assignee_id
             
-        return initial  # Return the populated dictionary
+        self.initial = initial
+        return self.initial.copy()
     
     def form_valid(self, form):
         """

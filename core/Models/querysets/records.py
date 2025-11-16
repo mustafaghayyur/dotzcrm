@@ -73,8 +73,10 @@ class QuerySet(models.QuerySet):
         
         for key in selectors:
             if key in self.tableCols:
-                
                 table = self.tableCols[key]
+                if key == 'latest':
+                    continue
+
                 if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
@@ -146,14 +148,17 @@ class QuerySet(models.QuerySet):
             Make sure all condition inputs are strings or lists.
         """
         tableCols = list(self.tableCols.keys())
+        keys = list(conditions.keys())  # copy keys of conditions to loop over
 
-        for k, v in conditions.items():
+        for k in keys:
             if k in tableCols:
-                if isinstance(v, str) or isinstance(v, list):
+                if conditions[k] is None:
+                    continue
+                if isinstance(conditions[k], str) or isinstance(conditions[k], list):
                     continue
                 else:
-                    if isinstance(v, float) or isinstance(v, int) or isinstance(v, complex):
-                        conditions[k] = str(v)
+                    if isinstance(conditions[k], float) or isinstance(conditions[k], int) or isinstance(conditions[k], complex):
+                        conditions[k] = str(conditions[k])
                         continue
                     else:
                         conditions[k] = ''

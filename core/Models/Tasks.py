@@ -25,7 +25,7 @@ class CRUD(CRUD.Generic):
             raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
         if 'all' in selectors:
-            selectors = list(rdbms.tasks.full_record.keys())
+            selectors = list(rdbms['tasks']['keys']['full_record'].keys())
 
         user_id = 1
         rawObj = Task.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
@@ -52,7 +52,7 @@ class CRUD(CRUD.Generic):
             "tid": task_id,
         }
 
-        rawObj = self.read(selectors, conditions, orderBy, 1)
+        rawObj = self.read(['all'], conditions)
 
         if rawObj:
             return rawObj[0]  # we only want one
