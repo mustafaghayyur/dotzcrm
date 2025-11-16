@@ -133,10 +133,11 @@ class TaskEditView(FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         """
-        if 'tid' in form and form['tid'] is not None:
-            CRUD.update(form)
+        misc.log(form.cleaned_data, 'This is a view of the form dictionary')
+        if 'id' in form.cleaned_data and form.cleaned_data['id'] is not None:
+            CRUD().update(form.cleaned_data)
         else:
-            CRUD.create(form)
+            CRUD().create(form.cleaned_data)
 
         # proceed with the original plans..
         return super().form_valid(form)

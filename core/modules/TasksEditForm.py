@@ -7,12 +7,12 @@ from tasks.models import *
 class TasksEditForm(forms.Form):
     User = get_user_model()
 
-    tid = forms.CharField(widget=forms.HiddenInput())
-    did = forms.CharField(widget=forms.HiddenInput())
-    lid = forms.CharField(widget=forms.HiddenInput())
-    sid = forms.CharField(widget=forms.HiddenInput())
-    vid = forms.CharField(widget=forms.HiddenInput())
-    aid = forms.CharField(widget=forms.HiddenInput())
+    tid = forms.CharField(widget=forms.HiddenInput(), required=False)
+    did = forms.CharField(widget=forms.HiddenInput(), required=False)
+    lid = forms.CharField(widget=forms.HiddenInput(), required=False)
+    sid = forms.CharField(widget=forms.HiddenInput(), required=False)
+    vid = forms.CharField(widget=forms.HiddenInput(), required=False)
+    aid = forms.CharField(widget=forms.HiddenInput(), required=False)
     
     description = forms.CharField(max_length=255, empty_value="What's your task?")
     status = forms.CharField(max_length=20)
@@ -20,8 +20,8 @@ class TasksEditForm(forms.Form):
 
     details = forms.CharField(widget=forms.Textarea, empty_value="Enter long description here...")
 
-    deadline = forms.DateTimeField()
-    parent_id = forms.ModelChoiceField(queryset=Task.objects)
+    deadline = forms.DateTimeField(required=False)
+    parent_id = forms.ModelChoiceField(queryset=Task.objects, required=False)
 
     assignor = forms.ModelChoiceField(queryset=User.objects, empty_label="Select One")
     assignee = forms.ModelChoiceField(queryset=User.objects, empty_label="Select One")
