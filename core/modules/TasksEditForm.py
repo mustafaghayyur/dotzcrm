@@ -21,9 +21,9 @@ class TasksEditForm(forms.Form):
     details = forms.CharField(widget=forms.Textarea, empty_value="Enter long description here...")
 
     deadline = forms.DateTimeField(required=False)
-    parent_id = forms.ModelChoiceField(queryset=Task.objects, required=False)
+    parent_id = forms.ModelChoiceField(queryset=Task.objects.all(), required=False)
 
-    assignor = forms.ModelChoiceField(queryset=User.objects, empty_label="Select One")
-    assignee = forms.ModelChoiceField(queryset=User.objects, empty_label="Select One")
+    assignor_id = forms.ModelChoiceField(queryset=User.objects.all(), empty_label="Select One")
+    assignee_id = forms.ModelChoiceField(queryset=User.objects.all(), empty_label="Select One")
 
     

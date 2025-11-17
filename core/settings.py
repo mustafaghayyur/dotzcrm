@@ -128,18 +128,18 @@ rdbms = {
             'w': 'Watcher',
         },
         'updates': {
-            'ignore': {
-                'tasks_task': ['id', 'create_time', 'delete_time', 'creator_id'],
-                'tasks_details': ['id', 'create_time', 'task_id', 'details'],
-                'tasks_deadline': ['id', 'create_time', 'task_id', 'deadline'],
-                'tasks_status': ['id', 'create_time', 'task_id', 'status'],
-                'tasks_visibility': ['id', 'create_time', 'task_id', 'visibility'],
-                'tasks_assignment': ['id', 'create_time', 'task_id', 'assignee_id', 'assignor_id'],
-                'tasks_watcher': ['id', 'create_time', 'task_id', 'watcher_id'],
-            }
+            'ignore': {}  # can carry any fields within a table to ignore in a certain operation
         }
     },  # end of tasks
     'tables': {
-        'tasks_task': ['id', 'create_time', '...']
+        # Outline all tables within CRM system here
+        # Used in conjunction with other rdbms objects to conduct operations
+        'tasks_task': ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id'],
+        'tasks_details': ['id', 'details', 'latest', 'create_time', 'delete_time', 'task_id'],
+        'tasks_deadline': ['id', 'deadline', 'latest', 'create_time', 'delete_time', 'task_id'],
+        'tasks_status': ['id', 'status', 'latest', 'create_time', 'delete_time', 'task_id'],
+        'tasks_visibility': ['id', 'visibility', 'latest', 'create_time', 'delete_time', 'task_id'],
+        'tasks_assignment': ['id', 'latest', 'create_time', 'delete_time', 'assignee_id', 'assignor_id', 'task_id'],
+        'tasks_watcher': ['id', 'latest', 'create_time', 'delete_time', 'task_id', 'watcher_id'],
     }
 }

@@ -1,21 +1,22 @@
-"""
-    Please read the README.md in this folder before using.
-"""
-
 from .querysets.tasks import *
 from tasks.models import *
-from . import CRUD  # generic, parent crud class
+from .background.CRUD import Generic  # generic, parent crud class
 from core.settings import rdbms, tasks
-
 from core.helpers import misc
 
-class CRUD(CRUD.Generic):
+"""
+    Handles ALL crud operations for Tasks Module of DotzCRM.
+    Please read the README.md in this folder before using.
+"""
+class CRUD(Generic):
 
     def __init__(self):
         self.idCols = rdbms['tasks']['keys']['only_pk']
         self.space = 'tasks'
         self.mtabbrv = rdbms['tasks']['master_table_abbrv']
         self.mtModel = Task
+
+        super().__init__()
 
     def create(self, dictionary):
         return super().create(dictionary)

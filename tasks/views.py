@@ -1,14 +1,9 @@
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView  #, DeleteView
-from core.modules.TasksEditForm import TasksEditForm
-from django import forms
-from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponse
-
-
-
 #from django.views.generic.dates import YearArchiveView
 
+from core.modules.TasksEditForm import TasksEditForm
 from core.Models.Tasks import CRUD
 from core.Models import Tasks
 from core.helpers import misc
@@ -43,7 +38,6 @@ class TaskDetailView(DetailView):
     # which in our case is a RawQuerySet
     def get_object(self, queryset=None):
         record = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility', 'details', 'assignor_id'])
-        misc.log(record, 'results[detailed]')
         
         if record:
             return record[0]  # extract the Model instance from the RawQuerySet
@@ -95,12 +89,10 @@ class TaskEditView(FormView):
 
         if 'pk' in self.kwargs:
             pk = self.kwargs['pk']
-            misc.log(pk)
             if not isinstance(pk, int) or pk < 1:
                 raise Exception(f'Record\'s ID missing. Cannot edit.')
 
             taskRecord = CRUD().fetchFullRecordForUpdate(pk)
-            misc.log(taskRecord, 'this is for form edit view')
 
             # taskRecord is a RawQuerySet; which can be evaluated with a simple if
             if taskRecord:
