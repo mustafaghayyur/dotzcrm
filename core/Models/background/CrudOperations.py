@@ -16,12 +16,13 @@ class Background(ErrorHandling):
         super().__init__()
 
     def deleteChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, masterId):
+        spaceSettings = getattr(settings, self.space)
         fieldsF = {}
         fieldsF[settings.rdbms[self.space]['master_id']] = masterId
-        fieldsF['latest'] = settings[self.space]['values']['latest']['latest']
+        fieldsF['latest'] = spaceSettings['values']['latest']['latest']
         fieldsU = {}
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = settings[self.space]['values']['latest']['archive']
+        fieldsU['latest'] = spaceSettings['values']['latest']['archive']
         
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
@@ -65,7 +66,7 @@ class Background(ErrorHandling):
                         continue
                 
                 if col in settings.rdbms[self.space]['updates']['ignore'][tableName]:
-                    continue  # ignore columns don't need a comparison in child-update operations 
+                    continue  # ignore columns don't need a comparison in child-update operations
 
                 if newRecordDictionary[key] != getattr(completeRecord, col):
                     misc.log([newRecordDictionary[key], getattr(completeRecord, col)], f' - UPDATE CHILD Opr.: these form, DB values for [{col}] column did not match.')
@@ -85,11 +86,17 @@ class Background(ErrorHandling):
     def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
         """
         """
-        if crud.isValidId(newRecordDictionary, settings.rdbms[self.space]['master_id']):
+        masterId = settings.rdbms[self.space]['master_id']  # grab master_id for this space
+        
+        if masterId not in newRecordDictionary:
+            newRecordDictionary[masterId] = newRecordDictionary[self.mtabbrv + 'id']
+
+        if not crud.isValidId(newRecordDictionary, masterId):
             raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
 
         fields = {}
 
+        
         for col in columnsList:
             if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
                 key = tbl + col  # add on a prefix to match newRecordDictionary keys
