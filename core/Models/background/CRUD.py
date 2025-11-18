@@ -44,6 +44,9 @@ class Generic(Background):
         if self.mtabbrv + 'id' not in dictionary:
             raise Exception(f'Update operation needs {self.space} id, in: {self.space}.CRUD.update().')
 
+        if not isinstance(dictionary['tid'], int):
+            dictionary['tid'] = int(dictionary['tid'])
+
         if not isinstance(dictionary['tid'], int) or dictionary['tid'] < 1:
             raise Exception(f'{self.space} ID provided must be of int() format and greater than zero, in: {self.space}.CRUD.update().')
 
@@ -54,7 +57,7 @@ class Generic(Background):
 
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[0]  # child table abbreviation
             t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
@@ -66,7 +69,7 @@ class Generic(Background):
                 self.createChildTable(model, tbl, t['table'], t['cols'], dictionary)
                 continue
                 
-            if not isinstance(dictionary[pk], int) or dictionary[pk] < 1:  # create a new record for child table
+            if not crud.isValidId(dictionary, pk):  # create a new record for child table
                 self.createChildTable(model, tbl, t['table'], t['cols'], dictionary)
                 continue
 

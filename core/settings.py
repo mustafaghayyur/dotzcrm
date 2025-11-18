@@ -128,7 +128,15 @@ rdbms = {
             'w': 'Watcher',
         },
         'updates': {
-            'ignore': {}  # can carry any fields within a table to ignore in a certain operation
+            'ignore': {
+                'tasks_task': [],
+                'tasks_details': ['latest', 'task_id'],
+                'tasks_deadline': ['latest', 'task_id'],
+                'tasks_status': ['latest', 'task_id'],
+                'tasks_visibility': ['latest', 'task_id'],
+                'tasks_assignment': ['latest', 'task_id'],
+                'tasks_watcher': ['latest', 'task_id'],
+            }  # can carry any fields within a table to ignore in a certain operation
         }
     },  # end of tasks
     'tables': {

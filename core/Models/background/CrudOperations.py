@@ -1,6 +1,6 @@
 from django.utils import timezone
 from tasks.models import *
-from core.helpers import crud
+from core.helpers import crud, misc
 from core import settings
 from .Validation import ErrorHandling
 
@@ -47,24 +47,37 @@ class Background(ErrorHandling):
         fields['update_time'] = timezone.now()
 
         mtModel.objects.filter(id=newRecordDictionary[self.mtabbrv + 'id']).update(**fields)
+        misc.log({'fields': fields}, f'Update For: [{self.mtabbrv}]')
         return None
 
     def updateChildTable(self, modelClass, completeRecord, tbl, tableName, columnsList, newRecordDictionary):
+        misc.log(modelClass, f'ENTERING update for [{tbl}]')
         updateRequired = False
         for col in columnsList:
             if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
                 key = tbl + col  # need tbl_abbrv prefix for comparison
 
             if key in newRecordDictionary:
+                if isinstance(newRecordDictionary[key], object):
+                    if hasattr(newRecordDictionary[key], 'id'):
+                        # need to overwrite dictionary key with int value for comparison
+                        newRecordDictionary[key] = newRecordDictionary[key].id
+                        continue
+                
+                if col in settings.rdbms[self.space]['updates']['ignore'][tableName]:
+                    continue  # ignore columns don't need a comparison in child-update operations 
+
                 if newRecordDictionary[key] != getattr(completeRecord, col):
+                    misc.log([newRecordDictionary[key], getattr(completeRecord, col)], f' - UPDATE CHILD Opr.: these form, DB values for [{col}] column did not match.')
                     updateRequired = True  # changes found in dictionary record
 
-        if updateRequired:  # update record for child table
+        if updateRequired:  # update old record for child table
             fields = {}
             fields['delete_time'] = timezone.now()
-            fields['latest'] = 2
+            fields['latest'] = getattr(settings, self.space)['values']['latest']['archive']
             
             modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
+            misc.log({'fields': fields}, f'Update For: [{tbl}]')
             self.createChildTable(modelClass, tbl, tableName, columnsList, newRecordDictionary)
 
         return None
@@ -72,13 +85,10 @@ class Background(ErrorHandling):
     def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
         """
         """
-        if settings.rdbms[self.space]['master_id'] not in newRecordDictionary:
+        if crud.isValidId(newRecordDictionary, settings.rdbms[self.space]['master_id']):
             raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
 
         fields = {}
-
-        if tbl == 'a':
-            misc.log(columnsList, f'checking columns for [{tbl}]')
 
         for col in columnsList:
             if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
@@ -88,13 +98,12 @@ class Background(ErrorHandling):
 
             if key in newRecordDictionary:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    if tbl == 'a':
-                        misc.log(newRecordDictionary[key], f'KEY [{key}] check for assignment table')
                     if isinstance(newRecordDictionary[key], object):
                         if hasattr(newRecordDictionary[key], 'id'):
                             fields[col] = newRecordDictionary[key].id  # must be a foreignkey Model instance, grab only the id.
                             continue
                         fields[col] = None
+                        continue
                     fields[col] = newRecordDictionary[key]
 
         # if record is empty, abort insert...
@@ -102,20 +111,18 @@ class Background(ErrorHandling):
             if settings.rdbms[self.space]['master_id'] in fields:
                 return None  # only the master ID is added, no need need to insert
 
-        misc.log(fields, f'This is fields.dict for [{tbl}] table')
-
         fields['create_time'] = timezone.now()
         fields['latest'] = 1
         record = modelClass(**fields)
         record.save()
-
-        misc.log(record, f'This is record for {tbl} table')
+        misc.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
 
     def createMasterTable(self, tbl, modelClass, newRecordDictionary):
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
-        misc.log(t['cols'], 'cols fot MT')
-        tblColumns = settings.rdbms['tables'][settings.rdbms[self.space]['master_table']]
+        
+        masterTable = settings.rdbms[self.space]['master_table']
+        tblColumns = settings.rdbms['tables'][masterTable]
         record = {}
 
         for col in tblColumns:
@@ -141,7 +148,7 @@ class Background(ErrorHandling):
 
         record = modelClass(**record)
         record.save()
-        misc.log([record.id, assignor], 'let\'s inspect the returned MT record create')
+        misc.log({'fields': record}, f'Create For: [{tbl}]')
         return record
 
 

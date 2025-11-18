@@ -90,9 +90,7 @@ class QuerySet(models.QuerySet):
                     string += ' ' + table + '.' + key + ','
 
         # chop off the last comma from returned string
-        return string[:-1]
-
-    
+        return string[:-1]    
 
     def _generateWhereStatements(self, i, tbl, key, item):
         """
@@ -198,8 +196,7 @@ class QuerySet(models.QuerySet):
 #
 # This class carries common helper functions needed by all children tables of Master Table.
 #
-# When dealing with revisions we try not to fetch IDs of all revisions. 
-# This is wasteful spending.
+# When dealing with revisions we try not to fetch by IDs. This is wasteful spending.
 #
 # We instead refer to revisions by their chronological place (in reverse). 
 # So index[0] will be the current record. Then index[1] will be the last revision before the current one. And so forth.
@@ -207,7 +204,7 @@ class QuerySet(models.QuerySet):
 class ChildrenQuerySet(models.QuerySet):
     
     # These are to be set in inherited class:
-    tbl = None  # Your table for this QuerySet 
+    tbl = None  # Your table for this QuerySet
     master_col = None  # The foreign key of master table (i.e. Tasks)
     valTbl = None  # Name of table that can validate if user has access to this record(s)
     valCol = None  # Name of column (in valTbl) that specifically can confirm user's right to records

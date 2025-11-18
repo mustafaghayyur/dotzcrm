@@ -6,7 +6,7 @@ from django.http import Http404, HttpResponse
 from core.modules.TasksEditForm import TasksEditForm
 from core.Models.Tasks import CRUD
 from core.Models import Tasks
-from core.helpers import misc
+from core.helpers import misc, crud
 
 class TasksListView(ListView):
     context_object_name = "tasks"
@@ -36,13 +36,15 @@ class TaskDetailView(DetailView):
     """
     # object refers to the first 'object' found in the results' QuerySet
     # which in our case is a RawQuerySet
+
     def get_object(self, queryset=None):
-        record = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility', 'details', 'assignor_id'])
+        if 'pk' in self.kwargs:
+            record = CRUD().read(['all'], {'tid': self.kwargs['pk']})
         
-        if record:
-            return record[0]  # extract the Model instance from the RawQuerySet
-        else:
-            raise Http404("No record found matching the query")
+            if record:
+                return record[0]  # extract the Model instance from the RawQuerySet
+        
+        raise Http404("No record found matching the query")
         
 
 """
@@ -125,8 +127,7 @@ class TaskEditView(FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         """
-        misc.log(form.cleaned_data, 'This is a view of the form dictionary')
-        if 'id' in form.cleaned_data and form.cleaned_data['id'] is not None:
+        if crud.isValidId(form.cleaned_data, 'tid'):
             CRUD().update(form.cleaned_data)
         else:
             CRUD().create(form.cleaned_data)

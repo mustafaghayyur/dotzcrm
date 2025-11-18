@@ -30,7 +30,7 @@ class CRUD(Generic):
 
         user_id = 1
         rawObj = Task.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
-        misc.log(rawObj, 'Inspect SQL response.')
+        
         if rawObj:
             return rawObj
 
