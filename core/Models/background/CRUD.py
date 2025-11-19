@@ -13,8 +13,8 @@ class Generic(Background):
     def create(self, dictionary):
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         
-        #misc.log(self.submission, 'FORM-------------------------------------')
-        #misc.log(completeRecord, 'DB-------------------------------------', 2)
+        #self.log(self.submission, 'FORM-------------------------------------')
+        #self.log(completeRecord, 'DB-------------------------------------', 2)
         
         masterRecord = self.createMasterTable(self.dbConfigs['mtAbbrv'], self.mtModel)
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}

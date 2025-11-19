@@ -1,4 +1,4 @@
-def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file = "/Users/mustafa/Sites/python/server1/DEBUGGER.log"):
+def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file = "/Users/mustafa/Sites/python/server1/DEBUGGER.log", crud = False):
     """
         Simple logger. Use by importing core.helpers.misc
 
@@ -32,18 +32,28 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
             except KeyError as e:
                 pass
             
+    if crud:
+        msg = f"""
+{now} | Variable type: {varType}
+---------------
+{log_message}
+---------------
+{log}
+---------------
+"""
 
-    msg = f"""
-        "{now}
-        ---------------
-        {log_message}
-        ---------------
-        Variable type: {varType}
-        ---------------
-        {log}
-        ---------------
+    else:
+        msg = f"""
+{now}
+---------------
+{log_message}
+---------------
+Variable type: {varType}
+---------------
+{log}
+---------------
 
-        """
+"""
     with open(logger_file, "at") as f:
         f.write(msg)
 

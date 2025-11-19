@@ -19,6 +19,8 @@ class Background(ErrorHandling):
 
     submission = None
 
+    logger_file = '/Users/mustafa/Sites/python/server1/CRUD.log'
+
     def __init__(self):
         # loads configs related to the module (defined in self.space)
         self.module = getattr(settings, self.space)
@@ -75,7 +77,7 @@ class Background(ErrorHandling):
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord):
-        misc.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
+        self.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
         fields = {}
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
@@ -86,17 +88,17 @@ class Background(ErrorHandling):
             if key in self.submission:
                 if self.submission[key] != getattr(completeRecord, col):
                     fields[col] = self.submission[key]
-                    misc.log([key, self.submission[key], col, getattr(completeRecord, col)], 'MISMATCH')
-                misc.log([key, col], 'comparing in MT Update')
+                    self.log([key, self.submission[key], col, getattr(completeRecord, col)], 'MISMATCH')
+                self.log([key, col], 'comparing in MT Update')
 
         fields['update_time'] = timezone.now()
 
         mtModel.objects.filter(id=self.submission[self.dbConfigs['mtAbbrv'] + 'id']).update(**fields)
-        misc.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
+        self.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
         return None
 
     def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord):
-        misc.log(None, f'ENTERING update for childtable [{tbl}]')
+        self.log(None, f'ENTERING update for childtable [{tbl}]')
 
         if not hasattr(completeRecord, tbl + 'id'):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
@@ -118,10 +120,10 @@ class Background(ErrorHandling):
                     continue  # ignore columns don't need a comparison in child-update operations
 
                 if self.submission[key] != getattr(completeRecord, col):
-                    misc.log([key, self.submission[key], col, getattr(completeRecord, col)], f'MISMATCH -  update needed')
+                    self.log([key, self.submission[key], col, getattr(completeRecord, col)], f'MISMATCH -  update needed')
                     updateRequired = True  # changes found in dictionary record
 
-                misc.log([key, col], 'comparing in CT Update')
+                self.log([key, col], 'comparing in CT Update')
 
         if updateRequired:
             fields = {}
@@ -130,13 +132,13 @@ class Background(ErrorHandling):
             
             # update old record, create new one...
             modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
-            misc.log({'fields': fields}, f'Update For: [{tbl}]')
+            self.log({'fields': fields}, f'Update For: [{tbl}]')
             self.createChildTable(modelClass, tbl, tableName, columnsList)
 
         return None
 
     def createChildTable(self, modelClass, tbl, tableName, columnsList):
-        misc.log(None, f'Entering create operation for childtable: [{tbl}]')
+        self.log(None, f'Entering create operation for childtable: [{tbl}]')
         fields = {}
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
@@ -151,7 +153,7 @@ class Background(ErrorHandling):
                             self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
                     
                     fields[col] = self.submission[key]
-                    misc.log([key, self.submission[key]], 'Field added')
+                    self.log([key, self.submission[key]], 'Field added')
 
         if len(fields) <= 1:  # if record is empty, abort insertion...
             if self.dbConfigs['mtId'] in fields:
@@ -161,11 +163,11 @@ class Background(ErrorHandling):
         fields['latest'] = 1
         record = modelClass(**fields)
         record.save()
-        misc.log({'fields': fields}, f'Create For: [{tbl}]')
+        self.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
 
     def createMasterTable(self, tbl, modelClass):
-        misc.log(None, f'Entering create operation for MasterTable: [{tbl}]')
+        self.log(None, f'Entering create operation for MasterTable: [{tbl}]')
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
         fields = {}
 
@@ -179,7 +181,7 @@ class Background(ErrorHandling):
             if key in self.submission:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
                     fields[col] = self.submission[key]
-                    misc.log(key, self.submission[key], 'Field added')
+                    self.log(key, self.submission[key], 'Field added')
 
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
@@ -193,7 +195,7 @@ class Background(ErrorHandling):
 
         record = modelClass(**fields)
         record.save()
-        misc.log({'fields': fields}, f'Create For: [{tbl}]')
+        self.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
 
     def _generateParentId(self, dictionary):
@@ -207,3 +209,6 @@ class Background(ErrorHandling):
             return self.currentUser
 
         return assignor
+
+    def log(self, subject, log_message, level = 1):
+        misc.log(subject, log_message, level, self.logger_file, crud=True)

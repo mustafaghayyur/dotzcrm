@@ -1,7 +1,6 @@
 from .querysets.tasks import *
 from tasks.models import *
 from .background.CRUD import Generic  # generic, parent crud class
-from core.helpers import misc
 
 """
     Handles ALL crud operations for Tasks Module of DotzCRM.
@@ -23,7 +22,7 @@ class CRUD(Generic):
             raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
         if 'all' in selectors:
-            selectors = list(rdbms['tasks']['keys']['full_record'].keys())
+            selectors = list(self.dbConfigs['keys']['full_record'].keys())
 
         user_id = 1
         rawObj = Task.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
@@ -44,7 +43,7 @@ class CRUD(Generic):
         conditions = {
             #"assignee_id": None,
             "update_time": None,
-            "latest": tasks['values']['latest']['latest'],
+            "latest": self.module['values']['latest']['latest'],
             "visibility": None,
             "status": None,
             "tid": task_id,
