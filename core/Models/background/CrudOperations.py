@@ -35,7 +35,25 @@ class Background(ErrorHandling):
         super().__init__()
 
     def saveSubmission(self, operation, submission):
+        # First, we do some error checking on the dictionary supplied:
         self.dictValidation(self.space, operation, submission)
+
+        # Second, we make sure the master-table-id is included in record:
+        masterId = self.dbConfigs['mtId']
+        
+        if self.dbConfigs['mtAbbrv'] + 'id' not in submission:
+            raise Exception(f'Could not complete operation; Master-Table ID is missing. In {self.space}.CRUD.{operation}()')
+
+        if masterId not in submission:
+            submission[masterId] = submission[self.dbConfigs['mtAbbrv'] + 'id']
+
+        if not crud.isValidId(submission, masterId):
+            raise Exception(f'Could not complete operation; \'master_id\' missing. In {self.space}.CRUD.{operation}()')
+
+        if 'id' not in submission:
+            submission['id'] = submission[masterId]
+
+        # Finally, we save the submitted form into self.submission
         self.submission = submission
 
     def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId):
@@ -57,15 +75,19 @@ class Background(ErrorHandling):
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord):
+        misc.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
         fields = {}
-
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = self.dbConfigs['mtAbbrv'] + col  # need tbl_abbrv prefix for comparison
+            else:
+                key = col
 
             if key in self.submission:
                 if self.submission[key] != getattr(completeRecord, col):
                     fields[col] = self.submission[key]
+                    misc.log([key, self.submission[key], col, getattr(completeRecord, col)], 'MISMATCH')
+                misc.log([key, col], 'comparing in MT Update')
 
         fields['update_time'] = timezone.now()
 
@@ -74,7 +96,7 @@ class Background(ErrorHandling):
         return None
 
     def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord):
-        misc.log(modelClass, f'ENTERING update for [{tbl}]')
+        misc.log(None, f'ENTERING update for childtable [{tbl}]')
 
         if not hasattr(completeRecord, tbl + 'id'):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
@@ -83,20 +105,23 @@ class Background(ErrorHandling):
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = tbl + col  # need tbl-abbrv prefix for comparison
+            else:
+                key = col
 
             if key in self.submission:
                 if isinstance(self.submission[key], object):
                     if hasattr(self.submission[key], 'id'):
                         # need to overwrite dictionary key with int value for comparison
                         self.submission[key] = self.submission[key].id
-                        continue
                 
                 if col in self.dbConfigs['updates']['ignore'][tableName]:
                     continue  # ignore columns don't need a comparison in child-update operations
 
                 if self.submission[key] != getattr(completeRecord, col):
-                    misc.log([self.submission[key], getattr(completeRecord, col)], f' - UPDATE CHILD Opr.: these form, DB values for [{col}] column did not match.')
+                    misc.log([key, self.submission[key], col, getattr(completeRecord, col)], f'MISMATCH -  update needed')
                     updateRequired = True  # changes found in dictionary record
+
+                misc.log([key, col], 'comparing in CT Update')
 
         if updateRequired:
             fields = {}
@@ -111,14 +136,7 @@ class Background(ErrorHandling):
         return None
 
     def createChildTable(self, modelClass, tbl, tableName, columnsList):
-        masterId = self.dbConfigs['mtId']  # grab master_id for this space
-        
-        if masterId not in self.submission:
-            self.submission[masterId] = self.submission[self.dbConfigs['mtAbbrv'] + 'id']
-
-        if not crud.isValidId(self.submission, masterId):
-            raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
-
+        misc.log(None, f'Entering create operation for childtable: [{tbl}]')
         fields = {}
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
@@ -130,14 +148,13 @@ class Background(ErrorHandling):
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
                     if isinstance(self.submission[key], object):
                         if hasattr(self.submission[key], 'id'):
-                            fields[col] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
-                            continue
-                        fields[col] = None
-                        continue
+                            self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
+                    
                     fields[col] = self.submission[key]
+                    misc.log([key, self.submission[key]], 'Field added')
 
         if len(fields) <= 1:  # if record is empty, abort insertion...
-            if masterId in fields:
+            if self.dbConfigs['mtId'] in fields:
                 return None  # only the master ID is added, no need need to insert
 
         fields['create_time'] = timezone.now()
@@ -148,6 +165,7 @@ class Background(ErrorHandling):
         return record
 
     def createMasterTable(self, tbl, modelClass):
+        misc.log(None, f'Entering create operation for MasterTable: [{tbl}]')
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
         fields = {}
 
@@ -161,6 +179,7 @@ class Background(ErrorHandling):
             if key in self.submission:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
                     fields[col] = self.submission[key]
+                    misc.log(key, self.submission[key], 'Field added')
 
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None

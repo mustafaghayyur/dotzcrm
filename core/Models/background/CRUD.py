@@ -12,7 +12,10 @@ class Generic(Background):
 
     def create(self, dictionary):
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-
+        
+        #misc.log(self.submission, 'FORM-------------------------------------')
+        #misc.log(completeRecord, 'DB-------------------------------------', 2)
+        
         masterRecord = self.createMasterTable(self.dbConfigs['mtAbbrv'], self.mtModel)
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
@@ -40,7 +43,6 @@ class Generic(Background):
 
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-        misc.log(rdbms, "Inspecting the new rdbms dictionatry")
 
         if mtId not in self.submission:
             raise Exception(f'Update operation needs {self.space} id, in: {self.space}.CRUD.update().')
