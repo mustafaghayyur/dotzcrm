@@ -56,24 +56,24 @@ class Background(ErrorHandling):
         
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
-    def updateMasterTable(self, space, completeRecord, newRecordDictionary, mtModel, tableName, columnsList):
+    def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord):
         fields = {}
 
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = self.dbConfigs['mtAbbrv'] + col  # need tbl_abbrv prefix for comparison
 
-            if key in newRecordDictionary:
-                if newRecordDictionary[key] != getattr(completeRecord, col):
-                    fields[col] = newRecordDictionary[key]
+            if key in self.submission:
+                if self.submission[key] != getattr(completeRecord, col):
+                    fields[col] = self.submission[key]
 
         fields['update_time'] = timezone.now()
 
-        mtModel.objects.filter(id=newRecordDictionary[self.dbConfigs['mtAbbrv'] + 'id']).update(**fields)
-        misc.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
+        mtModel.objects.filter(id=self.submission[self.dbConfigs['mtAbbrv'] + 'id']).update(**fields)
+        misc.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}')
         return None
 
-    def updateChildTable(self, modelClass, completeRecord, tbl, tableName, columnsList, newRecordDictionary):
+    def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord):
         misc.log(modelClass, f'ENTERING update for [{tbl}]')
 
         if not hasattr(completeRecord, tbl + 'id'):
@@ -84,21 +84,21 @@ class Background(ErrorHandling):
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = tbl + col  # need tbl-abbrv prefix for comparison
 
-            if key in newRecordDictionary:
-                if isinstance(newRecordDictionary[key], object):
-                    if hasattr(newRecordDictionary[key], 'id'):
+            if key in self.submission:
+                if isinstance(self.submission[key], object):
+                    if hasattr(self.submission[key], 'id'):
                         # need to overwrite dictionary key with int value for comparison
-                        newRecordDictionary[key] = newRecordDictionary[key].id
+                        self.submission[key] = self.submission[key].id
                         continue
                 
                 if col in self.dbConfigs['updates']['ignore'][tableName]:
                     continue  # ignore columns don't need a comparison in child-update operations
 
-                if newRecordDictionary[key] != getattr(completeRecord, col):
-                    misc.log([newRecordDictionary[key], getattr(completeRecord, col)], f' - UPDATE CHILD Opr.: these form, DB values for [{col}] column did not match.')
+                if self.submission[key] != getattr(completeRecord, col):
+                    misc.log([self.submission[key], getattr(completeRecord, col)], f' - UPDATE CHILD Opr.: these form, DB values for [{col}] column did not match.')
                     updateRequired = True  # changes found in dictionary record
 
-        if updateRequired:  
+        if updateRequired:
             fields = {}
             fields['delete_time'] = timezone.now()
             fields['latest'] = self.module['values']['latest']['archive']
@@ -106,39 +106,38 @@ class Background(ErrorHandling):
             # update old record, create new one...
             modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
             misc.log({'fields': fields}, f'Update For: [{tbl}]')
-            self.createChildTable(modelClass, tbl, tableName, columnsList, newRecordDictionary)
+            self.createChildTable(modelClass, tbl, tableName, columnsList)
 
         return None
 
-    def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
+    def createChildTable(self, modelClass, tbl, tableName, columnsList):
         masterId = self.dbConfigs['mtId']  # grab master_id for this space
         
-        if masterId not in newRecordDictionary:
-            newRecordDictionary[masterId] = newRecordDictionary[self.dbConfigs['mtAbbrv'] + 'id']
+        if masterId not in self.submission:
+            self.submission[masterId] = self.submission[self.dbConfigs['mtAbbrv'] + 'id']
 
-        if not crud.isValidId(newRecordDictionary, masterId):
+        if not crud.isValidId(self.submission, masterId):
             raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
 
         fields = {}
-        
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
-                key = tbl + col  # add on a prefix to match newRecordDictionary keys
+                key = tbl + col  # add on a prefix to match self.submission keys
             else:
                 key = col
 
-            if key in newRecordDictionary:
+            if key in self.submission:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    if isinstance(newRecordDictionary[key], object):
-                        if hasattr(newRecordDictionary[key], 'id'):
-                            fields[col] = newRecordDictionary[key].id  # must be a foreignkey Model instance, grab only the id.
+                    if isinstance(self.submission[key], object):
+                        if hasattr(self.submission[key], 'id'):
+                            fields[col] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
                             continue
                         fields[col] = None
                         continue
-                    fields[col] = newRecordDictionary[key]
+                    fields[col] = self.submission[key]
 
         if len(fields) <= 1:  # if record is empty, abort insertion...
-            if self.dbConfigs['mtId'] in fields:
+            if masterId in fields:
                 return None  # only the master ID is added, no need need to insert
 
         fields['create_time'] = timezone.now()
@@ -148,36 +147,35 @@ class Background(ErrorHandling):
         misc.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
 
-    def createMasterTable(self, tbl, modelClass, newRecordDictionary):
+    def createMasterTable(self, tbl, modelClass):
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
-        record = {}
+        fields = {}
 
         for col in t['cols']:
-            # get the correct key reference for column in newRecordDictionary...
+            # get the correct key reference for column in self.submission...
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
-                key = tbl + col  # add on a prefix to match newRecordDictionary keys
+                key = tbl + col  # add on a prefix to match self.submission keys
             else:
                 key = col
 
-            if key in newRecordDictionary:
+            if key in self.submission:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    record[col] = newRecordDictionary[key]
+                    fields[col] = self.submission[key]
 
-        if len(record) == 0:  # if record is empty, abort insertion...
+        if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
 
-        record['parent_id'] = self._generateParentId(newRecordDictionary)
-        assignor = newRecordDictionary['assignor_id'].id  # this is for initial testing ... should be removed
-        record['creator_id'] = self._generateCreatorId(assignor)
+        fields['parent_id'] = self._generateParentId(self.submission)
+        assignor = self.submission['assignor_id'].id  # this is for initial testing ... should be removed
+        fields['creator_id'] = self._generateCreatorId(assignor)
 
-        record['create_time'] = timezone.now()
-        record['update_time'] = record['create_time']
+        fields['create_time'] = timezone.now()
+        fields['update_time'] = fields['create_time']
 
-        record = modelClass(**record)
+        record = modelClass(**fields)
         record.save()
-        misc.log({'fields': record}, f'Create For: [{tbl}]')
+        misc.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
-
 
     def _generateParentId(self, dictionary):
         if 'parent' in dictionary:

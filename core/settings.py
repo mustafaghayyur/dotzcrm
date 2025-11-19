@@ -106,6 +106,7 @@ rdbms = {
                 'creator_id': 't',
                 'parent_id': 't',
                 'latest': ''
+                # NOTE: task_id is omitted because tid = task_id
             },  # end of full_record
         },  # end of keys
 

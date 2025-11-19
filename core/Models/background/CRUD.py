@@ -58,7 +58,7 @@ class Generic(Background):
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk == mtId:
-                self.updateMasterTable(model, completeRecord, t['table'], t['cols'])
+                self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
                 continue
 
             if pk not in self.submission:
@@ -71,7 +71,7 @@ class Generic(Background):
                 continue
 
             # determine if an update is necessary and carry out update operations...
-            self.updateChildTable(model, completeRecord, tbl, t['table'], t['cols'])
+            self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
 
     def delete(self, masterId):
         if not isinstance(masterId, int) or masterId < 1:
