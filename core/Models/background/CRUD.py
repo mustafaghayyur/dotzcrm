@@ -14,6 +14,7 @@ class Generic(Background):
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
 
         masterRecord = self.createMasterTable(self.dbConfigs['mtAbbrv'], self.mtModel)
+        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
         if not hasattr(masterRecord, 'id') or not isinstance(masterRecord.id, int):
             raise Exception(f'Something went wrong. {self.space} record could not be created in: {self.space}.CRUD.create().')
@@ -26,7 +27,7 @@ class Generic(Background):
                 continue
 
             tbl = pk[0]  # table abbreviation
-            t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
+            t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             self.createChildTable(model, tbl, t['table'], t['cols'])
@@ -38,6 +39,8 @@ class Generic(Background):
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
+        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
+        misc.log(rdbms, "Inspecting the new rdbms dictionatry")
 
         if mtId not in self.submission:
             raise Exception(f'Update operation needs {self.space} id, in: {self.space}.CRUD.update().')
@@ -54,7 +57,7 @@ class Generic(Background):
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
             tbl = pk[0]  # child table abbreviation
-            t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
+            t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk == mtId:
@@ -77,13 +80,14 @@ class Generic(Background):
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
+        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
+
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
 
             if pk == self.dbConfigs['mtAbbrv'] + 'id':
                 continue  # skip, we delete master table at the end.
 
-            rdbms = {self.space: self.dbConfigs, 'tables': self.module}
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 

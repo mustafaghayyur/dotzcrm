@@ -53,9 +53,9 @@ tasks = {
 ####################################################################
 rdbms = {
     'tasks': {
-        'mt': 'tasks_task',  #old name master_table
-        'mtAbbrv': 't',  #old name master_table_abbrv
-        'mtId': 'task_id',  #old name master_id
+        'mt': 'tasks_task',
+        'mtAbbrv': 't',
+        'mtId': 'task_id',
         'keys': {
             # all primary_keys for Tasks (and children tables) should be
             # listed here:

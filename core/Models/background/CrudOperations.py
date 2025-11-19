@@ -34,13 +34,13 @@ class Background(ErrorHandling):
 
         super().__init__()
 
-    def saveSubmission(self, submission, operation):
+    def saveSubmission(self, operation, submission):
         self.dictValidation(self.space, operation, submission)
         self.submission = submission
 
     def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId):
         fieldsF = {}  # fields to find records with
-        fieldsF[self.dbConfigs['master_id']] = masterId
+        fieldsF[self.dbConfigs['mtId']] = masterId
         fieldsF['latest'] = self.module['values']['latest']['latest']
         
         fieldsU = {}  # fields to update in found records
@@ -70,7 +70,7 @@ class Background(ErrorHandling):
         fields['update_time'] = timezone.now()
 
         mtModel.objects.filter(id=self.submission[self.dbConfigs['mtAbbrv'] + 'id']).update(**fields)
-        misc.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}')
+        misc.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
         return None
 
     def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord):

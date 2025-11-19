@@ -82,7 +82,7 @@ class QuerySet(models.QuerySet):
                     key = key[1:]  # slice off first character
                     addition = ' AS ' + table + key
                     
-                    if table + key == rdbms[self.space]['master_table_abbrv'] + 'id':
+                    if table + key == rdbms[self.space]['mtAbbrv'] + 'id':
                         addition = ''
                     
                     string += ' ' + table + '.' + key + addition + ','
