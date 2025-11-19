@@ -21,7 +21,8 @@ class TasksListView(ListView):
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
-        results = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility'], {"status": None})
+        results = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility'], {"visibility": None})
+        # misc.log(results, 'RAW SQL OUTPUT [List]')
         return results
 
 class TaskDetailView(DetailView):
@@ -39,8 +40,9 @@ class TaskDetailView(DetailView):
 
     def get_object(self, queryset=None):
         if 'pk' in self.kwargs:
-            record = CRUD().read(['all'], {'tid': self.kwargs['pk'], "status": None})
-        
+            record = CRUD().read(['all'], {'tid': self.kwargs['pk'], "visibility": None})
+            # misc.log(record, 'RAW SQL OUTPUT [Details]')
+
             if record:
                 return record[0]  # extract the Model instance from the RawQuerySet
         

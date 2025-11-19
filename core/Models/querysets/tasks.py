@@ -43,10 +43,12 @@ class TasksQuerySet(records.QuerySet):
             SELECT {selectString}
             FROM tasks_task AS t
             {joins}
-            WHERE {whereStatements} 
+            WHERE {whereStatements}
             ORDER BY {orderBy} LIMIT {limit};
             """
 
+        # misc.log(query, 'SEARCH QUERY STRING')
+        # misc.log(params, 'SEARCH PARAMS')
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self, user_id):

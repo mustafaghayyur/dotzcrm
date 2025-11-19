@@ -13,7 +13,8 @@ B
 
 C
 --
-
+ > child-table: for each Module (Tasks, Tickets, Documents, etc) there is the main Master table, symbolizing a single Master (i.e. Task, Ticket, etc.) records. And then several children-tables which carry additional data pertaining to the master-record.
+ > CT: abbreviation for child-table (see above)
 
 D
 --
@@ -60,6 +61,7 @@ M
   4. Customers Module
 
  > mt (or MT): stands for Master Table: usually refers to the paraent table for a module that all children tables relate to. In Tasks module, this would be the 'tasks_task' table (unless configured differently).
+ > Master Table: see mt above.
 
  > Model: a Model with a capital M, refers not to the default django models found in each module's codebase. But the the core.Models directory. Please see README.md of that directory for more info.
 

@@ -34,9 +34,9 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
             
     if crud:
         msg = f"""
-{now} | Variable type: {varType}
+{now} | Variable type: {varType} | SPACE: {log_message['space']}
 ---------------
-{log_message}
+{log_message['msg']}
 ---------------
 {log}
 ---------------

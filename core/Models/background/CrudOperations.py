@@ -1,6 +1,6 @@
 from django.utils import timezone
 from tasks.models import *
-from core.helpers import crud, misc
+from core.helpers import crud
 from core import settings
 from .Validation import ErrorHandling
 
@@ -8,7 +8,7 @@ from .Validation import ErrorHandling
     This class holds the background crud operations.
 """
 class Background(ErrorHandling):
-    currentUser = None # FUTURE IMPLEMENTATION
+    currentUser = None  # FUTURE IMPLEMENTATION
 
     mtModel = None
     space = None
@@ -19,7 +19,6 @@ class Background(ErrorHandling):
 
     submission = None
 
-    logger_file = '/Users/mustafa/Sites/python/server1/CRUD.log'
 
     def __init__(self):
         # loads configs related to the module (defined in self.space)
@@ -39,22 +38,8 @@ class Background(ErrorHandling):
     def saveSubmission(self, operation, submission):
         # First, we do some error checking on the dictionary supplied:
         self.dictValidation(self.space, operation, submission)
-
         # Second, we make sure the master-table-id is included in record:
-        masterId = self.dbConfigs['mtId']
-        
-        if self.dbConfigs['mtAbbrv'] + 'id' not in submission:
-            raise Exception(f'Could not complete operation; Master-Table ID is missing. In {self.space}.CRUD.{operation}()')
-
-        if masterId not in submission:
-            submission[masterId] = submission[self.dbConfigs['mtAbbrv'] + 'id']
-
-        if not crud.isValidId(submission, masterId):
-            raise Exception(f'Could not complete operation; \'master_id\' missing. In {self.space}.CRUD.{operation}()')
-
-        if 'id' not in submission:
-            submission['id'] = submission[masterId]
-
+        submission = self.mtIdValidation(operation, submission)
         # Finally, we save the submitted form into self.submission
         self.submission = submission
 
@@ -78,6 +63,7 @@ class Background(ErrorHandling):
 
     def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord):
         self.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
+        
         fields = {}
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
@@ -139,6 +125,7 @@ class Background(ErrorHandling):
 
     def createChildTable(self, modelClass, tbl, tableName, columnsList):
         self.log(None, f'Entering create operation for childtable: [{tbl}]')
+        
         fields = {}
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
@@ -168,6 +155,7 @@ class Background(ErrorHandling):
 
     def createMasterTable(self, tbl, modelClass):
         self.log(None, f'Entering create operation for MasterTable: [{tbl}]')
+        
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
         fields = {}
 
@@ -210,5 +198,4 @@ class Background(ErrorHandling):
 
         return assignor
 
-    def log(self, subject, log_message, level = 1):
-        misc.log(subject, log_message, level, self.logger_file, crud=True)
+    

@@ -42,7 +42,8 @@ tasks = {
             'failed': 'failed',
         },
     },
-
+    # CRUD operations are logged properly when Django's DEBUG setting is True:
+    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'
 }
 
 ####################################################################
@@ -131,12 +132,12 @@ rdbms = {
         'updates': {
             'ignore': {
                 'tasks_task': [],
-                'tasks_details': ['latest', 'task_id'],
-                'tasks_deadline': ['latest', 'task_id'],
-                'tasks_status': ['latest', 'task_id'],
-                'tasks_visibility': ['latest', 'task_id'],
-                'tasks_assignment': ['latest', 'task_id'],
-                'tasks_watcher': ['latest', 'task_id'],
+                'tasks_details': ['id', 'latest', 'task_id'],
+                'tasks_deadline': ['id', 'latest', 'task_id'],
+                'tasks_status': ['id', 'latest', 'task_id'],
+                'tasks_visibility': ['id', 'latest', 'task_id'],
+                'tasks_assignment': ['id', 'latest', 'task_id'],
+                'tasks_watcher': ['id', 'latest', 'task_id'],
             }  # can carry any fields within a table to ignore in a certain operation
         }
     },  # end of tasks

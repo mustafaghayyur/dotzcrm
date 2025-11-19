@@ -13,4 +13,7 @@
     <div id="status" class="status">
         {{record.status}}
     </div>
+    <div id="edit" class="btn">
+        <a href="{% url 'task_edit' record.id %}">edit</a>
+    </div>
 {% endblock %}
