@@ -8,21 +8,44 @@ from .Validation import ErrorHandling
     This class holds the background crud operations.
 """
 class Background(ErrorHandling):
-    mtabbrv = None  # master-table-abbreviation
-    mtModel = None  # master-table-modelClass
-    currentUser = None
+    currentUser = None # FUTURE IMPLEMENTATION
+
+    mtModel = None
+    space = None
+    module = None
+    dbConfigs = None
+    tables = None
+    idCols = None
+
+    submission = None
 
     def __init__(self):
+        # loads configs related to the module (defined in self.space)
+        self.module = getattr(settings, self.space)
+
+        # loads configs for this module, more secifically related to the Database
+        self.dbConfigs = settings.rdbms[self.space]
+
+        # loads tables data needed for certain operations
+        self.tables = settings.rdbms['tables']
+
+        # holds all primary keys for given space/module
+        self.idCols = self.dbConfigs['keys']['only_pk']
+
         super().__init__()
 
-    def deleteChildTable(self, modelClass, latestRecord, tbl, tableName, columnsList, masterId):
-        spaceSettings = getattr(settings, self.space)
-        fieldsF = {}
-        fieldsF[settings.rdbms[self.space]['master_id']] = masterId
-        fieldsF['latest'] = spaceSettings['values']['latest']['latest']
-        fieldsU = {}
+    def saveSubmission(self, submission, operation):
+        self.dictValidation(self.space, operation, submission)
+        self.submission = submission
+
+    def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId):
+        fieldsF = {}  # fields to find records with
+        fieldsF[self.dbConfigs['master_id']] = masterId
+        fieldsF['latest'] = self.module['values']['latest']['latest']
+        
+        fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = spaceSettings['values']['latest']['archive']
+        fieldsU['latest'] = self.module['values']['latest']['archive']
         
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
@@ -34,12 +57,11 @@ class Background(ErrorHandling):
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     def updateMasterTable(self, space, completeRecord, newRecordDictionary, mtModel, tableName, columnsList):
-        # update the QuerySet
         fields = {}
 
         for col in columnsList:
-            if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
-                key = self.mtabbrv + col  # need tbl_abbrv prefix for comparison
+            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
+                key = self.dbConfigs['mtAbbrv'] + col  # need tbl_abbrv prefix for comparison
 
             if key in newRecordDictionary:
                 if newRecordDictionary[key] != getattr(completeRecord, col):
@@ -47,16 +69,20 @@ class Background(ErrorHandling):
 
         fields['update_time'] = timezone.now()
 
-        mtModel.objects.filter(id=newRecordDictionary[self.mtabbrv + 'id']).update(**fields)
-        misc.log({'fields': fields}, f'Update For: [{self.mtabbrv}]')
+        mtModel.objects.filter(id=newRecordDictionary[self.dbConfigs['mtAbbrv'] + 'id']).update(**fields)
+        misc.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
         return None
 
     def updateChildTable(self, modelClass, completeRecord, tbl, tableName, columnsList, newRecordDictionary):
         misc.log(modelClass, f'ENTERING update for [{tbl}]')
+
+        if not hasattr(completeRecord, tbl + 'id'):
+            raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
+
         updateRequired = False
         for col in columnsList:
-            if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
-                key = tbl + col  # need tbl_abbrv prefix for comparison
+            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
+                key = tbl + col  # need tbl-abbrv prefix for comparison
 
             if key in newRecordDictionary:
                 if isinstance(newRecordDictionary[key], object):
@@ -65,18 +91,19 @@ class Background(ErrorHandling):
                         newRecordDictionary[key] = newRecordDictionary[key].id
                         continue
                 
-                if col in settings.rdbms[self.space]['updates']['ignore'][tableName]:
+                if col in self.dbConfigs['updates']['ignore'][tableName]:
                     continue  # ignore columns don't need a comparison in child-update operations
 
                 if newRecordDictionary[key] != getattr(completeRecord, col):
                     misc.log([newRecordDictionary[key], getattr(completeRecord, col)], f' - UPDATE CHILD Opr.: these form, DB values for [{col}] column did not match.')
                     updateRequired = True  # changes found in dictionary record
 
-        if updateRequired:  # update old record for child table
+        if updateRequired:  
             fields = {}
             fields['delete_time'] = timezone.now()
-            fields['latest'] = getattr(settings, self.space)['values']['latest']['archive']
+            fields['latest'] = self.module['values']['latest']['archive']
             
+            # update old record, create new one...
             modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
             misc.log({'fields': fields}, f'Update For: [{tbl}]')
             self.createChildTable(modelClass, tbl, tableName, columnsList, newRecordDictionary)
@@ -84,21 +111,18 @@ class Background(ErrorHandling):
         return None
 
     def createChildTable(self, modelClass, tbl, tableName, columnsList, newRecordDictionary):
-        """
-        """
-        masterId = settings.rdbms[self.space]['master_id']  # grab master_id for this space
+        masterId = self.dbConfigs['mtId']  # grab master_id for this space
         
         if masterId not in newRecordDictionary:
-            newRecordDictionary[masterId] = newRecordDictionary[self.mtabbrv + 'id']
+            newRecordDictionary[masterId] = newRecordDictionary[self.dbConfigs['mtAbbrv'] + 'id']
 
         if not crud.isValidId(newRecordDictionary, masterId):
             raise Exception(f'Could not create child record; master_id missing. In {self.space}.CRUD.create()')
 
         fields = {}
-
         
         for col in columnsList:
-            if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
+            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = tbl + col  # add on a prefix to match newRecordDictionary keys
             else:
                 key = col
@@ -113,9 +137,8 @@ class Background(ErrorHandling):
                         continue
                     fields[col] = newRecordDictionary[key]
 
-        # if record is empty, abort insert...
-        if len(fields) <= 1:
-            if settings.rdbms[self.space]['master_id'] in fields:
+        if len(fields) <= 1:  # if record is empty, abort insertion...
+            if self.dbConfigs['mtId'] in fields:
                 return None  # only the master ID is added, no need need to insert
 
         fields['create_time'] = timezone.now()
@@ -127,13 +150,11 @@ class Background(ErrorHandling):
 
     def createMasterTable(self, tbl, modelClass, newRecordDictionary):
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
-        
-        masterTable = settings.rdbms[self.space]['master_table']
-        tblColumns = settings.rdbms['tables'][masterTable]
         record = {}
 
-        for col in tblColumns:
-            if crud.isProblematicKey(settings.rdbms[self.space]['keys']['problematic'], col, True):
+        for col in t['cols']:
+            # get the correct key reference for column in newRecordDictionary...
+            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = tbl + col  # add on a prefix to match newRecordDictionary keys
             else:
                 key = col
@@ -142,8 +163,7 @@ class Background(ErrorHandling):
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
                     record[col] = newRecordDictionary[key]
 
-        # if record is empty, abort insert...
-        if len(record) == 0:
+        if len(record) == 0:  # if record is empty, abort insertion...
             return None
 
         record['parent_id'] = self._generateParentId(newRecordDictionary)

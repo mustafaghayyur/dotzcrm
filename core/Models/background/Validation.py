@@ -5,7 +5,6 @@
     CRUD Operations. Code should be designed to accommodate all modules of CRM
 """
 class ErrorHandling:
-    currentUser = None
 
     def __init__(self):
         pass

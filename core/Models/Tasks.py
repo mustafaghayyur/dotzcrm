@@ -1,7 +1,6 @@
 from .querysets.tasks import *
 from tasks.models import *
 from .background.CRUD import Generic  # generic, parent crud class
-from core.settings import rdbms, tasks
 from core.helpers import misc
 
 """
@@ -11,10 +10,8 @@ from core.helpers import misc
 class CRUD(Generic):
 
     def __init__(self):
-        self.idCols = rdbms['tasks']['keys']['only_pk']
-        self.space = 'tasks'
-        self.mtabbrv = rdbms['tasks']['master_table_abbrv']
-        self.mtModel = Task
+        self.space = 'tasks'  # holds the name of current module/space
+        self.mtModel = Task  # holds the class reference for Master Table's model
 
         super().__init__()
 

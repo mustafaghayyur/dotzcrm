@@ -16,12 +16,11 @@ def generateModelInfo(rdbms, space, tbl):
         'cols': rdbms['tables'][rdbms[space]['table_names'][tbl]],  # grab column names
     }
     
-
 def isValidId(dictionary, idKey):
     if idKey in dictionary and dictionary[idKey] is not None:
         if not isinstance(dictionary[idKey], int) and dictionary[idKey].isdigit():
-            dictionary[idKey] = int(dictionary[idKey])
-            if dictionary[idKey] > 0:
+            item = int(dictionary[idKey])
+            if item > 0:
                 return True
     return False
 
