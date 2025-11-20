@@ -1,4 +1,5 @@
 from django.utils import timezone
+import datetime
 from tasks.models import *
 from core.helpers import crud
 from core import settings
@@ -104,6 +105,11 @@ class Background(ErrorHandling):
                 
                 if col in self.dbConfigs['updates']['ignore'][tableName]:
                     continue  # ignore columns don't need a comparison in child-update operations
+
+                if self.submission[key] is not None and isinstance(self.submission[key], datetime.datetime):
+                    dbVal = getattr(completeRecord, col)
+                    dbValTZ = timezone.make_aware(dbVal, timezone.get_current_timezone())
+                    self.log(key, f'The type of deadline is: [{dbValTZ}] [{self.submission[key]}]')
 
                 if self.submission[key] != getattr(completeRecord, col):
                     self.log([key, self.submission[key], col, getattr(completeRecord, col)], f'MISMATCH -  update needed')
