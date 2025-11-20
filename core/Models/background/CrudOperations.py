@@ -45,6 +45,8 @@ class Background(ErrorHandling):
         self.submission = submission
 
     def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId):
+        self.log(None, f'ENTERING delete for CT [{tbl}]')
+        
         fieldsF = {}  # fields to find records with
         fieldsF[self.dbConfigs['mtId']] = masterId
         fieldsF['latest'] = self.module['values']['latest']['latest']
@@ -52,14 +54,17 @@ class Background(ErrorHandling):
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
         fieldsU['latest'] = self.module['values']['latest']['archive']
-        
+
+        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
-    def deleteMasterTable(self, masterId):
+    def deleteMasterTable(self, modelClass, tbl, tableName, columnsList, masterId):
+        self.log(None, f'ENTERING delete for MT [{tbl}]')
         fieldsU = {}
         fieldsU['update_time'] = timezone.now()
         fieldsU['delete_time'] = fieldsU['update_time']
-        
+
+        self.log({'id': masterId, 'update': fieldsU}, f'ID for deletion find | Fields for deletion update [{tbl}]')        
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord):

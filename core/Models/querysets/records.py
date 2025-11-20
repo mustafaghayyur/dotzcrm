@@ -36,15 +36,6 @@ class QuerySet(models.QuerySet):
         """
         defaultConditions = self._generateDefaultConditions(user_id)
 
-
-
-
-
-
-
-        raise Exception(f'Invalid input provided to {space}.CRUD.{operation}(). Expecting Dictionary.')
-
-
         if conditions is None:
             conditions = {}
 

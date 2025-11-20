@@ -1,11 +1,13 @@
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import FormView  #, DeleteView
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.http import Http404, HttpResponse
-#from django.views.generic.dates import YearArchiveView
+
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormView  # , DeleteView
+# from django.views.generic.dates import YearArchiveView
 
 from core.modules.TasksEditForm import TasksEditForm
 from core.Models.Tasks import CRUD
-from core.Models import Tasks
 from core.helpers import misc, crud
 
 class TasksListView(ListView):
@@ -16,8 +18,8 @@ class TasksListView(ListView):
         try:
             return super().get(request, *args, **kwargs)
         except Exception as e:
-            HttpResponse("<h3>Error: {e}</h3>")
-    
+            raise Http404(f'Error: {e}')
+        
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
@@ -28,13 +30,28 @@ class TasksListView(ListView):
 class TaskDetailView(DetailView):
     context_object_name = "record"
     template_name = "record.html"
-    """
+    
     def get(self, request, *args, **kwargs):
+        """
+            This GET call will retrieve a full record for the Task's Primary Key in question.
+            Does not retrieve deleted records.
+        """
         try:
             return super().get(request, *args, **kwargs)
         except Exception as e:
-            HttpResponse("<h3>Error: {e}</h3>")
-    """
+            raise Http404(f'Error: {e}')
+
+    def post(self, request, *args, **kwargs):
+        """
+            This POST call will delete the Primary Key in question
+        """
+        try:
+            if 'pk' in self.kwargs:
+                CRUD().delete(self.kwargs['pk'])
+            return redirect(reverse('tasks_index'))
+        except Exception as e:
+            raise Http404(f'Error: {e}')
+    
     # object refers to the first 'object' found in the results' QuerySet
     # which in our case is a RawQuerySet
 
@@ -136,4 +153,12 @@ class TaskEditView(FormView):
 
         # proceed with the original plans..
         return super().form_valid(form)
+
+
+def notFoundError(request, exception):
+    context = {
+        'Message': 'Hello mr. Moto',
+        'exception': exception
+    }
+    return render(request, "404.html", context, status=404)
 

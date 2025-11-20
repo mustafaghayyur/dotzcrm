@@ -16,4 +16,8 @@
     <div id="edit" class="btn">
         <a href="{% url 'task_edit' record.id %}">edit</a>
     </div>
+    <form action="{% url 'task_info' record.id %}" method="post">{% csrf_token %}
+        <input type="hidden" name="pk" value="{{ record.id }}">
+        <input type="submit" value="Delete">
+    </form>
 {% endblock %}

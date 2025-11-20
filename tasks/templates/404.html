@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %} Something Went Wrong! {% endblock %}
+
+{% block page_heading %}Oops! Something Went Wrong{% endblock %}
+
+{% block content %}
+    <div class="important">
+        It seems we are having difficulty finding what you're looking for.
+    </div>
+    <p></p>
+    <div class="info">
+        If it helps, the server returned this message:
+    </div>
+    <p></p>
+    <blockquote class="error">
+        <div class="lead"><code>{{ exception }}</code></div>
+    </blockquote>
+
+    <p>If the problem persists, please take a screenshot and contact system admin.</p>
+{% endblock %}

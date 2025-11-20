@@ -97,7 +97,9 @@ class Generic(Background):
             self.deleteChildTable(model, tbl, t['table'], t['cols'], masterId)
 
         # once all children records have been updated with delete markers
-        self.deleteMasterTable(masterId)
+        t = crud.generateModelInfo(rdbms, self.space, self.dbConfigs['mtAbbrv'])
+        model = globals()[t['model']]
+        self.deleteMasterTable(model, self.dbConfigs['mtId'], t['table'], t['cols'], masterId)
 
 
     
