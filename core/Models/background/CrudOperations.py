@@ -106,13 +106,12 @@ class Background(ErrorHandling):
                 if col in self.dbConfigs['updates']['ignore'][tableName]:
                     continue  # ignore columns don't need a comparison in child-update operations
 
+                dbVal = getattr(completeRecord, col)
                 if self.submission[key] is not None and isinstance(self.submission[key], datetime.datetime):
-                    dbVal = getattr(completeRecord, col)
-                    dbValTZ = timezone.make_aware(dbVal, timezone.get_current_timezone())
-                    self.log(key, f'The type of deadline is: [{dbValTZ}] [{self.submission[key]}]')
+                    dbVal = timezone.make_aware(dbVal, timezone.get_current_timezone())
 
-                if self.submission[key] != getattr(completeRecord, col):
-                    self.log([key, self.submission[key], col, getattr(completeRecord, col)], f'MISMATCH -  update needed')
+                if self.submission[key] != dbVal:
+                    self.log([key, self.submission[key], col, dbVal], f'MISMATCH -  update needed')
                     updateRequired = True  # changes found in dictionary record
 
                 self.log([key, col], 'comparing in CT Update')

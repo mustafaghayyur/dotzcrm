@@ -11,13 +11,13 @@ from core.helpers import misc, crud
 class TasksListView(ListView):
     context_object_name = "tasks"
     template_name = "index.html"
-    """
+    
     def get(self, request, *args, **kwargs):
         try:
             return super().get(request, *args, **kwargs)
         except Exception as e:
             HttpResponse("<h3>Error: {e}</h3>")
-    """
+    
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
