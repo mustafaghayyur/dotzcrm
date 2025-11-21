@@ -5,12 +5,16 @@ from django.contrib.auth import views as auth_views
 
 
 class LoginView(auth_views.LoginView):
-    def __init__(self, kwargs):
-        pass
+    template_name = 'login.html'
+    next_page = 'tasks_index'
+    authentication_form = 'AuthenticationForm'
+    extra_context = None
+
 
 class LogoutView(auth_views.LogoutView):
-    def __init__(self, kwargs):
-        pass
+    next_page = 'login'
+    template_name = 'logout.html'
+    extra_context = None
         
 class PWChangeView(auth_views.PasswordChangeView):
     def __init__(self, kwargs):

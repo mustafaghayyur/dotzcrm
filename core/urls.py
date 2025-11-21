@@ -4,7 +4,6 @@ from .authViews import *
 
 urlpatterns = [
     # specific url: path("change-password/", auth_views.PasswordChangeView.as_view()),
-    # path('details/<int:pk>/', views.TaskDetailView.as_view(), name = 'task_info'),
 
     path('login/', LoginView.as_view(), name = 'login'),
     path('logout/', LogoutView.as_view(), name = 'logout'),

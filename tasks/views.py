@@ -154,11 +154,3 @@ class TaskEditView(FormView):
         # proceed with the original plans..
         return super().form_valid(form)
 
-
-def notFoundError(request, exception):
-    context = {
-        'Message': 'Hello mr. Moto',
-        'exception': exception
-    }
-    return render(request, "404.html", context, status=404)
-
