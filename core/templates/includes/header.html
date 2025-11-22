@@ -6,6 +6,10 @@
         <nav class="navbar container-fluid justify-content-start rounded-3">
             <a class="btn btn-outline-success bs-success-green me-2" href="{% url 'login' %}">Login</a>
             <a class="btn btn-sm btn-outline-tertiary" href="#">Register</a>
+            <form id="logout-form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Log out</button>
+            </form>
         </nav>
     </div> 
 </div>
