@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
 
 # get our querysets (the core of our RDMS logic)
 from core.Models.querysets.tasks import *
@@ -14,8 +13,8 @@ class Task(models.Model):
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-    create_time = models.DateTimeField(default=timezone.now)
-    update_time = models.DateTimeField(default=timezone.now, null=False, blank=False)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = TasksQuerySet.as_manager()
@@ -25,7 +24,7 @@ class Details(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     details = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio()
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-    create_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = DetailQuerySet.as_manager()
@@ -37,7 +36,7 @@ class Deadline(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = DeadlineQuerySet.as_manager()
@@ -48,7 +47,7 @@ class Status(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = StatusQuerySet.as_manager()
@@ -59,7 +58,7 @@ class Visibility(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = VisibilityQuerySet.as_manager()
@@ -73,7 +72,7 @@ class Watcher(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = WatacherQuerySet.as_manager()
@@ -95,7 +94,7 @@ class Assignment(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     # note: updates are banned on this table.
     # application level control to be implemented.
-    create_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = AssignmentQuerySet.as_manager()
@@ -106,7 +105,7 @@ class Assignment(models.Model):
 #class TaskTicketAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    ticket_id = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(default=timezone.now)
+#    create_time = models.DateTimeField(auto_now_add=True)
 #    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
@@ -117,7 +116,7 @@ class Assignment(models.Model):
 #class TaskCustomerAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(default=timezone.now)
+#    create_time = models.DateTimeField(auto_now_add=True)
 #    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
@@ -128,7 +127,7 @@ class Assignment(models.Model):
 #class TaskCustomerAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    document_id = models.ForeignKey(Document, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(default=timezone.now)
+#    create_time = models.DateTimeField(auto_now_add=True)
 #    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
@@ -139,7 +138,7 @@ class Assignment(models.Model):
 #class TaskCommentAssignment(models.Model):
 #    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
 #    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(default=timezone.now)
+#    create_time = models.DateTimeField(auto_now_add=True)
 #    delete_time = models.DateTimeField(null=True, blank=True)
     # note: updates are banned on this table.
     # application level control to be implemented.
