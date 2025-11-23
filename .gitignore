@@ -8,3 +8,4 @@ COMMANDS.md
 .env
 *.log
 db.sqlite3
+backups/
