@@ -1,15 +1,20 @@
-<div class="row">
-    <div class="headerWD col-10 text-bg-secondary p-3">
-        <h3 class="display-6">Dotz Customer Relationship Manager</h2>
+<div class="row align-items-center">
+    <div class="headerWD col-10 text-bg-secondary p-4">
+        <h3 class="display-6 vollkorn-bold lh-1">Dotz CRM</h2>
+        <h3 class="text-body-warning reenie-beanie-regular lh-1">+ PM Software</h5>
     </div>
     <div class="col-2 bg-body-tertiary p-3">
         <nav class="navbar container-fluid justify-content-start rounded-3">
-            <a class="btn btn-outline-success bs-success-green me-2" href="{% url 'login' %}">Login</a>
-            <a class="btn btn-sm btn-outline-tertiary" href="#">Register</a>
-            <form id="logout-form" method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit">Log out</button>
-            </form>
+            {% if user.is_authenticated %}
+                <h6>Hello {{ user.username }}</h6>
+                <form id="logout-form" method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Log out</button>
+                </form>
+            {% else %}
+                <a class="btn btn-outline-success bs-success-green me-2" href="{% url 'login' %}">Login</a>
+                <a class="btn btn-sm btn-outline-tertiary" href="#">Register</a>
+            {% endif %}
         </nav>
     </div> 
 </div>

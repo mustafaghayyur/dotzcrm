@@ -1,3 +1,5 @@
+from django import forms
+
 def isProblematicKey(promlematicsList, key, noPrefix = False):
     """
         Catches any problematic keys as defined near the top of this class
@@ -24,4 +26,6 @@ def isValidId(dictionary, idKey):
                 return True
     return False
 
+class DateTimeLocalInput(forms.DateTimeInput):
+    input_type = 'datetime-local'
 
