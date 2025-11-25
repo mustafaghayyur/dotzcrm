@@ -44,13 +44,6 @@ class Generic(Background):
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        if mtId not in self.submission:
-            raise Exception(f'Update operation needs {self.space} id, in: {self.space}.CRUD.update().')
-
-        if not crud.isValidId(self.submission, mtId):
-            raise Exception(f'{self.space} ID provided must be a valid integer and greater than zero, in: {self.space}.CRUD.update().')
-
-        self.submission[mtId] = int(self.submission[mtId])
         completeRecord = self.fetchFullRecordForUpdate(self.submission[mtId])
 
         if not completeRecord:

@@ -119,6 +119,7 @@ rdbms = {
             'v': 'tasks_visibility',
             'a': 'tasks_assignment',
             'w': 'tasks_watcher',
+            'c': 'tasks_comment',
         },
         'model_names': {  # index of all names by their abbreviations used in CRUD operations
             't': 'Task',
@@ -128,6 +129,7 @@ rdbms = {
             'v': 'Visibility',
             'a': 'Assignment',
             'w': 'Watcher',
+            'c': 'Comment',
         },
         'updates': {
             'ignore': {
@@ -138,6 +140,7 @@ rdbms = {
                 'tasks_visibility': ['id', 'latest', 'task_id'],
                 'tasks_assignment': ['id', 'latest', 'task_id'],
                 'tasks_watcher': ['id', 'latest', 'task_id'],
+                'tasks_comment': ['id', 'task_id'],
             }  # can carry any fields within a table to ignore in a certain operation
         }
     },  # end of tasks
@@ -151,5 +154,6 @@ rdbms = {
         'tasks_visibility': ['id', 'visibility', 'latest', 'create_time', 'delete_time', 'task_id'],
         'tasks_assignment': ['id', 'latest', 'create_time', 'delete_time', 'assignee_id', 'assignor_id', 'task_id'],
         'tasks_watcher': ['id', 'latest', 'create_time', 'delete_time', 'task_id', 'watcher_id'],
+        'tasks_comment': ['id', 'comment', 'parent_id', 'create_time', 'update_time', 'delete_time', 'task_id']
     }
 }

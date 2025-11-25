@@ -99,6 +99,15 @@ class Assignment(models.Model):
 
     objects = AssignmentQuerySet.as_manager()
 
+# NOTE: Comments model must ALWAYS be named Comment
+class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=6000)
+    parent = models.ForeignKey('self', null=True, blank=True)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
 
 # @todo - link tasks with tickets
 # This model allows tickets to be mentioned in tasks

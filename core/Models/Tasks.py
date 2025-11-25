@@ -1,12 +1,13 @@
 from .querysets.tasks import *
 from tasks.models import *
+from .background import CRUD, Comments  # generic, parent crud class
 from .background.CRUD import Generic  # generic, parent crud class
 
 """
     Handles ALL crud operations for Tasks Module of DotzCRM.
     Please read the README.md in this folder before using.
 """
-class CRUD(Generic):
+class CRUD(CRUD.Generic):
 
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
@@ -25,7 +26,7 @@ class CRUD(Generic):
             selectors = list(self.dbConfigs['keys']['full_record'].keys())
 
         user_id = 1
-        rawObj = Task.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
+        rawObj = self.mtModel.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
         
         if rawObj:
             return rawObj
@@ -55,3 +56,9 @@ class CRUD(Generic):
             return rawObj[0]  # we only want one
         return None
 
+class Comments(Comments.CRUD):
+    def __init__(self):
+        pass
+
+    def readComments(self, definitions):
+        pass
