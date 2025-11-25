@@ -1,7 +1,6 @@
 from .querysets.tasks import *
 from tasks.models import *
-from .background import CRUD, Comments  # generic, parent crud class
-from .background.CRUD import Generic  # generic, parent crud class
+from .background import CRUD, RevisionlessChildren
 
 """
     Handles ALL crud operations for Tasks Module of DotzCRM.
@@ -56,7 +55,7 @@ class CRUD(CRUD.Generic):
             return rawObj[0]  # we only want one
         return None
 
-class Comments(Comments.CRUD):
+class Comments(RevisionlessChildren.CRUD):
     def __init__(self):
         pass
 
