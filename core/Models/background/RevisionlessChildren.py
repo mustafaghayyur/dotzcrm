@@ -22,16 +22,13 @@ class CRUD(Generic):
         if not masterRecord:
             raise Exception('Master Record could not be found. RLC cannot be created in {self.space}.CRUD.create()')
 
-        for pk in self.idCols:
-            if self.dbConfigs['models'][pk] != 'Comment'
-                continue
-
+        for pk in self.rlcidCols:
             tbl = pk[0]  # table abbreviation
             rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
     
-            self.createChildTable(model, tbl, t['table'], t['cols'])
+            self.createChildTable(model, tbl, t['table'], t['cols'], True)
 
     def readRLCs(self):
         pass  # defined in individual Module's class extensions.
@@ -42,61 +39,41 @@ class CRUD(Generic):
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
 
-        # masterRecords gets the parent record id, to which this comment belongs
+        # masterRecords gets the parent record id, to which this RLC belongs
         masterRecord = self.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in updateRLC()')
 
         if not masterRecord:
-            raise Exception(f'No valid record found for provided {self.space} ID for comment update, in: {self.space}.CRUD.update().')
+            raise Exception(f'No valid record found for provided {self.space} ID for RLC update, in: {self.space}.CRUD.update().')
 
-        for pk in self.idCols:
-            
-            if self.dbConfigs['models'][pk] != 'Comment':
-                continue
+        for pk in self.rlcidCols:
             
             originalRLC = self.readRLCs({pk: self.submission[pk], mtId: self.submission[mtId]})
             self.log(originalRLC, 'JUST CONFIRMING if originalRLC record is being fetched correctly in updateRLC()')
 
             if not originalRLC:
-                raise Exception(f'No valid comment record found for provided ID, in: {self.space}.CRUD.update().')
+                raise Exception(f'No valid RLC record found for provided ID, in: {self.space}.CRUD.update().')
             
             tbl = pk[0]  # child table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
                 
             # determine if an update is necessary and carry out update operations...
-            self.updateChildTable(model, tbl, t['table'], t['cols'], originalRLC)
+            self.updateChildTable(model, tbl, t['table'], t['cols'], originalRLC, True)
 
-    def deleteRLCById(self, commentId):
-        if not isinstance(commentId, int) or masterId < 1:
+    def deleteRLCById(self, rlcId):
+        if not isinstance(rlcId, int) or masterId < 1:
             raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        for pk in self.idCols:
-            if self.dbConfigs['models'][pk] != 'Comment':
-                continue
+        for pk in self.rlcidCols:
 
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
-            self.deleteChildTableById(model, tbl, t['table'], t['cols'], commentId)
-
-    def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, commentId):
-        """
-            Helper function for deleteRLCById()
-        """
-        self.log(None, f'ENTERING deleteById for CT [{tbl}]')
-        
-        fieldsF = {}  # fields to find records with
-        fieldsF['id'] = childId
-        
-        fieldsU = {}  # fields to update in found records
-        fieldsU['delete_time'] = timezone.now()
-
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
-        return modelClass.objects.filter(**fieldsF).update(**fieldsU)
+            self.deleteChildTableById(model, tbl, t['table'], t['cols'], rlcId)
 
     def deleteAllRLCsForMT(self, masterId):
         if not isinstance(masterId, int) or masterId < 1:
@@ -104,24 +81,22 @@ class CRUD(Generic):
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        for pk in self.idCols:
-            if self.dbConfigs['models'][pk] != 'Comment':
-                continue
-
+        for pk in self.rlcidCols:
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
-            self.deleteAllForChildTable(model, tbl, t['table'], t['cols'], masterId)
+            self.deleteChildTable(model, tbl, t['table'], t['cols'], masterId, True)
 
-    def deleteAllForChildTable(self, modelClass, tbl, tableName, columnsList, masterId):
+    def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, rlcId):
         """
-            Helper function for deleteAllRLCsForMT()
+            Helper function for deleteRLCById()
+            For RLC type nodes only
         """
-        self.log(None, f'ENTERING deleteAll for CT [{tbl}]')
+        self.log(None, f'ENTERING deleteById for CT [{tbl}]')
         
         fieldsF = {}  # fields to find records with
-        fieldsF[self.dbConfigs['mtId']] = masterId
+        fieldsF['id'] = childId
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()

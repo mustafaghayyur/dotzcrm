@@ -7,6 +7,7 @@ from .Validation import ErrorHandling
 
 """
     This class holds the background crud operations.
+    Primary focus: One-to-One relationship CRUD types
 """
 class Background(ErrorHandling):
     currentUser = None  # FUTURE IMPLEMENTATION
@@ -31,8 +32,11 @@ class Background(ErrorHandling):
         # loads tables data needed for certain operations
         self.tables = settings.rdbms['tables']
 
-        # holds all primary keys for given space/module
-        self.idCols = self.dbConfigs['keys']['only_pk']
+        # holds all O2O primary keys for given space/module
+        self.idCols = self.dbConfigs['keys']['one2one']
+        self.m2midCols = self.dbConfigs['keys']['m2m']
+        self.m2oidCols = self.dbConfigs['keys']['m2o']
+        self.rlcidCols = self.dbConfigs['keys']['rlc']
 
         super().__init__()
 
@@ -44,18 +48,22 @@ class Background(ErrorHandling):
         # Finally, we save the submitted form into self.submission
         self.submission = submission
 
-    def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId):
+    def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId, rlc = False):
         self.log(None, f'ENTERING delete for CT [{tbl}]')
         
         fieldsF = {}  # fields to find records with
         fieldsF[self.dbConfigs['mtId']] = masterId
-        fieldsF['latest'] = self.module['values']['latest']['latest']
+        if not rlc:
+            fieldsF['latest'] = self.module['values']['latest']['latest']
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.module['values']['latest']['archive']
+        if not rlc:
+            fieldsU['latest'] = self.module['values']['latest']['archive']
 
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
+        designation = '[RLC]' if rlc else ''
+
+        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}] | {designation}')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
     def deleteMasterTable(self, modelClass, tbl, tableName, columnsList, masterId):
@@ -67,9 +75,13 @@ class Background(ErrorHandling):
         self.log({'id': masterId, 'update': fieldsU}, f'ID for deletion find | Fields for deletion update [{tbl}]')        
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
-    def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord):
+    def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord, rlc = False):
         self.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
-        
+        mId = self.dbConfigs['mtAbbrv'] + 'id'
+
+        if not hasattr(completeRecord, mId) or getattr(completeRecord, mId) is None:
+            raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
+
         fields = {}
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
@@ -85,17 +97,19 @@ class Background(ErrorHandling):
 
         fields['update_time'] = timezone.now()
 
-        mtModel.objects.filter(id=self.submission[self.dbConfigs['mtAbbrv'] + 'id']).update(**fields)
+        mtModel.objects.filter(id=getattr(completeRecord, mId)).update(**fields)
         self.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
         return None
 
-    def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord):
+    def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord, rlc = False):
         self.log(None, f'ENTERING update for childtable [{tbl}]')
 
-        if not hasattr(completeRecord, tbl + 'id'):
+        if not hasattr(completeRecord, tbl + 'id') or getattr(completeRecord, tbl + 'id') is None:
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         updateRequired = False
+        rlcFields = {}  # fields for RLC update
+
         for col in columnsList:
             if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
                 key = tbl + col  # need tbl-abbrv prefix for comparison
@@ -117,23 +131,29 @@ class Background(ErrorHandling):
 
                 if self.submission[key] != dbVal:
                     self.log([key, self.submission[key], col, dbVal], f'MISMATCH -  update needed')
+                    rlcFields[key] = dbVal
                     updateRequired = True  # changes found in dictionary record
 
                 self.log([key, col], 'comparing in CT Update')
 
         if updateRequired:
-            fields = {}
-            fields['delete_time'] = timezone.now()
-            fields['latest'] = self.module['values']['latest']['archive']
-            
-            # update old record, create new one...
-            modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
-            self.log({'fields': fields}, f'Update For: [{tbl}]')
-            self.createChildTable(modelClass, tbl, tableName, columnsList)
+            if rlc:
+                rlcFields['update_time'] = timezone.now()
+                modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**rlcFields)
+                self.log({'fields': rlcFields}, f'Update For: [{tbl}] | [RLC]')
+            else:
+                fields = {}
+                fields['delete_time'] = timezone.now()
+                fields['latest'] = self.module['values']['latest']['archive']
+                
+                # update old record, create new one...
+                modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
+                self.log({'fields': fields}, f'Update For: [{tbl}]')
+                self.createChildTable(modelClass, tbl, tableName, columnsList)
 
         return None
 
-    def createChildTable(self, modelClass, tbl, tableName, columnsList):
+    def createChildTable(self, modelClass, tbl, tableName, columnsList, rlc = False):
         self.log(None, f'Entering create operation for childtable: [{tbl}]')
         
         fields = {}
@@ -157,13 +177,18 @@ class Background(ErrorHandling):
                 return None  # only the master ID is added, no need need to insert
 
         fields['create_time'] = timezone.now()
-        fields['latest'] = 1
+        if rlc:
+            fields['update_time'] = fields['create_time']
+        else:
+            fields['latest'] = 1
+
         record = modelClass(**fields)
         record.save()
-        self.log({'fields': fields}, f'Create For: [{tbl}]')
+        designation = '[RLC]' if rlc else ''
+        self.log({'fields': fields}, f'Create For: [{tbl}] | {designation}')
         return record
 
-    def createMasterTable(self, tbl, modelClass):
+    def createMasterTable(self, tbl, modelClass, rlc = False):
         self.log(None, f'Entering create operation for MasterTable: [{tbl}]')
         
         t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
@@ -178,15 +203,17 @@ class Background(ErrorHandling):
 
             if key in self.submission:
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
+                    if isinstance(self.submission[key], object):
+                        if hasattr(self.submission[key], 'id'):
+                            self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
+                    
                     fields[col] = self.submission[key]
                     self.log(key, self.submission[key], 'Field added')
 
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
 
-        fields['parent_id'] = self._generateParentId(self.submission)
-        assignor = self.submission['assignor_id'].id  # this is for initial testing ... should be removed
-        fields['creator_id'] = self._generateCreatorId(assignor)
+        fields['creator_id'] = self._generateCreatorId(self.submission['assignor_id'].id)
 
         fields['create_time'] = timezone.now()
         fields['update_time'] = fields['create_time']
@@ -196,12 +223,7 @@ class Background(ErrorHandling):
         self.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
 
-    def _generateParentId(self, dictionary):
-        if 'parent' in dictionary:
-            if isinstance(dictionary['parent'], object) and dictionary['parent'] is not None:
-                return dictionary['parent'].id
-        return None
-
+    # this is for initial testing ... should be removed
     def _generateCreatorId(self, assignor):
         if self.currentUser is not None:
             return self.currentUser

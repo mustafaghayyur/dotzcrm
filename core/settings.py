@@ -59,8 +59,11 @@ rdbms = {
         'mtId': 'task_id',
         'keys': {
             # all primary_keys for Tasks (and children tables) should be
-            # listed here:
-            'only_pk': ['tid', 'did', 'lid', 'sid', 'vid', 'aid', 'wid'],
+            # listed here (One-to-One types):
+            'one2one': ['tid', 'did', 'lid', 'sid', 'vid', 'aid'],
+            'rlc': ['cid'],
+            'm2m': [],
+            'm2o': ['wid'],
 
             # these keys tend to be found in every table and cause problems if not handled separately
             'problematic': ['id', 'create_time', 'update_time', 'delete_time'],

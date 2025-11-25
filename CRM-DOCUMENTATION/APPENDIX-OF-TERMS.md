@@ -68,6 +68,8 @@ M
  > Many-To-Many Children: a type of node in the system, where child-table nodes can't simply be retrieved as single-latest revisions of the master-table's record-set. These data-types need special handling for CRUD operations.
  > M2M: see Many-To-Many Children above.
 
+ > Many-To-One Children: a type of node in the system, where child-table nodes can't be retrieved as a single-latest revision of a master-table's record-set. These data-types need special handling for CRUD operations
+
 N
 --
 

@@ -4,6 +4,7 @@ from .CrudOperations import Background
 
 """
     Generic CRUD Operations that can be used through out the system.
+    One-to-One relationship CRUD types
 """
 class Generic(Background):
 
