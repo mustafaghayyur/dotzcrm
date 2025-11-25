@@ -14,6 +14,7 @@ B
 C
 --
  > child-table: for each Module (Tasks, Tickets, Documents, etc) there is the main Master table, symbolizing a single Master (i.e. Task, Ticket, etc.) records. And then several children-tables which carry additional data pertaining to the master-record.
+ 
  > CT: abbreviation for child-table (see above)
 
 D
@@ -61,11 +62,13 @@ M
   4. Customers Module
 
  > mt (or MT): stands for Master Table: usually refers to the parent table for a module that all children tables relate to. In Tasks module, this would be the 'tasks_task' table (unless configured differently).
+ 
  > Master Table: see mt above.
 
  > Model: a Model with a capital M, refers not to the default django models found in each module's codebase. But the the core.Models directory. Please see README.md of that directory for more info.
 
  > Many-To-Many Children: a type of node in the system, where child-table nodes can't simply be retrieved as single-latest revisions of the master-table's record-set. These data-types need special handling for CRUD operations.
+ 
  > M2M: see Many-To-Many Children above.
 
  > Many-To-One Children: a type of node in the system, where child-table nodes can't be retrieved as a single-latest revision of a master-table's record-set. These data-types need special handling for CRUD operations
@@ -90,6 +93,7 @@ Q
 R
 --
  > Revision-less Children: a type of node in the system where child-table nodes don't carry revisions like normal module's Child Tables. These RLC need special handling for CRUD operations.
+ 
  > RLC: see Revision-less Children above.
 
 S

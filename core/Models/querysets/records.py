@@ -30,11 +30,11 @@ class QuerySet(models.QuerySet):
         super().__init__(model, query, using, hints)
 
 
-    def _compileVariables(self, user_id, selectors = [], conditions = None, orderBy = '', limit = '20'):
+    def _compileVariables(self, selectors = [], conditions = None, orderBy = '', limit = '20'):
         """
         # Compiles all inputs provided and readies them for use in the specified Query.
         """
-        defaultConditions = self._generateDefaultConditions(user_id)
+        defaultConditions = self._generateDefaultConditions()
 
         if conditions is None:
             conditions = {}
@@ -120,17 +120,12 @@ class QuerySet(models.QuerySet):
 
         return ''
 
-    def _generateDefaultConditions(self, user_id):
+    def _generateDefaultConditions(self):
         """
-            Should be overwritten in actual QuerySet.
-            Contains a dictionary of default conditions to use for QuerySet type.
+            Should be overwritten in actual Module own QuerySet.
+            Contains a dictionary of default conditions to use for  each QuerySet type.
         """
-        params = {
-            "assignee_id": user_id,
-            "delete_time": 'IS NULL',
-        }
-
-        return params
+        pass
 
     def _mergeConditions(self, defaults, provided):
         """
@@ -201,7 +196,7 @@ class QuerySet(models.QuerySet):
 # We instead refer to revisions by their chronological place (in reverse). 
 # So index[0] will be the current record. Then index[1] will be the last revision before the current one. And so forth.
 #######################################
-class ChildrenQuerySet(models.QuerySet):
+class ChildQuerySet(models.QuerySet):
     
     # These are to be set in inherited class:
     tbl = None  # Your table for this QuerySet
@@ -209,68 +204,80 @@ class ChildrenQuerySet(models.QuerySet):
     valTbl = None  # Name of table that can validate if user has access to this record(s)
     valCol = None  # Name of column (in valTbl) that specifically can confirm user's right to records
 
-    def fetchLatest(self, user_id, task_id):
+    def fetchById(self, mtId, cId):
         """
-            Fetch a specific revision of child table record.
+            Fetch specific CT record by its ID.
+            Applies to O2O, M2O, M2M and RLC Records
         """
         query = f"""
-            SELECT * FROM {self.tbl} AS A
-                INNER JOIN {self.validationTbl} AS B ON B.{self.master_col} = A.{self.master_col} AND A.latest = 1
-                WHERE A.{self.master_col} = %s
-                AND B.{self.valCol} = %s
+            SELECT * FROM {self.tbl}
+                WHERE {self.master_col} = %s
+                AND id = $s
+                LIMIT 1;
+            """
+
+        return self.raw(query, [mtId, cId])
+
+    def fetchLatest(self, mtId):
+        """
+            Fetch the latest of child table record for MT ID.
+            One to One records
+        """
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.master_col} = %s
+                AND latest = 1
                 ORDER BY create_time DESC
                 LIMIT 1;
             """
 
-        recs = self.raw(query, [task_id, user_id, revision])
+        return self.raw(query, [mtId])
 
-        for rec in recs:
-            return rec  # this returns only the model instance
-
-    def fetchRevision(self, user_id, task_id, revision = 0):
+    def fetchRevision(self, mtId, revision = 0):
         """
-            Fetch a specific revision of child table record.
+            Fetch a specific revision # of child table record for MT ID.
+            One to One records
         """
         query = f"""
-            SELECT * FROM {self.tbl} AS A
-                INNER JOIN {self.validationTbl} AS B ON B.{self.master_col} = A.{self.master_col}
-                WHERE A.{self.master_col} = %s
-                AND B.{self.valCol} = %s
+            SELECT * FROM {self.tbl}
+                WHERE {self.master_col} = %s
                 ORDER BY create_time DESC
                 LIMIT 1 OFFSET (%s);
             """
 
-        recs = self.raw(query, [task_id, user_id, revision])
+        return self.raw(query, [mtId, revision])
 
-        for rec in recs:
-            return rec  # this returns only the model instance
-
-    def fetchAllRevisions(self, user_id, task_id):
+    def fetchAllRevisionsByMasterId(self, mtId):
         """
-            Fetch all revisions of child table record.
+            Fetch all revisions of child table record for MT ID.
+            One to One records
         """
         query = f"""
-            SELECT * FROM {self.tbl} AS A
-                INNER JOIN {self.validationTbl} AS B ON B.{self.master_col} = A.{self.master_col}
-                WHERE A.{self.master_col} = %s
-                AND B.{self.valCol} = %s
+            SELECT * FROM {self.tbl}
+                WHERE {self.master_col} = %s
                 ORDER BY create_time DESC
             """
 
-        return self.raw(query, [task_id, user_id])  # returns the whole rawqueryset
+        return self.raw(query, [mtId])  # returns the whole rawqueryset
 
-
-    def fetchRevisionlessById(self, user_id, task_id, child_id):
+    def fetchAllByMasterIdRLC(self, mtId):
         """
-            RevisionLess children records don't have the 'latest' columns.
+            Revision Less children records don't have the 'latest' columns.
             I.e. they don't have revisions.
         """
         pass
 
-    def fetchAllRevisionlessByMaster(self, user_id, task_id):
+    def fetchAllCurrentByMasterIdM2O(self, mtId):
         """
-            RevisionLess children records don't have the 'latest' columns.
-            I.e. they don't have revisions.
+            Fetch all the latest of child table records for MT ID.
+            Many to One records
+        """
+        pass
+
+    def fetchAllRevisionsByIdM2O(self, mtId, cId):
+        """
+            Fetch all revisions of CT records for CT ID.
+            Many to One records
         """
         pass
 

@@ -5,6 +5,7 @@
 {% block page_heading %}Tasks Management Console{% endblock %}
 
 {% block content %}
+    <div>Your To Do List:</div>
     <ul>
         {% for task in tasks %}
             <li><div><a href="{% url 'task_info' task.id %}">{{task.description}}</a></div>

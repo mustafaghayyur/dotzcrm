@@ -13,18 +13,20 @@ from core.helpers import misc, crud
 class TasksListView(ListView):
     context_object_name = "tasks"
     template_name = "index.html"
+    user_id = None
     
     def get(self, request, *args, **kwargs):
-        try:
-            return super().get(request, *args, **kwargs)
-        except Exception as e:
-            raise Http404(f'Error: {e}')
+        #try:
+        self.user_id = request.user.id
+        return super().get(request, *args, **kwargs)
+        #except Exception as e:
+        #    raise Http404(f'Error: {e}')
         
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.
     def get_queryset(self):
-        results = CRUD().read(['tid', 'description', 'tcreate_time', 'tupdate_time', 'status', 'visibility'], {"visibility": None})
-        # misc.log(results, 'RAW SQL OUTPUT [List]')
+        results = CRUD().read(['tid', 'description', 'tupdate_time', 'status', 'visibility'], {"creator_id": self.user_id, "visibility": 'private'})
+        misc.log(results, 'RAW SQL OUTPUT [List]')
         return results
 
 class TaskDetailView(DetailView):

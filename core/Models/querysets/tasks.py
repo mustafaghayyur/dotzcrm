@@ -18,7 +18,7 @@ class TasksQuerySet(records.QuerySet):
         
     # NOTE: Watchers table is not query-able in this comprehensive search.
     #       Will have to query all watchers separately.
-    def fetchTasks(self, user_id, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
+    def fetchTasks(self, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         """
         # Fetches full Task records with latest records (of sub tables).
         #
@@ -29,7 +29,7 @@ class TasksQuerySet(records.QuerySet):
         #  - orderBy: [string] any specific ordering you want.
         #  - limit: [string] number of records you want retrieved.
         """
-        obj = self._compileVariables(user_id, selectors, conditions, orderBy, limit)
+        obj = self._compileVariables(selectors, conditions, orderBy, limit)
 
         selectString = obj['selectString']
         whereStatements = strings.concatenate(obj['whereStatements'])
@@ -47,16 +47,15 @@ class TasksQuerySet(records.QuerySet):
             ORDER BY {orderBy} LIMIT {limit};
             """
 
-        # misc.log(query, 'SEARCH QUERY STRING')
-        # misc.log(params, 'SEARCH PARAMS')
+        misc.log(query, 'SEARCH QUERY STRING')
+        misc.log(params, 'SEARCH PARAMS')
         return self.raw(query, params, translations)
 
-    def _generateDefaultConditions(self, user_id):
-        s = tasks['values']['status']
+    def _generateDefaultConditions(self):
+        # s = tasks['values']['status']
         params = {
-            "assignee_id": user_id,
-            # "delete_time": 'IS NULL',  # needs to be handled
-            "tupdate_time": tasks['recentInterval'],
+            # "tdelete_time": 'IS NULL',  # needs to be handled
+            # "tupdate_time": tasks['recentInterval'],
             "latest": tasks['values']['latest']['latest'],
             # "visibility": tasks['values']['visibility']['private'],
             # "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
@@ -92,50 +91,35 @@ class TasksQuerySet(records.QuerySet):
 
 
 
-class DetailQuerySet(records.ChildrenQuerySet):
+class DetailQuerySet(records.ChildQuerySet):
     tbl = 'tasks_details'
     master_col = 'task_id'
-    valTbl = 'tasks_assignment'
-    valCol = 'assignor_id'
 
 
-class DeadlineQuerySet(records.ChildrenQuerySet):
+class DeadlineQuerySet(records.ChildQuerySet):
     tbl = 'tasks_deadline'
     master_col = 'task_id'
-    valTbl = 'tasks_assignment'
-    valCol = 'assignor_id'
 
 
-class StatusQuerySet(records.ChildrenQuerySet):
+class StatusQuerySet(records.ChildQuerySet):
     tbl = 'tasks_status'
     master_col = 'task_id'
-    valTbl = 'tasks_assignment'
-    valCol = 'assignor_id'
 
 
-class VisibilityQuerySet(records.ChildrenQuerySet):
+class VisibilityQuerySet(records.ChildQuerySet):
     tbl = 'tasks_assignment'
     master_col = 'task_id'
-    valTbl = 'tasks_assignment'
-    valCol = 'assignor_id'
 
 
-class WatacherQuerySet(records.ChildrenQuerySet):
+class WatacherQuerySet(records.ChildQuerySet):
     tbl = 'tasks_watcher'
     master_col = 'task_id'
-    valTbl = 'tasks_assignment'
-    valCol = 'assignor_id'
 
-    def fetchAllCurrentWatchers(self, user_id, task_id):
-        pass
-
-    def fetchAllWatchersHistory(self, user_id, task_id):
-        pass
-
-    def fetchSpecificWatcherHistory(self, user_id, task_id):
-        pass
-
-class AssignmentQuerySet(records.ChildrenQuerySet):
+class AssignmentQuerySet(records.ChildQuerySet):
     tbl = 'tasks_visibility'
+    master_col = 'task_id'
+
+class CommentQuerySet(records.ChildQuerySet):
+    tbl = 'tasks_comment'
     master_col = 'task_id'
 

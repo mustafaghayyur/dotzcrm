@@ -24,11 +24,10 @@ class CRUD(CRUD.Generic):
         if 'all' in selectors:
             selectors = list(self.dbConfigs['keys']['full_record'].keys())
 
-        user_id = 1
-        rawObj = self.mtModel.objects.fetchTasks(user_id, selectors, conditions, orderBy, limit)
+        rawObjs = self.mtModel.objects.fetchTasks(selectors, conditions, orderBy, limit)
         
-        if rawObj:
-            return rawObj
+        if rawObjs:
+            return rawObjs
 
         return None
 
@@ -59,24 +58,21 @@ class Comments(RevisionlessChildren.CRUD):
     def __init__(self):
         pass
 
-    def readComments(self, definitions):
+    def readRLC(self, definitions):
         if not isinstance(definitions, dictionary) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
-        for pk in self.idCols:
-            if self.dbConfigs['models'][pk] != 'Comment'
-                continue
-
+        for pk in self.rlcidCols:
             user_id = 1
             model = globals()[self.dbConfigs['models'][pk]]
             if pk in selectors:
-                # specific record being saught:
-                rawObj = model.objects.fetchRevisionlessById(user_id, selectors[self.dbConfigs['mtId']], selectors[pk])
+                # specific record being sought:
+                rawObjs = model.objects.fetchById(selectors[self.dbConfigs['mtId']], selectors[pk])
 
             else:
-                rawObj = model.objects.fetchAllRevisionlessByMaster(user_id, selectors[self.dbConfigs['mtId']])
+                rawObjs = model.objects.fetchAllByMasterIdRLC(selectors[self.dbConfigs['mtId']])
         
-        if rawObj:
-            return rawObj
+        if rawObjs:
+            return rawObjs
 
         return None
