@@ -61,4 +61,23 @@ class Comments(Comments.CRUD):
         pass
 
     def readComments(self, definitions):
-        pass
+        if not isinstance(definitions, dictionary) or len(definitions) < 1:
+            raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
+
+        for pk in self.idCols:
+            if self.dbConfigs['models'][pk] != 'Comment'
+                continue
+
+            user_id = 1
+            model = globals()[self.dbConfigs['models'][pk]]
+            if pk in selectors:
+                # specific record being saught:
+                rawObj = model.objects.fetchRevisionlessById(user_id, selectors[self.dbConfigs['mtId']], selectors[pk])
+
+            else:
+                rawObj = model.objects.fetchAllRevisionlessByMaster(user_id, selectors[self.dbConfigs['mtId']])
+        
+        if rawObj:
+            return rawObj
+
+        return None

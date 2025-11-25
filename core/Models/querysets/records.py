@@ -260,4 +260,17 @@ class ChildrenQuerySet(models.QuerySet):
         return self.raw(query, [task_id, user_id])  # returns the whole rawqueryset
 
 
+    def fetchRevisionlessById(self, user_id, task_id, child_id):
+        """
+            RevisionLess children records don't have the 'latest' columns.
+            I.e. they don't have revisions.
+        """
+        pass
+
+    def fetchAllRevisionlessByMaster(self, user_id, task_id):
+        """
+            RevisionLess children records don't have the 'latest' columns.
+            I.e. they don't have revisions.
+        """
+        pass
 
