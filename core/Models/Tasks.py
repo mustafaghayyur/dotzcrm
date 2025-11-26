@@ -18,6 +18,10 @@ class CRUD(CRUD.Generic):
         return super().create(dictionary)
 
     def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
+        """
+            See documentation on how to form selectors, conditions, etc.
+            @return: None | RawQuerySet
+        """
         if not isinstance(selectors, list) or len(selectors) < 1:
             raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
@@ -55,22 +59,28 @@ class CRUD(CRUD.Generic):
         return None
 
 class Comments(RevisionlessChildren.CRUD):
+    """
+        Comments are a RLC table type.
+    """
     def __init__(self):
         pass
 
     def readRLC(self, definitions):
-        if not isinstance(definitions, dictionary) or len(definitions) < 1:
+        """
+            Takes requirements for retrieval of comments. If valid, executes
+            relevant Query. See documentation on definitions formulation.
+        """
+        if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
         for pk in self.rlcidCols:
-            user_id = 1
             model = globals()[self.dbConfigs['models'][pk]]
-            if pk in selectors:
+            if pk in definitions:
                 # specific record being sought:
-                rawObjs = model.objects.fetchById(selectors[self.dbConfigs['mtId']], selectors[pk])
+                rawObjs = model.objects.fetchById(definitions[self.dbConfigs['mtId']], definitions[pk])
 
             else:
-                rawObjs = model.objects.fetchAllByMasterIdRLC(selectors[self.dbConfigs['mtId']])
+                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.dbConfigs['mtId']])
         
         if rawObjs:
             return rawObjs

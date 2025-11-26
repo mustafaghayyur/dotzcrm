@@ -16,18 +16,20 @@ class TasksQuerySet(records.QuerySet):
 
         super().__init__(model, query, using, hints)
         
-    # NOTE: Watchers table is not query-able in this comprehensive search.
-    #       Will have to query all watchers separately.
     def fetchTasks(self, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         """
         # Fetches full Task records with latest records (of sub tables).
         #
         # PARAMS:
-        #  - user_id: [int] the current user's ID
-        #  - selectors: [list] list of columns you wish the result set to carry (from all Tasks' tables combined)
+        #  - selectors: [list] list of columns you wish the result set to carry (from all Tasks' tables combined).
         #  - conditions: [dictionary] book of parameters for which tasks should be fetched. The 'conditions' dictionary defines which tasks will be fetched.
-        #  - orderBy: [string] any specific ordering you want.
-        #  - limit: [string] number of records you want retrieved.
+        #  - orderBy: [string] any specific, legitimate ordering you want.
+        #  - limit: [string] number of records you want retrieved. Can accept offsets.
+        #
+        # See documentation on legitimate ways of forming selectors, conditions, etc in this call.
+        #
+        # NOTE: Watchers table is not query-able in this comprehensive search.
+        #       Will have to query all watchers separately.
         """
         obj = self._compileVariables(selectors, conditions, orderBy, limit)
 
@@ -63,8 +65,10 @@ class TasksQuerySet(records.QuerySet):
 
         return params
 
-    # define how each join statement should be formed:
     def _generateJoinStatements(self, selectors, conditions):
+        """
+            Forms Join statements string, as part of the search query.
+        """
         tbls = self._getValidTablesUsed(selectors, conditions)
         joins = []
 

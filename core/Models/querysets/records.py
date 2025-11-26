@@ -43,16 +43,15 @@ class QuerySet(models.QuerySet):
 
         whereStatements = []
         params = {}
-        i = 0
         tbl = self.tableCols
 
         for key, item in actualConditions.items():
-            whereStatements.append(self._generateWhereStatements(i, tbl[key], key, item))
+            lenWS = self._calculateLengthOfWS(whereStatements)
+            whereStatements.append(self._generateWhereStatements(tbl[key], key, item, lenWS))
             if isinstance(item, list):
                 params[key] = tuple(item)
             else:
                 params[key] = item
-            i += 1
 
         selectString = self._generateProperSelectors(selectors)
 
@@ -90,15 +89,16 @@ class QuerySet(models.QuerySet):
                     string += ' ' + table + '.' + key + ','
 
         # chop off the last comma from returned string
-        return string[:-1]    
+        return string[:-1]
 
-    def _generateWhereStatements(self, i, tbl, key, item):
+    def _generateWhereStatements(self, tbl, key, item, lenWhereStatement):
         """
-            This helper function forms parts of the WHERE statement in the query.
+            Helper function forms parts of the WHERE statement in the query.
+            returns string
         """
         andPref = ''
 
-        if i > 0:
+        if lenWhereStatement > 0:
             andPref = ' AND '
 
         if key == 'latest':
@@ -118,7 +118,25 @@ class QuerySet(models.QuerySet):
         if isinstance(item, str):
             return andPref + tbl + '.' + keyDb + ' = %(' + key + ')s'
 
+        # return HAS to BE string
         return ''
+
+    def _calculateLengthOfWS(self, ws):
+        """
+            Calculates the string length of combined where statement (list)
+            @input: list of where statement strings
+            @return: int of length of total where statement
+        """
+        string = ''
+        if not isinstance(ws, list):
+            return 0
+        
+        for item in ws:
+            if isinstance(item, str): 
+                string += item
+
+        return len(string)
+
 
     def _generateDefaultConditions(self):
         """
@@ -138,7 +156,7 @@ class QuerySet(models.QuerySet):
 
     def _validateConditions(self, conditions):
         """
-            Make sure all condition inputs are strings or lists.
+            @input conditions: [dict] all condition items should be primitive data types or lists.
         """
         tableCols = list(self.tableCols.keys())
         keys = list(conditions.keys())  # copy keys of conditions to loop over
@@ -161,8 +179,10 @@ class QuerySet(models.QuerySet):
 
         return conditions
 
-    # this method will need to be filled for each Master Table QuerySet
     def _generateJoinStatements(self, selectors, conditions):
+        """
+            This method will need to be filled for each Master Table QuerySet
+        """
         pass
             
         

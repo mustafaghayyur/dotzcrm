@@ -12,6 +12,10 @@ class Generic(Background):
         super().__init__()
 
     def create(self, dictionary):
+        """
+            Validates a given dictionary of key: walue pairs. If valid, 
+            attempts to save to DB. Else, throws an exception.
+        """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         
         #self.log(self.submission, 'FORM-------------------------------------')
@@ -40,6 +44,10 @@ class Generic(Background):
         pass  # defined in individual Module's class extensions.
 
     def update(self, dictionary):
+        """
+            Validates a given dictionary of key: walue pairs. If valid, 
+            attempts to save to DB. Else, throws an exception.
+        """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
@@ -73,6 +81,10 @@ class Generic(Background):
             self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
 
     def delete(self, masterId):
+        """
+            Validates a given record ID. If valid, attempts to  mark record
+            as deleted in DB. Else, throws an exception.
+        """
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 

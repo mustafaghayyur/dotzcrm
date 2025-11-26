@@ -83,7 +83,7 @@ O
 
 P
 --
-
+ > Primitive Data Types (PDT): several built-in data types are often referred to as "primitive" because they form the basic building blocks for other data structures and store single values. Strings, Int, floats, Bool, None and Complex are main ones.
 
 Q
 --

@@ -213,7 +213,8 @@ class Background(ErrorHandling):
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
 
-        fields['creator_id'] = self._generateCreatorId(self.submission['assignor_id'].id)
+        assignor = self.submission['assignor_id'].id if isinstance(self.submission['assignor_id'], object) else self.submission['assignor_id']
+        fields['creator_id'] = self._generateCreatorId(assignor)
 
         fields['create_time'] = timezone.now()
         fields['update_time'] = fields['create_time']

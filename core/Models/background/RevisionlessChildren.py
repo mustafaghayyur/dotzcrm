@@ -3,7 +3,7 @@ from core.helpers import crud
 from .CRUD import Generic
 
 """
-    Handles all crud operations for Revision-less Children (RLC).
+    Handles all crud operations for Revision-less Children (RLC) tables.
 """
 class CRUD(Generic):
 
@@ -11,6 +11,11 @@ class CRUD(Generic):
         super().__init__()
 
     def createRLC(self, dictionary):
+        """
+            Creates single RLC CT record.
+            Validates a given dictionary of key: value pairs. If valid, 
+            attempts to save to DB. Else, throws an exception.
+        """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
@@ -34,6 +39,11 @@ class CRUD(Generic):
         pass  # defined in individual Module's class extensions.
 
     def updateRLC(self, dictionary):
+        """
+            Updates single RLC CT record.
+            Validates a given dictionary of key: value pairs. If valid, 
+            attempts to save to DB. Else, throws an exception.
+        """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
@@ -62,6 +72,11 @@ class CRUD(Generic):
             self.updateChildTable(model, tbl, t['table'], t['cols'], originalRLC, True)
 
     def deleteRLCById(self, rlcId):
+        """
+            Deletion for specific RLC child record by its ID.
+            Validates a given dictionary of key: value pairs. If valid, 
+            attempts to save deletion update to DB. Else, throws an exception.
+        """
         if not isinstance(rlcId, int) or masterId < 1:
             raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
@@ -76,6 +91,11 @@ class CRUD(Generic):
             self.deleteChildTableById(model, tbl, t['table'], t['cols'], rlcId)
 
     def deleteAllRLCsForMT(self, masterId):
+        """
+            Deletion for all child RLC records for master-table record.
+            Validates a given dictionary of key: value pairs. If valid, 
+            attempts to save deletion update to DB. Else, throws an exception.
+        """
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'RLC Records could not be deleted. Invalid Master-ID supplied in {self.space}.CRUD.delete()')
 
