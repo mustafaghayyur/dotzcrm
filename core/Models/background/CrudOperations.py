@@ -1,7 +1,7 @@
 from django.utils import timezone
 import datetime
 from tasks.models import *
-from core.helpers import crud
+from core.helpers import crud, misc
 from core import settings
 from .Validation import ErrorHandling
 
@@ -79,7 +79,7 @@ class Background(ErrorHandling):
         self.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
         mId = self.dbConfigs['mtAbbrv'] + 'id'
 
-        if not hasattr(completeRecord, mId) or getattr(completeRecord, mId) is None:
+        if not completeRecord.id or completeRecord.id is None:
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         fields = {}
@@ -97,7 +97,7 @@ class Background(ErrorHandling):
 
         fields['update_time'] = timezone.now()
 
-        mtModel.objects.filter(id=getattr(completeRecord, mId)).update(**fields)
+        mtModel.objects.filter(id=completeRecord.id).update(**fields)
         self.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
         return None
 
@@ -131,7 +131,7 @@ class Background(ErrorHandling):
 
                 if self.submission[key] != dbVal:
                     self.log([key, self.submission[key], col, dbVal], f'MISMATCH -  update needed')
-                    rlcFields[key] = dbVal
+                    rlcFields[col] = dbVal
                     updateRequired = True  # changes found in dictionary record
 
                 self.log([key, col], 'comparing in CT Update')

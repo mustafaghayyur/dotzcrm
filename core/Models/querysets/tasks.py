@@ -2,14 +2,12 @@ from . import records
 from core.settings import tasks, rdbms
 from core.helpers import strings, misc
 
-
-##########################################################################
-# TasksQuerySet customizes generic RecordsQuerySet to be usable by Tasks module.
-#
-# DO NOT use raw queries anywhere outside of QuerySets in this CRM.
-##########################################################################
 class TasksQuerySet(records.QuerySet):
-
+    """
+        # TasksQuerySet allows for highly versatile Select queries to DB.
+        # For M2O, etc a further extension might be required.
+        # For One-to-One data models (i.e. records).
+    """
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.tableCols = rdbms['tasks']['keys']['full_record']
         self.space = 'tasks'  # used by some modules
@@ -18,7 +16,7 @@ class TasksQuerySet(records.QuerySet):
         
     def fetchTasks(self, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         """
-        # Fetches full Task records with latest records (of sub tables).
+        # Fetches full Task records with latest One-to-One records (of sub tables).
         #
         # PARAMS:
         #  - selectors: [list] list of columns you wish the result set to carry (from all Tasks' tables combined).
@@ -27,9 +25,6 @@ class TasksQuerySet(records.QuerySet):
         #  - limit: [string] number of records you want retrieved. Can accept offsets.
         #
         # See documentation on legitimate ways of forming selectors, conditions, etc in this call.
-        #
-        # NOTE: Watchers table is not query-able in this comprehensive search.
-        #       Will have to query all watchers separately.
         """
         obj = self._compileVariables(selectors, conditions, orderBy, limit)
 
@@ -49,8 +44,8 @@ class TasksQuerySet(records.QuerySet):
             ORDER BY {orderBy} LIMIT {limit};
             """
 
-        misc.log(query, 'SEARCH QUERY STRING')
-        misc.log(params, 'SEARCH PARAMS')
+        # misc.log(query, 'SEARCH QUERY STRING')
+        # misc.log(params, 'SEARCH PARAMS')
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self):

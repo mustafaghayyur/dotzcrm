@@ -2,7 +2,6 @@ from django.db import models
 from core.helpers import crud
 from core.settings import rdbms
 
-
 ##########################################################################
 # The QuerySet family of definitions will be essential to maintaining
 # strict data-integrity and database-interactions standards.
@@ -13,22 +12,21 @@ from core.settings import rdbms
 #
 # DO NOT use raw queries anywhere outside of QuerySets in this project.
 #
-# Master Record QuerySet Helper functions
-# This class is not meant to retrieve actual data.
-# This class carries common helper functions needed by all types of records (of Master tables) in the CRM.
-#  -> Tasks Master Table
-#  -> Tickets Master Table
-#  -> Customers Master Table
-#  -> Documents Master Table
+# This class carries common helper functions needed by MT One-to-One records.
 ##########################################################################
+
 class QuerySet(models.QuerySet):
-    
+    """
+        Master Record QuerySet Helper functions:
+        This class is not meant to retrieve actual data.
+        For One-to-One records.
+    """
+
     tableCols = None
     space = None
 
     def __init__(self, model=None, query=None, using=None, hints=None):
         super().__init__(model, query, using, hints)
-
 
     def _compileVariables(self, selectors = [], conditions = None, orderBy = '', limit = '20'):
         """
@@ -205,19 +203,14 @@ class QuerySet(models.QuerySet):
         return list(set(tablesUsed))
                 
 
-#######################################
-# Child Tables QuerySet Helper functions
-# This class is not meant to retrieve actual data.
-#
-# This class carries common helper functions needed by all children tables of Master Table.
-#
-# When dealing with revisions we try not to fetch by IDs. This is wasteful spending.
-#
-# We instead refer to revisions by their chronological place (in reverse). 
-# So index[0] will be the current record. Then index[1] will be the last revision before the current one. And so forth.
-#######################################
 class ChildQuerySet(models.QuerySet):
-    
+    """
+        Child Tables' QuerySet:
+        This class carries common functions needed by all children tables
+        of Master Table.
+        For O2O, M2O, M2M and RLC records (could be separated in the future)
+    """
+
     # These are to be set in inherited class:
     tbl = None  # Your table for this QuerySet
     master_col = None  # The foreign key of master table (i.e. Tasks)
@@ -256,7 +249,13 @@ class ChildQuerySet(models.QuerySet):
     def fetchRevision(self, mtId, revision = 0):
         """
             Fetch a specific revision # of child table record for MT ID.
-            One to One records
+            When dealing with revisions we try not to fetch by IDs. This is
+            wasteful spending.
+            We instead refer to revisions by their chronological place (in
+            reverse). So index[0] will be the current record. Then index[1]
+            will be the last revision before the current one. And so forth.
+            
+            For One to One records
         """
         query = f"""
             SELECT * FROM {self.tbl}
