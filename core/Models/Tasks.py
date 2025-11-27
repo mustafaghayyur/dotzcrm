@@ -1,6 +1,6 @@
 from .querysets.tasks import *
 from tasks.models import *
-from .background import CRUD, RevisionlessChildren
+from .background import CRUD, RevisionlessChildren, M2OChildren
 
 """
     Handles ALL crud operations for Tasks Module of DotzCRM.
@@ -61,6 +61,8 @@ class CRUD(CRUD.Generic):
 class Comments(RevisionlessChildren.CRUD):
     """
         Comments are a RLC table type.
+        All CRUD operations for Comments within Task module, are handled by
+        this class.
     """
     def __init__(self):
         pass
@@ -74,6 +76,36 @@ class Comments(RevisionlessChildren.CRUD):
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
         for pk in self.rlcidCols:
+            model = globals()[self.dbConfigs['models'][pk]]
+            if pk in definitions:
+                # specific record being sought:
+                rawObjs = model.objects.fetchById(definitions[self.dbConfigs['mtId']], definitions[pk])
+
+            else:
+                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.dbConfigs['mtId']])
+        
+        if rawObjs:
+            return rawObjs
+
+        return None
+
+class Assignments(M2OChildren.CRUD):
+    """
+       Assignments pertain to Many-to-One relations where certain items are
+       being assigned to the Tasks' MT. Such as watchers, following an open
+       task.
+    """
+
+    def readM2O(self, definitions):
+        """
+            Takes requirements for retrieval of M2O Assignments. If valid,
+            executes relevant Query. See documentation on definitions
+            formulation.
+        """
+        if not isinstance(definitions, dict) or len(definitions) < 1:
+            raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
+
+        for pk in self.m2oidCols:
             model = globals()[self.dbConfigs['models'][pk]]
             if pk in definitions:
                 # specific record being sought:

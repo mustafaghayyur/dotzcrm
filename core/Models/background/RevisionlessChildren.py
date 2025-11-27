@@ -1,5 +1,5 @@
 from tasks.models import *
-from core.helpers import crud
+from core.helpers import crud  #, misc
 from .CRUD import Generic
 
 """
@@ -77,7 +77,7 @@ class CRUD(Generic):
             Validates a given dictionary of key: value pairs. If valid, 
             attempts to save deletion update to DB. Else, throws an exception.
         """
-        if not isinstance(rlcId, int) or masterId < 1:
+        if not isinstance(rlcId, int) or rlcId < 1:
             raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
@@ -108,7 +108,7 @@ class CRUD(Generic):
 
             self.deleteChildTable(model, tbl, t['table'], t['cols'], masterId, True)
 
-    def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, rlcId):
+    def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
         """
             Helper function for deleteRLCById()
             For RLC type nodes only
