@@ -15,13 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import include, path
-from core.views import *
 
-# the inlcude() function allows you to sub a specific view for a collection of sub-views
+from core.views import *  # needed to load some basic views and error handlers...
+
+# the include() function allows you to sub a specific view 
+# for a collection of sub-views
 
 urlpatterns = [
+    path('rest/', include('restapi.urls')),
     path('tasks/', include('tasks.urls')),
-    path("account/", include('core.urls')),  # include("django.contrib.auth.urls",
+    path("account/", include('core.urls')),  # default: include("django.contrib.auth.urls",
     path('', index, name = 'index'),
 ]
 
