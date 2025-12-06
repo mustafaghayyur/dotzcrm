@@ -1,21 +1,18 @@
 from .querysets.tasks import *
 from tasks.models import *
-from .background import CRUD, RevisionlessChildren, M2OChildren
+from .background import O2ORecords, RevisionlessChildren, M2OChildren
 
 """
-    Handles ALL crud operations for Tasks Module of DotzCRM.
+    Handles all O1O crud operations for Tasks Module of DotzCRM.
     Please read the README.md in this folder before using.
 """
-class CRUD(CRUD.Generic):
+class CRUD(O2ORecords.CRUD):
 
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
 
         super().__init__()
-
-    def create(self, dictionary):
-        return super().create(dictionary)
 
     def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
         """
@@ -34,13 +31,6 @@ class CRUD(CRUD.Generic):
             return rawObjs
 
         return None
-
-    def update(self, dictionary):
-        return super().update(dictionary)
-
-    def delete(self, task_id):
-        # Delete the tasks
-        super().delete(task_id)
 
     def fetchFullRecordForUpdate(self, task_id):
         conditions = {
@@ -65,9 +55,9 @@ class Comments(RevisionlessChildren.CRUD):
         this class.
     """
     def __init__(self):
-        pass
+        super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
-    def readRLC(self, definitions):
+    def read(self, definitions):
         """
             Takes requirements for retrieval of comments. If valid, executes
             relevant Query. See documentation on definitions formulation.
@@ -96,7 +86,10 @@ class Assignments(M2OChildren.CRUD):
        task.
     """
 
-    def readM2O(self, definitions):
+    def __init__(self):
+        super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
+
+    def read(self, definitions):
         """
             Takes requirements for retrieval of M2O Assignments. If valid,
             executes relevant Query. See documentation on definitions

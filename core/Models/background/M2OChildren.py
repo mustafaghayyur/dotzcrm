@@ -1,17 +1,18 @@
 from tasks.models import *
 from core.helpers import crud  #, misc
-from . import CRUD
+from . import O2ORecords
 
 """
     Generic CRUD Operations that can be used through out the system.
     Only Many-to-One relationship CRUD operations are handled here.
 """
-class CRUD(CRUD.Generic):
+class CRUD(O2ORecords.CRUD):
 
-    def __init__(self):
+    def __init__(self, MasterCRUDClass):
+        self.masterCrudObj = MasterCRUDClass()
         super().__init__()
 
-    def createM2O(self, dictionary):
+    def create(self, dictionary):
         """
             Attempts to create child(ren) records that hold a M2O relationship
             with Master Table.
@@ -21,7 +22,7 @@ class CRUD(CRUD.Generic):
         
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
 
-        masterRecord = self.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createM2O()')
 
         if not masterRecord:
@@ -35,10 +36,10 @@ class CRUD(CRUD.Generic):
     
             self.createChildTable(model, tbl, t['table'], t['cols'])
 
-    def readM2O(self):
+    def read(self):
         pass  # defined in individual Module's class extensions.
 
-    def updateM2O(self, dictionary):
+    def update(self, dictionary):
         """
             Attempts to update child(ren) records that hold a M2O relationship
             with Master Table.
@@ -50,7 +51,7 @@ class CRUD(CRUD.Generic):
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
 
         # masterRecords gets the parent record id, to which this M2O belongs
-        masterRecord = self.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in updateM2O()')
 
         if not masterRecord:
@@ -58,7 +59,7 @@ class CRUD(CRUD.Generic):
 
         for pk in self.m2oidCols:
             
-            originalM2O = self.readM2Os({pk: self.submission[pk], mtId: self.submission[mtId]})
+            originalM2O = self.read({pk: self.submission[pk], mtId: self.submission[mtId]})
             self.log(originalM2O, 'JUST CONFIRMING if originalM2O record is being fetched correctly in updateM2O()')
 
             if not originalM2O:
@@ -71,7 +72,7 @@ class CRUD(CRUD.Generic):
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], originalM2O)
 
-    def deleteM2OById(self, m2oId):
+    def deleteById(self, m2oId):
         """
             Attempts to delete a single child record that of M2O relationship
             type, by its Unique ID.
@@ -89,7 +90,7 @@ class CRUD(CRUD.Generic):
 
             self.deleteChildTableById(model, tbl, t['table'], t['cols'], m2oId)
 
-    def deleteAllM2OsForMT(self, masterId):
+    def deleteAllForMT(self, masterId):
         """
             Attempts to delete all M2O-type children records for a MT ID
             provided.

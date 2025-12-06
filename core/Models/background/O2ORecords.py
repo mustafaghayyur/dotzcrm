@@ -1,12 +1,12 @@
 from tasks.models import *
 from core.helpers import crud
-from .CrudOperations import Background
+from . import CrudOperations
 
 """
     Generic CRUD Operations that can be used through out the system.
     One-to-One relationship CRUD types
 """
-class Generic(Background):
+class CRUD(CrudOperations.Background):
 
     def __init__(self):
         super().__init__()

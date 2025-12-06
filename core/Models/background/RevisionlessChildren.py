@@ -1,16 +1,17 @@
 from tasks.models import *
 from core.helpers import crud  #, misc
-from .CRUD import Generic
+from . import CrudOperations
 
 """
     Handles all crud operations for Revision-less Children (RLC) tables.
 """
-class CRUD(Generic):
+class CRUD(CrudOperations.Background):
 
-    def __init__(self):
+    def __init__(self, MasterCRUDClass):
+        self.masterCrudObj = MasterCRUDClass()
         super().__init__()
 
-    def createRLC(self, dictionary):
+    def create(self, dictionary):
         """
             Creates single RLC CT record.
             Validates a given dictionary of key: value pairs. If valid, 
@@ -21,7 +22,7 @@ class CRUD(Generic):
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
         #self.log(self.submission, 'FORM-------------------------------------')
 
-        masterRecord = self.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createRLC()')
 
         if not masterRecord:
@@ -35,10 +36,10 @@ class CRUD(Generic):
     
             self.createChildTable(model, tbl, t['table'], t['cols'], True)
 
-    def readRLCs(self):
+    def read(self):
         pass  # defined in individual Module's class extensions.
 
-    def updateRLC(self, dictionary):
+    def update(self, dictionary):
         """
             Updates single RLC CT record.
             Validates a given dictionary of key: value pairs. If valid, 
@@ -50,7 +51,7 @@ class CRUD(Generic):
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
 
         # masterRecords gets the parent record id, to which this RLC belongs
-        masterRecord = self.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in updateRLC()')
 
         if not masterRecord:
@@ -58,7 +59,7 @@ class CRUD(Generic):
 
         for pk in self.rlcidCols:
             
-            originalRLC = self.readRLCs({pk: self.submission[pk], mtId: self.submission[mtId]})
+            originalRLC = self.read({pk: self.submission[pk], mtId: self.submission[mtId]})
             self.log(originalRLC, 'JUST CONFIRMING if originalRLC record is being fetched correctly in updateRLC()')
 
             if not originalRLC:
@@ -71,7 +72,7 @@ class CRUD(Generic):
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], originalRLC, True)
 
-    def deleteRLCById(self, rlcId):
+    def deleteById(self, rlcId):
         """
             Deletion for specific RLC child record by its ID.
             Validates a given dictionary of key: value pairs. If valid, 
@@ -90,7 +91,7 @@ class CRUD(Generic):
 
             self.deleteChildTableById(model, tbl, t['table'], t['cols'], rlcId)
 
-    def deleteAllRLCsForMT(self, masterId):
+    def deleteAllForMT(self, masterId):
         """
             Deletion for all child RLC records for master-table record.
             Validates a given dictionary of key: value pairs. If valid, 
@@ -110,7 +111,7 @@ class CRUD(Generic):
 
     def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
         """
-            Helper function for deleteRLCById()
+            Helper function for deleteById()
             For RLC type nodes only
         """
         self.log(None, f'ENTERING deleteById for CT [{tbl}]')
