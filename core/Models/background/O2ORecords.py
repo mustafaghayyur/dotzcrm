@@ -13,13 +13,13 @@ class CRUD(CrudOperations.Background):
 
     def create(self, dictionary):
         """
-            Validates a given dictionary of key: walue pairs. If valid, 
+            Validates a given dictionary of key: value pairs. If valid, 
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         
-        #self.log(self.submission, 'FORM-------------------------------------')
-        #self.log(completeRecord, 'DB-------------------------------------', 2)
+        # self.log(self.submission, 'FORM-------------------------------------')
+        # self.log(completeRecord, 'DB-------------------------------------', 2)
         
         masterRecord = self.createMasterTable(self.dbConfigs['mtAbbrv'], self.mtModel)
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
@@ -59,7 +59,7 @@ class CRUD(CrudOperations.Background):
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
 
         if len(records) > 1:
-            completeRecord = self.pruneLatestRecords(records)
+            completeRecord = self.pruneLatestRecords(records, mtId)
         else:
             completeRecord = records[0]
 
@@ -113,11 +113,33 @@ class CRUD(CrudOperations.Background):
         self.deleteMasterTable(model, self.dbConfigs['mtId'], t['table'], t['cols'], masterId)
 
 
-    def pruneLatestRecords(fetchedRecords):
+    def pruneLatestRecords(self, fetchedRecords, mtId):
         """
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
             for each CT.
         """
         pass
-    
+
+        for pk in self.idCols:
+            tbl = pk[0]  # table abbreviation
+
+            if pk == self.dbConfigs['mtAbbrv'] + 'id':
+                continue  # can't prune MT duplicates...
+
+            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            model = globals()[t['model']]  # retrieve Model class with global scope
+
+            self.checkChildForMultipleLatests(model, tbl, t['table'], t['cols'], fetchedRecords)
+
+        records = self.fetchFullRecordForUpdate(mtId)
+
+        if not records:
+            raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
+
+        if len(records) > 1:
+            return self.pruneLatestRecords(records, mtId)  # bit if recursion
+
+        return records[0]
+
+

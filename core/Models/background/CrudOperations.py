@@ -224,6 +224,13 @@ class Background(ErrorHandling):
         self.log({'fields': fields}, f'Create For: [{tbl}]')
         return record
 
+    def checkChildForMultipleLatests(self, modelClass, tbl, tableName, columnsList, fetchedRecords):
+        """
+            For given CT, see if fetched records have multiple entries 
+            marked as 'latest' in the DB.
+        """
+        pass
+
     # this is for initial testing ... should be removed
     def _generateCreatorId(self, assignor):
         if self.currentUser is not None:

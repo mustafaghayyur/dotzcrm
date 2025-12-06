@@ -1,9 +1,9 @@
-from .querysets.tasks import *
 from tasks.models import *
+from .querysets.tasks import *
 from .background import O2ORecords, RevisionlessChildren, M2OChildren
 
 """
-    Handles all O1O crud operations for Tasks Module of DotzCRM.
+    Handles all O2O crud operations for Tasks Module of DotzCRM.
     Please read the README.md in this folder before using.
 """
 class CRUD(O2ORecords.CRUD):
@@ -85,8 +85,8 @@ class Comments(RevisionlessChildren.CRUD):
 class Assignments(M2OChildren.CRUD):
     """
        Assignments pertain to Many-to-One relations where certain items are
-       being assigned to the Tasks' MT. Such as watchers, following an open
-       task.
+       being assigned to the Tasks' MT record. Such as watchers, following 
+       an open task.
     """
 
     def __init__(self):
