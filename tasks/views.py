@@ -115,10 +115,11 @@ class TaskEditView(FormView):
             if not isinstance(pk, int) or pk < 1:
                 raise Exception(f'Record\'s ID missing. Cannot edit.')
 
-            taskRecord = CRUD().fetchFullRecordForUpdate(pk)
+            records = CRUD().fetchFullRecordForUpdate(pk)
 
             # taskRecord is a RawQuerySet; which can be evaluated with a simple if
-            if taskRecord:
+            if records:
+                taskRecord = records[0]  # we only need the first (?) @todo should this be re-visited?
                 # Map model data to form fields
                 initial['tid'] = taskRecord.id
                 initial['task_id'] = taskRecord.id

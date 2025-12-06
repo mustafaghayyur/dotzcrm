@@ -53,10 +53,15 @@ class CRUD(CrudOperations.Background):
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        completeRecord = self.fetchFullRecordForUpdate(self.submission[mtId])
+        records = self.fetchFullRecordForUpdate(self.submission[mtId])
 
-        if not completeRecord:
+        if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
+
+        if len(records) > 1:
+            completeRecord = self.pruneLatestRecords(records)
+        else:
+            completeRecord = records[0]
 
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
@@ -108,4 +113,11 @@ class CRUD(CrudOperations.Background):
         self.deleteMasterTable(model, self.dbConfigs['mtId'], t['table'], t['cols'], masterId)
 
 
+    def pruneLatestRecords(fetchedRecords):
+        """
+            Handles scenario where multiple CT records are found to be marked 
+            'latest' in DB. These multiples need to be pruned to a single record 
+            for each CT.
+        """
+        pass
     

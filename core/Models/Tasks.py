@@ -33,6 +33,9 @@ class CRUD(O2ORecords.CRUD):
         return None
 
     def fetchFullRecordForUpdate(self, task_id):
+        """
+            fetch full records with all CT records marked 'latest'
+        """
         conditions = {
             #"assignee_id": None,
             "update_time": None,
@@ -42,10 +45,10 @@ class CRUD(O2ORecords.CRUD):
             "tid": task_id,
         }
 
-        rawObj = self.read(['all'], conditions)
+        rawObj = self.read(['all'], conditions, limit='')
 
         if rawObj:
-            return rawObj[0]  # we only want one
+            return rawObj  # returns all records found.
         return None
 
 class Comments(RevisionlessChildren.CRUD):
