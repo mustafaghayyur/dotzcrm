@@ -11,14 +11,13 @@ from core.settings import rdbms
 # interact with the MySQL DB.
 #
 # DO NOT use raw queries anywhere outside of QuerySets in this project.
-#
-# This class carries common helper functions needed by MT One-to-One records.
 ##########################################################################
 
-class QuerySet(models.QuerySet):
+class MasterTableQuerySet(models.QuerySet):
     """
-        Master Record QuerySet Helper functions:
-        This class is not meant to retrieve actual data.
+        Master Table QuerySet.
+        This class is not meant to retrieve actual data, but defines helper
+        functions for our versatile Select Query.
         For One-to-One records.
     """
 
@@ -201,35 +200,49 @@ class QuerySet(models.QuerySet):
 
         # return unique table names
         return list(set(tablesUsed))
-                
+      
 
+"""
+    =======================================================================
+    
+    Children QuerySets will be based on the various data-models we use
+    in DotzCRM:
+     -> One-to-One data models have a singular, unique relation to each other.
+        These tables also carry revisions, making the 'latest' demarcation necessary.
+     -> Many-to-One data models. These also carry revisions. Typically the MT
+        is the One-Table, and a specific CT is the Many-Table.
+     -> Revision-less Children (RLC) data models. These have no revisions, thus no
+        'latest' field. However, they too carry a many-to-one relationship with
+        the MT.
+     -> Many-to-Many data models. 
+
+    =====================================================================
+"""
 class ChildQuerySet(models.QuerySet):
     """
         Child Tables' QuerySet:
         This class carries common functions needed by all children tables
         of Master Table.
-        For O2O, M2O, M2M and RLC records (could be separated in the future)
+        Primarily for One-to-One types
     """
 
     # These are to be set in inherited class:
     tbl = None  # Your table for this QuerySet
     master_col = None  # The foreign key of master table (i.e. Tasks)
-    valTbl = None  # Name of table that can validate if user has access to this record(s)
-    valCol = None  # Name of column (in valTbl) that specifically can confirm user's right to records
+    module = None  # to be set in inheritor class 
+    space = None  # to be set in inheritor class
 
-    def fetchById(self, mtId, cId):
+    def fetchById(self, cId):
         """
-            Fetch specific CT record by its ID.
+            Fetch specific CT record by its own ID.
             Applies to O2O, M2O, M2M and RLC Records
         """
         query = f"""
             SELECT * FROM {self.tbl}
-                WHERE {self.master_col} = %s
-                AND id = $s
-                LIMIT 1;
+                WHERE id = %s;
             """
 
-        return self.raw(query, [mtId, cId])
+        return self.raw(query, [cId])
 
     def fetchLatest(self, mtId):
         """
@@ -239,12 +252,13 @@ class ChildQuerySet(models.QuerySet):
         query = f"""
             SELECT * FROM {self.tbl}
                 WHERE {self.master_col} = %s
-                AND latest = 1
+                AND latest = %s
                 ORDER BY create_time DESC
                 LIMIT 1;
             """
 
-        return self.raw(query, [mtId])
+        latest = self.module['values']['latest']['latest']
+        return self.raw(query, [mtId, latest])
 
     def fetchRevision(self, mtId, revision = 0):
         """
@@ -279,6 +293,12 @@ class ChildQuerySet(models.QuerySet):
 
         return self.raw(query, [mtId])  # returns the whole rawqueryset
 
+    
+
+class RLCChildQuerySet(ChildQuerySet):
+    """
+        For Revision-less Children data models
+    """
     def fetchAllByMasterIdRLC(self, mtId):
         """
             Revision Less children records don't have the 'latest' columns.
@@ -286,17 +306,60 @@ class ChildQuerySet(models.QuerySet):
         """
         pass
 
-    def fetchAllCurrentByMasterIdM2O(self, mtId):
+class M2OChildQuerySet(ChildQuerySet):
+    """
+        For Many-to-One Record types
+    """
+
+    def __init__(self, model=None, query=None, using=None, hints=None):
+        self.oneColumn = rdbms[self.space]['keys']['m2o'][self.tbl]['oneCol']
+        self.manyColumn = rdbms[self.space]['keys']['m2o'][self.tbl]['manyCol']
+        
+        super().__init__(model, query, using, hints)
+
+    def fetchAllCurrentByManyId(self, manyId):
         """
-            Fetch all the latest of child table records for MT ID.
-            Many to One records
+            Fetch all the latest of child table records referencing ManyId.
         """
         pass
-
-    def fetchAllRevisionsByIdM2O(self, mtId, cId):
+    
+    def fetchAllCurrentByOneId(self, oneId):
         """
-            Fetch all revisions of CT records for CT ID.
-            Many to One records
+            Fetch all the latest of child table records referencing OneId.
         """
-        pass
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.oneColumn} = %s
+                AND latest = %s
+            """
 
+        latest = self.module['values']['latest']['latest']
+        return self.raw(query, [oneId, latest])
+
+    def fetchAllRevisions(self, oneId, manyId):
+        """
+            Fetch revision history of CT records for One & Many Ids.
+        """
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.oneColumn} = %s
+                AND {self.manyColumn} = %s
+                ORDER BY create_time DESC
+            """
+
+        return self.raw(query, [oneId, manyId])
+
+    def fetchRevision(self, oneId, manyId, revision = 0):
+        """
+            Fetch a specific revision # (zero-indexed) of child table record 
+            for One Id.
+        """
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.oneColumn} = %s
+                AND {self.manyColumn} = %s
+                ORDER BY create_time DESC
+                LIMIT 1 OFFSET (%s);
+            """
+
+        return self.raw(query, [oneId, manyId, revision])

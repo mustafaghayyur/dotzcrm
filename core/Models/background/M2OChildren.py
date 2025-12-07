@@ -1,12 +1,18 @@
 from tasks.models import *
-from core.helpers import crud  #, misc
-from . import O2ORecords
+from core.helpers import crud  # , misc
+from . import CrudOperations
 
 """
-    Generic CRUD Operations that can be used through out the system.
-    Only Many-to-One relationship CRUD operations are handled here.
+    Many-to-One CRUD Operations that can be used through out the system.
+    
+    In a M2O relationship, there are two key columns to watch out for, the
+    one ID (often MT ID) that cannot have multiples; and the many ID (CT) which 
+    can show up numerous times in the result sets.
+    
+    By making sure many-correct FKs are handled correctly in reference to
+    a single MT ID, we can keep the M2O relationship meaningful.
 """
-class CRUD(O2ORecords.CRUD):
+class CRUD(CrudOperations.Background):
 
     def __init__(self, MasterCRUDClass):
         self.masterCrudObj = MasterCRUDClass()
@@ -14,26 +20,29 @@ class CRUD(O2ORecords.CRUD):
 
     def create(self, dictionary):
         """
-            Attempts to create child(ren) records that hold a M2O relationship
-            with Master Table.
             Creation of a single record per M2O CT.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
+        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
         
-        mtId = self.dbConfigs['mtAbbrv'] + 'id'
-
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
-        self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createM2O()')
-
-        if not masterRecord:
-            raise Exception('Master Record could not be found. M2O cannot be created in {self.space}.CRUD.create()')
-
-        for pk in self.m2oidCols:
+        # no need to check valid MT ID. MySQL FK checks are enough.
+        for pk in self.m2oIdCols:
             tbl = pk[0]  # table abbreviation
-            rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
-    
+            
+            m2oKeys = self.dbConfigs['keys']['m2o'][t['table']]  # fetch m2o keys for table
+            skip = False
+
+            if not crud.isValidId(self.submission, m2oKeys['o']):
+                skip = True
+
+            if not crud.isValidId(self.submission, m2oKeys['m']):
+                skip = True
+
+            if skip:
+                continue  # required IDs missing, skip this table
+
             self.createChildTable(model, tbl, t['table'], t['cols'])
 
     def read(self):
@@ -41,33 +50,24 @@ class CRUD(O2ORecords.CRUD):
 
     def update(self, dictionary):
         """
-            Attempts to update child(ren) records that hold a M2O relationship
-            with Master Table.
             Update of a single record per M2O CT.
         """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-        mtId = self.dbConfigs['mtAbbrv'] + 'id'
+        
+        # no need to check valid MT ID. MySQL FK checks are enough.
+        for pk in self.m2oIdCols:
+            tbl = pk[0]  # child table abbreviation
+            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            model = globals()[t['model']]  # retrieve Model class with global scope
+            m2oKeys = self.dbConfigs['keys']['m2o'][t['table']]  # fetch m2o keys for table
 
-        # masterRecords gets the parent record id, to which this M2O belongs
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
-        self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in updateM2O()')
-
-        if not masterRecord:
-            raise Exception(f'No valid record found for provided {self.space} ID for M2O update, in: {self.space}.CRUD.update().')
-
-        for pk in self.m2oidCols:
-            
-            originalM2O = self.read({pk: self.submission[pk], mtId: self.submission[mtId]})
+            originalM2O = self.read({m2oKeys['o']: self.submission[m2oKeys['o']], m2oKeys['m']: self.submission[m2oKeys['m']]})
             self.log(originalM2O, 'JUST CONFIRMING if originalM2O record is being fetched correctly in updateM2O()')
 
             if not originalM2O:
                 raise Exception(f'No valid M2O record found for provided ID, in: {self.space}.CRUD.update().')
-            
-            tbl = pk[0]  # child table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
-            model = globals()[t['model']]  # retrieve Model class with global scope
                 
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], originalM2O)
@@ -82,7 +82,7 @@ class CRUD(O2ORecords.CRUD):
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        for pk in self.m2oidCols:
+        for pk in self.m2oIdCols:
 
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
@@ -100,7 +100,7 @@ class CRUD(O2ORecords.CRUD):
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        for pk in self.m2oidCols:
+        for pk in self.m2oIdCols:
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope

@@ -2,14 +2,13 @@ from . import records
 from core.settings import tasks, rdbms
 from core.helpers import strings, misc
 
-class TasksQuerySet(records.QuerySet):
+class TasksQuerySet(records.MasterTableQuerySet):
     """
-        # TasksQuerySet allows for highly versatile Select queries to DB.
-        # For M2O, etc a further extension might be required.
-        # For One-to-One data models (i.e. records).
+        TasksQuerySet allows for highly versatile Select queries to DB.
+        For One-to-One data models (i.e. records).
     """
     def __init__(self, model=None, query=None, using=None, hints=None):
-        self.tableCols = rdbms['tasks']['keys']['full_record']
+        self.tableCols = rdbms['tasks']['keys']['o2oAllCols']
         self.space = 'tasks'  # used by some modules
 
         super().__init__(model, query, using, hints)
@@ -19,8 +18,11 @@ class TasksQuerySet(records.QuerySet):
         # Fetches full Task records with latest One-to-One records (of sub tables).
         #
         # PARAMS:
-        #  - selectors: [list] list of columns you wish the result set to carry (from all Tasks' tables combined).
-        #  - conditions: [dictionary] book of parameters for which tasks should be fetched. The 'conditions' dictionary defines which tasks will be fetched.
+        #  - selectors: [list] list of columns you wish the result set to carry 
+                (from all Tasks' O2O tables combined).
+        #  - conditions: [dictionary] book of parameters which define what 
+                tasks should be fetched. The 'conditions' dictionary defines 
+                which tasks will be fetched.
         #  - orderBy: [string] any specific, legitimate ordering you want.
         #  - limit: [string] number of records you want retrieved. Can accept offsets.
         #
@@ -33,7 +35,7 @@ class TasksQuerySet(records.QuerySet):
         params = obj['params']
         joins = obj['joins']
 
-        # sub it any column names you wish to output differently in the ORM
+        # sub in any column names you wish to output differently in the ORM
         translations = {}
         
         query = f"""
@@ -93,32 +95,46 @@ class TasksQuerySet(records.QuerySet):
 class DetailQuerySet(records.ChildQuerySet):
     tbl = 'tasks_details'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 
 
 class DeadlineQuerySet(records.ChildQuerySet):
     tbl = 'tasks_deadline'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 
 
 class StatusQuerySet(records.ChildQuerySet):
     tbl = 'tasks_status'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 
 
 class VisibilityQuerySet(records.ChildQuerySet):
     tbl = 'tasks_assignment'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 
 
-class WatacherQuerySet(records.ChildQuerySet):
+class WatcherQuerySet(records.M2OChildQuerySet):
     tbl = 'tasks_watcher'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 
 class AssignmentQuerySet(records.ChildQuerySet):
     tbl = 'tasks_visibility'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 
-class CommentQuerySet(records.ChildQuerySet):
+class CommentQuerySet(records.RLCChildQuerySet):
     tbl = 'tasks_comment'
     master_col = 'task_id'
+    space = 'tasks'
+    module = tasks  # bring is module's settings
 

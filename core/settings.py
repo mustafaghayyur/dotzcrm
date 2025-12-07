@@ -60,10 +60,10 @@ rdbms = {
         'keys': {
             # all primary_keys for Tasks (and children tables) should be
             # listed here (One-to-One types):
-            'one2one': ['tid', 'did', 'lid', 'sid', 'vid', 'aid'],
-            'rlc': ['cid'],
-            'm2m': [],
-            'm2o': ['wid'],
+            'o2oIds': ['tid', 'did', 'lid', 'sid', 'vid', 'aid'],
+            'rlcIds': ['cid'],
+            'm2mIds': [],
+            'm2oIds': ['wid'],
 
             # these keys tend to be found in every table and cause problems if not handled separately
             'problematic': ['id', 'create_time', 'update_time', 'delete_time'],
@@ -74,7 +74,7 @@ rdbms = {
             # one active record for a single active task record.
             # Many-to-one records like watchers are not included in the 'full_record'
             ############################################################################
-            'full_record': {
+            'o2oAllCols': {
                 # Key's carry tbl_abbrv[first letter] + column name
                 'tid': 't',
                 'did': 'd',
@@ -111,7 +111,14 @@ rdbms = {
                 'parent_id': 't',
                 'latest': ''
                 # NOTE: task_id is omitted because tid = task_id
-            },  # end of full_record
+            },  # end of o2oAllCols
+            'm2o': {
+                # Sets the one-column and many-column names
+                'tasks_watcher': {
+                    'oneCol': 'task_id',
+                    'manyCol': 'watcher_id',
+                }
+            }
         },  # end of keys
 
         'table_names': {  # index of all names by their abbreviations used in CRUD operations

@@ -2,12 +2,13 @@ from tasks.models import *
 from .querysets.tasks import *
 from .background import O2ORecords, RevisionlessChildren, M2OChildren
 
-"""
-    Handles all O2O crud operations for Tasks Module of DotzCRM.
-    Please read the README.md in this folder before using.
-"""
-class CRUD(O2ORecords.CRUD):
 
+class CRUD(O2ORecords.CRUD):
+    """
+        Handles all O2O crud operations for Tasks Module of DotzCRM.
+        Please read the README.md in this folder before using.
+    """
+    
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
@@ -23,7 +24,7 @@ class CRUD(O2ORecords.CRUD):
             raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
         if 'all' in selectors:
-            selectors = list(self.dbConfigs['keys']['full_record'].keys())
+            selectors = list(self.dbConfigs['keys']['o2oAllCols'].keys())
 
         rawObjs = self.mtModel.objects.fetchTasks(selectors, conditions, orderBy, limit)
         
@@ -37,7 +38,7 @@ class CRUD(O2ORecords.CRUD):
             fetch full records with all CT records marked 'latest'
         """
         conditions = {
-            #"assignee_id": None,
+            # "assignee_id": None,
             "update_time": None,
             "latest": self.module['values']['latest']['latest'],
             "visibility": None,
@@ -57,6 +58,7 @@ class Comments(RevisionlessChildren.CRUD):
         All CRUD operations for Comments within Task module, are handled by
         this class.
     """
+
     def __init__(self):
         super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
@@ -68,11 +70,11 @@ class Comments(RevisionlessChildren.CRUD):
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
-        for pk in self.rlcidCols:
+        for pk in self.rlcIdCols:
             model = globals()[self.dbConfigs['models'][pk]]
             if pk in definitions:
                 # specific record being sought:
-                rawObjs = model.objects.fetchById(definitions[self.dbConfigs['mtId']], definitions[pk])
+                rawObjs = model.objects.fetchById(definitions[pk])
 
             else:
                 rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.dbConfigs['mtId']])
@@ -82,14 +84,14 @@ class Comments(RevisionlessChildren.CRUD):
 
         return None
 
-class Assignments(M2OChildren.CRUD):
+class Watchers(M2OChildren.CRUD):
     """
-       Assignments pertain to Many-to-One relations where certain items are
-       being assigned to the Tasks' MT record. Such as watchers, following 
-       an open task.
+       This is a Many-to-One relations table, where many 'watchers' are
+       being assigned to a single Tasks' MT record.
     """
 
     def __init__(self):
+        self.pk = 'w'  # set table_abbrv for use in queries.
         super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
     def read(self, definitions):
@@ -101,14 +103,14 @@ class Assignments(M2OChildren.CRUD):
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
-        for pk in self.m2oidCols:
-            model = globals()[self.dbConfigs['models'][pk]]
-            if pk in definitions:
-                # specific record being sought:
-                rawObjs = model.objects.fetchById(definitions[self.dbConfigs['mtId']], definitions[pk])
+        model = globals()[self.dbConfigs['models'][self.pk]]
+        if self.pk in definitions:
+            # specific record being sought:
+            if 
+            rawObjs = model.objects.fetchById(definitions[self.pk])
 
-            else:
-                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.dbConfigs['mtId']])
+        else:
+            rawObjs = model.objects.fetchAllCurrentByOneId(definitions[self.dbConfigs['mtId']])
         
         if rawObjs:
             return rawObjs

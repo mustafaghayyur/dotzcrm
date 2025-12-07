@@ -12,8 +12,8 @@ from .Validation import ErrorHandling
 class Background(ErrorHandling):
     currentUser = None  # FUTURE IMPLEMENTATION
 
-    mtModel = None
-    space = None
+    mtModel = None  # set inheritor class
+    space = None  # set inheritor class
     module = None
     dbConfigs = None
     tables = None
@@ -33,10 +33,10 @@ class Background(ErrorHandling):
         self.tables = settings.rdbms['tables']
 
         # holds all O2O primary keys for given space/module
-        self.idCols = self.dbConfigs['keys']['one2one']
-        self.m2midCols = self.dbConfigs['keys']['m2m']
-        self.m2oidCols = self.dbConfigs['keys']['m2o']
-        self.rlcidCols = self.dbConfigs['keys']['rlc']
+        self.idCols = self.dbConfigs['keys']['o2oIds']
+        self.m2mIdCols = self.dbConfigs['keys']['m2mIds']
+        self.m2oIdCols = self.dbConfigs['keys']['m2oIds']
+        self.rlcIdCols = self.dbConfigs['keys']['rlcIds']
 
         super().__init__()
 

@@ -75,7 +75,7 @@ class Watcher(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = WatacherQuerySet.as_manager()
+    objects = WatcherQuerySet.as_manager()
 
 
 # The table to manage assignor/assignee for each task

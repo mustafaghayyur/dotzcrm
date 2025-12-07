@@ -73,6 +73,9 @@ M
 
  > Many-To-One Children: a type of node in the system, where child-table nodes can't be retrieved as a single-latest revision of a master-table's record-set. These data-types need special handling for CRUD operations
 
+ > ManyId, Many-Column-Name: In a Many-to-One relationship the many-column-name identifies the FK of the table which has a repeating relationship. 
+
+
 N
 --
 
@@ -80,6 +83,7 @@ N
 O
 --
 
+ > OneId, One-Column-Name: In a Many-to-One relationship the one-column-name identifies the FK of the table which has a non-repeating relationship. 
 
 P
 --

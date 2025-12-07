@@ -20,7 +20,8 @@ class CRUD(CrudOperations.Background):
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         
         mtId = self.dbConfigs['mtAbbrv'] + 'id'
-        #self.log(self.submission, 'FORM-------------------------------------')
+        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
+        # self.log(self.submission, 'FORM-------------------------------------')
 
         masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createRLC()')
@@ -28,9 +29,8 @@ class CRUD(CrudOperations.Background):
         if not masterRecord:
             raise Exception('Master Record could not be found. RLC cannot be created in {self.space}.CRUD.create()')
 
-        for pk in self.rlcidCols:
+        for pk in self.rlcIdCols:
             tbl = pk[0]  # table abbreviation
-            rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
     
@@ -57,7 +57,7 @@ class CRUD(CrudOperations.Background):
         if not masterRecord:
             raise Exception(f'No valid record found for provided {self.space} ID for RLC update, in: {self.space}.CRUD.update().')
 
-        for pk in self.rlcidCols:
+        for pk in self.rlcIdCols:
             
             originalRLC = self.read({pk: self.submission[pk], mtId: self.submission[mtId]})
             self.log(originalRLC, 'JUST CONFIRMING if originalRLC record is being fetched correctly in updateRLC()')
@@ -83,7 +83,7 @@ class CRUD(CrudOperations.Background):
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        for pk in self.rlcidCols:
+        for pk in self.rlcIdCols:
 
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
@@ -102,7 +102,7 @@ class CRUD(CrudOperations.Background):
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
-        for pk in self.rlcidCols:
+        for pk in self.rlcIdCols:
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(rdbms, self.space, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
