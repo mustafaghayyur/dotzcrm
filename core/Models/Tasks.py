@@ -2,7 +2,6 @@ from tasks.models import *
 from .querysets.tasks import *
 from .background import O2ORecords, RevisionlessChildren, M2OChildren
 
-
 class CRUD(O2ORecords.CRUD):
     """
         Handles all O2O crud operations for Tasks Module of DotzCRM.
@@ -60,6 +59,9 @@ class Comments(RevisionlessChildren.CRUD):
     """
 
     def __init__(self):
+        self.space = 'tasks'  # holds the name of current module/space
+        self.mtModel = Task  # holds the class reference for Master Table's model
+
         super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
     def read(self, definitions):
@@ -91,28 +93,7 @@ class Watchers(M2OChildren.CRUD):
     """
 
     def __init__(self):
-        self.pk = 'w'  # set table_abbrv for use in queries.
-        super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
+        self.pk = 'wid'  # set table_abbrv for use in queries.
+        self.space = 'tasks'  # holds the name of current module/space
 
-    def read(self, definitions):
-        """
-            Takes requirements for retrieval of M2O Assignments. If valid,
-            executes relevant Query. See documentation on definitions
-            formulation.
-        """
-        if not isinstance(definitions, dict) or len(definitions) < 1:
-            raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
-
-        model = globals()[self.dbConfigs['models'][self.pk]]
-        if self.pk in definitions:
-            # specific record being sought:
-            if 
-            rawObjs = model.objects.fetchById(definitions[self.pk])
-
-        else:
-            rawObjs = model.objects.fetchAllCurrentByOneId(definitions[self.dbConfigs['mtId']])
-        
-        if rawObjs:
-            return rawObjs
-
-        return None
+        super.__init__()

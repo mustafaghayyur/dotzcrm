@@ -3,23 +3,20 @@ import datetime
 from tasks.models import *
 from core.helpers import crud, misc
 from core import settings
-from .Validation import ErrorHandling
+from . import Validation
 
 """
     This class holds the background crud operations.
     Primary focus: One-to-One relationship CRUD types
 """
-class Background(ErrorHandling):
-    currentUser = None  # FUTURE IMPLEMENTATION
+class Background(Validation.ErrorHandling):
+    space = None  # set in inheritor class
 
-    mtModel = None  # set inheritor class
-    space = None  # set inheritor class
-    module = None
-    dbConfigs = None
-    tables = None
-    idCols = None
+    module = None  # settings for 'app' or module in system (e.g. Tasks, Tickets, etc)
+    dbConfigs = None  # settings for DB
+    tables = None  # definitions of tables
 
-    submission = None
+    submission = None  # will hold dictionary of submitted data by user
 
 
     def __init__(self):
@@ -34,8 +31,6 @@ class Background(ErrorHandling):
 
         # holds all O2O primary keys for given space/module
         self.idCols = self.dbConfigs['keys']['o2oIds']
-        self.m2mIdCols = self.dbConfigs['keys']['m2mIds']
-        self.m2oIdCols = self.dbConfigs['keys']['m2oIds']
         self.rlcIdCols = self.dbConfigs['keys']['rlcIds']
 
         super().__init__()
@@ -213,9 +208,7 @@ class Background(ErrorHandling):
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
 
-        assignor = self.submission['assignor_id'].id if isinstance(self.submission['assignor_id'], object) else self.submission['assignor_id']
-        fields['creator_id'] = self._generateCreatorId(assignor)
-
+        fields['creator_id'] = self._generateCreatorId()
         fields['create_time'] = timezone.now()
         fields['update_time'] = fields['create_time']
 
@@ -231,11 +224,14 @@ class Background(ErrorHandling):
         """
         pass
 
-    # this is for initial testing ... should be removed
     def _generateCreatorId(self, assignor):
-        if self.currentUser is not None:
-            return self.currentUser
-
-        return assignor
+        if 'assignor_id' in self.submission:
+            if self.submission['assignor_id'] is not None:
+                if isinstance(self.submission['assignor_id'], object):
+                    return self.submission['assignor_id'].id  
+                else:
+                    return self.submission['assignor_id']
+        
+        return None
 
     

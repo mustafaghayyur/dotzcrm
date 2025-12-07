@@ -62,8 +62,6 @@ rdbms = {
             # listed here (One-to-One types):
             'o2oIds': ['tid', 'did', 'lid', 'sid', 'vid', 'aid'],
             'rlcIds': ['cid'],
-            'm2mIds': [],
-            'm2oIds': ['wid'],
 
             # these keys tend to be found in every table and cause problems if not handled separately
             'problematic': ['id', 'create_time', 'update_time', 'delete_time'],

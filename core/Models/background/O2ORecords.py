@@ -8,6 +8,8 @@ from . import CrudOperations
 """
 class CRUD(CrudOperations.Background):
 
+    mtModel = None  # set inheritor class
+
     def __init__(self):
         super().__init__()
 

@@ -304,7 +304,13 @@ class RLCChildQuerySet(ChildQuerySet):
             Revision Less children records don't have the 'latest' columns.
             I.e. they don't have revisions.
         """
-        pass
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.master_col} = %s
+                ORDER BY create_time DESC
+            """
+
+        return self.raw(query, [mtId])
 
 class M2OChildQuerySet(ChildQuerySet):
     """
@@ -321,7 +327,14 @@ class M2OChildQuerySet(ChildQuerySet):
         """
             Fetch all the latest of child table records referencing ManyId.
         """
-        pass
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.manyColumn} = %s
+                AND latest = %s
+            """
+
+        latest = self.module['values']['latest']['latest']
+        return self.raw(query, [manyId, latest])
     
     def fetchAllCurrentByOneId(self, oneId):
         """
