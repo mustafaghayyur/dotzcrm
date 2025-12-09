@@ -1,5 +1,6 @@
 from . import records
-from core.settings import tasks, rdbms
+from core.Models.mappers import tasks as tasksMappers
+from core import settings  # tasks, rdbms
 from core.helpers import strings, misc
 
 class TasksQuerySet(records.MasterTableQuerySet):
@@ -8,8 +9,10 @@ class TasksQuerySet(records.MasterTableQuerySet):
         For One-to-One data models (i.e. records).
     """
     def __init__(self, model=None, query=None, using=None, hints=None):
-        self.tableCols = rdbms['tasks']['keys']['o2oAllCols']
         self.space = 'tasks'  # used by some modules
+        self.mapper = tasksMappers.TasksMapper()
+        self.valuesMapper = tasksMappers.ValuesManager
+        self.tableCols = self.mapper.generateO2OFields()
 
         super().__init__(model, query, using, hints)
         
@@ -51,12 +54,12 @@ class TasksQuerySet(records.MasterTableQuerySet):
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self):
-        # s = tasks['values']['status']
+        # s = self.valuesMapper.status()
         params = {
-            # "tdelete_time": 'IS NULL',  # needs to be handled
-            # "tupdate_time": tasks['recentInterval'],
-            "latest": tasks['values']['latest']['latest'],
-            # "visibility": tasks['values']['visibility']['private'],
+            # "tdelete_time": 'IS NULL',  # @todo needs to be handled
+            # "tupdate_time": settings.tasks['recentInterval'],
+            "latest": self.valuesMapper.latest('latest'),
+            # "visibility": self.valuesMapper.visibility('private'),
             # "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
         }
 
@@ -96,45 +99,52 @@ class DetailQuerySet(records.ChildQuerySet):
     tbl = 'tasks_details'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 
 
 class DeadlineQuerySet(records.ChildQuerySet):
     tbl = 'tasks_deadline'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 
 
 class StatusQuerySet(records.ChildQuerySet):
     tbl = 'tasks_status'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 
 
 class VisibilityQuerySet(records.ChildQuerySet):
     tbl = 'tasks_assignment'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 
 
 class WatcherQuerySet(records.M2MChildQuerySet):
     tbl = 'tasks_watcher'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 
 class AssignmentQuerySet(records.ChildQuerySet):
     tbl = 'tasks_visibility'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 
 class CommentQuerySet(records.RLCChildQuerySet):
     tbl = 'tasks_comment'
     master_col = 'task_id'
     space = 'tasks'
-    module = tasks  # bring is module's settings
+    mapper = tasksMappers.TasksMapper()
+    valuesMapper = tasksMappers.ValuesManager()
 

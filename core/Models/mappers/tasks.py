@@ -1,10 +1,14 @@
 from . import RelationshipMappers
 
-class TasksMapper():
+class TasksMapper(RelationshipMappers):
+    """
+        All calls should be made to following method names without the '_' prefix.
+        RelationshipMappers() has proper wrapper functions.
+    """
     def __init__(self):
         pass
 
-    def tables(self):
+    def _tables(self):
         """
             These keys (table-abbreviations) will be used throughout code.
             Change with care.
@@ -20,7 +24,7 @@ class TasksMapper():
             'c': 'tasks_comment',
         }
 
-    def models(self):
+    def _models(self):
         """
             These keys (table-abbreviations) will be used throughout code.
             Change with care.
@@ -36,19 +40,14 @@ class TasksMapper():
             'c': 'Comment',
         }
 
-    def master(self, key = 'all'):
-        info = {
+    def _master(self):
+        return {
             'table': 'tasks_task',
             'abbreviation': 't',
             'foreignKeyName': 'task_id',
         }
 
-        if key is not None and key in info:
-            return info[key]
-
-        return info
-
-    def tablesForRelationType(self, relationType = 'o2o'):
+    def _tablesForRelationType(self, relationType):
         match relationType:
             case 'o2o':
                 return ['d', 'l', 's', 'v', 'a']
@@ -61,7 +60,7 @@ class TasksMapper():
             case _:
                 return []
 
-    def commonFields(self):
+    def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
             if not handled separately
@@ -70,7 +69,7 @@ class TasksMapper():
         """
         return ['id', 'create_time', 'update_time', 'delete_time']
 
-    def ignoreOnUpdates(self):
+    def _ignoreOnUpdates(self):
         """
             Can carry any fields within a table to ignore in a certain operation
         """
@@ -85,14 +84,14 @@ class TasksMapper():
             'tasks_comment': ['id', 'task_id'],
         }
 
-    def ignoreOnRetrieval(self):
+    def _ignoreOnRetrieval(self):
         return ['task_id']
 
-    def tableFields(self, name = None):
+    def _tableFields(self):
         """
             Outline all tables within Tasks system here
         """
-        tables = {
+        return {
             'tasks_task': ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id'],
             'tasks_details': ['id', 'details', 'latest', 'create_time', 'delete_time', 'task_id'],
             'tasks_deadline': ['id', 'deadline', 'latest', 'create_time', 'delete_time', 'task_id'],
@@ -103,10 +102,16 @@ class TasksMapper():
             'tasks_comment': ['id', 'comment', 'parent_id', 'create_time', 'update_time', 'delete_time', 'task_id']
         }
 
-        if name is not None and name in tables:
-            return table[name]
-
-        return tables
+    def _m2mFields(self):
+        """
+            Retrieves relational fields for specific M2M table.
+        """
+        return {
+            'w': {
+                'firstCol': 'task_id',
+                'secondCol': 'watcher_id',
+            },
+        }
 
 
 class ValuesManager():
@@ -115,14 +120,19 @@ class ValuesManager():
     Enums will be managed in the application layer.
     """
 
-    def latest(self):
-        return {
+    def latest(self, key):
+        values = {
             'archive': 2,
             'latest': 1,
         }
 
-    def status(self):
-        return {
+        if key is not None and key in values:
+            return values[key]
+
+        return values
+
+    def status(self, key):
+        values = {
             'assigned': 'assigned',
             'viewed': 'viewed',
             'queued': 'queued',
@@ -135,10 +145,20 @@ class ValuesManager():
             'failed': 'failed',
         }
 
-    def visibility(self):
-        return {
+        if key is not None and key in values:
+            return values[key]
+
+        return values
+
+    def visibility(self, key):
+        values = {
             'private': 'private',
             'assigned': 'assigned',
             'organization': 'organization',
             'stakeholders': 'stakeholders',
         }
+
+        if key is not None and key in values:
+            return values[key]
+
+        return values

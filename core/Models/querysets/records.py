@@ -1,6 +1,5 @@
 from django.db import models
 from core.helpers import crud
-from core.settings import rdbms
 
 ##########################################################################
 # The QuerySet family of definitions will be essential to maintaining
@@ -23,6 +22,8 @@ class MasterTableQuerySet(models.QuerySet):
 
     tableCols = None
     space = None
+    mapper = None
+    valuesMapper = None
 
     def __init__(self, model=None, query=None, using=None, hints=None):
         super().__init__(model, query, using, hints)
@@ -69,16 +70,16 @@ class MasterTableQuerySet(models.QuerySet):
         
         for key in selectors:
             if key in self.tableCols:
-                table = self.tableCols[key]
+                table = self.tableCols[key]  # fetches the value which is the tbl abbreviation for column
                 if key == 'latest':
                     continue
 
-                if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
+                if self.mapper.isCommonField(key):
                     # the table abbreviation is conjoined to key name. Separate:
                     key = key[1:]  # slice off first character
                     addition = ' AS ' + table + key
                     
-                    if table + key == rdbms[self.space]['mtAbbrv'] + 'id':
+                    if table + key == self.mapper.master('abbreviation') + 'id':
                         addition = ''
                     
                     string += ' ' + table + '.' + key + addition + ','
@@ -103,7 +104,7 @@ class MasterTableQuerySet(models.QuerySet):
 
         keyDb = key  # keyDb refers to the column name recognized by the DB.
 
-        if crud.isProblematicKey(rdbms[self.space]['keys']['problematic'], key):
+        if self.mapper.isCommonField(key, True):
             keyDb = key[1:]  # the table abbreviation is conjoined to key name. Separate:
 
         if keyDb in ['create_time', 'update_time', 'delete_time']:
@@ -115,8 +116,7 @@ class MasterTableQuerySet(models.QuerySet):
         if isinstance(item, str):
             return andPref + tbl + '.' + keyDb + ' = %(' + key + ')s'
 
-        # return HAS to BE string
-        return ''
+        return ''  # return HAS to BE string
 
     def _calculateLengthOfWS(self, ws):
         """
@@ -224,8 +224,9 @@ class ChildQuerySet(models.QuerySet):
     # These are to be set in inherited class:
     tbl = None  # Your table for this QuerySet
     master_col = None  # The foreign key of master table (i.e. Tasks)
-    module = None  # to be set in inheritor class 
     space = None  # to be set in inheritor class
+    mapper = None
+    valuesMapper = None
 
     def fetchById(self, cId):
         """
@@ -252,7 +253,7 @@ class ChildQuerySet(models.QuerySet):
                 LIMIT 1;
             """
 
-        latest = self.module['values']['latest']['latest']
+        latest = self.valuesMapper.latest('latest')
         return self.raw(query, [mtId, latest])
 
     def fetchRevision(self, mtId, revision = 0):
@@ -317,12 +318,18 @@ class M2MChildQuerySet(ChildQuerySet):
         These also carry revisions. Typically the MT is the First-Table-Id, 
         and a outside-entity is the Second-Table-Id.
 
-        First and Second cols defined in settings
+        First and Second cols defined in space's Mappers
     """
 
     def __init__(self, model=None, query=None, using=None, hints=None):
-        self.firstColumn = rdbms[self.space]['keys']['m2m'][self.tbl]['firstCol']
-        self.secondColumn = rdbms[self.space]['keys']['m2m'][self.tbl]['secondCol']
+        tbl = self.mappers.getAbbreviationForTable(self.tbl)
+        cols = self.mappers.m2mFields(tbl)
+
+        if cols is None:
+            raise Exception('Unable to fetch M2M Fields. Abort.')
+            
+        self.firstColumn = cols['firstCol']
+        self.secondColumn = cols['secondCol']
         
         super().__init__(model, query, using, hints)
 
@@ -336,7 +343,7 @@ class M2MChildQuerySet(ChildQuerySet):
                 AND latest = %s
             """
 
-        latest = self.module['values']['latest']['latest']
+        latest = self.valuesMapper.latest('latest')
         return self.raw(query, [secondId, latest])
     
     def fetchAllCurrentByFirstId(self, firstId):
@@ -349,7 +356,7 @@ class M2MChildQuerySet(ChildQuerySet):
                 AND latest = %s
             """
 
-        latest = self.module['values']['latest']['latest']
+        latest = self.valuesMapper.latest('latest')
         return self.raw(query, [firstId, latest])
 
     def fetchAllRevisions(self, firstId, secondId):
