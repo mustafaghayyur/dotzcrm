@@ -23,21 +23,20 @@ class CRUD(CrudOperations.Background):
         # self.log(self.submission, 'FORM-------------------------------------')
         # self.log(completeRecord, 'DB-------------------------------------', 2)
         
-        masterRecord = self.createMasterTable(self.dbConfigs['mtAbbrv'], self.mtModel)
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
+        masterRecord = self.createMasterTable(self.mapper.master('abbreviation'), self.mtModel)
 
         if not hasattr(masterRecord, 'id') or not isinstance(masterRecord.id, int):
             raise Exception(f'Something went wrong. {self.space} record could not be created in: {self.space}.CRUD.create().')
 
-        self.submission[self.dbConfigs['mtId']] = masterRecord.id  # add master table ID to dictionary
+        self.submission[self.mapper.master('foreignKeyName')] = masterRecord.id  # add master table ID to dictionary
 
         # Time to create child records, loop through each child table:
         for pk in self.idCols:
-            if pk == self.dbConfigs['mtAbbrv'] + 'id':
+            if pk == self.mapper.master('abbreviation') + 'id':
                 continue
 
             tbl = pk[0]  # table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             self.createChildTable(model, tbl, t['table'], t['cols'])
@@ -52,8 +51,7 @@ class CRUD(CrudOperations.Background):
         """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
-        mtId = self.dbConfigs['mtAbbrv'] + 'id'
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
+        mtId = self.mapper.master('abbreviation') + 'id'
 
         records = self.fetchFullRecordForUpdate(self.submission[mtId])
 
@@ -68,7 +66,7 @@ class CRUD(CrudOperations.Background):
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
             tbl = pk[0]  # child table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk == mtId:
@@ -95,24 +93,22 @@ class CRUD(CrudOperations.Background):
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
 
-            if pk == self.dbConfigs['mtAbbrv'] + 'id':
+            if pk == self.mapper.master('abbreviation') + 'id':
                 continue  # skip, we delete master table at the end.
 
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             # run a 'delete' operation for latest child table record. 
             self.deleteChildTable(model, tbl, t['table'], t['cols'], masterId)
 
         # once all children records have been updated with delete markers
-        t = crud.generateModelInfo(rdbms, self.space, self.dbConfigs['mtAbbrv'])
+        t = crud.generateModelInfo(self.mapper, self.mapper.master('abbreviation'))
         model = globals()[t['model']]
-        self.deleteMasterTable(model, self.dbConfigs['mtId'], t['table'], t['cols'], masterId)
+        self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
 
 
     def pruneLatestRecords(self, fetchedRecords, mtId):
@@ -126,10 +122,10 @@ class CRUD(CrudOperations.Background):
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
 
-            if pk == self.dbConfigs['mtAbbrv'] + 'id':
+            if pk == self.mapper.master('abbreviation') + 'id':
                 continue  # can't prune MT duplicates...
 
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             self.checkChildForMultipleLatests(model, tbl, t['table'], t['cols'], fetchedRecords)

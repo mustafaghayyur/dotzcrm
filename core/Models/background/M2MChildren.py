@@ -11,8 +11,7 @@ from . import CrudOperations
        the firstId to be associated with.
 
     Note: first and second can carry significance for each specific 'Model'
-    that inherits this class. Should be appropriately assigned in
-     > settings.rdbms.{space}.keys.m2m.{your Model's table}
+    that inherits this class. Should be appropriately assigned in mapper.
 """
 class CRUD(CrudOperations.Background):
 
@@ -27,10 +26,9 @@ class CRUD(CrudOperations.Background):
             Creation of a single record per M2M CT.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
         tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(rdbms, self.space, tbl)
+        t = crud.generateModelInfo(self.mapper, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
         
         skip = False
@@ -57,7 +55,7 @@ class CRUD(CrudOperations.Background):
             definitions['latest'] = True
 
         tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(rdbms, self.space, tbl)
+        t = crud.generateModelInfo(self.mapper, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
         if self.pk in definitions:
@@ -92,11 +90,9 @@ class CRUD(CrudOperations.Background):
 
         if not crud.isValidId(self.submission, self.pk):
             raise Exception(f'No valid M2M ID provided, in: {self.space}.CRUD.update().')
-
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
         
         tbl = self.pk[0]  # child table abbreviation
-        t = crud.generateModelInfo(rdbms, self.space, tbl)
+        t = crud.generateModelInfo(self.mapper, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
         originalM2M = self.read({self.pk: self.submission[self.pk]})
@@ -116,11 +112,8 @@ class CRUD(CrudOperations.Background):
         if not isinstance(m2mId, int) or m2mId < 1:
             raise Exception(f'M2M Record could not be deleted. Invalid id supplied in {self.space}.CRUD.deleteM2M()')
 
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-
-
         tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(rdbms, self.space, tbl)
+        t = crud.generateModelInfo(self.mapper, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
         self.__deleteChildTableById(model, tbl, t['table'], t['cols'], m2mId)
@@ -133,10 +126,8 @@ class CRUD(CrudOperations.Background):
         if not isinstance(firstColId, int) or firstColId < 1:
             raise Exception(f'M2M Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2M()')
 
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-
         tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(rdbms, self.space, tbl)
+        t = crud.generateModelInfo(self.mapper, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
         self.__deleteAllM2M(model, tbl, t['table'], t['cols'], firstColId)
@@ -153,7 +144,7 @@ class CRUD(CrudOperations.Background):
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.module['values']['latest']['archive']
+        fieldsU['latest'] = self.valuesMapper.latest('archive')
 
         self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
@@ -171,7 +162,7 @@ class CRUD(CrudOperations.Background):
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.module['values']['latest']['archive']
+        fieldsU['latest'] = self.valuesMapper.latest('archive')
 
         self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)

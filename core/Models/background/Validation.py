@@ -19,13 +19,13 @@ class ErrorHandling:
             raise Exception(f'Provided dictionary length zero in: {space}.CRUD.{operation}().')
 
     def mtIdValidation(self, operation, dictionary):
-        masterId = self.dbConfigs['mtId']
+        masterId = self.mapper.master('foreignKeyName')
         
-        if self.dbConfigs['mtAbbrv'] + 'id' not in dictionary:
+        if self.mapper.master('abbreviation') + 'id' not in dictionary:
             raise Exception(f'Could not complete operation; Master-Table ID is missing. In {self.space}.CRUD.{operation}()')
 
         if masterId not in dictionary:
-            dictionary[masterId] = dictionary[self.dbConfigs['mtAbbrv'] + 'id']
+            dictionary[masterId] = dictionary[self.mapper.master('abbreviation') + 'id']
 
         if not crud.isValidId(dictionary, masterId):
             raise Exception(f'Could not complete operation; \'master_id\' missing. In {self.space}.CRUD.{operation}()')

@@ -11,11 +11,7 @@ from . import Validation
 """
 class Background(Validation.ErrorHandling):
     space = None  # set in inheritor class
-
     module = None  # settings for 'app' or module in system (e.g. Tasks, Tickets, etc)
-    dbConfigs = None  # settings for DB
-    tables = None  # definitions of tables
-
     submission = None  # will hold dictionary of submitted data by user
 
 
@@ -23,23 +19,19 @@ class Background(Validation.ErrorHandling):
         # loads configs related to the module (defined in self.space)
         self.module = getattr(settings, self.space)
 
-        # loads configs for this module, more secifically related to the Database
-        self.dbConfigs = settings.rdbms[self.space]
-
-        # loads tables data needed for certain operations
-        self.tables = settings.rdbms['tables']
-
         # holds all O2O primary keys for given space/module
-        self.idCols = self.dbConfigs['keys']['o2oIds']
-        self.rlcIdCols = self.dbConfigs['keys']['rlcIds']
+        self.idCols = self.mapper.generateRelationTypeIds('o2o')
+        self.rlcIdCols = self.mapper.generateRelationTypeIds('rlcIds')
 
         super().__init__()
 
     def saveSubmission(self, operation, submission):
         # First, we do some error checking on the dictionary supplied:
         self.dictValidation(self.space, operation, submission)
+        
         # Second, we make sure the master-table-id is included in record:
         submission = self.mtIdValidation(operation, submission)
+        
         # Finally, we save the submitted form into self.submission
         self.submission = submission
 
@@ -47,14 +39,14 @@ class Background(Validation.ErrorHandling):
         self.log(None, f'ENTERING delete for CT [{tbl}]')
         
         fieldsF = {}  # fields to find records with
-        fieldsF[self.dbConfigs['mtId']] = masterId
+        fieldsF[self.mapper.master('foreignKeyName')] = masterId
         if not rlc:
-            fieldsF['latest'] = self.module['values']['latest']['latest']
+            fieldsF['latest'] = self.valuesMapper.latest('latest')
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
         if not rlc:
-            fieldsU['latest'] = self.module['values']['latest']['archive']
+            fieldsU['latest'] = self.valuesMapper.latest('archive')
 
         designation = '[RLC]' if rlc else ''
 
@@ -71,16 +63,15 @@ class Background(Validation.ErrorHandling):
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord, rlc = False):
-        self.log(None, f'ENTERING update for MT [{self.dbConfigs['mtAbbrv']}]')
-        mId = self.dbConfigs['mtAbbrv'] + 'id'
+        self.log(None, f'ENTERING update for MT [{tableName}]')
 
         if not completeRecord.id or completeRecord.id is None:
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         fields = {}
         for col in columnsList:
-            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
-                key = self.dbConfigs['mtAbbrv'] + col  # need tbl_abbrv prefix for comparison
+            if self.mapper.isCommonField(col):
+                key = self.mapper.master('abbreviation') + col  # need tbl_abbrv prefix for comparison
             else:
                 key = col
 
@@ -93,7 +84,7 @@ class Background(Validation.ErrorHandling):
         fields['update_time'] = timezone.now()
 
         mtModel.objects.filter(id=completeRecord.id).update(**fields)
-        self.log({'fields': fields}, f'Update For: [{self.dbConfigs['mtAbbrv']}]')
+        self.log({'fields': fields}, f'Update For: [{tableName}]')
         return None
 
     def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord, rlc = False):
@@ -103,10 +94,11 @@ class Background(Validation.ErrorHandling):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         updateRequired = False
+        ignored = self.mapper.ignoreOnUpdates(tableName)
         rlcFields = {}  # fields for RLC update
 
         for col in columnsList:
-            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
+            if self.mapper.isCommonField(col):
                 key = tbl + col  # need tbl-abbrv prefix for comparison
             else:
                 key = col
@@ -117,7 +109,7 @@ class Background(Validation.ErrorHandling):
                         # need to overwrite dictionary key with int value for comparison
                         self.submission[key] = self.submission[key].id
                 
-                if col in self.dbConfigs['updates']['ignore'][tableName]:
+                if col in ignored:
                     continue  # ignore columns don't need a comparison in child-update operations
 
                 dbVal = getattr(completeRecord, col)
@@ -139,7 +131,7 @@ class Background(Validation.ErrorHandling):
             else:
                 fields = {}
                 fields['delete_time'] = timezone.now()
-                fields['latest'] = self.module['values']['latest']['archive']
+                fields['latest'] = self.valuesMapper.latest('archive')
                 
                 # update old record, create new one...
                 modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
@@ -153,7 +145,7 @@ class Background(Validation.ErrorHandling):
         
         fields = {}
         for col in columnsList:
-            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
+            if self.mapper.isCommonField(col):
                 key = tbl + col  # add on a prefix to match self.submission keys
             else:
                 key = col
@@ -168,7 +160,7 @@ class Background(Validation.ErrorHandling):
                     self.log([key, self.submission[key]], 'Field added')
 
         if len(fields) <= 1:  # if record is empty, abort insertion...
-            if self.dbConfigs['mtId'] in fields:
+            if self.mapper.master('foreignKeyName') in fields:
                 return None  # only the master ID is added, no need need to insert
 
         fields['create_time'] = timezone.now()
@@ -186,12 +178,12 @@ class Background(Validation.ErrorHandling):
     def createMasterTable(self, tbl, modelClass, rlc = False):
         self.log(None, f'Entering create operation for MasterTable: [{tbl}]')
         
-        t = crud.generateModelInfo(settings.rdbms, self.space, tbl)
+        t = crud.generateModelInfo(self.mapper, tbl)
         fields = {}
 
         for col in t['cols']:
             # get the correct key reference for column in self.submission...
-            if crud.isProblematicKey(self.dbConfigs['keys']['problematic'], col, True):
+            if self.mapper.isCommonField(col):
                 key = tbl + col  # add on a prefix to match self.submission keys
             else:
                 key = col

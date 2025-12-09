@@ -1,4 +1,5 @@
 from tasks.models import *
+from .mappers.tasks import TasksMapper, ValuesManager
 from .querysets.tasks import *
 from .background import O2ORecords, RevisionlessChildren, M2OChildren
 
@@ -12,6 +13,8 @@ class CRUD(O2ORecords.CRUD):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
 
+        self.mapper = TasksMapper()
+        self.valuesMapper = ValuesManager()
         super().__init__()
 
     def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
@@ -23,7 +26,8 @@ class CRUD(O2ORecords.CRUD):
             raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
 
         if 'all' in selectors:
-            selectors = list(self.dbConfigs['keys']['o2oAllCols'].keys())
+            recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
+            selectors = list(recordKeys.keys())
 
         rawObjs = self.mtModel.objects.fetchTasks(selectors, conditions, orderBy, limit)
         
@@ -39,7 +43,7 @@ class CRUD(O2ORecords.CRUD):
         conditions = {
             # "assignee_id": None,
             "update_time": None,
-            "latest": self.module['values']['latest']['latest'],
+            "latest": self.valuesMapper.latest('latest'),
             "visibility": None,
             "status": None,
             "tid": task_id,
@@ -62,6 +66,8 @@ class Comments(RevisionlessChildren.CRUD):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
 
+        self.mapper = TasksMapper()
+        self.valuesMapper = ValuesManager()
         super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
     def read(self, definitions):
@@ -73,13 +79,13 @@ class Comments(RevisionlessChildren.CRUD):
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
         for pk in self.rlcIdCols:
-            model = globals()[self.dbConfigs['models'][pk]]
+            model = globals()[self.mapper.models(pk)]
             if pk in definitions:
                 # specific record being sought:
                 rawObjs = model.objects.fetchById(definitions[pk])
 
             else:
-                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.dbConfigs['mtId']])
+                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.mapper.master('foreignKeyName')])
         
         if rawObjs:
             return rawObjs
@@ -91,11 +97,16 @@ class Watchers(M2OChildren.CRUD):
        This is a Many-to-One relations table, where many 'watchers' are
        being assigned to a single Tasks' MT record.
     """
-    firstCol = 'task_id'
-    secondCol = 'watcher_id'
 
     def __init__(self):
         self.pk = 'wid'  # set table_abbrv for use in queries.
         self.space = 'tasks'  # holds the name of current module/space
 
+        self.mapper = TasksMapper()
+        self.valuesMapper = ValuesManager()
+
+        cols = self.mapper.m2mFields('w')
+        self.firstCol = cols['firstCol']
+        self.secondCol = cols['secondCol']
         super.__init__()
+        

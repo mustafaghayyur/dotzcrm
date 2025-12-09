@@ -19,8 +19,7 @@ class CRUD(CrudOperations.Background):
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         
-        mtId = self.dbConfigs['mtAbbrv'] + 'id'
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
+        mtId = self.mapper.master('abbreviation') + 'id'
         # self.log(self.submission, 'FORM-------------------------------------')
 
         masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
@@ -31,7 +30,7 @@ class CRUD(CrudOperations.Background):
 
         for pk in self.rlcIdCols:
             tbl = pk[0]  # table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
     
             self.createChildTable(model, tbl, t['table'], t['cols'], True)
@@ -47,8 +46,7 @@ class CRUD(CrudOperations.Background):
         """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-        mtId = self.dbConfigs['mtAbbrv'] + 'id'
+        mtId = self.mapper.master('abbreviation') + 'id'
 
         # masterRecords gets the parent record id, to which this RLC belongs
         masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
@@ -66,7 +64,7 @@ class CRUD(CrudOperations.Background):
                 raise Exception(f'No valid RLC record found for provided ID, in: {self.space}.CRUD.update().')
             
             tbl = pk[0]  # child table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
                 
             # determine if an update is necessary and carry out update operations...
@@ -81,12 +79,10 @@ class CRUD(CrudOperations.Background):
         if not isinstance(rlcId, int) or rlcId < 1:
             raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-
         for pk in self.rlcIdCols:
 
             tbl = pk[0]  # table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             self.deleteChildTableById(model, tbl, t['table'], t['cols'], rlcId)
@@ -100,11 +96,9 @@ class CRUD(CrudOperations.Background):
         if not isinstance(masterId, int) or masterId < 1:
             raise Exception(f'RLC Records could not be deleted. Invalid Master-ID supplied in {self.space}.CRUD.delete()')
 
-        rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
-
         for pk in self.rlcIdCols:
             tbl = pk[0]  # table abbreviation
-            t = crud.generateModelInfo(rdbms, self.space, tbl)
+            t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             self.deleteChildTable(model, tbl, t['table'], t['cols'], masterId, True)
