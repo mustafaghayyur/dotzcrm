@@ -91,6 +91,8 @@ class Watchers(M2OChildren.CRUD):
        This is a Many-to-One relations table, where many 'watchers' are
        being assigned to a single Tasks' MT record.
     """
+    firstCol = 'task_id'
+    secondCol = 'watcher_id'
 
     def __init__(self):
         self.pk = 'wid'  # set table_abbrv for use in queries.

@@ -120,7 +120,7 @@ class VisibilityQuerySet(records.ChildQuerySet):
     module = tasks  # bring is module's settings
 
 
-class WatcherQuerySet(records.M2OChildQuerySet):
+class WatcherQuerySet(records.M2MChildQuerySet):
     tbl = 'tasks_watcher'
     master_col = 'task_id'
     space = 'tasks'

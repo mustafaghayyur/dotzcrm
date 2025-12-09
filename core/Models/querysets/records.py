@@ -6,7 +6,7 @@ from core.settings import rdbms
 # The QuerySet family of definitions will be essential to maintaining
 # strict data-integrity and database-interactions standards.
 #
-# Where Python ORM's standard functions are not used to operate
+# Where Django ORM's standard functions are not used to operate
 # on the MySQL DB, these QuerySet methods should be used to
 # interact with the MySQL DB.
 #
@@ -204,26 +204,21 @@ class MasterTableQuerySet(models.QuerySet):
 
 """
     =======================================================================
-    
     Children QuerySets will be based on the various data-models we use
-    in DotzCRM:
-     -> One-to-One data models have a singular, unique relation to each other.
-        These tables also carry revisions, making the 'latest' demarcation necessary.
-     -> Many-to-One data models. These also carry revisions. Typically the MT
-        is the One-Table, and a specific CT is the Many-Table.
-     -> Revision-less Children (RLC) data models. These have no revisions, thus no
-        'latest' field. However, they too carry a many-to-one relationship with
-        the MT.
-     -> Many-to-Many data models. 
-
+    in DotzCRM...
     =====================================================================
 """
+
 class ChildQuerySet(models.QuerySet):
     """
-        Child Tables' QuerySet:
-        This class carries common functions needed by all children tables
-        of Master Table.
         Primarily for One-to-One types
+
+        One-to-One data models have a singular, unique relation to each other.
+        These tables also carry revisions, making the 'latest' demarcation 
+        necessary.
+
+        Though this class carries some common functions needed by all 
+        child tables of Master Table (M2M, RLC).
     """
 
     # These are to be set in inherited class:
@@ -235,7 +230,7 @@ class ChildQuerySet(models.QuerySet):
     def fetchById(self, cId):
         """
             Fetch specific CT record by its own ID.
-            Applies to O2O, M2O, M2M and RLC Records
+            Applies to O2O, M2M, M2M and RLC Records
         """
         query = f"""
             SELECT * FROM {self.tbl}
@@ -297,7 +292,10 @@ class ChildQuerySet(models.QuerySet):
 
 class RLCChildQuerySet(ChildQuerySet):
     """
-        For Revision-less Children data models
+        Revision-less Children (RLC) data models. 
+
+        These have no revisions, thus no 'latest' field. However, 
+        they too carry a many-to-many relationship with the MT.
     """
     def fetchAllByMasterIdRLC(self, mtId):
         """
@@ -312,67 +310,72 @@ class RLCChildQuerySet(ChildQuerySet):
 
         return self.raw(query, [mtId])
 
-class M2OChildQuerySet(ChildQuerySet):
+class M2MChildQuerySet(ChildQuerySet):
     """
-        For Many-to-One Record types
+        Many-to-Many data models. 
+
+        These also carry revisions. Typically the MT is the First-Table-Id, 
+        and a outside-entity is the Second-Table-Id.
+
+        First and Second cols defined in settings
     """
 
     def __init__(self, model=None, query=None, using=None, hints=None):
-        self.oneColumn = rdbms[self.space]['keys']['m2o'][self.tbl]['oneCol']
-        self.manyColumn = rdbms[self.space]['keys']['m2o'][self.tbl]['manyCol']
+        self.firstColumn = rdbms[self.space]['keys']['m2m'][self.tbl]['firstCol']
+        self.secondColumn = rdbms[self.space]['keys']['m2m'][self.tbl]['secondCol']
         
         super().__init__(model, query, using, hints)
 
-    def fetchAllCurrentByManyId(self, manyId):
+    def fetchAllCurrentBySecondId(self, secondId):
         """
-            Fetch all the latest of child table records referencing ManyId.
+            Fetch all the latest of child table records referencing secondId.
         """
         query = f"""
             SELECT * FROM {self.tbl}
-                WHERE {self.manyColumn} = %s
+                WHERE {self.secondColumn} = %s
                 AND latest = %s
             """
 
         latest = self.module['values']['latest']['latest']
-        return self.raw(query, [manyId, latest])
+        return self.raw(query, [secondId, latest])
     
-    def fetchAllCurrentByOneId(self, oneId):
+    def fetchAllCurrentByFirstId(self, firstId):
         """
-            Fetch all the latest of child table records referencing OneId.
+            Fetch all the latest of child table records referencing firstId.
         """
         query = f"""
             SELECT * FROM {self.tbl}
-                WHERE {self.oneColumn} = %s
+                WHERE {self.firstColumn} = %s
                 AND latest = %s
             """
 
         latest = self.module['values']['latest']['latest']
-        return self.raw(query, [oneId, latest])
+        return self.raw(query, [firstId, latest])
 
-    def fetchAllRevisions(self, oneId, manyId):
+    def fetchAllRevisions(self, firstId, secondId):
         """
-            Fetch revision history of CT records for One & Many Ids.
+            Fetch revision history of CT records for First & Second Ids.
         """
         query = f"""
             SELECT * FROM {self.tbl}
-                WHERE {self.oneColumn} = %s
-                AND {self.manyColumn} = %s
+                WHERE {self.firstColumn} = %s
+                AND {self.secondColumn} = %s
                 ORDER BY create_time DESC
             """
 
-        return self.raw(query, [oneId, manyId])
+        return self.raw(query, [firstId, secondId])
 
-    def fetchRevision(self, oneId, manyId, revision = 0):
+    def fetchRevision(self, firstId, secondId, revision = 0):
         """
             Fetch a specific revision # (zero-indexed) of child table record 
             for One Id.
         """
         query = f"""
             SELECT * FROM {self.tbl}
-                WHERE {self.oneColumn} = %s
-                AND {self.manyColumn} = %s
+                WHERE {self.firstColumn} = %s
+                AND {self.secondColumn} = %s
                 ORDER BY create_time DESC
                 LIMIT 1 OFFSET (%s);
             """
 
-        return self.raw(query, [oneId, manyId, revision])
+        return self.raw(query, [firstId, secondId, revision])

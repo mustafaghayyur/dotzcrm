@@ -66,15 +66,11 @@ M
  > Master Table: see mt above.
 
  > Model: a Model with a capital M, refers not to the default django models found in each module's codebase. But the the core.Models directory. Please see README.md of that directory for more info.
+ 
 
- > Many-To-Many Children: a type of node in the system, where child-table nodes can't simply be retrieved as single-latest revisions of the master-table's record-set. These data-types need special handling for CRUD operations.
+ > Many-To-Many Children: a type of node in the system, where child-table nodes can't be retrieved as a single-latest revision of a master-table's record-set. These data-types need special handling for CRUD operations
  
  > M2M: see Many-To-Many Children above.
-
- > Many-To-One Children: a type of node in the system, where child-table nodes can't be retrieved as a single-latest revision of a master-table's record-set. These data-types need special handling for CRUD operations
-
- > ManyId, Many-Column-Name: In a Many-to-One relationship the many-column-name identifies the FK of the table which has a repeating relationship. 
-
 
 N
 --
@@ -83,7 +79,6 @@ N
 O
 --
 
- > OneId, One-Column-Name: In a Many-to-One relationship the one-column-name identifies the FK of the table which has a non-repeating relationship. 
 
 P
 --

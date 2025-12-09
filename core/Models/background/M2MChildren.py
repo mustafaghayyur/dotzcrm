@@ -3,23 +3,28 @@ from core.helpers import crud  # , misc
 from . import CrudOperations
 
 """
-    Many-to-One CRUD Operations that can be used through out the system.
+    Many-to-Many CRUD Operations that can be used through out the system.
     
-    In a M2O relationship, there are two key columns to watch out for, the
-    one ID (often MT ID) that cannot have multiples; and the many ID (CT) which 
-    can show up numerous times in the result sets.
-    
-    By making sure many-correct FKs are handled correctly in reference to
-    a single MT ID, we can keep the M2O relationship meaningful.
+    In a M2M relationship, there are two key columns to watch out for: 
+     - FirstId: refers to the first FK of another table we are tracking
+     - SecondId: refers to the second FK of yet, another table we wish
+       the firstId to be associated with.
+
+    Note: first and second can carry significance for each specific 'Model'
+    that inherits this class. Should be appropriately assigned in
+     > settings.rdbms.{space}.keys.m2m.{your Model's table}
 """
 class CRUD(CrudOperations.Background):
 
+    firstCol = None  # defined in inheritor
+    secondCol = None  # defined in inheritor
+    
     def __init__(self):
         super().__init__()
 
     def create(self, dictionary):
         """
-            Creation of a single record per M2O CT.
+            Creation of a single record per M2M CT.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
@@ -28,13 +33,12 @@ class CRUD(CrudOperations.Background):
         t = crud.generateModelInfo(rdbms, self.space, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
         
-        m2oKeys = self.dbConfigs['keys']['m2o'][t['table']]  # fetch m2o keys for table
         skip = False
 
-        if not crud.isValidId(self.submission, m2oKeys['oneCol']):
+        if not crud.isValidId(self.submission, self.firstCol):
             skip = True
 
-        if not crud.isValidId(self.submission, m2oKeys['manyCol']):
+        if not crud.isValidId(self.submission, self.secondCol):
             skip = True
 
         if skip:
@@ -55,26 +59,25 @@ class CRUD(CrudOperations.Background):
         tbl = self.pk[0]  # table abbreviation
         t = crud.generateModelInfo(rdbms, self.space, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
-        m2oKeys = self.dbConfigs['keys']['m2o'][t['table']]  # fetch m2o keys for table
 
         if self.pk in definitions:
             if crud.isValidId(definitions, self.pk):
                 # specific record being sought:
                 rawObjs = model.objects.fetchById(definitions[self.pk])
             
-        if m2oKeys['oneCol'] in definitions and m2oKeys['manyCol'] not in definitions:        
-            if crud.isValidId(definitions, m2oKeys['oneCol']):
+        if self.firstCol in definitions and self.secondCol not in definitions:        
+            if crud.isValidId(definitions, self.firstCol):
                 if definitions['latest']:
-                    rawObjs = model.objects.fetchAllCurrentByOneId(definitions[m2oKeys['oneCol']])
+                    rawObjs = model.objects.fetchAllCurrentByFirstId(definitions[self.firstCol])
         
-        if m2oKeys['manyCol'] in definitions and m2oKeys['oneCol'] not in definitions:
-            if crud.isValidId(definitions, m2oKeys['manyCol']):
+        if self.secondCol in definitions and self.firstCol not in definitions:
+            if crud.isValidId(definitions, self.secondCol):
                 if definitions['latest']:
-                    rawObjs = model.objects.fetchAllCurrentByManyId(definitions[m2oKeys['manyCol']])
+                    rawObjs = model.objects.fetchAllCurrentBySecondId(definitions[self.secondCol])
         
-        if m2oKeys['oneCol'] in definitions and m2oKeys['manyCol'] in definitions:        
-            if crud.isValidId(definitions, m2oKeys['oneCol']) and crud.isValidId(definitions, m2oKeys['manyCol']):
-                rawObjs = model.objects.fetchAllRevisions(definitions[m2oKeys['oneCol']], definitions[m2oKeys['manyCol']])
+        if self.firstCol in definitions and self.secondCol in definitions:        
+            if crud.isValidId(definitions, self.firstCol) and crud.isValidId(definitions, self.secondCol):
+                rawObjs = model.objects.fetchAllRevisions(definitions[self.firstCol], definitions[self.secondCol])
 
         if rawObjs:
             return rawObjs
@@ -83,36 +86,35 @@ class CRUD(CrudOperations.Background):
 
     def update(self, dictionary):
         """
-            Update of a single record per M2O CT.
+            Update of a single record per M2M CT.
         """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
         if not crud.isValidId(self.submission, self.pk):
-            raise Exception(f'No valid M2O ID provided, in: {self.space}.CRUD.update().')
+            raise Exception(f'No valid M2M ID provided, in: {self.space}.CRUD.update().')
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
         
         tbl = self.pk[0]  # child table abbreviation
         t = crud.generateModelInfo(rdbms, self.space, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
-        m2oKeys = self.dbConfigs['keys']['m2o'][t['table']]  # fetch m2o keys for table
 
-        originalM2O = self.read({self.pk: self.submission[self.pk]})
-        self.log(originalM2O, 'JUST CONFIRMING if originalM2O record is being fetched correctly in updateM2O()')
+        originalM2M = self.read({self.pk: self.submission[self.pk]})
+        self.log(originalM2M, 'JUST CONFIRMING if originalM2M record is being fetched correctly in updateM2M()')
 
-        if not originalM2O:
-            raise Exception(f'No valid M2O record found for provided ID, in: {self.space}.CRUD.update().')
+        if not originalM2M:
+            raise Exception(f'No valid M2M record found for provided ID, in: {self.space}.CRUD.update().')
             
         # determine if an update is necessary and carry out update operations...
-        self.updateChildTable(model, tbl, t['table'], t['cols'], originalM2O)
+        self.updateChildTable(model, tbl, t['table'], t['cols'], originalM2M)
 
-    def deleteById(self, m2oId):
+    def deleteById(self, m2mId):
         """
-            Attempts to delete a single child record that of M2O relationship
+            Attempts to delete a single child record that of M2M relationship
             type, by its Unique ID.
         """
-        if not isinstance(m2oId, int) or m2oId < 1:
-            raise Exception(f'M2O Record could not be deleted. Invalid id supplied in {self.space}.CRUD.deleteM2O()')
+        if not isinstance(m2mId, int) or m2mId < 1:
+            raise Exception(f'M2M Record could not be deleted. Invalid id supplied in {self.space}.CRUD.deleteM2M()')
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
@@ -121,15 +123,15 @@ class CRUD(CrudOperations.Background):
         t = crud.generateModelInfo(rdbms, self.space, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
-        self.__deleteChildTableById(model, tbl, t['table'], t['cols'], m2oId)
+        self.__deleteChildTableById(model, tbl, t['table'], t['cols'], m2mId)
 
-    def deleteAllForOneCol(self, oneColId):
+    def deleteAllForFirstCol(self, firstColId):
         """
-            Attempts to delete all M2O-type children records for a MT ID
+            Attempts to delete all M2M-type children records for a MT ID
             provided.
         """
-        if not isinstance(oneColId, int) or oneColId < 1:
-            raise Exception(f'M2O Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2O()')
+        if not isinstance(firstColId, int) or firstColId < 1:
+            raise Exception(f'M2M Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2M()')
 
         rdbms = {self.space: self.dbConfigs, 'tables': self.tables}
 
@@ -137,18 +139,17 @@ class CRUD(CrudOperations.Background):
         t = crud.generateModelInfo(rdbms, self.space, tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
-        self.__deleteAllM2O(model, tbl, t['table'], t['cols'], oneColId)
+        self.__deleteAllM2M(model, tbl, t['table'], t['cols'], firstColId)
 
-    def __deleteAllM2O(self, modelClass, tbl, tableName, columnsList, oneColId):
+    def __deleteAllM2M(self, modelClass, tbl, tableName, columnsList, firstColId):
         """
-            Helper function for deleteAllForOneCol()
-            For M2O type nodes only
+            Helper function for deleteAllForFirstCol()
+            For M2M type nodes only
         """
-        self.log(None, f'ENTERING deleteAllForOneCol for CT [{tbl}]')
-        m2oKeys = self.dbConfigs['keys']['m2o'][t['table']]  # fetch m2o keys for table
+        self.log(None, f'ENTERING deleteAllForFirstCol for CT [{tbl}]')
         
         fieldsF = {}  # fields to find records with
-        fieldsF[m2oKeys['oneCol']] = oneColId
+        fieldsF[self.firstCol] = firstColId
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
@@ -161,7 +162,7 @@ class CRUD(CrudOperations.Background):
     def __deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
         """
             Helper function for deleteById()
-            For M2O type nodes only
+            For M2M type nodes only
         """
         self.log(None, f'ENTERING deleteById for CT [{tbl}]')
         
