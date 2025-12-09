@@ -1,3 +1,4 @@
+from core.helpers import misc
 
 class RelationshipMappers():
     """
@@ -23,6 +24,7 @@ class RelationshipMappers():
 
     def tableFields(self, name = 'all'):
         tables = self._tableFields()
+        #misc.log(name, 'tableFields() -> name key') # <-- working
         return self.returnValue(tables, name)
 
     def master(self, key = 'all'):
@@ -66,13 +68,15 @@ class RelationshipMappers():
         o2oTables = self.tablesForRelationType('o2o')  # fetch all o2o tables
         mt = self.master('abbreviation')
         o2oTables.append(mt)  # add master-table to list
-
+        
         commonFields = self.commonFields()
 
         recordKeys = {}  # open returned dictionary
 
         for tbl in o2oTables:
-            fields = self.tableFields(tbl)
+            tblName = self.tables(tbl)
+            fields = self.tableFields(tblName)
+            #misc.log(fields, 'generateO2OFields() -> fields for ' + tbl)
 
             if not isinstance(fields, list):
                 continue
@@ -101,7 +105,7 @@ class RelationshipMappers():
         for abbrv in abbrvs:
             ids.append(abbrv + 'id')
 
-        return abbrv
+        return ids
 
     def abbreviations(self):
         """
@@ -128,11 +132,16 @@ class RelationshipMappers():
         """
             Helper function. Used internally.
         """
+        #misc.log(info, 'returnValue() -> this is for info')
+        misc.log(key, 'returnValue() -> this is for key')
         if key is not None and key in info:
+            #misc.log(info[key], 'in returnValue() -> returning info[key]')
             return info[key]
 
         if key == 'all':
+            #misc.log(info[key], 'in returnValue() -> returning whole info')
             return info
 
+        #misc.log(info[key], 'in returnValue() -> returning None')
         return None
 

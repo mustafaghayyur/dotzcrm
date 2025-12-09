@@ -1,7 +1,7 @@
 from django.db import models
-from django.conf import settings
+from django.conf import settings as sysconf
 
-# get our querysets (the core of our RDMS logic)
+# import our QuerySets:
 from core.Models.querysets.tasks import *
 
 
@@ -9,7 +9,7 @@ from core.Models.querysets.tasks import *
 class Task(models.Model):
     description = models.CharField(max_length=255)
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
+        sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
@@ -66,7 +66,7 @@ class Visibility(models.Model):
 class Watcher(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     watcher = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
+        sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
     )
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
@@ -82,12 +82,12 @@ class Watcher(models.Model):
 class Assignment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     assignor = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
+        sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
         related_name='asasignor_user'
     )
     assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # Reference the user model defined in settings
+        sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
         related_name='asasignee_user'
     )

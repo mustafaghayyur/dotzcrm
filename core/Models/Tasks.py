@@ -1,7 +1,7 @@
 from tasks.models import *
 from .mappers.tasks import TasksMapper, ValuesManager
 from .querysets.tasks import *
-from .background import O2ORecords, RevisionlessChildren, M2OChildren
+from .background import O2ORecords, RevisionlessChildren, M2MChildren
 
 class CRUD(O2ORecords.CRUD):
     """
@@ -92,7 +92,7 @@ class Comments(RevisionlessChildren.CRUD):
 
         return None
 
-class Watchers(M2OChildren.CRUD):
+class Watchers(M2MChildren.CRUD):
     """
        This is a Many-to-One relations table, where many 'watchers' are
        being assigned to a single Tasks' MT record.

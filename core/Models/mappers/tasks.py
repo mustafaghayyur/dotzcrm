@@ -1,10 +1,12 @@
-from . import RelationshipMappers
+from .RelationshipMappers import RelationshipMappers
+from core.helpers import misc
 
 class TasksMapper(RelationshipMappers):
     """
         All calls should be made to following method names without the '_' prefix.
         RelationshipMappers() has proper wrapper functions.
     """
+
     def __init__(self):
         pass
 
@@ -120,18 +122,18 @@ class ValuesManager():
     Enums will be managed in the application layer.
     """
 
-    def latest(self, key):
+    def latest(self, key = 'all'):
         values = {
             'archive': 2,
             'latest': 1,
         }
-
+        
         if key is not None and key in values:
             return values[key]
 
         return values
 
-    def status(self, key):
+    def status(self, key = 'all'):
         values = {
             'assigned': 'assigned',
             'viewed': 'viewed',
@@ -150,7 +152,7 @@ class ValuesManager():
 
         return values
 
-    def visibility(self, key):
+    def visibility(self, key = 'all'):
         values = {
             'private': 'private',
             'assigned': 'assigned',

@@ -11,8 +11,9 @@ class TasksQuerySet(records.MasterTableQuerySet):
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.space = 'tasks'  # used by some modules
         self.mapper = tasksMappers.TasksMapper()
-        self.valuesMapper = tasksMappers.ValuesManager
+        self.valuesMapper = tasksMappers.ValuesManager()
         self.tableCols = self.mapper.generateO2OFields()
+        misc.log(self.tableCols, 'self.tableCols when defined')
 
         super().__init__(model, query, using, hints)
         
@@ -49,8 +50,8 @@ class TasksQuerySet(records.MasterTableQuerySet):
             ORDER BY {orderBy} LIMIT {limit};
             """
 
-        # misc.log(query, 'SEARCH QUERY STRING')
-        # misc.log(params, 'SEARCH PARAMS')
+        misc.log(query, 'SEARCH QUERY STRING')
+        misc.log(params, 'SEARCH PARAMS')
         return self.raw(query, params, translations)
 
     def _generateDefaultConditions(self):

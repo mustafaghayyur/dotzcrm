@@ -1,5 +1,5 @@
 from django.db import models
-from core.helpers import crud
+from core.helpers import crud, misc
 
 ##########################################################################
 # The QuerySet family of definitions will be essential to maintaining
@@ -33,11 +33,14 @@ class MasterTableQuerySet(models.QuerySet):
         # Compiles all inputs provided and readies them for use in the specified Query.
         """
         defaultConditions = self._generateDefaultConditions()
+        misc.log(defaultConditions, 'defaultConditions')
 
         if conditions is None:
             conditions = {}
+        misc.log(conditions, 'conditions')
 
         actualConditions = self._mergeConditions(defaultConditions, conditions)
+        misc.log(actualConditions, 'actualConditions')
 
         whereStatements = []
         params = {}
@@ -148,7 +151,9 @@ class MasterTableQuerySet(models.QuerySet):
             The provided conditions over-write the defaults.
         """
         conditions = defaults | provided  # merge provided conditions into the defaults
+        misc.log(conditions, '_mergeConditions()-> merged conditions (before validation)')
         final = self._validateConditions(conditions)
+        misc.log(final, '_mergeConditions()-> the final cond dict')
         return final
 
     def _validateConditions(self, conditions):
@@ -156,6 +161,7 @@ class MasterTableQuerySet(models.QuerySet):
             @input conditions: [dict] all condition items should be primitive data types or lists.
         """
         tableCols = list(self.tableCols.keys())
+        misc.log(tableCols, '_validateConditions()-> tableCols list (shouldn;t be empty')
         keys = list(conditions.keys())  # copy keys of conditions to loop over
 
         for k in keys:
