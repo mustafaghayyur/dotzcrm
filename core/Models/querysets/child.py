@@ -28,7 +28,7 @@ class CTQuerySet(models.QuerySet):
     mapper = None
     valuesMapper = None
 
-    def __init__(self, tableName, model=None, query=None, using=None, hints=None):
+    def __init__(self, model=None, query=None, using=None, hints=None):
         self.master_col = self.mapper.master('foreignKeyName')
 
         super().__init__(model, query, using, hints)

@@ -51,15 +51,15 @@ class CRUD(CrudOperations.Background):
         """
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
-        mtId = self.mapper.master('abbreviation') + 'id'
+        mId = self.mapper.master('abbreviation') + 'id'
 
-        records = self.fetchFullRecordForUpdate(self.submission[mtId])
+        records = self.fetchFullRecordForUpdate(self.submission[mId])
 
         if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
 
         if len(records) > 1:
-            completeRecord = self.pruneLatestRecords(records, mtId)
+            completeRecord = self.pruneLatestRecords(records, mId)
         else:
             completeRecord = records[0]
 
@@ -69,7 +69,7 @@ class CRUD(CrudOperations.Background):
             t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
 
-            if pk == mtId:
+            if pk == mId:
                 self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
                 continue
 
@@ -111,7 +111,7 @@ class CRUD(CrudOperations.Background):
         self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
 
 
-    def pruneLatestRecords(self, fetchedRecords, mtId):
+    def pruneLatestRecords(self, fetchedRecords, mId):
         """
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
@@ -130,13 +130,13 @@ class CRUD(CrudOperations.Background):
 
             self.checkChildForMultipleLatests(model, tbl, t['table'], t['cols'], fetchedRecords)
 
-        records = self.fetchFullRecordForUpdate(mtId)
+        records = self.fetchFullRecordForUpdate(mId)
 
         if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
 
         if len(records) > 1:
-            return self.pruneLatestRecords(records, mtId)  # bit if recursion
+            return self.pruneLatestRecords(records, mId)  # bit if recursion
 
         return records[0]
 
