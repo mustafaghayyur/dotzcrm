@@ -128,12 +128,20 @@ class RelationshipMappers():
                 return abbrv
         return None
 
+    def columnName(self, key, sphere = 'all'):
+        """
+            For future implementation.
+            Validate requested key is valid in mapper.
+        """
+
+        return key
+
     def returnValue(self, info, key):
         """
             Helper function. Used internally.
         """
         #misc.log(info, 'returnValue() -> this is for info')
-        misc.log(key, 'returnValue() -> this is for key')
+        #misc.log(key, 'returnValue() -> this is for key')
         if key is not None and key in info:
             #misc.log(info[key], 'in returnValue() -> returning info[key]')
             return info[key]

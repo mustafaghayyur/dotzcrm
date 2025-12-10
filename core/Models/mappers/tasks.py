@@ -69,7 +69,7 @@ class TasksMapper(RelationshipMappers):
 
             Note: 'latest' is intentionally excluded.
         """
-        return ['id', 'create_time', 'update_time', 'delete_time']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
