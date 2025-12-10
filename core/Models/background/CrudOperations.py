@@ -1,9 +1,9 @@
 from django.utils import timezone
-import datetime
 from tasks.models import *
 from core.helpers import crud, misc
 from core import settings
 from . import Validation
+from .Values import ValuesHandler
 
 """
     This class holds the background crud operations.
@@ -29,9 +29,10 @@ class Background(Validation.ErrorHandling):
         # First, we do some error checking on the dictionary supplied:
         self.dictValidation(self.space, operation, submission)
         
-        # Second, we make sure the master-table-id is included in record:
-        submission = self.mtIdValidation(operation, submission)
-        
+        if operation != 'create':
+            # Second, we make sure the master-table-id is included in record:
+            submission = self.mtIdValidation(operation, submission)
+            
         # Finally, we save the submitted form into self.submission
         self.submission = submission
 
@@ -69,17 +70,26 @@ class Background(Validation.ErrorHandling):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         fields = {}
+        ignored = self.mapper.ignoreOnUpdates(tableName)
+
         for col in columnsList:
+            if col in ignored:
+                continue  # ignore columns don't need a comparison in update operations
+
             if self.mapper.isCommonField(col):
                 key = self.mapper.master('abbreviation') + col  # need tbl_abbrv prefix for comparison
             else:
                 key = col
 
             if key in self.submission:
-                if self.submission[key] != getattr(completeRecord, col):
-                    fields[col] = self.submission[key]
-                    self.log([key, self.submission[key], col, getattr(completeRecord, col)], 'MISMATCH')
+                self.submission[key] = ValuesHandler.amendFormValue(getattr(completeRecord, col), self.submission[key])
+                dbVal = ValuesHandler.amendDatabaseValue(getattr(completeRecord, col), self.submission[key])
+                
                 self.log([key, col], 'comparing in MT Update')
+
+                if self.submission[key] != dbVal:
+                    fields[col] = self.submission[key]
+                    self.log([key, self.submission[key], col, dbVal], 'MISMATCH')
 
         fields['update_time'] = timezone.now()
 
@@ -98,30 +108,24 @@ class Background(Validation.ErrorHandling):
         rlcFields = {}  # fields for RLC update
 
         for col in columnsList:
+            if col in ignored:
+                continue  # ignore columns don't need a comparison in update operations
+
             if self.mapper.isCommonField(col):
                 key = tbl + col  # need tbl-abbrv prefix for comparison
             else:
                 key = col
 
             if key in self.submission:
-                if isinstance(self.submission[key], object):
-                    if hasattr(self.submission[key], 'id'):
-                        # need to overwrite dictionary key with int value for comparison
-                        self.submission[key] = self.submission[key].id
+                self.submission[key] = ValuesHandler.amendFormValue(getattr(completeRecord, col), self.submission[key])
+                dbVal = ValuesHandler.amendDatabaseValue(getattr(completeRecord, col), self.submission[key])
                 
-                if col in ignored:
-                    continue  # ignore columns don't need a comparison in child-update operations
-
-                dbVal = getattr(completeRecord, col)
-                if self.submission[key] is not None and isinstance(self.submission[key], datetime.datetime):
-                    dbVal = timezone.make_aware(dbVal, timezone.get_current_timezone())
+                self.log([key, col], 'comparing in CT Update')
 
                 if self.submission[key] != dbVal:
                     self.log([key, self.submission[key], col, dbVal], f'MISMATCH -  update needed')
                     rlcFields[col] = dbVal
                     updateRequired = True  # changes found in dictionary record
-
-                self.log([key, col], 'comparing in CT Update')
 
         if updateRequired:
             if rlc:
@@ -176,7 +180,7 @@ class Background(Validation.ErrorHandling):
         return record
 
     def createMasterTable(self, tbl, modelClass, rlc = False):
-        self.log(None, f'Entering create operation for MasterTable: [{tbl}]')
+        self.log(None, f'Entering create operation for MT: [{tbl}]')
         
         t = crud.generateModelInfo(self.mapper, tbl)
         fields = {}
@@ -216,7 +220,7 @@ class Background(Validation.ErrorHandling):
         """
         pass
 
-    def _generateCreatorId(self, assignor):
+    def _generateCreatorId(self):
         if 'assignor_id' in self.submission:
             if self.submission['assignor_id'] is not None:
                 if isinstance(self.submission['assignor_id'], object):

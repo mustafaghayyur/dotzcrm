@@ -1,4 +1,4 @@
-from core.helpers import misc
+# from core.helpers import misc
 
 class RelationshipMappers():
     """
@@ -24,7 +24,6 @@ class RelationshipMappers():
 
     def tableFields(self, name = 'all'):
         tables = self._tableFields()
-        #misc.log(name, 'tableFields() -> name key') # <-- working
         return self.returnValue(tables, name)
 
     def master(self, key = 'all'):
@@ -40,11 +39,11 @@ class RelationshipMappers():
         return self.returnValue(info, key)
 
     def ignoreOnUpdates(self, key = 'all'):
-        info = self._ignoreOnUpdates(key)
+        info = self._ignoreOnUpdates()
         return self.returnValue(info, key)
 
     def m2mFields(self, tbl = 'all'):
-        relationships = self._m2mFields(tbl)
+        relationships = self._m2mFields()
         return self.returnValue(relationships, tbl)
 
     def isCommonField(self, key, prefix = False):
@@ -66,9 +65,6 @@ class RelationshipMappers():
             tasks.comments are not included in the 'full record'
         """
         o2oTables = self.tablesForRelationType('o2o')  # fetch all o2o tables
-        mt = self.master('abbreviation')
-        o2oTables.append(mt)  # add master-table to list
-        
         commonFields = self.commonFields()
 
         recordKeys = {}  # open returned dictionary
@@ -76,7 +72,6 @@ class RelationshipMappers():
         for tbl in o2oTables:
             tblName = self.tables(tbl)
             fields = self.tableFields(tblName)
-            #misc.log(fields, 'generateO2OFields() -> fields for ' + tbl)
 
             if not isinstance(fields, list):
                 continue
@@ -98,6 +93,7 @@ class RelationshipMappers():
         """
             Returns [list] of id column names with tbl prefix prepended.
             You can fetch 'o2o', 'm2m', 'rlc' columns with this.
+            Defaults to 'o2o'
         """
         abbrvs = self.tablesForRelationType(relationType)
         ids = []
@@ -128,20 +124,23 @@ class RelationshipMappers():
                 return abbrv
         return None
 
+    def columnName(self, key, sphere = 'all'):
+        """
+            For future implementation.
+            Validate requested key is valid in mapper.
+        """
+
+        return key
+
     def returnValue(self, info, key):
         """
             Helper function. Used internally.
         """
-        #misc.log(info, 'returnValue() -> this is for info')
-        misc.log(key, 'returnValue() -> this is for key')
         if key is not None and key in info:
-            #misc.log(info[key], 'in returnValue() -> returning info[key]')
             return info[key]
 
         if key == 'all':
-            #misc.log(info[key], 'in returnValue() -> returning whole info')
             return info
 
-        #misc.log(info[key], 'in returnValue() -> returning None')
         return None
 

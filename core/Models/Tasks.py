@@ -1,6 +1,6 @@
 from tasks.models import *
 from .mappers.tasks import TasksMapper, ValuesManager
-from .querysets.tasks import *
+from .querysets.Tasks import *
 from .background import O2ORecords, RevisionlessChildren, M2MChildren
 
 class CRUD(O2ORecords.CRUD):
@@ -29,7 +29,7 @@ class CRUD(O2ORecords.CRUD):
             recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
             selectors = list(recordKeys.keys())
 
-        rawObjs = self.mtModel.objects.fetchTasks(selectors, conditions, orderBy, limit)
+        rawObjs = self.mtModel.objects.fetch(selectors, conditions, orderBy, limit)
         
         if rawObjs:
             return rawObjs
@@ -49,7 +49,7 @@ class CRUD(O2ORecords.CRUD):
             "tid": task_id,
         }
 
-        rawObj = self.read(['all'], conditions, limit='')
+        rawObj = self.read(['all'], conditions)
 
         if rawObj:
             return rawObj  # returns all records found.
@@ -105,7 +105,7 @@ class Watchers(M2MChildren.CRUD):
         self.mapper = TasksMapper()
         self.valuesMapper = ValuesManager()
 
-        cols = self.mapper.m2mFields('w')
+        cols = self.mapper.m2mFields(self.pk[0])
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super.__init__()

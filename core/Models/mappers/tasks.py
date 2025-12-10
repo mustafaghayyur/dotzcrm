@@ -52,7 +52,7 @@ class TasksMapper(RelationshipMappers):
     def _tablesForRelationType(self, relationType):
         match relationType:
             case 'o2o':
-                return ['d', 'l', 's', 'v', 'a']
+                return ['t', 'd', 'l', 's', 'v', 'a']
             case 'm2m':
                 return ['w']
             case 'rlc':
@@ -69,14 +69,14 @@ class TasksMapper(RelationshipMappers):
 
             Note: 'latest' is intentionally excluded.
         """
-        return ['id', 'create_time', 'update_time', 'delete_time']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
             Can carry any fields within a table to ignore in a certain operation
         """
         return {
-            'tasks_task': [],
+            'tasks_task': ['id'],
             'tasks_details': ['id', 'latest', 'task_id'],
             'tasks_deadline': ['id', 'latest', 'task_id'],
             'tasks_status': ['id', 'latest', 'task_id'],

@@ -16,6 +16,7 @@ def isValidId(dictionary, idKey):
                 return True
     return False
 
+
 class DateTimeLocalInput(forms.DateTimeInput):
     input_type = 'datetime-local'
 

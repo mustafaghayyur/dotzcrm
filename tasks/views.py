@@ -16,11 +16,11 @@ class TasksListView(ListView):
     user_id = None
     
     def get(self, request, *args, **kwargs):
-        #try:
-        self.user_id = request.user.id
-        return super().get(request, *args, **kwargs)
-        #except Exception as e:
-        #    raise Http404(f'Error: {e}')
+        try:
+            self.user_id = request.user.id
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            raise Http404(f'Error: {e}')
         
     # QuerySet refers to the ORM QuerySet object returned by any model query made in Django.
     # Which in our case is a RawQuerySet.

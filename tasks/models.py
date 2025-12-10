@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings as sysconf
 
 # import our QuerySets:
-from core.Models.querysets.tasks import *
+from core.Models.querysets.Tasks import *
 
 
 # The main task table
@@ -17,7 +17,7 @@ class Task(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = TasksQuerySet.as_manager()
+    objects = TaskQuerySet.as_manager()
 
 
 class Details(models.Model):
