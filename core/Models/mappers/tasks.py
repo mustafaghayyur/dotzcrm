@@ -115,8 +115,8 @@ class TasksMapper(RelationshipMappers):
             },
         }
 
-    def _defaults_orderBy(self):
-        return {
+    def _defaults_order_by(self):
+        return [
             {
                 'tbl': 't',
                 'col': 'update_time',
@@ -147,16 +147,12 @@ class TasksMapper(RelationshipMappers):
                 'col': 'create_time',
                 'sort': 'DESC',
             },
-        }
+        ]
 
     def _defaults_where_conditions(self):
-        # s = ValuesMapper.status()
         return {
             "latest": ValuesMapper.latest('latest'),
             # "tdelete_time": 'IS NULL',  # @todo needs to be handled
-            # "tupdate_time": settings.tasks['recentInterval'],
-            # "visibility": ValuesMapper.visibility('private'),
-            # "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
         }
 
 

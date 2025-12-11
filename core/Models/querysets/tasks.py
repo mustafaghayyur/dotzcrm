@@ -1,4 +1,5 @@
 from . import master, child
+from core.Models.mappers.tasks import *
 
 """
     REFORMATION (Notes):
@@ -25,6 +26,7 @@ class TaskQuerySet(master.MTQuerySet):
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.app = 'tasks'
         self.mapper = TasksMapper()
+        self.valuesMapper = ValuesMapper()
         self.columnsMatrix = self.mapper.generateO2OFields()
 
         super().__init__(model, query, using, hints)
@@ -41,41 +43,7 @@ class TaskQuerySet(master.MTQuerySet):
         #
         # See documentation on legitimate ways of forming selectors, conditions, etc in this call.
         """
-        obj = self.compileVariables(selectors, conditions, orderBy, limit)
-
-        selectString = obj['selectorString']
-        whereStatements = strings.concatenate(obj['whereString'])
-        params = obj['params']
-        joins = obj['joinsString']
-        orderStatement = obj['orderString']
-        limitStatement = obj['limitString']
-
-        # sub in any column names you wish to output differently in the ORM
-        translations = {}
-        
-        query = f"""
-            SELECT {selectString}
-            FROM tasks_task AS t
-            {joins}
-            WHERE {whereStatements}
-            ORDER BY {orderStatement} LIMIT {limitStatement};
-            """
-
-        misc.log(query, 'SEARCH QUERY STRING')
-        misc.log(params, 'SEARCH PARAMS')
-        return self.raw(query, params, translations)
-
-    def generateDefaultConditions(self):
-        # s = ValuesMapper.status()
-        params = {
-            # "tdelete_time": 'IS NULL',  # @todo needs to be handled
-            # "tupdate_time": settings.tasks['recentInterval'],
-            "latest": ValuesMapper.latest('latest'),
-            # "visibility": ValuesMapper.visibility('private'),
-            # "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
-        }
-
-        return params
+        super().fetch(selectors, conditions, orderBy, limit)
 
 
 class DetailQuerySet(child.CTQuerySet):

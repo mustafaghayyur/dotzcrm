@@ -1,4 +1,5 @@
 from . import Validation
+from core import settings
 
 """
     This class holds the background crud operations.

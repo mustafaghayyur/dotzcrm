@@ -1,7 +1,6 @@
 from django.db import models
-from core.Models.mappers.tasks import *
 
-from core.helpers import crud, misc
+from core.helpers import strings, crud, misc
 from core import settings  # tasks, rdbms
 
 ##########################################################################
@@ -23,7 +22,7 @@ class QuerySetManager(models.QuerySet):
         super().__init__(model, query, using, hints)
 
     def basicCompilationOfArguments(self, selectors, conditions, ordering, limit):
-        defaultConditions = self.generateDefaultConditions()
+        defaultConditions = self.mapper.defaults('where_conditions')  # self.generateDefaultConditions()
         actualConditions = self.assembleConditions(defaultConditions, conditions)        
         
         whereElements = self.decernConditionsIntoQueryRequirements(actualConditions)
@@ -34,6 +33,7 @@ class QuerySetManager(models.QuerySet):
         joins = self.generateJoinStatements(selectors, actualConditions)
 
         defaultOrdering = self.mapper.defaults('order_by')
+        suppliedOrdering = self.generateOrderingList(ordering)
         orderBy = self.mergeArgumentDictionaries(defaultOrdering, ordering)
         orderByString = self.generateOrderByString(orderBy)
 
@@ -67,6 +67,28 @@ class QuerySetManager(models.QuerySet):
             'params': params
         }
 
+    def generateOrderingList(self, ordering):
+        if isinstance(ordering, list):
+            for i in len(ordering):
+                if not isinstance(ordering[i], dict):
+                    ordering[i] = self.convertOrderingToDict(ordering[i])
+
+                if not isinstance(ordering[i], dict) or 'col' not in ordering[i]:
+                    ordering[i] = None
+                    continue
+
+        if isinstance(ordering, str):
+            return self.generateOrderingList(ordering.split(','))
+
+        return ordering
+
+    def convertOrderingToDict(self, orderingItem):
+        if not isinstance(orderingItem, str):
+            return None
+
+        # regex 'order by' out and 'desc/asc' then strip out col names
+
+
     def generateOrderByString(self, ordering):
         orderByString = ''
 
@@ -78,6 +100,18 @@ class QuerySetManager(models.QuerySet):
 
         return orderByString
 
+    def generateLimitString(limit):
+        string = ''
+
+        if isinstance(limit, list):
+            for itm in limit:
+                string += itm + ', '
+
+            string = string[:-2]
+        else:
+            string = str(limit)
+
+        return string
 
     def assembleConditions(self, defaultConditions, providedConditions):
         if providedConditions is None:
@@ -97,7 +131,7 @@ class QuerySetManager(models.QuerySet):
     def assembleParams(self, params):
         if self.latest:
             latestField = self.mapper.columnName('latest')
-            params[latestField] = ValuesMapper.latest('latest')
+            params[latestField] = self.valuesMapper.staticCaller('latest', 'latest')
 
         keys = list(params.keys())
         for key in keys:
@@ -171,14 +205,6 @@ class QuerySetManager(models.QuerySet):
                 string += item
 
         return len(string)
-
-
-    def generateDefaultConditions(self):
-        """
-            Should be overwritten in app specific inheritor
-            Contains a dictionary of default conditions to use for  each QuerySet type.
-        """
-        pass
 
     def mergeArgumentDictionaries(self, defaults, provided):
         """

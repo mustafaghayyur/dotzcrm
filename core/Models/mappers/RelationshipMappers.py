@@ -17,18 +17,15 @@ class RelationshipMappers():
         if not isinstance(requestedFunc, str):
             raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
 
-        requestedFunc = 'defaults_' + requestedFunc
+        requestedFunc = '_defaults_' + requestedFunc
 
         if hasattr(self, requestedFunc):
             functionCall = getattr(self, requestedFunc)
-
+            
             if callable(functionCall):
                 return functionCall()
 
         return None
-
-    def defaults_orderBy(self):
-        return self._defaults_orderBy()
 
     def commonFields(self):
         return self._commonFields()
