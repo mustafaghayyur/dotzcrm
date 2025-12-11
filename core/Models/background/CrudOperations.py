@@ -1,9 +1,4 @@
-from django.utils import timezone
-from tasks.models import *
-from core.helpers import crud, misc
-from core import settings
 from . import Validation
-from .Values import ValuesHandler
 
 """
     This class holds the background crud operations.
@@ -42,12 +37,12 @@ class Background(Validation.ErrorHandling):
         fieldsF = {}  # fields to find records with
         fieldsF[self.mapper.master('foreignKeyName')] = masterId
         if not rlc:
-            fieldsF['latest'] = self.valuesMapper.latest('latest')
+            fieldsF['latest'] = ValuesMapper.latest('latest')
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
         if not rlc:
-            fieldsU['latest'] = self.valuesMapper.latest('archive')
+            fieldsU['latest'] = ValuesMapper.latest('archive')
 
         designation = '[RLC]' if rlc else ''
 
@@ -135,7 +130,7 @@ class Background(Validation.ErrorHandling):
             else:
                 fields = {}
                 fields['delete_time'] = timezone.now()
-                fields['latest'] = self.valuesMapper.latest('archive')
+                fields['latest'] = ValuesMapper.latest('archive')
                 
                 # update old record, create new one...
                 modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)

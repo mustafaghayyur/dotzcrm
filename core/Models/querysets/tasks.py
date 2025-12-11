@@ -1,8 +1,22 @@
 from . import master, child
-from core.Models.mappers import tasks as tasksMappers
-from core import settings  # tasks, rdbms
-from core.helpers import strings, misc
 
+"""
+    REFORMATION (Notes):
+    -----------------------------
+    So far we have worked with MT and CT in QuerySets.
+    But what if, we could make QuertSet.fetch() so generic that it could fetch
+    anything? Thus making the CT/MT distinction for fetches void...
+
+    We will now attempt so:
+     1) C.U.D. in CRUD operations remain unchanged. This is absolute.
+     2) QuersySet will become a singular entity that any table, whether CT, MT
+        or M2MCT/RLCCT alike can be based off of. And allows for highly
+        versatile retrievals/select statements.
+
+    queryset_reformation2 branch CANNOT have any changes to core.Models.CRUD.
+    To ensure only QuerySets are modified, and that they still output the exact
+    same returns as before.
+"""
 class TaskQuerySet(master.MTQuerySet):
     """
         TaskQuerySet allows for highly versatile Select queries to DB.
@@ -10,22 +24,18 @@ class TaskQuerySet(master.MTQuerySet):
     """
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.app = 'tasks'
-        self.mapper = tasksMappers.TasksMapper()
-        self.valuesMapper = tasksMappers.ValuesManager()
+        self.mapper = TasksMapper()
         self.columnsMatrix = self.mapper.generateO2OFields()
 
         super().__init__(model, query, using, hints)
         
-    def fetch(self, selectors = [], conditions = None, orderBy = 't.update_time DESC', limit = '20'):
+    def fetch(self, selectors = [], conditions = None, orderBy = None, limit = None):
         """
         # Fetches full Task records with latest One-to-One records (of sub tables).
         #
         # PARAMS:
-        #  - selectors: [list] list of columns you wish the result set to carry 
-                (from all Tasks' O2O tables combined).
-        #  - conditions: [dictionary] book of parameters which define what 
-                tasks should be fetched. The 'conditions' dictionary defines 
-                which tasks will be fetched.
+        #  - selectors: [list] list of columns you want
+        #  - conditions: [dictionary] key=>value pairs of what to select.
         #  - orderBy: [string] any specific, legitimate ordering you want.
         #  - limit: [string] number of records you want retrieved. Can accept offsets.
         #
@@ -33,10 +43,12 @@ class TaskQuerySet(master.MTQuerySet):
         """
         obj = self.compileVariables(selectors, conditions, orderBy, limit)
 
-        selectString = obj['selectString']
-        whereStatements = strings.concatenate(obj['whereStatements'])
+        selectString = obj['selectorString']
+        whereStatements = strings.concatenate(obj['whereString'])
         params = obj['params']
-        joins = obj['joins']
+        joins = obj['joinsString']
+        orderStatement = obj['orderString']
+        limitStatement = obj['limitString']
 
         # sub in any column names you wish to output differently in the ORM
         translations = {}
@@ -46,7 +58,7 @@ class TaskQuerySet(master.MTQuerySet):
             FROM tasks_task AS t
             {joins}
             WHERE {whereStatements}
-            ORDER BY {orderBy} LIMIT {limit};
+            ORDER BY {orderStatement} LIMIT {limitStatement};
             """
 
         misc.log(query, 'SEARCH QUERY STRING')
@@ -54,12 +66,12 @@ class TaskQuerySet(master.MTQuerySet):
         return self.raw(query, params, translations)
 
     def generateDefaultConditions(self):
-        # s = self.valuesMapper.status()
+        # s = ValuesMapper.status()
         params = {
             # "tdelete_time": 'IS NULL',  # @todo needs to be handled
             # "tupdate_time": settings.tasks['recentInterval'],
-            "latest": self.valuesMapper.latest('latest'),
-            # "visibility": self.valuesMapper.visibility('private'),
+            "latest": ValuesMapper.latest('latest'),
+            # "visibility": ValuesMapper.visibility('private'),
             # "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
         }
 
@@ -69,46 +81,39 @@ class TaskQuerySet(master.MTQuerySet):
 class DetailQuerySet(child.CTQuerySet):
     tbl = 'tasks_details'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 
 
 class DeadlineQuerySet(child.CTQuerySet):
     tbl = 'tasks_deadline'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 
 
 class StatusQuerySet(child.CTQuerySet):
     tbl = 'tasks_status'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 
 
 class VisibilityQuerySet(child.CTQuerySet):
     tbl = 'tasks_assignment'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 
 
 class WatcherQuerySet(child.M2MQuerySet):
     tbl = 'tasks_watcher'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 
 class AssignmentQuerySet(child.CTQuerySet):
     tbl = 'tasks_visibility'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 
 class CommentQuerySet(child.RLCQuerySet):
     tbl = 'tasks_comment'
     app = 'tasks'
-    mapper = tasksMappers.TasksMapper()
-    valuesMapper = tasksMappers.ValuesManager()
+    mapper = TasksMapper()
 

@@ -1,4 +1,4 @@
-# from core.helpers import misc
+from core.helpers import misc
 
 class RelationshipMappers():
     """
@@ -10,8 +10,25 @@ class RelationshipMappers():
         dictionaries, etc as needed.
     """
     
-    def __init__(self):
-        pass
+    def __init__(self, mainTable):
+        self.mainTable = mainTable
+
+    def defaults(self, requestedFunc):
+        if not isinstance(requestedFunc, str):
+            raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
+
+        requestedFunc = 'defaults_' + requestedFunc
+
+        if hasattr(self, requestedFunc):
+            functionCall = getattr(self, requestedFunc)
+
+            if callable(functionCall):
+                return functionCall()
+
+        return None
+
+    def defaults_orderBy(self):
+        return self._defaults_orderBy()
 
     def commonFields(self):
         return self._commonFields()

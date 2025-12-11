@@ -1,6 +1,4 @@
-from django.db import models
 from . import background
-from core.helpers import crud, misc
 
 ##########################################################################
 # The QuerySet family of definitions will be essential to maintaining
@@ -25,31 +23,17 @@ class MTQuerySet(background.QuerySetManager):
         """
         pass
 
-    def compileVariables(self, selectors = [], conditions = None, orderBy = '', limit = '20'):
+    def compileVariables(self, selectors, conditions, orderBy, limit):
         """
         # Compiles all inputs provided, and readies them for use in fetch().
         """
-        defaultConditions = self.generateDefaultConditions()
-        actualConditions = self.assembleConditions(defaultConditions, conditions)        
-        whereStatements = []
-        params = {}
-
-        for key, item in actualConditions.items():
-            lenWS = self.calculateLengthOfWS(whereStatements)
-            whereStatements.append(self.generateWhereStatements(self.columnsMatrix[key], key, item, lenWS))
-            
-            if isinstance(item, list):
-                params[key] = tuple(item)
-            else:
-                params[key] = item
-
-        actualParameters = self.assembleParams(params)
-        selectString = self.generateProperSelectors(selectors)
-        joins = self.generateJoinStatements(selectors, actualConditions)
-
+        args = self.basicCompilationOfArguments(selectors, conditions, orderBy, limit)
+        
         return {
-            'selectString': selectString,
-            'whereStatements': whereStatements,
-            'params': actualParameters,
-            'joins': joins,
+            'selectorString': args['selectorString'],
+            'whereString': args['whereString'],
+            'params': args['params'],
+            'joinsString': args['joinsString'],
+            'orderString': args['orderString'],
+            'limitString': args['limitString'],
         }

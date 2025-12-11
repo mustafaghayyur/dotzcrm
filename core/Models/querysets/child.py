@@ -1,6 +1,6 @@
 from django.db import models
 from core.helpers import misc
-
+from core.Models.mappers.tasks import ValuesMapper
 
 """
     =======================================================================
@@ -59,7 +59,7 @@ class CTQuerySet(models.QuerySet):
                 LIMIT 1;
             """
 
-        latest = self.valuesMapper.latest('latest')
+        latest = ValuesMapper.latest('latest')
         return self.raw(query, [mtId, latest])
 
     def fetchRevision(self, mtId, revision = 0):
@@ -149,7 +149,7 @@ class M2MQuerySet(CTQuerySet):
                 AND latest = %s
             """
 
-        latest = self.valuesMapper.latest('latest')
+        latest = ValuesMapper.latest('latest')
         return self.raw(query, [secondId, latest])
     
     def fetchAllCurrentByFirstId(self, firstId):
@@ -162,7 +162,7 @@ class M2MQuerySet(CTQuerySet):
                 AND latest = %s
             """
 
-        latest = self.valuesMapper.latest('latest')
+        latest = ValuesMapper.latest('latest')
         return self.raw(query, [firstId, latest])
 
     def fetchAllRevisions(self, firstId, secondId):

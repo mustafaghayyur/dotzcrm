@@ -1,5 +1,5 @@
 from .RelationshipMappers import RelationshipMappers
-from core.helpers import misc
+from .ValuesMapper import ValuesMapperGeneric
 
 class TasksMapper(RelationshipMappers):
     """
@@ -115,14 +115,59 @@ class TasksMapper(RelationshipMappers):
             },
         }
 
+    def _defaults_orderBy(self):
+        return {
+            {
+                'tbl': 't',
+                'col': 'update_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'd',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'l',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 's',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'v',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'a',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+        }
 
-class ValuesManager():
+    def _defaults_where_conditions(self):
+        # s = ValuesMapper.status()
+        return {
+            "latest": ValuesMapper.latest('latest'),
+            # "tdelete_time": 'IS NULL',  # @todo needs to be handled
+            # "tupdate_time": settings.tasks['recentInterval'],
+            # "visibility": ValuesMapper.visibility('private'),
+            # "status": [s['assigned'], s['viewed'], s['queued'], s['started'], s['reassigned']],
+        }
+
+
+class ValuesMapper(ValuesMapperGeneric):
     """
-    This class will help manage value expectations for certain enum fields.
-    Enums will be managed in the application layer.
+        This class will help manage value expectations for certain enum fields.
+        Enums will be managed in the application layer.
     """
 
-    def latest(self, key = 'all'):
+    @staticmethod
+    def latest(key = 'all'):
         values = {
             'archive': 2,
             'latest': 1,
@@ -133,7 +178,8 @@ class ValuesManager():
 
         return values
 
-    def status(self, key = 'all'):
+    @staticmethod
+    def status(key = 'all'):
         values = {
             'assigned': 'assigned',
             'viewed': 'viewed',
@@ -152,7 +198,8 @@ class ValuesManager():
 
         return values
 
-    def visibility(self, key = 'all'):
+    @staticmethod
+    def visibility(key = 'all'):
         values = {
             'private': 'private',
             'assigned': 'assigned',

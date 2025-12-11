@@ -1,5 +1,8 @@
 from django.db import models
-from core.helpers import strings, misc
+from core.Models.mappers.tasks import *
+
+from core.helpers import crud, misc
+from core import settings  # tasks, rdbms
 
 ##########################################################################
 # These Classes offer background operations to enhance QuerySet Classes.
@@ -19,11 +22,68 @@ class QuerySetManager(models.QuerySet):
         self.latest = False
         super().__init__(model, query, using, hints)
 
+    def basicCompilationOfArguments(self, selectors, conditions, ordering, limit):
+        defaultConditions = self.generateDefaultConditions()
+        actualConditions = self.assembleConditions(defaultConditions, conditions)        
+        
+        whereElements = self.decernConditionsIntoQueryRequirements(actualConditions)
+        actualParameters = self.assembleParams(whereElements['params'])
+
+        selectString = self.generateProperSelectors(selectors)
+        
+        joins = self.generateJoinStatements(selectors, actualConditions)
+
+        defaultOrdering = self.mapper.defaults('order_by')
+        orderBy = self.mergeArgumentDictionaries(defaultOrdering, ordering)
+        orderByString = self.generateOrderByString(orderBy)
+
+        limitString = self.generateLimitString(limit)
+
+        return {
+            'selectorString': selectString,
+            'whereString': whereElements['statements'],
+            'params': actualParameters,
+            'joinsString': joins,
+            'orderString': orderByString,
+            'limitString': limitString
+        }
+
+
+    def decernConditionsIntoQueryRequirements(self, conditions):
+        whereStatements = []
+        params = {}
+
+        for key, item in conditions.items():
+            lenWS = self.calculateLengthOfWS(whereStatements)
+            whereStatements.append(self.generateWhereStatements(self.columnsMatrix[key], key, item, lenWS))
+            
+            if isinstance(item, list):
+                params[key] = tuple(item)
+            else:
+                params[key] = item
+
+        return {
+            'statements': whereStatements,
+            'params': params
+        }
+
+    def generateOrderByString(self, ordering):
+        orderByString = ''
+
+        if not isinstance(ordering, dict):
+            return orderByString
+
+        for item in ordering:
+            orderByString += f' {item.tbl}.{item.col} {item.sort} '
+
+        return orderByString
+
+
     def assembleConditions(self, defaultConditions, providedConditions):
         if providedConditions is None:
             providedConditions = {}
 
-        actualConditions = self.mergeConditions(defaultConditions, providedConditions)
+        actualConditions = self.mergeArgumentDictionaries(defaultConditions, providedConditions)
         latestKey = self.mapper.columnName('latest')
 
         if latestKey in actualConditions:
@@ -37,7 +97,7 @@ class QuerySetManager(models.QuerySet):
     def assembleParams(self, params):
         if self.latest:
             latestField = self.mapper.columnName('latest')
-            params[latestField] = self.valuesMapper.latest('latest')
+            params[latestField] = ValuesMapper.latest('latest')
 
         keys = list(params.keys())
         for key in keys:
@@ -120,7 +180,7 @@ class QuerySetManager(models.QuerySet):
         """
         pass
 
-    def mergeConditions(self, defaults, provided):
+    def mergeArgumentDictionaries(self, defaults, provided):
         """
             Simply merges default conditions with object-instance provided conditions.
             The provided conditions over-write the defaults.

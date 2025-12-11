@@ -1,7 +1,8 @@
-from tasks.models import *
-from .mappers.tasks import TasksMapper, ValuesManager
-from .querysets.Tasks import *
 from .background import O2ORecords, RevisionlessChildren, M2MChildren
+
+from tasks.models import *
+from .mappers.tasks import TasksMapper, ValuesMapper
+from .querysets.Tasks import *
 
 class CRUD(O2ORecords.CRUD):
     """
@@ -14,7 +15,6 @@ class CRUD(O2ORecords.CRUD):
         self.mtModel = Task  # holds the class reference for Master Table's model
 
         self.mapper = TasksMapper()
-        self.valuesMapper = ValuesManager()
         super().__init__()
 
     def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
@@ -43,7 +43,7 @@ class CRUD(O2ORecords.CRUD):
         conditions = {
             # "assignee_id": None,
             "update_time": None,
-            "latest": self.valuesMapper.latest('latest'),
+            "latest": ValuesMapper.latest('latest'),
             "visibility": None,
             "status": None,
             "tid": task_id,
@@ -67,7 +67,6 @@ class Comments(RevisionlessChildren.CRUD):
         self.mtModel = Task  # holds the class reference for Master Table's model
 
         self.mapper = TasksMapper()
-        self.valuesMapper = ValuesManager()
         super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
     def read(self, definitions):
@@ -103,7 +102,6 @@ class Watchers(M2MChildren.CRUD):
         self.space = 'tasks'  # holds the name of current module/space
 
         self.mapper = TasksMapper()
-        self.valuesMapper = ValuesManager()
 
         cols = self.mapper.m2mFields(self.pk[0])
         self.firstCol = cols['firstCol']

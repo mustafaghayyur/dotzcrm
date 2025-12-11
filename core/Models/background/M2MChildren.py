@@ -1,5 +1,3 @@
-from tasks.models import *
-from core.helpers import crud  # , misc
 from . import CrudOperations
 
 """
@@ -144,7 +142,7 @@ class CRUD(CrudOperations.Background):
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.valuesMapper.latest('archive')
+        fieldsU['latest'] = ValuesMapper.latest('archive')
 
         self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
@@ -162,7 +160,7 @@ class CRUD(CrudOperations.Background):
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.valuesMapper.latest('archive')
+        fieldsU['latest'] = ValuesMapper.latest('archive')
 
         self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
