@@ -1,15 +1,11 @@
-from django.utils import timezone
-from tasks.models import *
-from core.helpers import crud, misc
-from core import settings
 from . import Validation
-from .Values import ValuesHandler
+from core import settings
 
 """
     This class holds the background crud operations.
     Primary focus: One-to-One relationship CRUD types
 """
-class Background(Validation.ErrorHandling):
+class CrudOperations(Validation.ErrorHandling):
     space = None  # set in inheritor class
     module = None  # settings for 'app' or module in system (e.g. Tasks, Tickets, etc)
     submission = None  # will hold dictionary of submitted data by user
@@ -42,12 +38,12 @@ class Background(Validation.ErrorHandling):
         fieldsF = {}  # fields to find records with
         fieldsF[self.mapper.master('foreignKeyName')] = masterId
         if not rlc:
-            fieldsF['latest'] = self.valuesMapper.latest('latest')
+            fieldsF['latest'] = self.mapper.values.latest('latest')
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
         if not rlc:
-            fieldsU['latest'] = self.valuesMapper.latest('archive')
+            fieldsU['latest'] = self.mapper.values.latest('archive')
 
         designation = '[RLC]' if rlc else ''
 
@@ -135,7 +131,7 @@ class Background(Validation.ErrorHandling):
             else:
                 fields = {}
                 fields['delete_time'] = timezone.now()
-                fields['latest'] = self.valuesMapper.latest('archive')
+                fields['latest'] = self.mapper.values.latest('archive')
                 
                 # update old record, create new one...
                 modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
@@ -217,6 +213,7 @@ class Background(Validation.ErrorHandling):
         """
             For given CT, see if fetched records have multiple entries 
             marked as 'latest' in the DB.
+            @todo
         """
         pass
 

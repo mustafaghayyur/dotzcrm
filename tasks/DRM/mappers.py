@@ -1,5 +1,5 @@
-from .RelationshipMappers import RelationshipMappers
-from core.helpers import misc
+from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from core.DRMcore.mappers.ValuesMapper import ValuesMapperGeneric
 
 class TasksMapper(RelationshipMappers):
     """
@@ -115,13 +115,53 @@ class TasksMapper(RelationshipMappers):
             },
         }
 
+    def _defaults_order_by(self):
+        return [
+            {
+                'tbl': 't',
+                'col': 'update_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'd',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'l',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 's',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'v',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'a',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+        ]
 
-class ValuesManager():
-    """
-    This class will help manage value expectations for certain enum fields.
-    Enums will be managed in the application layer.
-    """
+    def _defaults_where_conditions(self):
+        return {
+            "latest": self.values.latest('latest'),
+            # "tdelete_time": 'IS NULL',  # @todo needs to be handled
+        }
 
+
+class ValuesMapper(ValuesMapperGeneric):
+    """
+        This class will help manage value expectations for certain enum fields.
+        Enums will be managed in the application layer.
+    """
+    
     def latest(self, key = 'all'):
         values = {
             'archive': 2,

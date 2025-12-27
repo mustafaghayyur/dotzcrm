@@ -1,6 +1,4 @@
-from tasks.models import *
-from core.helpers import crud  # , misc
-from . import CrudOperations
+from . import Background
 
 """
     Many-to-Many CRUD Operations that can be used through out the system.
@@ -13,7 +11,7 @@ from . import CrudOperations
     Note: first and second can carry significance for each specific 'Model'
     that inherits this class. Should be appropriately assigned in mapper.
 """
-class CRUD(CrudOperations.Background):
+class CRUD(Background.CrudOperations):
 
     firstCol = None  # defined in inheritor
     secondCol = None  # defined in inheritor
@@ -144,7 +142,7 @@ class CRUD(CrudOperations.Background):
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.valuesMapper.latest('archive')
+        fieldsU['latest'] = self.mapper.values.latest('archive')
 
         self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
@@ -162,7 +160,7 @@ class CRUD(CrudOperations.Background):
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.valuesMapper.latest('archive')
+        fieldsU['latest'] = self.mapper.values.latest('archive')
 
         self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)

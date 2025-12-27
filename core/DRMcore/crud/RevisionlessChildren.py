@@ -1,11 +1,9 @@
-from tasks.models import *
-from core.helpers import crud  #, misc
-from . import CrudOperations
+from . import Background
 
 """
     Handles all crud operations for Revision-less Children (RLC) tables.
 """
-class CRUD(CrudOperations.Background):
+class CRUD(Background.CrudOperations):
 
     def __init__(self, MasterCRUDClass):
         self.masterCrudObj = MasterCRUDClass()

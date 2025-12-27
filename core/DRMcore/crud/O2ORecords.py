@@ -1,12 +1,10 @@
-from tasks.models import *
-from core.helpers import crud
-from . import CrudOperations
+from . import Background
 
 """
     Generic CRUD Operations that can be used through out the system.
     One-to-One relationship CRUD types
 """
-class CRUD(CrudOperations.Background):
+class CRUD(Background.CrudOperations):
 
     mtModel = None  # set inheritor class
 

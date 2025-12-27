@@ -6,6 +6,12 @@ This document will hold common jargon/acronyms found through out the code base, 
 A
 --
 
+> App: the app is a nearly stand alone section of the CRM. Apps can also be referred to as 'space' or 'module' in some parts of the codebase. The originally conceptualized apps for the DotzCRM were: 
+  1. Tasks Module
+  2. Tickets Module (refers to customer queries/requests)
+  3. Documents Module
+  4. Customers Module
+
 
 B
 --
@@ -20,6 +26,8 @@ C
 D
 --
 
+> Data Relationship Manager (DRM): Please see README.md of core.DRM directory for more info.
+ 
 
 E
 --
@@ -55,18 +63,9 @@ L
 
 M
 --
- > Module: the module is a nearly stand alone section of the CRM. The originally conceptualized modules for the DotzCRM were: 
-  1. Tasks Module
-  2. Tickets Module (refers to customer queries/requests)
-  3. Documents Module
-  4. Customers Module
+ > Module: see App
 
- > mt (or MT): stands for Master Table: usually refers to the parent table for a module that all children tables relate to. In Tasks module, this would be the 'tasks_task' table (unless configured differently).
- 
- > Master Table: see mt above.
-
- > Model: a Model with a capital M, refers not to the default django models found in each module's codebase. But the the core.Models directory. Please see README.md of that directory for more info.
- 
+ > Master Table (mt) (or MT): stands for Master Table: usually refers to the parent table for a module that all children tables relate to. In Tasks module, this would be the 'tasks_task' table (unless configured differently).
 
  > Many-To-Many Children: a type of node in the system, where child-table nodes can't be retrieved as a single-latest revision of a master-table's record-set. These data-types need special handling for CRUD operations
  

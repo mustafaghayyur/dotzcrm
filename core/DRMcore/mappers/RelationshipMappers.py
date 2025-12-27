@@ -1,50 +1,19 @@
-# from core.helpers import misc
+from .RMWrappers import Wrappers
+from core.helpers import misc
 
-class RelationshipMappers():
+class RelationshipMappers(Wrappers):
     """
         This class and its inheritors will help map tables to data in 
         meaningful ways.
 
-        All App-specific extensions of this class should only define the 
-        '_' prefixed version of methods defined here, returning simple lists,
-        dictionaries, etc as needed.
+        The Mapper is Singleton. Thus, only data that relates to Schema should
+        be stored in properties, so it can be shared across Query operations.
     """
-    
-    def __init__(self):
-        pass
+    values = None  # holds the ValuesMapper instance
 
-    def commonFields(self):
-        return self._commonFields()
-
-    def tablesForRelationType(self, relationType = 'o2o'):
-        return self._tablesForRelationType(relationType)
-
-    def ignoreOnRetrieval(self):
-        return self._ignoreOnRetrieval()
-
-    def tableFields(self, name = 'all'):
-        tables = self._tableFields()
-        return self.returnValue(tables, name)
-
-    def master(self, key = 'all'):
-        info = self._master()
-        return self.returnValue(info, key)
-
-    def tables(self, key = 'all'):
-        info = self._tables()
-        return self.returnValue(info, key)
-
-    def models(self, key = 'all'):
-        info = self._models()
-        return self.returnValue(info, key)
-
-    def ignoreOnUpdates(self, key = 'all'):
-        info = self._ignoreOnUpdates()
-        return self.returnValue(info, key)
-
-    def m2mFields(self, tbl = 'all'):
-        relationships = self._m2mFields()
-        return self.returnValue(relationships, tbl)
+    def __init__(self, VMClassInstance, mainTable = None):
+        self.values = self.setValuesMapper(VMClassInstance)
+        self.mainTable = mainTable  # @todo remove?
 
     def isCommonField(self, key, prefix = False):
         """
@@ -124,12 +93,11 @@ class RelationshipMappers():
                 return abbrv
         return None
 
-    def columnName(self, key, sphere = 'all'):
+    def columnName(self, key):
         """
             For future implementation.
-            Validate requested key is valid in mapper.
+            Validate requested key exists in mapper.
         """
-
         return key
 
     def returnValue(self, info, key):

@@ -1,6 +1,7 @@
 from django.db import models
-from core.helpers import misc
+from . import background
 
+from core.helpers import misc
 
 """
     =======================================================================
@@ -9,7 +10,7 @@ from core.helpers import misc
     =====================================================================
 """
 
-class CTQuerySet(models.QuerySet):
+class CTQuerySet(background.QuerySetManager):
     """
         Primarily for One-to-One types
 
@@ -24,9 +25,6 @@ class CTQuerySet(models.QuerySet):
     # These are to be set in inherited class:
     tbl = None  # Your table for this QuerySet
     master_col = None  # The foreign key of master table (i.e. Tasks)
-    app = None  # to be set in inheritor class
-    mapper = None
-    valuesMapper = None
 
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.master_col = self.mapper.master('foreignKeyName')
@@ -59,7 +57,7 @@ class CTQuerySet(models.QuerySet):
                 LIMIT 1;
             """
 
-        latest = self.valuesMapper.latest('latest')
+        latest = self.mapper.values.latest('latest')
         return self.raw(query, [mtId, latest])
 
     def fetchRevision(self, mtId, revision = 0):
@@ -149,7 +147,7 @@ class M2MQuerySet(CTQuerySet):
                 AND latest = %s
             """
 
-        latest = self.valuesMapper.latest('latest')
+        latest = self.mapper.values.latest('latest')
         return self.raw(query, [secondId, latest])
     
     def fetchAllCurrentByFirstId(self, firstId):
@@ -162,7 +160,7 @@ class M2MQuerySet(CTQuerySet):
                 AND latest = %s
             """
 
-        latest = self.valuesMapper.latest('latest')
+        latest = self.mapper.values.latest('latest')
         return self.raw(query, [firstId, latest])
 
     def fetchAllRevisions(self, firstId, secondId):
