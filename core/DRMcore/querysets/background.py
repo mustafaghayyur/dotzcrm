@@ -10,7 +10,6 @@ from core import settings  # tasks, rdbms
 class QuerySetManager(models.QuerySet):
     """
         Defines helper functions for our versatile Select Query.
-        For One-to-One records.
     """
     app = None  # defines which app this queryset is used for
     columnsMatrix = None  # read 'table-columns' we will reference

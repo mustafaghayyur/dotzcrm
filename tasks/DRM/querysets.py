@@ -7,7 +7,7 @@ from mappers import *
 class TaskQuerySet(master.MTQuerySet):
     """
         TaskQuerySet allows for highly versatile Select queries to DB.
-        For One-to-One data models (i.e. records).
+        For O2O, M2M and RLC data models (i.e. records).
     """
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.app = 'tasks'

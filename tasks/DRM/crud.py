@@ -93,8 +93,8 @@ class Comments(RevisionlessChildren.CRUD):
 
 class Watchers(M2MChildren.CRUD):
     """
-       This is a Many-to-One relations table, where many 'watchers' are
-       being assigned to a single Tasks' MT record.
+       This is a Many-to-Many relations table, where many 'watchers' are
+       being assigned to many Tasks' record.
     """
 
     def __init__(self):
