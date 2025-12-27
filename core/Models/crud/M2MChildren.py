@@ -1,4 +1,4 @@
-from . import CrudOperations
+from . import Background
 
 """
     Many-to-Many CRUD Operations that can be used through out the system.
@@ -11,7 +11,7 @@ from . import CrudOperations
     Note: first and second can carry significance for each specific 'Model'
     that inherits this class. Should be appropriately assigned in mapper.
 """
-class CRUD(CrudOperations.Background):
+class CRUD(Background.CrudOperations):
 
     firstCol = None  # defined in inheritor
     secondCol = None  # defined in inheritor

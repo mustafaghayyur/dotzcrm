@@ -1,7 +1,5 @@
-from core.modules import Singleton
-from core.helpers import misc
-
 from .RMWrappers import Wrappers
+from core.helpers import misc
 
 class RelationshipMappers(Wrappers):
     """

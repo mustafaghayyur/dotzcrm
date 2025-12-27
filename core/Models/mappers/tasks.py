@@ -161,7 +161,7 @@ class ValuesMapper(ValuesMapperGeneric):
         This class will help manage value expectations for certain enum fields.
         Enums will be managed in the application layer.
     """
-    def latest(key = 'all'):
+    def latest(self, key = 'all'):
         values = {
             'archive': 2,
             'latest': 1,
@@ -172,7 +172,7 @@ class ValuesMapper(ValuesMapperGeneric):
 
         return values
 
-    def status(key = 'all'):
+    def status(self, key = 'all'):
         values = {
             'assigned': 'assigned',
             'viewed': 'viewed',
@@ -191,7 +191,7 @@ class ValuesMapper(ValuesMapperGeneric):
 
         return values
 
-    def visibility(key = 'all'):
+    def visibility(self, key = 'all'):
         values = {
             'private': 'private',
             'assigned': 'assigned',

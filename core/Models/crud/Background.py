@@ -5,7 +5,7 @@ from core import settings
     This class holds the background crud operations.
     Primary focus: One-to-One relationship CRUD types
 """
-class Background(Validation.ErrorHandling):
+class CrudOperations(Validation.ErrorHandling):
     space = None  # set in inheritor class
     module = None  # settings for 'app' or module in system (e.g. Tasks, Tickets, etc)
     submission = None  # will hold dictionary of submitted data by user

@@ -1,4 +1,4 @@
-from core.modules import Singleton
+from core.modules.Singleton import Singleton
 from core.helpers import misc
 
 class Wrappers(Singleton):

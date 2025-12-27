@@ -1,4 +1,4 @@
-from .background import O2ORecords, RevisionlessChildren, M2MChildren
+from .crud import O2ORecords, RevisionlessChildren, M2MChildren
 
 from tasks.models import *
 from .mappers.tasks import TasksMapper, ValuesMapper
