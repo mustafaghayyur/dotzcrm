@@ -151,7 +151,7 @@ class TasksMapper(RelationshipMappers):
 
     def _defaults_where_conditions(self):
         return {
-            "latest": ValuesMapper.latest('latest'),
+            "latest": self.values.latest('latest'),
             # "tdelete_time": 'IS NULL',  # @todo needs to be handled
         }
 
@@ -161,8 +161,6 @@ class ValuesMapper(ValuesMapperGeneric):
         This class will help manage value expectations for certain enum fields.
         Enums will be managed in the application layer.
     """
-
-    @staticmethod
     def latest(key = 'all'):
         values = {
             'archive': 2,
@@ -174,7 +172,6 @@ class ValuesMapper(ValuesMapperGeneric):
 
         return values
 
-    @staticmethod
     def status(key = 'all'):
         values = {
             'assigned': 'assigned',
@@ -194,7 +191,6 @@ class ValuesMapper(ValuesMapperGeneric):
 
         return values
 
-    @staticmethod
     def visibility(key = 'all'):
         values = {
             'private': 'private',

@@ -15,7 +15,6 @@ class QuerySetManager(models.QuerySet):
     app = None  # defines which app this queryset is used for
     columnsMatrix = None  # read 'table-columns' we will reference
     mapper = None  # mapper object that handles schema decisions
-    valuesMapper = None  # values mapper handling values being referenced
 
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.latest = False
@@ -32,10 +31,12 @@ class QuerySetManager(models.QuerySet):
         
         joins = self.generateJoinStatements(selectors, actualConditions)
 
-        defaultOrdering = self.mapper.defaults('order_by')
-        suppliedOrdering = self.generateOrderingList(ordering)
-        orderBy = self.mergeArgumentDictionaries(defaultOrdering, ordering)
-        orderByString = self.generateOrderByString(orderBy)
+        orderByList = self.generateOrderingList(ordering)
+
+        if orderByList:
+            orderByList = self.mapper.defaults('order_by')  # use default order set in App's Mapper.
+
+        orderByString = self.generateOrderByString(orderByList)
 
         limitString = self.generateLimitString(limit)
 
@@ -68,26 +69,32 @@ class QuerySetManager(models.QuerySet):
         }
 
     def generateOrderingList(self, ordering):
+        """
+            @todo - expand this operation to convert provided string orderby
+            arguments into desired list of dictionaries.
+        """
         if isinstance(ordering, list):
-            for i in len(ordering):
-                if not isinstance(ordering[i], dict):
-                    ordering[i] = self.convertOrderingToDict(ordering[i])
-
-                if not isinstance(ordering[i], dict) or 'col' not in ordering[i]:
-                    ordering[i] = None
-                    continue
-
-        if isinstance(ordering, str):
-            return self.generateOrderingList(ordering.split(','))
-
-        return ordering
-
-    def convertOrderingToDict(self, orderingItem):
-        if not isinstance(orderingItem, str):
             return None
 
-        # regex 'order by' out and 'desc/asc' then strip out col names
+        for i in range(len(ordering)):
 
+            if not isinstance(ordering[i], dict):
+                ordering[i] = None
+                continue
+
+            if 'col' not in ordering[i]:
+                ordering[i] = None
+                continue
+
+            if 'tbl' not in ordering[i]:
+                ordering[i] = None
+                continue
+
+            if 'sort' not in ordering[i]:
+                ordering[i] = None
+                continue
+
+        return ordering
 
     def generateOrderByString(self, ordering):
         orderByString = ''
@@ -131,7 +138,7 @@ class QuerySetManager(models.QuerySet):
     def assembleParams(self, params):
         if self.latest:
             latestField = self.mapper.columnName('latest')
-            params[latestField] = self.valuesMapper.staticCaller('latest', 'latest')
+            params[latestField] = self.mapper.values.static('latest', 'latest')
 
         keys = list(params.keys())
         for key in keys:

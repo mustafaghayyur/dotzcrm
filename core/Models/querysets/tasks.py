@@ -2,21 +2,7 @@ from . import master, child
 from core.Models.mappers.tasks import *
 
 """
-    REFORMATION (Notes):
-    -----------------------------
-    So far we have worked with MT and CT in QuerySets.
-    But what if, we could make QuertSet.fetch() so generic that it could fetch
-    anything? Thus making the CT/MT distinction for fetches void...
-
-    We will now attempt so:
-     1) C.U.D. in CRUD operations remain unchanged. This is absolute.
-     2) QuersySet will become a singular entity that any table, whether CT, MT
-        or M2MCT/RLCCT alike can be based off of. And allows for highly
-        versatile retrievals/select statements.
-
-    queryset_reformation2 branch CANNOT have any changes to core.Models.CRUD.
-    To ensure only QuerySets are modified, and that they still output the exact
-    same returns as before.
+    We are now removing MT/CT distinction from QuerySets.
 """
 class TaskQuerySet(master.MTQuerySet):
     """
@@ -25,8 +11,7 @@ class TaskQuerySet(master.MTQuerySet):
     """
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.app = 'tasks'
-        self.mapper = TasksMapper()
-        self.valuesMapper = ValuesMapper()
+        self.mapper = TasksMapper(ValuesMapper)
         self.columnsMatrix = self.mapper.generateO2OFields()
 
         super().__init__(model, query, using, hints)
@@ -49,39 +34,39 @@ class TaskQuerySet(master.MTQuerySet):
 class DetailQuerySet(child.CTQuerySet):
     tbl = 'tasks_details'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 
 
 class DeadlineQuerySet(child.CTQuerySet):
     tbl = 'tasks_deadline'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 
 
 class StatusQuerySet(child.CTQuerySet):
     tbl = 'tasks_status'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 
 
 class VisibilityQuerySet(child.CTQuerySet):
     tbl = 'tasks_assignment'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 
 
 class WatcherQuerySet(child.M2MQuerySet):
     tbl = 'tasks_watcher'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 
 class AssignmentQuerySet(child.CTQuerySet):
     tbl = 'tasks_visibility'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 
 class CommentQuerySet(child.RLCQuerySet):
     tbl = 'tasks_comment'
     app = 'tasks'
-    mapper = TasksMapper()
+    mapper = TasksMapper(ValuesMapper)
 

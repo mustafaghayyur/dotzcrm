@@ -2,7 +2,6 @@ from django.conf import settings as ds  # stands for django-settings
 from django.utils import timezone
 
 from core.helpers import misc, crud
-from core.Models.mappers.tasks import ValuesMapper
 from .staticHelpers import ValuesHandler
 
 """

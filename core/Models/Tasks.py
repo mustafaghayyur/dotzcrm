@@ -14,7 +14,8 @@ class CRUD(O2ORecords.CRUD):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
 
-        self.mapper = TasksMapper()
+        self.mapper = TasksMapper(ValuesMapper)
+        
         super().__init__()
 
     def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
@@ -43,7 +44,7 @@ class CRUD(O2ORecords.CRUD):
         conditions = {
             # "assignee_id": None,
             "update_time": None,
-            "latest": ValuesMapper.latest('latest'),
+            "latest": self.mapper.values.latest('latest'),
             "visibility": None,
             "status": None,
             "tid": task_id,

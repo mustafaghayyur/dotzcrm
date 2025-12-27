@@ -1,5 +1,6 @@
+from core.modules import Singleton
 
-class ValuesMapperGeneric():
+class ValuesMapperGeneric(Singleton):
     """
         ValuesMapper() and its descendants should be static classes.
         Primary modus operandi is static methods. Though state-based 
@@ -9,12 +10,13 @@ class ValuesMapperGeneric():
     def __init__(self):
         pass
 
-    def staticCaller(self, methodName, key = None):
+    def static(self, methodName, key = None):
         """
             For places static methods can't be called.
             We have the static method caller.
         """
         classToSummon = self.__class__
+        
         if hasattr(classToSummon, methodName):
             methodToSommon = getattr(classToSummon, methodName)
             
