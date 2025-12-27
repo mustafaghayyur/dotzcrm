@@ -1,5 +1,5 @@
-from .RelationshipMappers import RelationshipMappers
-from .ValuesMapper import ValuesMapperGeneric
+from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from core.DRMcore.mappers.ValuesMapper import ValuesMapperGeneric
 
 class TasksMapper(RelationshipMappers):
     """
@@ -161,6 +161,7 @@ class ValuesMapper(ValuesMapperGeneric):
         This class will help manage value expectations for certain enum fields.
         Enums will be managed in the application layer.
     """
+    
     def latest(self, key = 'all'):
         values = {
             'archive': 2,

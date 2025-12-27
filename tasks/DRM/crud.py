@@ -1,8 +1,7 @@
-from .crud import O2ORecords, RevisionlessChildren, M2MChildren
+from core.DRMcore.crud import O2ORecords, RevisionlessChildren, M2MChildren
 
 from tasks.models import *
-from .mappers.tasks import TasksMapper, ValuesMapper
-from .querysets.Tasks import *
+from .mappers import TasksMapper, ValuesMapper
 
 class CRUD(O2ORecords.CRUD):
     """

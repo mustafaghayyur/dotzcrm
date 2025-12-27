@@ -1,5 +1,5 @@
-from . import master, child
-from core.Models.mappers.tasks import *
+from core.DRMcore.querysets import master, child
+from mappers import *
 
 """
     We are now removing MT/CT distinction from QuerySets.
