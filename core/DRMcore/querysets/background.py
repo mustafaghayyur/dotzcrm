@@ -1,3 +1,4 @@
+import re
 from django.db import models
 
 from core.helpers import strings, crud, misc
@@ -12,8 +13,9 @@ class QuerySetManager(models.QuerySet):
         Defines helper functions for our versatile Select Query.
     """
     app = None  # defines which app this queryset is used for
-    columnsMatrix = None  # read 'table-columns' we will reference
     mapper = None  # mapper object that handles schema decisions
+    columnsMatrix = None  # read 'table-columns-in-mapper' we can reference
+    tablesUsed = None # actual table-abbreviations being referenced in query
 
     def __init__(self, model=None, query=None, using=None, hints=None):
         self.latest = False
@@ -25,6 +27,8 @@ class QuerySetManager(models.QuerySet):
         
         whereElements = self.decernConditionsIntoQueryRequirements(actualConditions)
         actualParameters = self.assembleParams(whereElements['params'])
+
+        self.tablesUsed = self.getValidTablesUsed(selectors, conditions)
 
         selectString = self.generateProperSelectors(selectors)
         
@@ -104,7 +108,8 @@ class QuerySetManager(models.QuerySet):
             return orderByString
 
         for item in ordering:
-            orderByString += f' {item['tbl']}.{item['col']} {item['sort']}, '
+            if item['tbl'] in self.tablesUsed:
+                orderByString += f' {item['tbl']}.{item['col']} {item['sort']}, '
 
         return orderByString[:-2]
 
@@ -192,7 +197,20 @@ class QuerySetManager(models.QuerySet):
             keyDb = key[1:]  # the table abbreviation is conjoined to key name. Separate:
 
         if keyDb in ['create_time', 'update_time', 'delete_time']:
-            return andPref + '(' + tbl + '.' + keyDb + ' >= NOW() - INTERVAL %(' + key + ')s DAY OR ' + tbl + '.' + keyDb + ' IS NULL )'
+            itemType = crud.determineDateArgumentType(item)
+            
+            if itemType is None:
+                return ''
+            
+            match itemType[0]:
+                case 'lastXDays':
+                    return andPref + '(' + tbl + '.' + keyDb + ' >= NOW() - INTERVAL %(' + key + ')s DAY)'
+                case 'range':
+                    start = crud.formulateProperDate(itemType[1]['start'])
+                    end = crud.formulateProperDate(itemType[1]['end'])
+                    return andPref + '(' + tbl + '.' + keyDb + ' BETWEEN ' + start + ' AND ' + end + ')'
+                case 'nullType':
+                    return andPref + tbl + '.' + keyDb + ' ' + itemType[1]
 
         if isinstance(item, list):
             return andPref + tbl + '.' + keyDb + ' IN %(' + key + ')s'
@@ -255,13 +273,12 @@ class QuerySetManager(models.QuerySet):
         """
             This method will need to be filled in app specific inheritor
         """
-        tbls = self.getValidTablesUsed(selectors, conditions)
         mt = self.mapper.master('abbreviation')
         mtId = self.mapper.master('foreignKeyName')
         joins = []
         latestKey = self.mapper.columnName('latest')
 
-        for tbl in tbls:
+        for tbl in self.tablesUsed:
             if tbl == mt or tbl == '':
                 continue
 

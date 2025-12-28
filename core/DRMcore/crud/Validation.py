@@ -1,8 +1,5 @@
 from django.conf import settings as ds  # stands for django-settings
-from django.utils import timezone
-
 from core.helpers import misc, crud
-from .staticHelpers import ValuesHandler
 
 """
     This class is crudely designed to hold all error handling code for 

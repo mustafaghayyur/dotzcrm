@@ -38,10 +38,10 @@ class TaskDetailView(DetailView):
             This GET call will retrieve a full record for the Task's Primary Key in question.
             Does not retrieve deleted records.
         """
-        try:
-            return super().get(request, *args, **kwargs)
-        except Exception as e:
-            raise Http404(f'Error: {e}')
+        #try:
+        return super().get(request, *args, **kwargs)
+        #except Exception as e:
+        #    raise Http404(f'Error: {e}')
 
     def post(self, request, *args, **kwargs):
         """
@@ -59,7 +59,7 @@ class TaskDetailView(DetailView):
 
     def get_object(self, queryset=None):
         if 'pk' in self.kwargs:
-            record = CRUD().read(['all'], {'tid': self.kwargs['pk'], "visibility": None})
+            record = CRUD().read(['all'], {'tid': self.kwargs['pk'], 'tdelete_time': 'is NULL'})
             # misc.log(record, 'RAW SQL OUTPUT [Details]')
 
             if record:

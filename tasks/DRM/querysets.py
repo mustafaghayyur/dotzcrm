@@ -28,7 +28,7 @@ class TaskQuerySet(master.MTQuerySet):
         #
         # See documentation on legitimate ways of forming selectors, conditions, etc in this call.
         """
-        super().fetch(selectors, conditions, orderBy, limit)
+        return super().fetch(selectors, conditions, orderBy, limit)
 
 
 class DetailQuerySet(child.CTQuerySet):
