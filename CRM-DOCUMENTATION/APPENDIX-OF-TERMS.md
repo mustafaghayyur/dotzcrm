@@ -85,7 +85,7 @@ P
 
 Q
 --
- > QuerySets: querysets hold special meaning to DotzCRM, as we rely heavily on raw queries. These queryset classes can be found in core.Models.querysets. Please see README.md in core.Models for details.
+ > QuerySets: querysets hold special meaning to DotzCRM, as we rely heavily on raw queries. These queryset classes can be found in core.DRMcore.querysets. Please see README.md in core.DRMcore for details.
 
 
 R
