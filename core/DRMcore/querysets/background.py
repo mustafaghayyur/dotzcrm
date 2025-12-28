@@ -32,7 +32,7 @@ class QuerySetManager(models.QuerySet):
 
         orderByList = self.generateOrderingList(ordering)
 
-        if orderByList:
+        if not orderByList:
             orderByList = self.mapper.defaults('order_by')  # use default order set in App's Mapper.
 
         orderByString = self.generateOrderByString(orderByList)
@@ -72,12 +72,13 @@ class QuerySetManager(models.QuerySet):
             @todo - expand this operation to convert provided string orderby
             arguments into desired list of dictionaries.
         """
-        if isinstance(ordering, list):
+        if not isinstance(ordering, list):
             return None
 
         for i in range(len(ordering)):
 
             if not isinstance(ordering[i], dict):
+                misc.log(ordering[i], 'ordering[i] is not a dict, so what is it?')
                 ordering[i] = None
                 continue
 
@@ -98,26 +99,31 @@ class QuerySetManager(models.QuerySet):
     def generateOrderByString(self, ordering):
         orderByString = ''
 
-        if not isinstance(ordering, dict):
+        if not isinstance(ordering, list):
+            misc.log(ordering, 'passed orderList is not a list type. OrderingBy string is set to empty string')
             return orderByString
 
         for item in ordering:
-            orderByString += f' {item.tbl}.{item.col} {item.sort} '
+            orderByString += f' {item['tbl']}.{item['col']} {item['sort']}, '
 
-        return orderByString
+        return orderByString[:-2]
 
-    def generateLimitString(limit):
+    def generateLimitString(self, limit):
         string = ''
 
         if isinstance(limit, list):
             for itm in limit:
                 string += itm + ', '
 
-            string = string[:-2]
-        else:
-            string = str(limit)
-
-        return string
+            return '(' + string[:-2] + ')'
+        
+        if strings.isPrimitiveType(limit):
+            if limit is None:
+                return self.mapper.defaults('limit_value')
+            else:
+                return str(limit)
+        
+        return self.mapper.defaults('limit_value')
 
     def assembleConditions(self, defaultConditions, providedConditions):
         if providedConditions is None:
@@ -137,7 +143,7 @@ class QuerySetManager(models.QuerySet):
     def assembleParams(self, params):
         if self.latest:
             latestField = self.mapper.columnName('latest')
-            params[latestField] = self.mapper.values.static('latest', 'latest')
+            params[latestField] = self.mapper.values.latest('latest')
 
         keys = list(params.keys())
         for key in keys:

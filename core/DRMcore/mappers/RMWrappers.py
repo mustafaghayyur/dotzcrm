@@ -8,12 +8,6 @@ class Wrappers(Singleton):
         dictionaries, etc as needed.
     """
 
-    def setValuesMapper(self, VMClassInstance):
-        """
-            Set's the self.values property
-        """
-        self.values = VMClassInstance()
-
     def defaults(self, requestedFunc):
         """
             Returns a self._defaults_{requestedFunc} method if defined.
@@ -25,7 +19,6 @@ class Wrappers(Singleton):
 
         if hasattr(self, requestedFunc):
             functionCall = getattr(self, requestedFunc)
-            
             if callable(functionCall):
                 return functionCall()
 

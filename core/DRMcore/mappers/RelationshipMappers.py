@@ -11,9 +11,15 @@ class RelationshipMappers(Wrappers):
     """
     values = None  # holds the ValuesMapper instance
 
-    def __init__(self, VMClassInstance, mainTable = None):
-        self.values = self.setValuesMapper(VMClassInstance)
-        self.mainTable = mainTable  # @todo remove?
+    def __init__(self, VMClassInstance):
+        self.setValuesMapper(VMClassInstance)
+
+    
+    def setValuesMapper(self, VMClassInstance):
+        """
+            Set's the self.values property
+        """
+        self.values = VMClassInstance()
 
     def isCommonField(self, key, prefix = False):
         """
@@ -95,20 +101,9 @@ class RelationshipMappers(Wrappers):
 
     def columnName(self, key):
         """
-            For future implementation.
-            Validate requested key exists in mapper.
+            In the future: if certain columns change name, this intermediary function
+            can be used to translate them in legacy code.
+
+            All columns should be referenced through this function.
         """
         return key
-
-    def returnValue(self, info, key):
-        """
-            Helper function. Used internally.
-        """
-        if key is not None and key in info:
-            return info[key]
-
-        if key == 'all':
-            return info
-
-        return None
-

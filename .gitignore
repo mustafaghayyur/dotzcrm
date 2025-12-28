@@ -9,3 +9,4 @@ COMMANDS.md
 *.log
 db.sqlite3
 backups/
+*.code-workspace

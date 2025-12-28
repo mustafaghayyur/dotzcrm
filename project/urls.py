@@ -24,7 +24,7 @@ from core.views import *  # needed to load some basic views and error handlers..
 urlpatterns = [
     path('rest/', include('restapi.urls')),
     path('tasks/', include('tasks.urls')),
-    path("account/", include('core.urls')),  # default: include("django.contrib.auth.urls",
+    path("accounts/", include('core.urls')),  # default: include("django.contrib.auth.urls",
     path('', index, name = 'index'),
 ]
 

@@ -1,5 +1,5 @@
 from core.DRMcore.querysets import master, child
-from mappers import *
+from .mappers import *
 
 """
     We are now removing MT/CT distinction from QuerySets.

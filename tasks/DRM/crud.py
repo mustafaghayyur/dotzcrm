@@ -17,7 +17,7 @@ class CRUD(O2ORecords.CRUD):
         
         super().__init__()
 
-    def read(self, selectors, conditions = None, orderBy = 't.update_time DESC', limit = '20'):
+    def read(self, selectors, conditions = None, orderBy = None, limit = None):
         """
             See documentation on how to form selectors, conditions, etc.
             @return: None | RawQuerySet

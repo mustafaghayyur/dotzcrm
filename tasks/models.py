@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings as sysconf
 
 # import our QuerySets:
-from core.Models.querysets.Tasks import *
+from .DRM.querysets import *
 
 
 # The main task table

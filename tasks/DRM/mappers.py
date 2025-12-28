@@ -7,8 +7,8 @@ class TasksMapper(RelationshipMappers):
         RelationshipMappers() has proper wrapper functions.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, VMClassInstance):
+        super().__init__(VMClassInstance)
 
     def _tables(self):
         """
@@ -154,6 +154,12 @@ class TasksMapper(RelationshipMappers):
             "latest": self.values.latest('latest'),
             # "tdelete_time": 'IS NULL',  # @todo needs to be handled
         }
+    
+    def _defaults_limit_value(self):
+        """
+            Should be returned in string format.
+        """
+        return '20'
 
 
 class ValuesMapper(ValuesMapperGeneric):
