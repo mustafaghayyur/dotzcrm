@@ -4,27 +4,57 @@ from rest_framework import status
 from tasks.models import *
 from tasks.validators.tasks import *
 
+"""
+    Views starting with [_H_] are not directly accessible by django urls.
+    They serve to handle (thus the 'H') a specific HTTP method request.
+
+    _H_ usually acompany {someObject}_crud() views; and handle full crud operations.
+
+    NOTE: the [request] argument being passed to views with the @api_view decorator,
+        are not the conventional Django request objects. Rather, DRF's enhanced
+        Request object.
+"""
 @api_view(['GET'])
 def task_list(request, format=None):
     """
-    List all snippets, or create a new snippet.
+    List all  tasks for ____
     """
     snippets = Snippet.objects.all()
     serializer = SnippetSerializer(snippets, many=True)
     return Response(serializer.data)
 
-@api_view(['POST'])
-def task_create(request, format=None):
+@api_view(['POST', 'PUT', 'GET', 'DELETE'])
+def task_crud(request, format=None):
+    method = request.method
+
+    match method:
+        case 'GET':
+            return _H_task_detail(request, format)
+        case 'POST':
+            return _H_task_create(request, format)
+        case 'PUT':
+            return _H_task_edit(request, format)
+        case 'DELETE':
+            return _H_task_delete(request, format)
+        case _:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+"""
+======================== HANDLER FUNCTIONS ===============================
+"""
+def _H_task_create(request, format=None):
+    """
+        Create single task record (with all it's related child-tables).
+    """
     serializer = SnippetSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['PUT'])
-def task_edit(request, pk, format=None):
+def _H_task_edit(request, pk, format=None):
     """
-    Retrieve, update or delete a snippet instance.
+        Edit single task record (with all it's related child-tables).
     """
     try:
         snippet = Snippet.objects.get(pk=pk)
@@ -37,8 +67,10 @@ def task_edit(request, pk, format=None):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['DELETE'])
-def task_delete(request, pk, format=None):
+def _H_task_delete(request, pk, format=None):
+    """
+        Delete single task record (with all it's related child-tables).
+    """
     try:
         snippet = Snippet.objects.get(pk=pk)
     except Snippet.DoesNotExist:
@@ -47,8 +79,10 @@ def task_delete(request, pk, format=None):
     snippet.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view(['GET'])
-def task_detail(request, pk, format=None):
+def _H_task_detail(request, pk, format=None):
+    """
+        Retrieve single task record (with all it's related child-tables).
+    """
     try:
         snippet = Snippet.objects.get(pk=pk)
     except Snippet.DoesNotExist:

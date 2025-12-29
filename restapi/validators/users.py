@@ -1,3 +1,4 @@
+"""
 from datetime import datetime
 from pydantic import BaseModel, PositiveInt
 
@@ -70,3 +71,5 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
         fields = ["url", "name"]
+
+"""
