@@ -7,7 +7,7 @@ from django.views.generic.edit import FormView  # , DeleteView
 # from django.views.generic.dates import YearArchiveView
 
 from core.modules.TasksEditForm import TasksEditForm
-from .DRM.crud import CRUD
+from .drm.crud import CRUD
 from core.helpers import misc, crud
 
 class TasksListView(ListView):
