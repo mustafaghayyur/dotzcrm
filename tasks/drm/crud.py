@@ -2,6 +2,7 @@ from core.DRMcore.crud import O2ORecords, RevisionlessChildren, M2MChildren
 
 from tasks.models import *
 from .mappers import TasksMapper, ValuesMapper
+from .mapper_values import ValuesMapper
 
 class CRUD(O2ORecords.CRUD):
     """

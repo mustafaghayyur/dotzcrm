@@ -1,5 +1,4 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
-from core.DRMcore.mappers.ValuesMapper import ValuesMapperGeneric
 
 class TasksMapper(RelationshipMappers):
     """
@@ -160,53 +159,3 @@ class TasksMapper(RelationshipMappers):
             Should be returned in string format.
         """
         return '20'
-
-
-class ValuesMapper(ValuesMapperGeneric):
-    """
-        This class will help manage value expectations for certain enum fields.
-        Enums will be managed in the application layer.
-    """
-    
-    def latest(self, key = 'all'):
-        values = {
-            'archive': 2,
-            'latest': 1,
-        }
-        
-        if key is not None and key in values:
-            return values[key]
-
-        return values
-
-    def status(self, key = 'all'):
-        values = {
-            'assigned': 'assigned',
-            'viewed': 'viewed',
-            'queued': 'queued',
-            'started': 'started',
-            'onhold': 'onhold',
-            'abandoned': 'abandoned',
-            'reassigned': 'reassigned',
-            'awaitingfeedback': 'awaitingfeedback',
-            'completed': 'completed',
-            'failed': 'failed',
-        }
-
-        if key is not None and key in values:
-            return values[key]
-
-        return values
-
-    def visibility(self, key = 'all'):
-        values = {
-            'private': 'private',
-            'assigned': 'assigned',
-            'organization': 'organization',
-            'stakeholders': 'stakeholders',
-        }
-
-        if key is not None and key in values:
-            return values[key]
-
-        return values

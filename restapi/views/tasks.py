@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from tasks.models import *
 from tasks.validators.tasks import *
+from tasks.drm.crud import CRUD
+from pydantic import ValidationError
 
 """
     Views starting with [_H_] are not directly accessible by django urls.
@@ -46,47 +48,50 @@ def _H_task_create(request, format=None):
     """
         Create single task record (with all it's related child-tables).
     """
-    serializer = SnippetSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        serializer = TaskO2ORecord(**request.data)
+        result = CRUD().create(serializer.model_dump())
+        return Response(result, status=status.HTTP_201_CREATED)
+    except ValidationError as e:
+        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
 def _H_task_edit(request, pk, format=None):
     """
         Edit single task record (with all it's related child-tables).
     """
     try:
-        snippet = Snippet.objects.get(pk=pk)
-    except Snippet.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    serializer = SnippetSerializer(snippet, data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TaskO2ORecord(**request.data)
+        result = CRUD().update(serializer.model_dump())
+        return Response(result)
+    except ValidationError as e:
+        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
 def _H_task_delete(request, pk, format=None):
     """
         Delete single task record (with all it's related child-tables).
     """
     try:
-        snippet = Snippet.objects.get(pk=pk)
-    except Snippet.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        crud = CRUD()
+        crud.delete(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
     
-    snippet.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
 
 def _H_task_detail(request, pk, format=None):
     """
         Retrieve single task record (with all it's related child-tables).
     """
     try:
-        snippet = Snippet.objects.get(pk=pk)
-    except Snippet.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        crud = CRUD()
+        crud.read(pk)
+        record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
+        if record:
+            return Response(record[0])
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
     
-    serializer = SnippetSerializer(snippet)
-    return Response(serializer.data)
