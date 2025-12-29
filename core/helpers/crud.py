@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django import forms
 import re
 
@@ -53,6 +54,39 @@ def formulateProperDate(date):
 
     return matches[1] + '-' + matches[2] + '-' + matches[3] + ' ' + '00:00:00'
 
+def isFutureDatetime(dt: datetime):
+    """
+        Validator to check if the datetime is in the future relative to Django's timezone.now().
+    """
+    if dt is None:
+        return None
+    
+    now = timezone.now()
+
+    if dt.tzinfo is None:
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        
+    if dt <= now:
+        raise ValueError("Datetime must be in the future.")
+    
+    return dt
+
+def isPastDatetime(dt: datetime):
+    """
+        Validator to check if the datetime is in the future relative to Django's timezone.now().
+    """
+    if dt is None:
+        return None
+    
+    now = timezone.now()
+
+    if dt.tzinfo is None:
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        
+    if dt > now:
+        raise ValueError("Datetime must not be in the future.")
+    
+    return dt
+
 class DateTimeLocalInput(forms.DateTimeInput):
     input_type = 'datetime-local'
-

@@ -4,7 +4,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 urlpatterns = [
-    path('tasks/', views.tasks.task_list),
+    path('tasks/<str:type>', views.tasks.task_list),
     path('tasks/details/<int:pk>/', views.tasks.task_crud),
 ]
 

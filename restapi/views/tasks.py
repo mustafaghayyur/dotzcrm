@@ -13,33 +13,60 @@ from pydantic import ValidationError
     _H_ usually acompany {someObject}_crud() views; and handle full crud operations.
 
     NOTE: the [request] argument being passed to views with the @api_view decorator,
-        are not the conventional Django request objects. Rather, DRF's enhanced
+        is not the conventional Django request object. Rather, DRF's enhanced
         Request object.
 """
 @api_view(['GET'])
-def task_list(request, format=None):
+def task_list(request, type, format=None):
     """
     List all  tasks for ____
     """
-    snippets = Snippet.objects.all()
-    serializer = SnippetSerializer(snippets, many=True)
-    return Response(serializer.data)
+    selectors = ['tid', 'description', 'tupdate_time', 'status', 'visibility']
+    conditions = {
+        'tdelete_time': 'is Null',
+        'assignee': request.user.id,
+    }
+
+    match type:
+        case 'private':
+            conditions['visibility'] = 'private'
+        case 'workspace':
+            conditions['workspace'] = request.data['workspace']
+            conditions['assignee'] = None
+        case '_':
+            pass
+
+    try:
+        records = CRUD().read(selectors, conditions, limit='all')
+        if records:
+            serialized = TaskO2ORecord(**records)
+            return Response(serialized.model_dump_json())
+    except ValidationError as e:
+        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
-def task_crud(request, format=None):
+def task_crud(request, pk, format=None):
     method = request.method
-
-    match method:
-        case 'GET':
-            return _H_task_detail(request, format)
-        case 'POST':
-            return _H_task_create(request, format)
-        case 'PUT':
-            return _H_task_edit(request, format)
-        case 'DELETE':
-            return _H_task_delete(request, format)
-        case _:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        match method:
+            case 'GET':
+                return _H_task_detail(request, pk, format)
+            case 'POST':
+                return _H_task_create(request, format)
+            case 'PUT':
+                return _H_task_edit(request, format)
+            case 'DELETE':
+                return _H_task_delete(request, pk, format)
+            case _:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    except ValidationError as e:
+        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
 """
 ======================== HANDLER FUNCTIONS ===============================
@@ -48,50 +75,32 @@ def _H_task_create(request, format=None):
     """
         Create single task record (with all it's related child-tables).
     """
-    try:
-        serializer = TaskO2ORecord(**request.data)
-        result = CRUD().create(serializer.model_dump())
-        return Response(result, status=status.HTTP_201_CREATED)
-    except ValidationError as e:
-        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+    serializer = TaskO2ORecord(**request.data)
+    result = CRUD().create(serializer.model_dump())
+    return Response(result, status=status.HTTP_201_CREATED)
+    
 
-def _H_task_edit(request, pk, format=None):
+def _H_task_edit(request, format=None):
     """
         Edit single task record (with all it's related child-tables).
     """
-    try:
-        serializer = TaskO2ORecord(**request.data)
-        result = CRUD().update(serializer.model_dump())
-        return Response(result)
-    except ValidationError as e:
-        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
-
+    serializer = TaskO2ORecord(**request.data)
+    result = CRUD().update(serializer.model_dump())
+    return Response(result)
+    
 def _H_task_delete(request, pk, format=None):
     """
         Delete single task record (with all it's related child-tables).
     """
-    try:
-        crud = CRUD()
-        crud.delete(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
-    
+    crud = CRUD().delete(pk)
+    return Response(status=status.HTTP_204_NO_CONTENT)    
 
 def _H_task_detail(request, pk, format=None):
     """
         Retrieve single task record (with all it's related child-tables).
     """
-    try:
-        crud = CRUD()
-        crud.read(pk)
-        record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
-        if record:
-            return Response(record[0])
-    except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+    record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
+    if record:
+        serialized = TaskO2ORecord(**record[0])
+        return Response(serialized.model_dump_json())
     
