@@ -1,56 +1,53 @@
+from rest_framework import serializers
 from datetime import datetime
 from django.utils import timezone
-from pydantic import BaseModel, Field, AfterValidator
 from typing import Annotated
 
-from tasks.models import *
 from tasks.drm.mapper_values import *
 from core.helpers import crud
 
-"""
-    Find out more: https://docs.pydantic.dev/latest/concepts/models/#model-methods-and-properties
-"""
-class TaskO2ORecord(BaseModel):
-    tid: Annotated[int, Field(gt=0)]
-    did: Annotated[int, Field(None, gt=0)]
-    lid: Annotated[int, Field(None, gt=0)]
-    sid: Annotated[int, Field(None, gt=0)]
-    aid: Annotated[int, Field(None, gt=0)]
-    vid: Annotated[int, Field(None, gt=0)]
+class TaskO2ORecord(serializers.Serializer):
+    tid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    did = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    lid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    sid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    aid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    vid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
 
-    description: Annotated[str, Field(None, max_length=255)]
-    details: Annotated[str, Field(None, min_length=50)]
-    status: Annotated[Status, Field(None, max_length=20)]
-    visibility: Annotated[Visibility, Field(None, max_length=20)]
+    description = serializers.CharField(allow_null=False, required=True, min_length=20, max_length=255)
+    details = serializers.CharField(allow_null=True, required=False, min_length=50)
+    
+    status = serializers.ChoiceField(choices=[(c.value, c.value) for c in Status], default=Status.created.value)
+    visibility = serializers.ChoiceField(choices=[(c.value, c.value) for c in Visibility], default=Visibility.private.value)
 
-    deadline: Annotated[datetime | None, Field(default_factory=timezone.now), AfterValidator(crud.isFutureDatetime)]
+    deadline = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isFutureDeadlineOrNone])
 
-    creator: Annotated[int, Field(None, gt=0)]
-    parent: Annotated[int, Field(None, gt=0)]
-    assignor: Annotated[int, Field(None, gt=0)]
-    assignee: Annotated[int, Field(None, gt=0)]
+    creator = serializers.IntegerField(allow_null=False, required=True, validators=[crud.isPositiveIdAlways])
+    parent = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    assignor = serializers.IntegerField(allow_null=False, required=True, validators=[crud.isPositiveIdAlways])
+    assignee = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
 
-    dlatest: Annotated[Latest, Field(None, max_length=1)]
-    llatest: Annotated[Latest, Field(None, max_length=1)]
-    slatest: Annotated[Latest, Field(None, max_length=1)]
-    alatest: Annotated[Latest, Field(None, max_length=1)]
-    vlatest: Annotated[Latest, Field(None, max_length=1)]
+    dlatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
+    llatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
+    slatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
+    alatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
+    vlatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
 
-    tcreate_time: Annotated[datetime, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
-    dcreate_time: Annotated[datetime | None, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
-    lcreate_time: Annotated[datetime | None, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
-    screate_time: Annotated[datetime | None, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
-    acreate_time: Annotated[datetime | None, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
-    vcreate_time: Annotated[datetime | None, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
+    tcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    dcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    lcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    screate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    acreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    vcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
 
-    tdelete_time: Annotated[datetime | None, AfterValidator(crud.isPastDatetime)]
-    ddelete_time: Annotated[datetime | None, AfterValidator(crud.isPastDatetime)]
-    ldelete_time: Annotated[datetime | None, AfterValidator(crud.isPastDatetime)]
-    sdelete_time: Annotated[datetime | None, AfterValidator(crud.isPastDatetime)]
-    adelete_time: Annotated[datetime | None, AfterValidator(crud.isPastDatetime)]
-    vdelete_time: Annotated[datetime | None, AfterValidator(crud.isPastDatetime)]
+    tdelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    ddelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    ldelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    sdelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    adelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    vdelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
 
-    tupdate_time: Annotated[datetime, Field(default_factory=timezone.now), AfterValidator(crud.isPastDatetime)]
+    tupdate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
 
 
     

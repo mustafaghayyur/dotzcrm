@@ -54,12 +54,36 @@ def formulateProperDate(date):
 
     return matches[1] + '-' + matches[2] + '-' + matches[3] + ' ' + '00:00:00'
 
-def isFutureDatetime(dt: datetime):
+"""
+=================================================
+    Below are methods for Validation of inputs 
+    to our REST API.
+=================================================
+"""
+def isFutureDeadlineOrNone(value):
+    return isFutureDatetime(value, 'Deadline', True)
+
+def isFutureDeadlineAlways(value):
+    return isFutureDatetime(value, 'Deadline', False)
+
+def isPastDatetimeOrNone(value):
+    return isPastDatetime(value, 'TimeStamp', True)
+
+def isPastDatetimeAlways(value):
+    return isPastDatetime(value, 'TimeStamp', False)
+
+def isPositiveIdOrNone(value):
+    return isPositiveInt(value, 'ID', True)
+
+def isPositiveIdAlways(value):
+    return isPositiveInt(value, 'ID', False)
+
+def isFutureDatetime(dt: datetime, key, noneAllowed):
     """
         Validator to check if the datetime is in the future relative to Django's timezone.now().
     """
     if dt is None:
-        return None
+        return isNoneAllowed(noneAllowed, key)
     
     now = timezone.now()
 
@@ -67,16 +91,16 @@ def isFutureDatetime(dt: datetime):
         dt = timezone.make_aware(dt, timezone.get_current_timezone())
         
     if dt <= now:
-        raise ValueError("Datetime must be in the future.")
+        raise ValueError(f"{key} must be in the future.")
     
     return dt
 
-def isPastDatetime(dt: datetime):
+def isPastDatetime(dt: datetime, key, noneAllowed):
     """
         Validator to check if the datetime is in the future relative to Django's timezone.now().
     """
     if dt is None:
-        return None
+        return isNoneAllowed(noneAllowed, key)
     
     now = timezone.now()
 
@@ -84,9 +108,26 @@ def isPastDatetime(dt: datetime):
         dt = timezone.make_aware(dt, timezone.get_current_timezone())
         
     if dt > now:
-        raise ValueError("Datetime must not be in the future.")
+        raise ValueError(f"{key} must not be in the future.")
     
     return dt
+
+def isPositiveInt(value, key, noneAllowed):
+    if value is None:
+        return isNoneAllowed(noneAllowed, key)
+    
+    if value is not isinstance(value, int) or value <= 0:
+        raise ValidationError(f"{key} must be None or an integer greater than 0.")
+
+
+def isNoneAllowed(noneAllowed, key):
+    """
+        Helper function.
+    """
+    if noneAllowed:
+        return None
+    else:
+        raise ValueError(f"{key} cannot be None.")
 
 class DateTimeLocalInput(forms.DateTimeInput):
     input_type = 'datetime-local'

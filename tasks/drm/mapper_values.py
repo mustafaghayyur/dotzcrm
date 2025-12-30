@@ -45,6 +45,7 @@ class ValuesMapper(ValuesMapperGeneric):
     making serialization to JSON straightforward.
 """
 class Status(str, Enum):
+    created = 'created'
     assigned = 'assigned'
     viewed = 'viewed'
     queued = 'queued'

@@ -1,10 +1,10 @@
+from rest_framework.serializers import ValidationError
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from tasks.models import *
 from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
-from pydantic import ValidationError
 
 """
     Views starting with [_H_] are not directly accessible by django urls.
@@ -75,18 +75,24 @@ def _H_task_create(request, format=None):
     """
         Create single task record (with all it's related child-tables).
     """
-    serializer = TaskO2ORecord(**request.data)
-    result = CRUD().create(serializer.model_dump())
-    return Response(result, status=status.HTTP_201_CREATED)
+    serializer = TaskO2ORecord(data=request.data)
+    if serializer.is_valid():
+        result = CRUD().create(serializer.validated_data)
+        return Response(result, status=status.HTTP_201_CREATED)
+    else:
+        raise ValidationError('Could not validate submitted data.')
     
 
 def _H_task_edit(request, format=None):
     """
         Edit single task record (with all it's related child-tables).
     """
-    serializer = TaskO2ORecord(**request.data)
-    result = CRUD().update(serializer.model_dump())
-    return Response(result)
+    serializer = TaskO2ORecord(data=request.data)
+    if serializer.is_valid():
+        result = CRUD().update(serializer.validated_data)
+        return Response(result)
+    else:
+        raise ValidationError('Could not validate submitted data.')
     
 def _H_task_delete(request, pk, format=None):
     """
