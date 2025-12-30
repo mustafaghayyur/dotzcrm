@@ -120,7 +120,7 @@ class QuerySetManager(models.QuerySet):
             for itm in limit:
                 string += itm + ', '
 
-            return '(' + string[:-2] + ')'
+            return string[:-2]
         
         if strings.isPrimitiveType(limit):
             if limit is None:

@@ -1,7 +1,7 @@
 from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, DateTimeField
 
 from tasks.drm.mapper_values import *
-from core.helpers import crud
+from core.helpers import crud, misc
 
 """
     Repeating options saved to dictionaries for convinient reuse...
@@ -26,7 +26,9 @@ datetimeNullableOpts = {
 
 latestChoiceOpts = {
     'choices': [(c.value, c.value) for c in Latest], 
-    'default': Latest.latest.value,
+    'allow_null': True,
+    'required': False,
+    'validators': [crud.isLatestChoicetOrNone]
 }
 
 class TaskO2ORecord(Serializer):
@@ -34,7 +36,7 @@ class TaskO2ORecord(Serializer):
         Serializer for O2O Task records.
     """
     id = IntegerField(**intMandatoryOpts)  # id = tid; but different places require different terms.
-    tid = IntegerField(**intNullableOpts)
+    tid = IntegerField(allow_null = True, required = False, validators = [crud.isPositiveIdOrNone])
     did = IntegerField(**intNullableOpts)
     lid = IntegerField(**intNullableOpts)
     sid = IntegerField(**intNullableOpts)
@@ -75,3 +77,25 @@ class TaskO2ORecord(Serializer):
     vdelete_time = DateTimeField(**datetimeNullableOpts)
 
     tupdate_time = DateTimeField(**datetimeNullableOpts)
+
+    def validate(self, data):
+        """
+            If `tid` is not provided, use the provided `id` value.
+        """
+        if data.get('tid') is None and data.get('id') is not None:
+            data['tid'] = data['id']
+        return data
+    
+    def validate_tid(self, value):
+        misc.log(value, 'validate_tid() being called.')
+        if value is None:
+            return self.initial_data.get('id')
+        return value
+    
+    def to_internal_value(self, data):
+        misc.log(data, 'I am in to_internal_value()')
+        if data.get('tid') is None and data.get('id') is not None:
+            data = dict(data) # make a copy
+            data['tid'] = data['id']
+            return super().to_internal_value(data)
+    

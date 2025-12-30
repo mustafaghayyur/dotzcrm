@@ -3,6 +3,8 @@ from django import forms
 from rest_framework.exceptions import ValidationError
 import re
 
+from tasks.drm.mapper_values import Latest 
+
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     tableName = mapper.tables(tbl)
     return {
@@ -55,6 +57,10 @@ def formulateProperDate(date):
 
     return matches[1] + '-' + matches[2] + '-' + matches[3] + ' ' + '00:00:00'
 
+class DateTimeLocalInput(forms.DateTimeInput):
+    # Needed by some CRUD operations.
+    input_type = 'datetime-local'
+
 """
 =================================================
     Below are methods for Validation of inputs 
@@ -78,6 +84,17 @@ def isPositiveIdOrNone(value):
 
 def isPositiveIdAlways(value):
     return isPositiveInt(value, 'ID', False)
+
+def isLatestChoicetOrNone(value):
+    return isLatestChoice(value, 'Latest', True)
+    
+def isLatestChoice(value, key, noneAllowed):
+    if value is None:
+        return isNoneAllowed(noneAllowed, key)
+    
+    if value not in [member.value for member in Latest]:
+        raise ValidationError(f"{key} must be None or accepted Enum Value.")
+
 
 def isFutureDatetime(dt: datetime, key, noneAllowed):
     """
@@ -129,6 +146,5 @@ def isNoneAllowed(noneAllowed, key):
         return None
     else:
         raise ValidationError(f"{key} cannot be None.")
+    
 
-class DateTimeLocalInput(forms.DateTimeInput):
-    input_type = 'datetime-local'
