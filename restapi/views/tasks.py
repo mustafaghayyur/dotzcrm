@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from tasks.models import *
-from tasks.validators.tasks import *
+from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
 from pydantic import ValidationError
 
