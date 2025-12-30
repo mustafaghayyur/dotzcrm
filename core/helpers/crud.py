@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django import forms
+from rest_framework.exceptions import ValidationError
 import re
 
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
@@ -91,7 +92,7 @@ def isFutureDatetime(dt: datetime, key, noneAllowed):
         dt = timezone.make_aware(dt, timezone.get_current_timezone())
         
     if dt <= now:
-        raise ValueError(f"{key} must be in the future.")
+        raise ValidationError(f"{key} must be in the future.")
     
     return dt
 
@@ -108,7 +109,7 @@ def isPastDatetime(dt: datetime, key, noneAllowed):
         dt = timezone.make_aware(dt, timezone.get_current_timezone())
         
     if dt > now:
-        raise ValueError(f"{key} must not be in the future.")
+        raise ValidationError(f"{key} must not be in the past.")
     
     return dt
 
@@ -127,7 +128,7 @@ def isNoneAllowed(noneAllowed, key):
     if noneAllowed:
         return None
     else:
-        raise ValueError(f"{key} cannot be None.")
+        raise ValidationError(f"{key} cannot be None.")
 
 class DateTimeLocalInput(forms.DateTimeInput):
     input_type = 'datetime-local'

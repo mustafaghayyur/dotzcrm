@@ -1,4 +1,4 @@
-from rest_framework.serializers import IntegerField, ChoiceField, CharField, DateTimeField
+from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, DateTimeField
 
 from tasks.drm.mapper_values import *
 from core.helpers import crud
@@ -29,10 +29,11 @@ latestChoiceOpts = {
     'default': Latest.latest.value,
 }
 
-class TaskO2ORecord(serializers.Serializer):
+class TaskO2ORecord(Serializer):
     """
         Serializer for O2O Task records.
     """
+    id = IntegerField(**intMandatoryOpts)  # id = tid; but different places require different terms.
     tid = IntegerField(**intNullableOpts)
     did = IntegerField(**intNullableOpts)
     lid = IntegerField(**intNullableOpts)
@@ -48,10 +49,10 @@ class TaskO2ORecord(serializers.Serializer):
 
     deadline = DateTimeField(allow_null=True, required=False, validators=[crud.isFutureDeadlineOrNone])
 
-    creator = IntegerField(**intMandatoryOpts)
-    parent = IntegerField(**intNullableOpts)
-    assignor = IntegerField(**intMandatoryOpts)
-    assignee = IntegerField(**intNullableOpts)
+    creator_id = IntegerField(**intMandatoryOpts)
+    parent_id = IntegerField(**intNullableOpts)
+    assignor_id = IntegerField(**intMandatoryOpts)
+    assignee_id = IntegerField(**intNullableOpts)
 
     dlatest = ChoiceField(**latestChoiceOpts)
     llatest = ChoiceField(**latestChoiceOpts)

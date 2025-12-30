@@ -1,5 +1,4 @@
-from rest_framework.serializers import ValidationError
-
+from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -21,7 +20,7 @@ def task_list(request, type, format=None):
     """
     List all  tasks for ____
     """
-    selectors = ['tid', 'description', 'tupdate_time', 'status', 'visibility']
+    selectors = ['tid', 'description', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
         'tdelete_time': 'is Null',
         'assignee': request.user.id,
@@ -39,8 +38,8 @@ def task_list(request, type, format=None):
     try:
         records = CRUD().read(selectors, conditions, limit='all')
         if records:
-            serialized = TaskO2ORecord(**records)
-            return Response(serialized.model_dump_json())
+            serialized = TaskO2ORecord(records, many=True)
+            return Response(serialized.data)
     except ValidationError as e:
         return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -107,6 +106,6 @@ def _H_task_detail(request, pk, format=None):
     """
     record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
     if record:
-        serialized = TaskO2ORecord(**record[0])
-        return Response(serialized.model_dump_json())
+        serialized = TaskO2ORecord(record[0])
+        return Response(serialized.data)
     

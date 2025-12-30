@@ -125,8 +125,11 @@ class QuerySetManager(models.QuerySet):
         if strings.isPrimitiveType(limit):
             if limit is None:
                 return self.mapper.defaults('limit_value')
-            else:
-                return str(limit)
+            
+            if isinstance(limit, str) and limit.lower().strip() == 'all':
+                return '1000000'  # set a crazy large amount
+            
+            return str(limit)
         
         return self.mapper.defaults('limit_value')
 
