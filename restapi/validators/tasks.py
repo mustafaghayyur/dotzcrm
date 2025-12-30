@@ -1,84 +1,76 @@
-from rest_framework import serializers
-from datetime import datetime
-from django.utils import timezone
-from typing import Annotated
+from rest_framework.serializers import IntegerField, ChoiceField, CharField, DateTimeField
 
 from tasks.drm.mapper_values import *
 from core.helpers import crud
 
+"""
+    Repeating options saved to dictionaries for convinient reuse...
+"""
+intNullableOpts = {
+    'allow_null': True, 
+    'required': False, 
+    'validators': [crud.isPositiveIdOrNone]
+}
+
+intMandatoryOpts = {
+    'allow_null': False, 
+    'required': True, 
+    'validators': [crud.isPositiveIdAlways]
+}
+
+datetimeNullableOpts = {
+    'allow_null': True, 
+    'required': False, 
+    'validators': [crud.isPastDatetimeOrNone]
+}
+
+latestChoiceOpts = {
+    'choices': [(c.value, c.value) for c in Latest], 
+    'default': Latest.latest.value,
+}
+
 class TaskO2ORecord(serializers.Serializer):
-    tid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
-    did = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
-    lid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
-    sid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
-    aid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
-    vid = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    """
+        Serializer for O2O Task records.
+    """
+    tid = IntegerField(**intNullableOpts)
+    did = IntegerField(**intNullableOpts)
+    lid = IntegerField(**intNullableOpts)
+    sid = IntegerField(**intNullableOpts)
+    aid = IntegerField(**intNullableOpts)
+    vid = IntegerField(**intNullableOpts)
 
-    description = serializers.CharField(allow_null=False, required=True, min_length=20, max_length=255)
-    details = serializers.CharField(allow_null=True, required=False, min_length=50)
+    description = CharField(allow_null=False, required=True, min_length=20, max_length=255)
+    details = CharField(allow_null=True, required=False, min_length=50)
     
-    status = serializers.ChoiceField(choices=[(c.value, c.value) for c in Status], default=Status.created.value)
-    visibility = serializers.ChoiceField(choices=[(c.value, c.value) for c in Visibility], default=Visibility.private.value)
+    status = ChoiceField(choices=[(c.value, c.value) for c in Status], default=Status.created.value)
+    visibility = ChoiceField(choices=[(c.value, c.value) for c in Visibility], default=Visibility.private.value)
 
-    deadline = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isFutureDeadlineOrNone])
+    deadline = DateTimeField(allow_null=True, required=False, validators=[crud.isFutureDeadlineOrNone])
 
-    creator = serializers.IntegerField(allow_null=False, required=True, validators=[crud.isPositiveIdAlways])
-    parent = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
-    assignor = serializers.IntegerField(allow_null=False, required=True, validators=[crud.isPositiveIdAlways])
-    assignee = serializers.IntegerField(allow_null=True, required=False, validators=[crud.isPositiveIdOrNone])
+    creator = IntegerField(**intMandatoryOpts)
+    parent = IntegerField(**intNullableOpts)
+    assignor = IntegerField(**intMandatoryOpts)
+    assignee = IntegerField(**intNullableOpts)
 
-    dlatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
-    llatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
-    slatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
-    alatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
-    vlatest = serializers.ChoiceField(choices=[(c.value, c.value) for c in Latest], default=Latest.latest.value)
+    dlatest = ChoiceField(**latestChoiceOpts)
+    llatest = ChoiceField(**latestChoiceOpts)
+    slatest = ChoiceField(**latestChoiceOpts)
+    alatest = ChoiceField(**latestChoiceOpts)
+    vlatest = ChoiceField(**latestChoiceOpts)
 
-    tcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    dcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    lcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    screate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    acreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    vcreate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    tcreate_time = DateTimeField(**datetimeNullableOpts)
+    dcreate_time = DateTimeField(**datetimeNullableOpts)
+    lcreate_time = DateTimeField(**datetimeNullableOpts)
+    screate_time = DateTimeField(**datetimeNullableOpts)
+    acreate_time = DateTimeField(**datetimeNullableOpts)
+    vcreate_time = DateTimeField(**datetimeNullableOpts)
 
-    tdelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    ddelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    ldelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    sdelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    adelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-    vdelete_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
+    tdelete_time = DateTimeField(**datetimeNullableOpts)
+    ddelete_time = DateTimeField(**datetimeNullableOpts)
+    ldelete_time = DateTimeField(**datetimeNullableOpts)
+    sdelete_time = DateTimeField(**datetimeNullableOpts)
+    adelete_time = DateTimeField(**datetimeNullableOpts)
+    vdelete_time = DateTimeField(**datetimeNullableOpts)
 
-    tupdate_time = serializers.DateTimeField(allow_null=True, required=False, validators=[crud.isPastDatetimeOrNone])
-
-
-    
-
-"""
-    external_data = {
-        'id': 123,
-        'signup_ts': '2019-06-01 12:22',  
-        'tastes': {
-            'wine': 9,
-            b'cheese': 7,  
-            'cabbage': '1',  
-        },
-    }
-
-    task = TaskO2ORecord(**external_data)  
-
-    print(task.id)  
-    #> 123
-    # task.model_dump() (dict) or task.model_dump_json() (JSON string) t
-    print(task.model_dump())
-
-    =======================================
-    error handling possibility (in Model class):
-    from pydantic import field_validator
-    @field_validator('details')
-    @classmethod
-    def _validate_details(cls, v):
-        if v is None:
-            return v
-        if isinstance(v, str) and len(v) > 20:
-            raise ValueError('details must be at most 20 characters')
-        return v
-"""
+    tupdate_time = DateTimeField(**datetimeNullableOpts)
