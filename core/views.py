@@ -8,7 +8,7 @@ def index (request):
         'content': 'This is a initial view for the CRM + PM Software',
     }
 
-    return render(request, 'generic.html', context)
+    return render(request, 'core/generic.html', context)
 
 # For class based views use the method_decorator with the name='dispatch' 
 # argument to apply the decorator to the main view logic:
@@ -21,4 +21,4 @@ def notFoundError(request, exception):
         'Message': 'Hello',
         'exception': exception
     }
-    return render(request, "404.html", context, status=404)
+    return render(request, "core/404.html", context, status=404)

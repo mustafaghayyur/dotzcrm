@@ -12,7 +12,7 @@ from core.helpers import misc, crud
 
 class TasksListView(ListView):
     context_object_name = "tasks"
-    template_name = "index.html"
+    template_name = "tasks/index.html"
     user_id = None
     
     def get(self, request, *args, **kwargs):
@@ -31,7 +31,7 @@ class TasksListView(ListView):
 
 class TaskDetailView(DetailView):
     context_object_name = "record"
-    template_name = "record.html"
+    template_name = "tasks/record.html"
     
     def get(self, request, *args, **kwargs):
         """
@@ -91,7 +91,7 @@ class TaskDetailView(DetailView):
 
 """
 class TaskEditView(FormView):
-    template_name = "edit.html"
+    template_name = "tasks/edit.html"
     form_class = TasksEditForm
     success_url = "/tasks/"
     """
