@@ -1,0 +1,33 @@
+/* custom.scss */
+
+// 1. Include functions and variables
+@import "../node_modules/bootstrap/scss/functions";
+@import "../node_modules/bootstrap/scss/variables";
+
+// 2. Override variables here
+$primary: #900; // Changes the global primary color to a dark red
+$body-bg: #eeeeee; // Changes the page background color
+
+// 3. Import the rest of Bootstrap
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+/* Add any additional custom styles below the import */
+.reenie-beanie-regular {
+  font-family: "Reenie Beanie", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.vollkorn-bold {
+  font-family: "Vollkorn", serif;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.vollkorn-reg {
+  font-family: "Vollkorn", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
