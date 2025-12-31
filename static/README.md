@@ -1,4 +1,4 @@
-# Bootsrap Setup Instructions
+## Bootsrap Setup Instructions
 
 We will be using Boostrap for all UI/UX development of Dotz CRM + PM Software.
 
@@ -16,7 +16,7 @@ While we may not do much in customization of vanilla bootstrap styles, you shoul
 4) Examine our Sass files found in static/scss/ directory. You can modify or add to, as you deem appropriate.
 
 5) Once satisfied with your changes, you may compile the code:
- > sass --watch ./scss/custom.scss ./css/custom.css
+ > sass ./scss/custom.scss:./css/custom.css --style=compressed
  (while cd'd in the static folder of this codebase.)
 
 6) Run your application and refresh your front-end code to see your changes.

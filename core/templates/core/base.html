@@ -1,0 +1,32 @@
+<!-- base.html -->
+{% load static %}
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %} Template {% endblock %} - Dotz CRM</title>
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">  
+  </head>
+  <body>
+    <div class="container">
+        {% include 'includes/header.html' %}
+        <div class="row align-items-start">
+            <div class="navWD col-3">
+                <p>&nbsp</p>
+                <h3>Updates</h3>
+                <p>Lorem ipsum indrigado. Navi sapto urdegan. Urague dorus beki heptim.</p>
+            </div>
+            <div class="contentWD col-9">
+                <h1>{% block page_heading %}Your content{% endblock %}</h1>
+                {% block content %}
+                    <p> some sort of content </p>
+                {% endblock %}
+            </div>
+        </div>
+        {% include 'includes/footer.html' %}
+    </div>
+    <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/costom.js' %}"></script>
+  </body>
+</html>
