@@ -1,7 +1,7 @@
 from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, DateTimeField
 
 from tasks.drm.mapper_values import *
-from core.helpers import crud, misc
+from core.helpers import validators
 
 """
     Repeating options saved to dictionaries for convinient reuse...
@@ -9,26 +9,26 @@ from core.helpers import crud, misc
 intNullableOpts = {
     'allow_null': True, 
     'required': False, 
-    'validators': [crud.isPositiveIdOrNone]
+    'validators': [validators.isPositiveIdOrNone]
 }
 
 intMandatoryOpts = {
     'allow_null': False, 
     'required': True, 
-    'validators': [crud.isPositiveIdAlways]
+    'validators': [validators.isPositiveIdAlways]
 }
 
 datetimeNullableOpts = {
     'allow_null': True, 
     'required': False, 
-    'validators': [crud.isPastDatetimeOrNone]
+    'validators': [validators.isPastDatetimeOrNone]
 }
 
 latestChoiceOpts = {
     'choices': [(c.value, c.value) for c in Latest], 
     'allow_null': True,
     'required': False,
-    'validators': [crud.isLatestChoicetOrNone]
+    'validators': [validators.isLatestChoicetOrNone]
 }
 
 class TaskO2ORecord(Serializer):
@@ -49,7 +49,7 @@ class TaskO2ORecord(Serializer):
     status = ChoiceField(choices=[(c.value, c.value) for c in Status], default=Status.created.value)
     visibility = ChoiceField(choices=[(c.value, c.value) for c in Visibility], default=Visibility.private.value)
 
-    deadline = DateTimeField(allow_null=True, required=False, validators=[crud.isFutureDeadlineOrNone])
+    deadline = DateTimeField(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 
     creator_id = IntegerField(**intMandatoryOpts)
     parent_id = IntegerField(**intNullableOpts)
