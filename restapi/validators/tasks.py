@@ -35,7 +35,7 @@ class TaskO2ORecord(Serializer):
     """
         Serializer for O2O Task records.
     """
-    id = IntegerField(**intMandatoryOpts)  # id = tid; but different places require different terms.
+    id = IntegerField(**intNullableOpts)  # id = tid; but different places require different terms.
     tid = IntegerField(**intNullableOpts)
     did = IntegerField(**intNullableOpts)
     lid = IntegerField(**intNullableOpts)
@@ -106,3 +106,20 @@ class TaskO2ORecord(Serializer):
             data['id'] = data['tid']
             return super().to_internal_value(data)
     """
+
+class Comment(Serializer):
+    id = IntegerField(**intNullableOpts)
+    task_id = IntegerField(**intMandatoryOpts)
+    comment = CharField(allow_null=False, required=True, min_length=50, max_length=6000)
+    parent_id = IntegerField(**intNullableOpts)
+    create_time = DateTimeField(**datetimeNullableOpts)
+    update_time = DateTimeField(**datetimeNullableOpts)
+    delete_time = DateTimeField(**datetimeNullableOpts)
+
+class Watcher(Serializer):
+    id = IntegerField(**intNullableOpts)
+    task_id = IntegerField(**intMandatoryOpts)
+    watcher_id = IntegerField(**intMandatoryOpts)
+    latest = ChoiceField(**latestChoiceOpts)
+    create_time = DateTimeField(**datetimeNullableOpts)
+    delete_time = DateTimeField(**datetimeNullableOpts)

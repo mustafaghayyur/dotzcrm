@@ -5,6 +5,7 @@ from rest_framework import status
 from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
 from core.helpers import pagination
+from .helpers.task import *
 
 """
     Views starting with [_H_] are not directly accessible by django urls.
@@ -60,13 +61,13 @@ def task_crud(request, pk, format=None):
     try:
         match method:
             case 'GET':
-                return _H_task_detail(request, pk, format)
+                return OneToOnes.detail(request, pk, format)
             case 'POST':
-                return _H_task_create(request, format)
+                return OneToOnes.create(request, format)
             case 'PUT':
-                return _H_task_edit(request, format)
+                return OneToOnes.edit(request, format)
             case 'DELETE':
-                return _H_task_delete(request, pk, format)
+                return OneToOnes.delete(request, pk, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
@@ -75,45 +76,25 @@ def task_crud(request, pk, format=None):
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
-"""
-======================== HANDLER FUNCTIONS ===============================
-"""
-def _H_task_create(request, format=None):
-    """
-        Create single task record (with all it's related child-tables).
-    """
-    serializer = TaskO2ORecord(data=request.data)
-    if serializer.is_valid():
-        result = CRUD().create(serializer.validated_data)
-        return Response(result, status=status.HTTP_201_CREATED)
-    else:
-        raise ValidationError('Could not validate submitted data.')
+@api_view(['POST', 'PUT', 'GET', 'DELETE'])
+def comments_crud(request, pk, format=None):
+    method = request.method
     
-
-def _H_task_edit(request, format=None):
-    """
-        Edit single task record (with all it's related child-tables).
-    """
-    serializer = TaskO2ORecord(data=request.data)
-    if serializer.is_valid():
-        result = CRUD().update(serializer.validated_data)
-        return Response(result)
-    else:
-        raise ValidationError('Could not validate submitted data.')
+    try:
+        match method:
+            case 'GET':
+                return Comments.detail(request, pk, format)
+            case 'POST':
+                return Comments.create(request, format)
+            case 'PUT':
+                return Comments.edit(request, format)
+            case 'DELETE':
+                return Comments.delete(request, pk, format)
+            case _:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
     
-def _H_task_delete(request, pk, format=None):
-    """
-        Delete single task record (with all it's related child-tables).
-    """
-    crud = CRUD().delete(pk)
-    return Response(status=status.HTTP_204_NO_CONTENT)    
-
-def _H_task_detail(request, pk, format=None):
-    """
-        Retrieve single task record (with all it's related child-tables).
-    """
-    record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
-    if record:
-        serialized = TaskO2ORecord(record[0])
-        return Response(serialized.data)
+    except ValidationError as e:
+        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
     
