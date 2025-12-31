@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
+from core.helpers import pagination
 
 """
     Views starting with [_H_] are not directly accessible by django urls.
@@ -18,9 +19,9 @@ from tasks.drm.crud import CRUD
 @api_view(['GET'])
 def task_list(request, type, format=None):
     """
-    List all  tasks for ____
+        List all  tasks for type of request
     """
-    selectors = ['tid', 'description', 'tupdate_time', 'status', 'visibility', 'assignor_id']
+    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
         'tdelete_time': 'is Null',
         'assignee': request.user.id,
@@ -36,12 +37,19 @@ def task_list(request, type, format=None):
             pass
 
     try:
-        records = CRUD().read(selectors, conditions, limit='all')
-        if records:
-            serialized = TaskO2ORecord(records, many=True)
-            return Response(serialized.data)
+        pgntn = pagination.assembleParamsForView(request.query_params)
+        
+        records = CRUD().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
+        serialized = TaskO2ORecord(records, many=True)
+        
+        return Response({
+            'page': pgntn['page'],
+            'page_size': pgntn['page_size'],
+            'has_more': pagination.determineHasMore(records, pgntn['page_size']),
+            'results': serialized.data
+        })
     except ValidationError as e:
-        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 

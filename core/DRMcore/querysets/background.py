@@ -120,7 +120,7 @@ class QuerySetManager(models.QuerySet):
             for itm in limit:
                 string += itm + ', '
 
-            return '(' + string[:-2] + ')'
+            return string[:-2]
         
         if strings.isPrimitiveType(limit):
             if limit is None:
@@ -176,7 +176,7 @@ class QuerySetManager(models.QuerySet):
                     addition = ' AS ' + table + key
                     
                     if table + key == self.mapper.master('abbreviation') + 'id':
-                        addition = ''
+                        addition = ', ' + table + '.' + key + ' AS ' + table + key
                     
                     string += ' ' + table + '.' + key + addition + ','
                 else:

@@ -2,6 +2,9 @@ from django.utils import timezone
 from django import forms
 from rest_framework.exceptions import ValidationError
 import re
+from . import misc
+
+from tasks.drm.mapper_values import Latest 
 
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     tableName = mapper.tables(tbl)
@@ -55,6 +58,27 @@ def formulateProperDate(date):
 
     return matches[1] + '-' + matches[2] + '-' + matches[3] + ' ' + '00:00:00'
 
+def recordsToDictionary(rawQuerySet, selectors):
+     # Convert RawQuerySet / DB row objects into plain dicts keyed by selectors
+    recordsToDict = []
+    for rec in (rawQuerySet or []):
+        row = {}
+        for key in selectors:
+            # RawQuerySet exposes selected columns as attributes named after the selector alias
+            row[key] = getattr(rec, key, None)
+
+        id = getattr(rec, 'id', None)
+        if 'id' not in row or row['id'] is None:
+            row['id'] = id
+
+        recordsToDict.append(row)
+        
+    return recordsToDict
+
+class DateTimeLocalInput(forms.DateTimeInput):
+    # Needed by some CRUD operations.
+    input_type = 'datetime-local'
+
 """
 =================================================
     Below are methods for Validation of inputs 
@@ -78,6 +102,17 @@ def isPositiveIdOrNone(value):
 
 def isPositiveIdAlways(value):
     return isPositiveInt(value, 'ID', False)
+
+def isLatestChoicetOrNone(value):
+    return isLatestChoice(value, 'Latest', True)
+    
+def isLatestChoice(value, key, noneAllowed):
+    if value is None:
+        return isNoneAllowed(noneAllowed, key)
+    
+    if value not in [member.value for member in Latest]:
+        raise ValidationError(f"{key} must be None or accepted Enum Value.")
+
 
 def isFutureDatetime(dt: datetime, key, noneAllowed):
     """
@@ -116,8 +151,7 @@ def isPastDatetime(dt: datetime, key, noneAllowed):
 def isPositiveInt(value, key, noneAllowed):
     if value is None:
         return isNoneAllowed(noneAllowed, key)
-    
-    if value is not isinstance(value, int) or value <= 0:
+    if not isinstance(value, int) or value <= 0:
         raise ValidationError(f"{key} must be None or an integer greater than 0.")
 
 
@@ -129,6 +163,5 @@ def isNoneAllowed(noneAllowed, key):
         return None
     else:
         raise ValidationError(f"{key} cannot be None.")
+    
 
-class DateTimeLocalInput(forms.DateTimeInput):
-    input_type = 'datetime-local'
