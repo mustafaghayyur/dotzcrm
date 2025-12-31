@@ -36,7 +36,7 @@ class TaskO2ORecord(Serializer):
         Serializer for O2O Task records.
     """
     id = IntegerField(**intMandatoryOpts)  # id = tid; but different places require different terms.
-    tid = IntegerField(allow_null = True, required = False, validators = [crud.isPositiveIdOrNone])
+    tid = IntegerField(**intNullableOpts)
     did = IntegerField(**intNullableOpts)
     lid = IntegerField(**intNullableOpts)
     sid = IntegerField(**intNullableOpts)
@@ -78,24 +78,31 @@ class TaskO2ORecord(Serializer):
 
     tupdate_time = DateTimeField(**datetimeNullableOpts)
 
+    """
     def validate(self, data):
-        """
-            If `tid` is not provided, use the provided `id` value.
-        """
-        if data.get('tid') is None and data.get('id') is not None:
+    """
+    """
+                    #If `tid` is not provided, use the provided `id` value.
+
+        if data.get('tid', None) is None and data.get('id', None) is not None:
             data['tid'] = data['id']
+
+        if data.get('id', None) is None and data.get('tid', None) is not None:
+            data['id'] = data['tid']
+
+        misc.log(data, 'I am in validate(), after the validation ')
         return data
-    
+
     def validate_tid(self, value):
         misc.log(value, 'validate_tid() being called.')
         if value is None:
             return self.initial_data.get('id')
         return value
-    
+
     def to_internal_value(self, data):
         misc.log(data, 'I am in to_internal_value()')
-        if data.get('tid') is None and data.get('id') is not None:
+        if data.get('id', None) is None and data.get('tid', None) is not None:
             data = dict(data) # make a copy
-            data['tid'] = data['id']
+            data['id'] = data['tid']
             return super().to_internal_value(data)
-    
+    """

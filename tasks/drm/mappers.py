@@ -6,7 +6,7 @@ class TasksMapper(RelationshipMappers):
         RelationshipMappers() has proper wrapper functions.
     """
 
-    def __init__(self, VMClassInstance):
+    def __init__(self, VMClassInstance = None):
         super().__init__(VMClassInstance)
 
     def _tables(self):

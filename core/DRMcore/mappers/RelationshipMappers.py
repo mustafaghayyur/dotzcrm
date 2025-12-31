@@ -11,8 +11,9 @@ class RelationshipMappers(Wrappers):
     """
     values = None  # holds the ValuesMapper instance
 
-    def __init__(self, VMClassInstance):
-        self.setValuesMapper(VMClassInstance)
+    def __init__(self, VMClassInstance = None):
+        if VMClassInstance is not None:
+            self.setValuesMapper(VMClassInstance)
 
     
     def setValuesMapper(self, VMClassInstance):
