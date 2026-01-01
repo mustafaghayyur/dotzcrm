@@ -1,9 +1,7 @@
 /**
- * This file holds custom JS to implement Bootstrap into Dotz CRM + PM
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
  */
-
-document.addEventListener('DOMContentLoaded', () => {
+export function TabbedDashBoard() {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');
     const containers = {
         private: document.getElementById('privateContainer'),
@@ -91,6 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
     }
 
+    /**
+     * This sets the event handler for tables loading data
+     */
     tabs.forEach(t => {
         t.addEventListener('click', () => {
             const tab = t.dataset.tab;
@@ -102,4 +103,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default open: private tab
     setActiveTab('private');
     fetchTab('private');
-});
+}
+
