@@ -37,6 +37,7 @@ def task_list(request, type, format=None):
         case 'workspaces':
             conditions['workspace'] = None
             conditions['assignee_id'] = None
+            conditions['visibility'] = 'workspaces'
         case '_':
             pass
 

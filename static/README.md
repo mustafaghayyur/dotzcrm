@@ -28,3 +28,6 @@ https://getbootstrap.com/docs/5.3/customize/sass/
 ### Notes
  - To keep the custom.scss file auto-recompile mode, while testing, you can also run (in dev environment):
  sass --watch ./scss/custom.scss ./css/custom.css
+
+ View useable icons:
+ https://icons.getbootstrap.com/
