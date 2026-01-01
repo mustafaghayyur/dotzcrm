@@ -18,16 +18,16 @@ export function TabbedDashBoard() {
     const fetched = { private: false, workspaces: false };
 
     function setActiveTab(tabName) {
-        tabs.forEach(t => {
-            const name = t.dataset.tab;
+        tabs.forEach(tab => {
+            const name = tab.dataset.tab;
             const pane = document.getElementById('tab-' + name);
             if (name === tabName) {
-                t.classList.add('active');
-                t.setAttribute('aria-selected','true');
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected','true');
                 pane.classList.add('active');
             } else {
-                t.classList.remove('active');
-                t.setAttribute('aria-selected','false');
+                tab.classList.remove('active');
+                tab.setAttribute('aria-selected','false');
                 pane.classList.remove('active');
             }
         });
@@ -66,16 +66,16 @@ export function TabbedDashBoard() {
             data.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
-                const desc = item.description || JSON.stringify(item);
-                const meta = item.status ? '<div class="text-muted small">' + escapeHtml(item.status) + '</div>' : '';
-                var more = ''
-                var details = ''
+                let desc = item.description || JSON.stringify(item);
+                let meta = item.status ? '<div class="text-muted small">' + escapeHtml(item.status) + '</div>' : '';
+                let more = ''
+                let details = ''
                 console.log('What is the tabName currently?', tabName)
                 if (tabName == 'private') {
                         more = '<a class="btn position-absolute top-0 end-0 m-3" data-bs-toggle="collapse" href="#collapseExample-' + escapeHtml(item.id) + '" role="button" aria-expanded="false" aria-controls="collapseExample-' + escapeHtml(item.id) + '"><i class="bi bi-info-circle"></i></a>'
                         details = '<div class="collapse" id="collapseExample-' + escapeHtml(item.id) + '"><div class="card card-body">' + escapeHtml(item.details) + '</div></div>'
                 }
-                li.innerHTML = '<div class="position-relative"><div>' + escapeHtml(String(desc)) + '</div>' + meta + more + details + '</div>';
+                li.innerHTML = '<div class="position-relative"><a class="link" href="/tasks/details/' + escapeHtml(item.id) + '">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
                 ul.appendChild(li);
             });
             container.innerHTML = '';
@@ -92,16 +92,18 @@ export function TabbedDashBoard() {
     /**
      * This sets the event handler for tables loading data
      */
-    tabs.forEach(t => {
-        t.addEventListener('click', () => {
-            const tab = t.dataset.tab;
-            setActiveTab(tab);
-            fetchTab(tab);
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            let info = tab.dataset.tab;
+            setActiveTab(info);
+            fetchTab(info);
         });
+
+        if (tab.id == 'tab-private-btn') {
+            // trigger 'private' tab by default
+            tab.click()
+        }
     });
 
-    // Default open: private tab
-    setActiveTab('private');
-    fetchTab('private');
 }
 

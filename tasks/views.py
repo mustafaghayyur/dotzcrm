@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.http import Http404, HttpResponse
+# from django.http import Http404, HttpResponse
 
-from .models import Task
+from .drm.crud import *
+from core.helpers.crud import isValidId
+from core.helpers import misc
 
 def dashboard(request):
     """
@@ -12,10 +14,16 @@ def dashboard(request):
     still iterate `tasks` continue to work. The tab-specific data is fetched
     by the client via the REST endpoints.
     """
-    return render(request, 'tasks/index.html', {'greating': 'Hello'})
+    return render(request, 'tasks/index.html', {'timestamp': None})
 
 def viewTaskDetails(request, id):
-    pass
+    if isValidId({'id': id}, 'id'):
+        records = CRUD().read(['all'], { 'tid': id, 'tdelete_time': 'is Null'})
+        misc.log(records[0].id, 'Inside task details, why record not showing?', 2)
+        if records:
+            return render(request, 'tasks/record.html', {'record': records[0]})
+    
+    return render(request, "core/404.html", { 'Message': 'Hello', 'exception': 'Task ID invalid or record not found.' }, status=404)
 
 def editTask(request, id = None):
     pass

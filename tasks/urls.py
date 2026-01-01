@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     path('', dashboard, name = 'task_index'),
-    path('details/<int:pk>/', viewTaskDetails, name = 'task_info'),
-    path('edit/<int:pk>/', editTask, name = 'task_edit'),
+    path('details/<int:id>/', viewTaskDetails, name = 'task_info'),
+    path('edit/<int:id>/', editTask, name = 'task_edit'),
     path('edit/', editTask, name = 'task_create'),
 ]
