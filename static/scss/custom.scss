@@ -4,6 +4,11 @@
 @import "../node_modules/bootstrap/scss/functions";
 @import "../node_modules/bootstrap/scss/variables";
 
+// Update the import directory to point to it‘s location within node_modules
+$bootstrap-icons-font-dir: "bootstrap-icons/font/fonts";
+// Import the Sass files as usual
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons";
+
 // 2. Override variables here
 $primary: #900; // Changes the global primary color to a dark red
 $body-bg: #eeeeee; // Changes the page background color
@@ -41,3 +46,30 @@ $body-bg: #eeeeee; // Changes the page background color
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+/* Tabbed dashboard styles */
+.tab-dashboard {
+  background: #fff;
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.tab-dashboard .nav-tabs .nav-link {
+  cursor: pointer;
+  background-color: #342c2c;
+}
+
+.tab-results {
+  min-height: 6rem;
+}
+
+.tab-results pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tab-dashboard { background: #403939; }
+}
+
