@@ -76,7 +76,7 @@ export function TabbedDashBoard(idToCheck) {
                         more = '<a class="btn position-absolute top-0 end-0 m-3" data-bs-toggle="collapse" href="#collapseExample-' + escapeHtml(item.id) + '" role="button" aria-expanded="false" aria-controls="collapseExample-' + escapeHtml(item.id) + '"><i class="bi bi-info-circle"></i></a>'
                         details = '<div class="collapse" id="collapseExample-' + escapeHtml(item.id) + '"><div class="card card-body">' + escapeHtml(item.details) + '</div></div>'
                 }
-                li.innerHTML = '<div class="position-relative"><a class="link" href="/tasks/details/' + escapeHtml(item.id) + '">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
+                li.innerHTML = '<div class="position-relative"><a class="link task-details-link" data-taskid="'+ escapeHtml(item.id) +'" href="#">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
                 ul.appendChild(li);
             });
             container.innerHTML = '';

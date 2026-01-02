@@ -10,8 +10,8 @@
  * DOM element seperately.
  * 
  * @param {*} request - use defineRequest() to attain this object
- * @param {*} containerId - id of HTML DOM leement in which response will be rendered
- * @param {*} mapper - object that defines a collection dom elements to map to api response
+ * @param {*} containerId - id of HTML DOM element in which response will be rendered
+ * @param {*} mapper - object that defines a collection of dom elements to map to api response
  * @param {*} callbackFunction - in complicated cases, response can be rendered with your own callback function
  */
 export function Fetcher(request, containerId, mapper = {}, callbackFunction = null) {
@@ -22,10 +22,11 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
      * Handles container and spinner states as well (partially).
      * @param {*} request - Request object
      */
-    async function fetchResource(request) {
+    async function fetchResource(reqObj) {
+        spinner = getSpinner()
         let container = document.getElementById(containerId)
         try {
-            let response = await fetch(request);
+            let response = await fetch(reqObj);
             
             if (!response.ok) {
                 throw new Error(response.status + ' ' + response.statusText);
@@ -43,7 +44,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         } catch (err) {
             container.innerHTML = '<div class="alert alert-danger">Error loading: ' + escapeHtml(err.message) + '</div>';
         } finally {
-            spinner = getSpinner()
             spinner.classList.add('d-none');
         }
     }
@@ -52,7 +52,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         const container = document.getElementById(containerId);
         
         if (typeof callbackFunction === 'function') {
-            return callbackFunction(resultSet);
+            return callbackFunction(resultSet, containerId);
         }
 
         // No callback provided, setup standard response
@@ -74,6 +74,14 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         }
     }
 
+    /**
+     * Recursive function. Maps out single record from the response' Array.
+     * @param {*} record - single record from respnse.resultArray()
+     * @param {*} wrapperTag - what tag this record should be wrapped in.
+     * @param {*} level - should not be touched, recursive operation
+     * @param {*} newMapper - should not be touched, recursive operation
+     * @returns 
+     */
     function generateRecordDom(record, wrapperTag, level = 0, newMapper = null) {
         dom = document.createElement(wrapperTag);
         dom.className = 'itm-record-lvl-' + level;
@@ -112,18 +120,20 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         if (i === 0) {
             console.log('generateRecordDom() - level: '+ level +'; mapper could not be processed, aborting record rendition');
         }
-
-        // escapeHtml(String(desc))
         return dom;
     }
 
+    /**
+     * helper function for safe rendering of user-supplied code.
+     * @todo - see if better escape operations are needed.
+     * @param {*} str - string to escape
+     */
     function escapeHtml(str) {
-        console.log('[escapeHtml] Checking if id made it: ', idToCheck)
         return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
     }
 
     /**
-     * Get and Set spinner element.
+     * Generate, set and return spinner element inside container.
      */
     function getSpinner() {
         if (spinner !== null && spinner instanceof HTMLElement) {
@@ -145,6 +155,12 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 
         return null;
     }
+
+    /**
+     * Implementation of Fetcher...
+     * see console logs for errors found during rendering of response...
+     */
+    fetchResource(request);
 }
 
 /**
