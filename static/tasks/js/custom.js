@@ -5,15 +5,23 @@ import { taskDetailsMapper } from "./mappers.js";
  * This file holds custom JS to implement Bootstrap into Dotz CRM + PM
  */
 
+
+
 // implment dashboard on index.html
-document.addEventListener('DOMContentLoaded', TabbedDashBoard('Hello Motto'));
+document.addEventListener('DOMContentLoaded', TabbedDashBoard(addListenersToTasks));
 
-// implment listener and fetcher for item details modal...
-let tasks = document.getElementsByClassName('task-details-link');
-tasks.forEach(task => {
-    let id = dataset.taskid;
-    request = defineRequest('rest/tasks/crud/' + id);
-    
-    task.addEventListener('click', Fetcher(request, 'ticketDetailsModal', {}, taskDetailsMapper));
-});
 
+
+function addListenersToTasks(container){
+    if(container instanceof HTMLElement){
+        // implment listener and fetcher for item details modal...
+        let tasks = container.querySelectorAll('.task-details-link');
+        tasks.forEach(task => {
+            // @todo - find a way to correctly refeeence taskid data attribute
+            let id = task.dataset.taskid;
+            request = defineRequest('rest/tasks/crud/' + id);
+            
+            task.addEventListener('click', Fetcher(request, 'ticketDetailsModal', {}, taskDetailsMapper));
+        });
+    }
+}

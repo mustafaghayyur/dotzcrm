@@ -1,7 +1,7 @@
 /**
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
  */
-export function TabbedDashBoard(idToCheck) {
+export function TabbedDashBoard(callbackFunction = null) {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');
     const containers = {
         private: document.getElementById('privateContainer'),
@@ -18,7 +18,6 @@ export function TabbedDashBoard(idToCheck) {
     const fetched = { private: false, workspaces: false };
 
     function setActiveTab(tabName) {
-        console.log('[setActiveTab] Checking if id made it: ', idToCheck)
         tabs.forEach(tab => {
             const name = tab.dataset.tab;
             const pane = document.getElementById('tab-' + name);
@@ -35,7 +34,6 @@ export function TabbedDashBoard(idToCheck) {
     }
 
     async function fetchTab(tabName) {
-        console.log('[fetchTab] Checking if id made it: ', idToCheck)
         if (fetched[tabName]) return;
         fetched[tabName] = true;
         const spinner = spinners[tabName];
@@ -47,7 +45,7 @@ export function TabbedDashBoard(idToCheck) {
             const contentType = res.headers.get('content-type') || '';
             if (contentType.includes('application/json')) {
                 const data = await res.json();
-                renderData(tabName, data.results);
+                renderData(tabName, data);
             } else {
                 const text = await res.text();
                 container.innerHTML = '<pre>' + escapeHtml(text) + '</pre>';
@@ -60,7 +58,9 @@ export function TabbedDashBoard(idToCheck) {
     }
 
     function renderData(tabName, data) {
-        console.log('[renderData] Checking if id made it: ', idToCheck)
+        const { results } = data;
+        console.log('data obj: ', results);
+        data = results;
         const container = containers[tabName];
         if (Array.isArray(data)) {
             const ul = document.createElement('ul');
@@ -81,13 +81,16 @@ export function TabbedDashBoard(idToCheck) {
             });
             container.innerHTML = '';
             container.appendChild(ul);
+            if(typeof callbackFunction === 'function'){
+                console.log('addListenersToTasks', callbackFunction);
+                callbackFunction(container);
+            }
         } else {
             container.innerHTML = '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
         }
     }
 
     function escapeHtml(str) {
-        console.log('[escapeHtml] Checking if id made it: ', idToCheck)
         return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
     }
 
@@ -96,20 +99,15 @@ export function TabbedDashBoard(idToCheck) {
      */
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            console.log('Checking if id made it (inside | tabs.forEach -> add eventListener): ', idToCheck)
             let info = tab.dataset.tab;
             setActiveTab(info);
             fetchTab(info);
         });
 
         if (tab.id == 'tab-private-btn') {
-            console.log('Checking if id made it (inside if of triggering private tab): ', idToCheck)
             // trigger 'private' tab by default
             tab.click()
         }
     });
-
-    console.log('Checking inside constructore, can I call id directly?', idToCheck)
-
 }
 
