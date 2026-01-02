@@ -1,0 +1,60 @@
+<!-- Button trigger modal -->
+<a class="btn btn-primary ticket-details-link" data-ticketId="" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal">View Ticket</a>
+
+<!-- Modal -->
+<div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true" data-bs-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ticketDetailsModalLabel">Task #{{record.tid}} - {{record.description}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <tr>
+            <th colspan="1" class="align-text-bottom">Created:</td>
+            <td colspan="1" class="align-text-bottom" id="tcreate_time"></td>
+            <th colspan="1" class="align-text-bottom">Last Updated:</td>
+            <td colspan="1" class="align-text-bottom" id="tupdate_time"></td>
+          </tr>
+          <tr>
+            <th colspan="1" class="align-text-bottom">Created by:</td>
+            <td colspan="1" class="align-text-bottom" id="creator_id"></td>
+            <th colspan="1" class="align-text-bottom">Assigned to:</td>
+            <td colspan="1" class="align-text-bottom" id="assignee_id"></td>
+          </tr>
+          <tr>
+            <th colspan="1" class="align-text-bottom">Status:</td>
+            <td colspan="1" class="align-text-bottom" id="status"></td>
+            <th colspan="1" class="align-text-bottom">Visibility</td>
+            <td colspan="1" class="align-text-bottom" id="visibility"></td>
+          </tr>
+          <tr>
+            <th colspan="1" class="align-text-bottom">Details:</td>
+            <td colspan="3" class="align-text-bottom" id="details"></td>
+          </tr>
+          <tr>
+            <th colspan="1" class="align-text-bottom">Deadline:</td>
+            <td colspan="1" class="align-text-bottom" id="deadline"></td>
+            <th colspan="1" class="align-text-bottom">Assignor:</td>
+            <td colspan="1" class="align-text-bottom" id="assignor_id"></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="text-center align-text-bottom">
+            </td>
+            <td colspan="2" class="text-center align-text-bottom">
+              <form class="d-inline-block" method="GET" action="{% url 'task_edit' record.id %}">
+                <button class="button" type="submit">edit</button>
+              </form>
+              <form class="d-inline-block" action="" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="">
+                <button class="button" type="submit">delete</button>
+              </form>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

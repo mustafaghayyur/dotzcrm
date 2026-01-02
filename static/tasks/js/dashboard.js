@@ -1,7 +1,7 @@
 /**
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
  */
-export function TabbedDashBoard() {
+export function TabbedDashBoard(idToCheck) {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');
     const containers = {
         private: document.getElementById('privateContainer'),
@@ -18,6 +18,7 @@ export function TabbedDashBoard() {
     const fetched = { private: false, workspaces: false };
 
     function setActiveTab(tabName) {
+        console.log('[setActiveTab] Checking if id made it: ', idToCheck)
         tabs.forEach(tab => {
             const name = tab.dataset.tab;
             const pane = document.getElementById('tab-' + name);
@@ -34,6 +35,7 @@ export function TabbedDashBoard() {
     }
 
     async function fetchTab(tabName) {
+        console.log('[fetchTab] Checking if id made it: ', idToCheck)
         if (fetched[tabName]) return;
         fetched[tabName] = true;
         const spinner = spinners[tabName];
@@ -45,7 +47,6 @@ export function TabbedDashBoard() {
             const contentType = res.headers.get('content-type') || '';
             if (contentType.includes('application/json')) {
                 const data = await res.json();
-                console.log('This is data var: 1', data.results)
                 renderData(tabName, data.results);
             } else {
                 const text = await res.text();
@@ -59,6 +60,7 @@ export function TabbedDashBoard() {
     }
 
     function renderData(tabName, data) {
+        console.log('[renderData] Checking if id made it: ', idToCheck)
         const container = containers[tabName];
         if (Array.isArray(data)) {
             const ul = document.createElement('ul');
@@ -70,7 +72,6 @@ export function TabbedDashBoard() {
                 let meta = item.status ? '<div class="text-muted small">' + escapeHtml(item.status) + '</div>' : '';
                 let more = ''
                 let details = ''
-                console.log('What is the tabName currently?', tabName)
                 if (tabName == 'private') {
                         more = '<a class="btn position-absolute top-0 end-0 m-3" data-bs-toggle="collapse" href="#collapseExample-' + escapeHtml(item.id) + '" role="button" aria-expanded="false" aria-controls="collapseExample-' + escapeHtml(item.id) + '"><i class="bi bi-info-circle"></i></a>'
                         details = '<div class="collapse" id="collapseExample-' + escapeHtml(item.id) + '"><div class="card card-body">' + escapeHtml(item.details) + '</div></div>'
@@ -86,6 +87,7 @@ export function TabbedDashBoard() {
     }
 
     function escapeHtml(str) {
+        console.log('[escapeHtml] Checking if id made it: ', idToCheck)
         return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
     }
 
@@ -94,16 +96,20 @@ export function TabbedDashBoard() {
      */
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
+            console.log('Checking if id made it (inside | tabs.forEach -> add eventListener): ', idToCheck)
             let info = tab.dataset.tab;
             setActiveTab(info);
             fetchTab(info);
         });
 
         if (tab.id == 'tab-private-btn') {
+            console.log('Checking if id made it (inside if of triggering private tab): ', idToCheck)
             // trigger 'private' tab by default
             tab.click()
         }
     });
+
+    console.log('Checking inside constructore, can I call id directly?', idToCheck)
 
 }
 
