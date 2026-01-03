@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
-from core.helpers import pagination
+from core.helpers import pagination, misc
 from .helpers.task import *
 
 """
@@ -25,15 +25,19 @@ def task_list(request, type, format=None):
     selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
         'tdelete_time': 'is Null',
-        'assignee': request.user.id,
+        'assignee_id': 1  # @todo readd: request.user.id,
     }
+
+    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
 
     match type:
         case 'private':
             conditions['visibility'] = 'private'
-        case 'workspace':
-            conditions['workspace'] = request.data['workspace']
-            conditions['assignee'] = None
+            selectors.append('details')
+        case 'workspaces':
+            conditions['workspace'] = None
+            conditions['assignee_id'] = None
+            conditions['visibility'] = 'workspaces'
         case '_':
             pass
 

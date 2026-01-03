@@ -7,7 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 
 class LoginView(auth_views.LoginView):
     template_name = 'auth/login.html'
-    next_page = 'tasks_index'
+    next_page = 'task_index'
     authentication_form = AuthenticationForm
     extra_context = None
 

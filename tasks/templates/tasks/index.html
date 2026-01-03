@@ -1,15 +1,33 @@
-{% extends 'core/base.html' %}
+{% extends 'tasks/base.html' %}
 
 {% block title %} Tasks Home {% endblock %}
 
 {% block page_heading %}Tasks Management Console{% endblock %}
 
 {% block content %}
-    <div>Your To Do List:</div>
-    <ul>
-        {% for task in tasks %}
-            <li><div><a href="{% url 'task_info' task.id %}">{{task.description}}</a></div>
-                <div>{{task.visibility}} | {{task.status}}</div></li>
-        {% endfor %}
+{% include 'tasks/viewTaskModal.html' %}
+  <div class="tab-dashboard">
+    <ul class="nav nav-tabs" role="tablist" id="tasksTab">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-private-btn" data-tab="private" type="button" role="tab" aria-controls="tab-private" aria-selected="true">Private</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-workspaces-btn" data-tab="workspaces" type="button" role="tab" aria-controls="tab-workspaces" aria-selected="false">Workspaces</button>
+      </li>
     </ul>
+
+    <div class="tab-content mt-3">
+      <div class="tab-pane active" id="tab-private" role="tabpanel" aria-labelledby="tab-private-btn">
+        <div id="privateContainer" class="tab-results">
+          <div class="spinner-border text-primary" role="status" id="privateSpinner"><span class="visually-hidden">Loading...</span></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-workspaces" role="tabpanel" aria-labelledby="tab-workspaces-btn">
+        <div id="workspacesContainer" class="tab-results">
+          <div class="spinner-border text-primary d-none" role="status" id="workspacesSpinner"><span class="visually-hidden">Loading...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

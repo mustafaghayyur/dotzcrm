@@ -1,4 +1,4 @@
-<!-- base.html for Tasks | Unused -->
+<!-- base.html for Tasks -->
 {% load static %}
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
@@ -6,19 +6,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %} Template {% endblock %} - Task Manager</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Vollkorn:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">  
   </head>
   <body>
     <div class="container">
         {% include 'includes/header.html' %}
         <div class="row align-items-start">
-            <div class="navWD col-3">
+            <div class="col-3">
                 <p>&nbsp</p>
-                <h3>Updates</h3>
-                <p>Lorem ipsum indrigado. Navi sapto urdegan. Urague dorus beki heptim.</p>
+                <h3>New Task</h3>
+                <form class="form">
+                  <textarea name="textarea" id="newTaskDashBoard"></textarea>
+                  <button class="btn btn-secondary" type="submit">save</button>
+                </form>
             </div>
             <div class="contentWD col-9">
                 <h1>{% block page_heading %}Your content{% endblock %}</h1>
@@ -29,6 +29,7 @@
         </div>
         {% include 'includes/footer.html' %}
     </div>
-    <script src="{% static 'js/custom.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script type="module" src="{% static 'tasks/js/custom.js' %}"></script>
   </body>
 </html>
