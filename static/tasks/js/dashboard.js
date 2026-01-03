@@ -1,5 +1,6 @@
 /**
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
+ * @param {function} callbackFunction 
  */
 export function TabbedDashBoard(callbackFunction = null) {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');

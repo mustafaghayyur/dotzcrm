@@ -6,14 +6,12 @@
  * This mapper function only finds dom elements matching items in the 'keys' list, if resultSet has the key
  * as well, then subs the resultSet[key] into the HTML of the matching dom elememnt.
  * 
- * containerId is irrelevent. This is a callback function passed to Fetcher()
+ * containerId is irrelevent in this mapper. This is a callback function passed to Fetcher()
  * 
  * @param {object} resultSet - retrieved from Fetcher() internal function fetchResource()
- * @param {string|Element} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
+ * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
 export function taskDetailsMapper(resultSet, containerId) {
-    console.log('See how api sends back resultSet, containerId: ', resultSet, containerId);
-
     // Keys we expect in the resultSet (keeps defined order)
     const keys = [
         'id','tid','did','lid','sid','aid','vid','description','details','status','visibility','deadline',
