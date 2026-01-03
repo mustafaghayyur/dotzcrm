@@ -1,17 +1,17 @@
 <!-- Button trigger modal -->
-<!--a class="btn btn-primary ticket-details-link" data-ticketId="" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal">View Ticket</a-->
+<!--a class="btn btn-primary task-details-link" data-task-id="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
 
 <!-- Modal -->
-<div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true" data-bs-keyboard="true">
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true" data-bs-keyboard="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="ticketDetailsModalLabel"><div class="h6 text-muted">[Task #<span id="tid" ></span>]</div><span id="description"></span></h5>
+        <h3 class="modal-title" id="taskDetailsModalLabel"><div class="h6 text-muted">[Task #<span id="tid" ></span>]</div><span id="description"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="ticketDetailsModalResponse"></div>
-        <table class="table table-striped" id="ticketDetailsTable">
+        <div id="taskDetailsModalResponse"></div>
+        <table class="table table-striped" id="taskDetailsTable">
           <tr>
             <th colspan="1" class="align-text-bottom">Created:</td>
             <td colspan="1" class="align-text-bottom" id="tcreate_time"></td>
@@ -53,7 +53,7 @@
             </td>
             <td colspan="2" class="text-center align-text-bottom">
               <form class="d-inline-block" method="GET" action="#">
-                <button class="button" type="submit">edit</button>
+                <button id="taskEditBtn" class="button" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal">edit</button>
               </form>
               <form class="d-inline-block" action="" method="post">
                 {% csrf_token %}

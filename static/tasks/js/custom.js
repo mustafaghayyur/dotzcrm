@@ -24,8 +24,10 @@ function addListenersToTasks(container){
             let id = task.dataset.taskId;
             let request = defineRequest('/rest/tasks/crud/' + id);
             task.addEventListener('click', ()=>{
-                Fetcher(request, 'ticketDetailsModalResponse', {}, taskDetailsMapper)
+                Fetcher(request, 'taskDetailsModalResponse', {}, taskDetailsMapper)
             });
         });
     }
 }
+
+

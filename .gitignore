@@ -3,7 +3,6 @@ __pycache__/
 *.pyo
 *.pyd
 node_modules/
-project/settings.py
 COMMANDS.md
 .env
 *.log

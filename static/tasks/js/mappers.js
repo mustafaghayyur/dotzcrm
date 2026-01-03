@@ -53,4 +53,30 @@ export function taskDetailsMapper(resultSet, containerId) {
             }
         }
     });
+
+    let editBtn = document.getElementById('taskEditBtn');
+    console.log(resultSet);
+    editBtn.addEventListener('click', () => {
+        prefillEditForm(keys, resultSet);
+    });
+}
+
+function prefillEditForm(keys, data){
+    const form = document.querySelector('#taskEditModal form'); // Get the form element
+
+    if(!form instanceof HTMLElement){
+        console.log('Error: form could not be found. Cannot pre-populate.');
+    }
+
+    keys.forEach(key => {
+        let value = data && Object.prototype.hasOwnProperty.call(data, key) ? data[key] : undefined;
+        let field = form.elements.namedItem(key);
+
+        if(!value || !field){
+            console.log('Error field value | field items, skipping ['+key+'].', value, field);
+            return;
+        }
+
+        field.value = value;
+    });
 }
