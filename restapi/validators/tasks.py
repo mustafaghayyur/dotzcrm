@@ -31,6 +31,11 @@ latestChoiceOpts = {
     'validators': [validators.isLatestChoicetOrNone]
 }
 
+class DateTimeFieldForJS(DateTimeField):
+    def to_representation(self, value):
+        # Example format: '2025-01-03T01:55:00Z' (simplified format, often preferred)
+        return value.strftime('%Y-%m-%dT%H:%M:%SZ')
+
 class TaskO2ORecord(Serializer):
     """
         Serializer for O2O Task records.
@@ -49,7 +54,7 @@ class TaskO2ORecord(Serializer):
     status = ChoiceField(choices=[(c.value, c.value) for c in Status], default=Status.created.value)
     visibility = ChoiceField(choices=[(c.value, c.value) for c in Visibility], default=Visibility.private.value)
 
-    deadline = DateTimeField(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
+    deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 
     creator_id = IntegerField(**intMandatoryOpts)
     parent_id = IntegerField(**intNullableOpts)
@@ -62,21 +67,21 @@ class TaskO2ORecord(Serializer):
     alatest = ChoiceField(**latestChoiceOpts)
     vlatest = ChoiceField(**latestChoiceOpts)
 
-    tcreate_time = DateTimeField(**datetimeNullableOpts)
-    dcreate_time = DateTimeField(**datetimeNullableOpts)
-    lcreate_time = DateTimeField(**datetimeNullableOpts)
-    screate_time = DateTimeField(**datetimeNullableOpts)
-    acreate_time = DateTimeField(**datetimeNullableOpts)
-    vcreate_time = DateTimeField(**datetimeNullableOpts)
+    tcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    dcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    lcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    screate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    acreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    vcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
-    tdelete_time = DateTimeField(**datetimeNullableOpts)
-    ddelete_time = DateTimeField(**datetimeNullableOpts)
-    ldelete_time = DateTimeField(**datetimeNullableOpts)
-    sdelete_time = DateTimeField(**datetimeNullableOpts)
-    adelete_time = DateTimeField(**datetimeNullableOpts)
-    vdelete_time = DateTimeField(**datetimeNullableOpts)
+    tdelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    ddelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    ldelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    sdelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    adelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    vdelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
-    tupdate_time = DateTimeField(**datetimeNullableOpts)
+    tupdate_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     """
     def validate(self, data):
@@ -112,14 +117,14 @@ class Comment(Serializer):
     task_id = IntegerField(**intMandatoryOpts)
     comment = CharField(allow_null=False, required=True, min_length=50, max_length=6000)
     parent_id = IntegerField(**intNullableOpts)
-    create_time = DateTimeField(**datetimeNullableOpts)
-    update_time = DateTimeField(**datetimeNullableOpts)
-    delete_time = DateTimeField(**datetimeNullableOpts)
+    create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    update_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
 class Watcher(Serializer):
     id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intMandatoryOpts)
     watcher_id = IntegerField(**intMandatoryOpts)
     latest = ChoiceField(**latestChoiceOpts)
-    create_time = DateTimeField(**datetimeNullableOpts)
-    delete_time = DateTimeField(**datetimeNullableOpts)
+    create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    delete_time = DateTimeFieldForJS(**datetimeNullableOpts)

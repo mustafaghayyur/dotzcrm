@@ -2,24 +2,57 @@
  * This module will carry common functions needed throughout the app...
  */
 
-const mysqlDatetime = '2024-01-27 15:50:00'; // Example MySQL DATETIME string
+// You can also access specific local time components like this:
+// console.log(`Local Hour: ${dateObject.getHours()}`);
+// console.log(`Local Minutes: ${dateObject.getMinutes()}`);
 
-function convertMysqlToDatetimeToLocal(mysqlString) {
-  // Create a Date object from the MySQL string. 
-  // If the MySQL time is not explicitly UTC, JS may treat it as local or UTC depending on browser implementation.
-  const dateObj = new Date(mysqlString);
+export function convertDateTimeToLocal(mysqlString, displayOptions = null) {
+    // Create a new Date object. 
+    // The browser automatically interprets the 'Z' as UTC
+    // mysqlString needs to be in format: "YYYY-MM-DDTHH:MM:SS.000Z"
+    const dateObj = new Date(mysqlString);
 
-  // Adjust for the local timezone offset to display the actual local time 
-  // represented by the MySQL string (assuming MySQL stores local time).
-  dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset());
-  
-  // Format the date object to ISO string format (which uses 'T' delimiter and UTC)
-  // then slice to get the required "YYYY-MM-DDTHH:mm" format.
-  return dateObj.toISOString().slice(0, 16);
+    if(typeof displayOptions === 'object'){
+        return new Intl.DateTimeFormat(navigator.language, displayOptions).format(dateObj);
+    } 
+    
+    if(displayOptions === 'default') {
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            timeZoneName: 'short',
+        };
+
+        return new Intl.DateTimeFormat(navigator.language, options).format(dateObj);        
+    } else {
+        return dateObj.toLocaleString();
+    }
 }
 
-// Get the input element
-const datetimeInput = document.getElementById('myDatetimeLocalInput');
+/**
+ * Useful to ensure user supplied values are formatted correctly.
+ * @param {string} dtValuePrivided - user supplied string representation of the datetime value
+ */
+export function sloppyDateTimeCorrection(dtValuePrivided) {
+    try {
+        const dt = new Date(dtValuePrivided);
+        const pad = str => String(str).padStart(2, '0');
 
-// Assign the converted value
-datetimeInput.value = convertMysqlToDatetimeLocal(mysqlDatetime);
+        if (!isNaN(dt.getTime())) {
+            const yyyy = dt.getFullYear();
+            const mm = pad(dt.getMonth() + 1);
+            const dd = pad(dt.getDate());
+            const hh = pad(dt.getHours());
+            const min = pad(dt.getMinutes());
+            return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+        } else {
+            throw Error('Error: Privided string not a recognized date.');
+        }
+    } catch (err) {
+        field.value = String(value);
+    }
+}

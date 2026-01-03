@@ -1,6 +1,7 @@
 /**
  * This file will hold various mappers our JS libraries may need to operate with data 
  */
+import { convertDateTimeToLocal } from "../../core/js/helpers.js";
 
 /**
  * This mapper function only finds dom elements matching items in the 'keys' list, if resultSet has the key
@@ -64,16 +65,23 @@ export function taskDetailsMapper(resultSet, containerId) {
 function prefillEditForm(keys, data){
     const form = document.querySelector('#taskEditModal form'); // Get the form element
 
-    if(!form instanceof HTMLElement){
+    if (!(form instanceof HTMLElement)) {
         console.log('Error: form could not be found. Cannot pre-populate.');
+        return;
     }
 
     keys.forEach(key => {
         let value = data && Object.prototype.hasOwnProperty.call(data, key) ? data[key] : undefined;
         let field = form.elements.namedItem(key);
 
-        if(!value || !field){
-            console.log('Error field value | field items, skipping ['+key+'].', value, field);
+        // If the key ends with '_time' or contains 'deadline', convert to appropriate format first
+        if (/(_time$)|deadline/.test(key)) {
+            field.value = convertDateTimeToLocal(value)
+            return; // continue to next key after handling datetime/deadline
+        }
+
+        if (!value || !field) {
+            console.log('Error field value | field items, skipping [' + key + '].', value, field);
             return;
         }
 
