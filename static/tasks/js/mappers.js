@@ -12,7 +12,7 @@
  * @param {string|Element} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
 export function taskDetailsMapper(resultSet, containerId) {
-    console.log('See how api sends back resultSet: ', resultSet);
+    console.log('See how api sends back resultSet, containerId: ', resultSet, containerId);
 
     // Keys we expect in the resultSet (keeps defined order)
     const keys = [

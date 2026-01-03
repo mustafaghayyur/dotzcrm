@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
+
 from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
 from core.helpers import pagination
@@ -17,7 +18,12 @@ class OneToOnes():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().create(serializer.validated_data)
-            return Response(result, status=status.HTTP_201_CREATED)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': result,
+            }, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -29,7 +35,12 @@ class OneToOnes():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().update(serializer.validated_data)
-            return Response(result)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': result,
+            }, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -39,7 +50,12 @@ class OneToOnes():
             Delete single task record (with all it's related child-tables).
         """
         crud = CRUD().delete(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)    
+        return Response({
+            'page': 1,
+            'page_size': 1,
+            'has_more': False,
+            'results': crud,
+        }, status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
     def detail(request, pk, format=None):
@@ -49,7 +65,12 @@ class OneToOnes():
         record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
         if record:
             serialized = TaskO2ORecord(record[0])
-            return Response(serialized.data)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': serialized.data,
+            })
         
 class Comments():
     @staticmethod
@@ -60,7 +81,12 @@ class Comments():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().create(serializer.validated_data)
-            return Response(result, status=status.HTTP_201_CREATED)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': result,
+            }, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -72,7 +98,12 @@ class Comments():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().update(serializer.validated_data)
-            return Response(result)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': result,
+            })
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -82,7 +113,12 @@ class Comments():
             Delete single task record (with all it's related child-tables).
         """
         crud = CRUD().delete(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)    
+        return Response({
+            'page': 1,
+            'page_size': 1,
+            'has_more': False,
+            'results': crud,
+        }, status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
     def detail(request, pk, format=None):
@@ -92,7 +128,12 @@ class Comments():
         record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
         if record:
             serialized = TaskO2ORecord(record[0])
-            return Response(serialized.data)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': serialized.data,
+            })
         
 class Watchers():
     @staticmethod
@@ -103,7 +144,12 @@ class Watchers():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().create(serializer.validated_data)
-            return Response(result, status=status.HTTP_201_CREATED)
+            return Response({
+                    'page': 1,
+                    'page_size': 1,
+                    'has_more': False,
+                    'results': result,
+                }, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -115,7 +161,12 @@ class Watchers():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().update(serializer.validated_data)
-            return Response(result)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': result,
+            })
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -125,7 +176,12 @@ class Watchers():
             Delete single task record (with all it's related child-tables).
         """
         crud = CRUD().delete(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)    
+        return Response({
+            'page': 1,
+            'page_size': 1,
+            'has_more': False,
+            'results': crud,
+        }, status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
     def detail(request, pk, format=None):
@@ -135,4 +191,9 @@ class Watchers():
         record = CRUD().read(['all'], {'tid': pk, 'tdelete_time': 'is NULL'})
         if record:
             serialized = TaskO2ORecord(record[0])
-            return Response(serialized.data)
+            return Response({
+                'page': 1,
+                'page_size': 1,
+                'has_more': False,
+                'results': serialized.data,
+            })

@@ -15,13 +15,13 @@ document.addEventListener('DOMContentLoaded', TabbedDashBoard(addListenersToTask
 function addListenersToTasks(container){
     if(container instanceof HTMLElement){
         // implment listener and fetcher for item details modal...
-        let tasks = container.querySelectorAll('.task-details-link');
+        let tasks = document.querySelectorAll('.task-details-link');
         tasks.forEach(task => {
-            // @todo - find a way to correctly refeeence taskid data attribute
-            let id = task.dataset.taskid;
-            request = defineRequest('rest/tasks/crud/' + id);
-            
-            task.addEventListener('click', Fetcher(request, 'ticketDetailsModal', {}, taskDetailsMapper));
+            let id = task.dataset.taskId;
+            let request = defineRequest('/rest/tasks/crud/' + id);
+            task.addEventListener('click', ()=>{
+                Fetcher(request, 'ticketDetailsModalResponse', {}, taskDetailsMapper)
+            });
         });
     }
 }

@@ -45,7 +45,7 @@ export function TabbedDashBoard(callbackFunction = null) {
             const contentType = res.headers.get('content-type') || '';
             if (contentType.includes('application/json')) {
                 const data = await res.json();
-                renderData(tabName, data);
+                renderData(tabName, data.results);
             } else {
                 const text = await res.text();
                 container.innerHTML = '<pre>' + escapeHtml(text) + '</pre>';
@@ -58,9 +58,6 @@ export function TabbedDashBoard(callbackFunction = null) {
     }
 
     function renderData(tabName, data) {
-        const { results } = data;
-        console.log('data obj: ', results);
-        data = results;
         const container = containers[tabName];
         if (Array.isArray(data)) {
             const ul = document.createElement('ul');
@@ -76,13 +73,12 @@ export function TabbedDashBoard(callbackFunction = null) {
                         more = '<a class="btn position-absolute top-0 end-0 m-3" data-bs-toggle="collapse" href="#collapseExample-' + escapeHtml(item.id) + '" role="button" aria-expanded="false" aria-controls="collapseExample-' + escapeHtml(item.id) + '"><i class="bi bi-info-circle"></i></a>'
                         details = '<div class="collapse" id="collapseExample-' + escapeHtml(item.id) + '"><div class="card card-body">' + escapeHtml(item.details) + '</div></div>'
                 }
-                li.innerHTML = '<div class="position-relative"><a class="link task-details-link" data-taskid="'+ escapeHtml(item.id) +'" href="#">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
+                li.innerHTML = '<div class="position-relative"><a class="link task-details-link" data-task-id="'+ escapeHtml(item.id) +'" role="button" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
                 ul.appendChild(li);
             });
             container.innerHTML = '';
             container.appendChild(ul);
             if(typeof callbackFunction === 'function'){
-                console.log('addListenersToTasks', callbackFunction);
                 callbackFunction(container);
             }
         } else {
