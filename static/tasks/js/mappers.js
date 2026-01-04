@@ -56,7 +56,6 @@ export function taskDetailsMapper(resultSet, containerId) {
     });
 
     let editBtn = document.getElementById('taskEditBtn');
-    console.log(resultSet);
     editBtn.addEventListener('click', () => {
         prefillEditForm(keys, resultSet);
     });
@@ -74,15 +73,14 @@ function prefillEditForm(keys, data){
         let value = data && Object.prototype.hasOwnProperty.call(data, key) ? data[key] : undefined;
         let field = form.elements.namedItem(key);
 
-        // If the key ends with '_time' or contains 'deadline', convert to appropriate format first
-        if (/(_time$)|deadline/.test(key)) {
-            field.value = convertDateTimeToLocal(value)
-            return; // continue to next key after handling datetime/deadline
+        if (!value || !field) {
+            return; // @todo, should I have better handling here? What about missing values for fields?
         }
 
-        if (!value || !field) {
-            console.log('Error field value | field items, skipping [' + key + '].', value, field);
-            return;
+        // If the key ends with '_time' or contains 'deadline', convert to appropriate format first
+        if (/(_time$)|deadline/.test(key)) {
+            field.value = convertDateTimeToLocal(value);
+            return; // continue to next key after handling datetime/deadline
         }
 
         field.value = value;
