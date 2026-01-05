@@ -50,25 +50,27 @@ This process assumes you have Node.js and npm installed.
 
  1) Initialize your project: open your terminal and cd into current static folder:
   > npm init -y
+
   This creates a package.json file.
 
  2) Install development dependencies: Babel core, Webpack.
   > npm install --save-dev @babel/core @babel/cli @babel/preset-env webpack webpack-cli babel-loader
+  
     - @babel/core is the main Babel functionality.
     - @babel/preset-env tells Babel which transformations and polyfills are needed based on your target environments.
     - babel-loader integrates Babel into Webpack.
 
  3) Configure Babel: create a configuration file (e.g., .babelrc or babel.config.json) in your project root to tell Babel to use the env preset:
 
-    {
+    ```{
         "presets": ["@babel/preset-env"]
-    }
+    }```
 
  4) Configure Webpack: create a webpack.config.js file to define how your code should be processed and bundled:
 
-    const path = require('path');
+    ```const path = require('path');
 
-    `module.exports = {
+    module.exports = {
         entry: './src/index.js', // Your main ES6 entry file
         output: {
             filename: 'bundle.js', // The output ES5 bundle
@@ -85,13 +87,13 @@ This process assumes you have Node.js and npm installed.
                 },
             ],
         },
-    };`
+    };```
 
  5) Add a build script: in your package.json file, add a script to run Webpack:
 
-    "scripts": {
-    "build": "webpack"
-    },
+    ```"scripts": {
+        "build": "webpack"
+    },```
 
  6) Our JS source code will be found in the main_project_directory/static/ folder. In specfic, we have tried to organize all project-wide JS code under 'core' sub-folder; and app-specific libraries/code under the app's specific directory (i.e. static/tasks/ for example). 
 
