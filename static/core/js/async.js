@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
  * request definition is fetched, and any resultant response from the API
@@ -163,13 +165,14 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 }
 
 /**
- * Use thid function to aquire Request object to supply to Fetcher().
+ * Use this function to aquire Request object to supply to Fetcher().
  * Helps form a proper request definition object
  */
-export function defineRequest(url, headers = { 'Content-Type': 'application/json' }) {
-    return new Request(url, {
+export function defineRequest(url, options = {}) {
+    const defaults = {
         method: 'GET',
-        headers: headers,
-        // ... other options
-    });
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const finalOptions = merge(defaults, options);
+    return new Request(url, finalOptions);
 }

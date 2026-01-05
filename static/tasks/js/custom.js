@@ -3,7 +3,8 @@
  */
 import { TabbedDashBoard } from "./dashboard.js";
 import { Fetcher, defineRequest } from "../../core/js/async.js";
-import { taskDetailsMapper } from "./mappers.js";
+import { taskDetailsMapper, keys } from "./mappers.js";
+import { validate } from './validate.js';
 
 // implment dashboard on index.html
 document.addEventListener(
@@ -29,4 +30,37 @@ function addListenersToTasks(container){
         });
     }
 }
+
+const form = document.querySelector('#taskEditForm'); // Get the form element
+
+if (!(form instanceof HTMLElement)) {
+    console.log('Error: form could not be found. Cannot pre-populate.', form);
+}
+
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    let dictionary = {};
+
+    const formData = new FormData(form);
+    const formObject = Object.fromEntries(formData.entries());
+    console.log('Form Data:', formObject);
+
+    keys.forEach(key => {
+        let val = formObject[key];
+
+        if (!val) {
+            dictionary[key] = validate(key, val);
+        }
+    });
+
+    let request = defineRequest('rest/tasks/crud', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dictionary),
+    });
+
+    Fetcher(request, 'taskEditModalResponse', editFormResponseMapper);
+});
 

@@ -12,13 +12,13 @@
       </div>
       <div class="modal-body">
         <div id="taskEditModalResponse"></div>
-        <form method="post">
+        <form method="post" id="taskEditForm">
             {% csrf_token %}
             <table class="table table-striped">
                 {{ form.as_table }}
                 <tr>
                     <th></th>
-                    <td><input type="submit" value="Save"></td>
+                    <td><input type="submit" value="Save" id="taskEditFormSaveBtn"></td>
                 </tr>
             </table>
         </form>

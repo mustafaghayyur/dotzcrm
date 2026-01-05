@@ -65,6 +65,53 @@ export function convertDateTimeToLocal(mysqlString) {
 }
 
 /**
+ * Performs reverse operation of convertDateTimeToLocal(), taking a datetime-local
+ * formatted string or Date object and converting it to back-end UTC timezone string format.
+ * @param {Date object | string} localString: string can be "YYYY-MM-DDTHH:MM" (local timezone)
+ * @returns string format "YYYY-MM-DDTHH:MM:SS.000Z"
+ */
+export function convertLocalToBackendUTC(localDate) {
+    try {
+        if (!localDate) return '';
+
+        let d;
+        if (localDate instanceof Date) {
+            d = localDate;
+            if (isNaN(d.getTime())) return '';
+        } else if (typeof localDate === 'string') {
+            // Accept strings like: YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS
+            const m = localDate.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+            if (!m) return '';
+            const [, y, mo, day, hh, mm, ss] = m;
+            const yyyy = parseInt(y, 10);
+            const month = parseInt(mo, 10) - 1;
+            const dd = parseInt(day, 10);
+            const hour = parseInt(hh, 10);
+            const minute = parseInt(mm, 10);
+            const second = ss ? parseInt(ss, 10) : 0;
+
+            // Construct a local Date using components (treated as local time)
+            d = new Date(yyyy, month, dd, hour, minute, second);
+            if (isNaN(d.getTime())) return '';
+        } else {
+            return '';
+        }
+
+        const pad = (n) => String(n).padStart(2, '0');
+        const utcYYYY = d.getUTCFullYear();
+        const utcMM = pad(d.getUTCMonth() + 1);
+        const utcDD = pad(d.getUTCDate());
+        const utcHH = pad(d.getUTCHours());
+        const utcMin = pad(d.getUTCMinutes());
+        const utcSec = pad(d.getUTCSeconds());
+
+        return `${utcYYYY}-${utcMM}-${utcDD}T${utcHH}:${utcMin}:${utcSec}.000Z`;
+    } catch (err) {
+        return '';
+    }
+}
+
+/**
  * Useful to ensure user supplied values are formatted correctly.
  * @param {string} dtValuePrivided - user supplied string representation of the datetime value
  */
