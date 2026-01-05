@@ -1,4 +1,4 @@
-## Bootsrap Setup Instructions
+# Bootsrap Setup Instructions
 
 We will be using Boostrap for all UI/UX development of Dotz CRM + PM Software.
 
@@ -16,7 +16,9 @@ While we may not do much in customization of vanilla bootstrap styles, you shoul
 4) Examine our Sass files found in static/scss/ directory. You can modify or add to, as you deem appropriate.
 
 5) Once satisfied with your changes, you may compile the code:
+
  > sass ./scss/custom.scss:./css/custom.css --style=compressed
+ 
  (while cd'd in the static folder of this codebase.)
 
 6) Run your application and refresh your front-end code to see your changes.
@@ -27,7 +29,8 @@ https://getbootstrap.com/docs/5.3/customize/sass/
 
 ### Notes
  - To keep the custom.scss file auto-recompile mode, while testing, you can also run (in dev environment):
- sass --watch ./scss/custom.scss ./css/custom.css
+
+  > sass --watch ./scss/custom.scss ./css/custom.css
 
  View useable icons:
  https://icons.getbootstrap.com/
@@ -55,20 +58,23 @@ This process assumes you have Node.js and npm installed.
 
  2) Install development dependencies: Babel core, Webpack.
   > npm install --save-dev @babel/core @babel/cli @babel/preset-env webpack webpack-cli babel-loader
-  
+
     - @babel/core is the main Babel functionality.
     - @babel/preset-env tells Babel which transformations and polyfills are needed based on your target environments.
     - babel-loader integrates Babel into Webpack.
 
  3) Configure Babel: create a configuration file (e.g., .babelrc or babel.config.json) in your project root to tell Babel to use the env preset:
 
-    ```{
+    ```
+    {
         "presets": ["@babel/preset-env"]
-    }```
+    }
+    ```
 
  4) Configure Webpack: create a webpack.config.js file to define how your code should be processed and bundled:
 
-    ```const path = require('path');
+    ```
+    const path = require('path');
 
     module.exports = {
         entry: './src/index.js', // Your main ES6 entry file
@@ -87,13 +93,16 @@ This process assumes you have Node.js and npm installed.
                 },
             ],
         },
-    };```
+    };
+    ```
 
  5) Add a build script: in your package.json file, add a script to run Webpack:
 
-    ```"scripts": {
+    ```
+    "scripts": {
         "build": "webpack"
-    },```
+    },
+    ```
 
  6) Our JS source code will be found in the main_project_directory/static/ folder. In specfic, we have tried to organize all project-wide JS code under 'core' sub-folder; and app-specific libraries/code under the app's specific directory (i.e. static/tasks/ for example). 
 
