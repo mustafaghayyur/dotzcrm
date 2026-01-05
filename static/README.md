@@ -17,7 +17,7 @@ While we may not do much in customization of vanilla bootstrap styles, you shoul
 
 5) Once satisfied with your changes, you may compile the code:
 
- > sass ./scss/custom.scss:./css/custom.css --style=compressed
+ > sass ./scss/dotzstrap.scss:./css/dotzstrap.css --style=compressed
  
  (while cd'd in the static folder of this codebase.)
 
@@ -30,10 +30,12 @@ https://getbootstrap.com/docs/5.3/customize/sass/
 ### Notes
  - To keep the custom.scss file auto-recompile mode, while testing, you can also run (in dev environment):
 
-  > sass --watch ./scss/custom.scss ./css/custom.css
+  > sass --watch ./scss/dotzstrap.scss ./css/dotzstrap.css
 
  View useable icons:
  https://icons.getbootstrap.com/
+
+
 
 
  # JS Code-base Development Evironment setup:
@@ -107,7 +109,7 @@ This process assumes you have Node.js and npm installed.
  6) Our JS source code will be found in the main_project_directory/static/ folder. In specfic, we have tried to organize all project-wide JS code under 'core' sub-folder; and app-specific libraries/code under the app's specific directory (i.e. static/tasks/ for example). 
 
  7) Compile your code. You can run the build script in your terminal:
-
- > npm run build
+  
+  > npm run build
 
  This will create a dist/bundle.js file containing the ES5-compatible code. You can now open your index.html file in any browser, and it will run the compatible JavaScript. 

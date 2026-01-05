@@ -1,23 +1,5 @@
 /* custom.scss */
 
-// 1. Include functions and variables
-@import "../node_modules/bootstrap/scss/functions";
-@import "../node_modules/bootstrap/scss/variables";
-
-// Update the import directory to point to it‘s location within node_modules
-$bootstrap-icons-font-dir: "../node_modules/bootstrap-icons/font/fonts";
-// Import the Sass files as usual
-@import "../node_modules/bootstrap-icons/font/bootstrap-icons";
-
-// 2. Override variables here
-$primary: #900; // Changes the global primary color to a dark red
-$body-bg: #eeeeee; // Changes the page background color
-
-// 3. Import the rest of Bootstrap
-@import "../node_modules/bootstrap/scss/bootstrap";
-
-/* Add any additional custom styles below the import */
-
 /* reenie-beanie-regular - latin */
 @font-face {
   font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
