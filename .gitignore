@@ -9,4 +9,6 @@ COMMANDS.md
 db.sqlite3
 backups/
 *.code-workspace
+
+# @todo remove static/css from ignore list before launch
 /static/css/*

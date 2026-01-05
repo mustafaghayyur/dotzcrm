@@ -78,24 +78,29 @@ This process assumes you have Node.js and npm installed.
     ```
     const path = require('path');
 
-    module.exports = {
-        entry: './src/index.js', // Your main ES6 entry file
+    const clientConfig = {
+        entry: {
+            core: './core/js/custom.js',
+            tasks: './tasks/js/custom.js',
+        }, // Your main ES6 entry files
         output: {
-            filename: 'bundle.js', // The output ES5 bundle
+            filename: '[name].bundle.js', // The output ES5 bundle, [name] is replaced by the entry key
             path: path.resolve(__dirname, 'dist'),
         },
         module: {
             rules: [
-                {
-                    test: /\.js$/,
-                    exclude: /node_modules/,
-                    use: {
-                    loader: 'babel-loader',
-                    },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                loader: 'babel-loader',
                 },
+            },
             ],
         },
     };
+
+    module.exports [clientConfig];
     ```
 
  5) Add a build script: in your package.json file, add a script to run Webpack:

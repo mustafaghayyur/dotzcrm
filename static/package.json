@@ -1,10 +1,28 @@
 {
+  "name": "Dotz CRM + PM Software",
+  "version": "0.1.0",
+  "description": "FrontEnd of CRM + PM Software from Web Dotz",
+  "main": "dist/core-bundle.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "build:core": "webpack --config webpack.config.js --env entry=core",
+    "build:tasks": "webpack --config webpack.config.js --env entry=tasks",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "2388479 ONTARIO INC.",
+  "license": "MIT",
   "dependencies": {
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "lodash": "^4.17.21"
   },
-  "scripts": {
-    "build": "webpack"
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/cli": "^7.28.3",
+    "@babel/preset-env": "^7.28.5",
+    "babel-loader": "^10.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1"
   }
 }
