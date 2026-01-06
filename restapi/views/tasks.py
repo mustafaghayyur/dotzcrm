@@ -76,7 +76,7 @@ def task_crud(request, pk, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
@@ -98,7 +98,7 @@ def comments_crud(request, pk, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response({'errors': e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
     

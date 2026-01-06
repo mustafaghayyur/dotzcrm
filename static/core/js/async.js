@@ -1,5 +1,4 @@
-import _ from 'lodash';
-
+import merge from 'lodash/merge';
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
  * request definition is fetched, and any resultant response from the API

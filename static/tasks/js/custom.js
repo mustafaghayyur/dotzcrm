@@ -3,7 +3,7 @@
  */
 import { TabbedDashBoard } from "./dashboard.js";
 import { Fetcher, defineRequest } from "../../core/js/async.js";
-import { taskDetailsMapper, keys } from "./mappers.js";
+import { taskDetailsMapper, keys, editFormResponseMapper } from "./mappers.js";
 import { validate } from './validate.js';
 
 // implment dashboard on index.html
@@ -53,8 +53,8 @@ form.addEventListener('submit', (event) => {
         }
     });
 
-    let request = defineRequest('rest/tasks/crud', {
-        method: 'POST',
+    let request = defineRequest('/rest/tasks/crud/0/', {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },

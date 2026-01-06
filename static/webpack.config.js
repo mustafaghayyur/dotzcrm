@@ -8,8 +8,8 @@ const appConfig = {
     mode: 'development', // on prod change to: 'production',
     entry: {
         // Defines two separate entry points and their output names
-        'core-bundle': path.resolve(__dirname, './src/core.js'),
-        'tasks-bundle': path.resolve(__dirname, './src/tasks.js')
+        'core-bundle': path.resolve(__dirname, './core/js/custom.js'),
+        'tasks-bundle': path.resolve(__dirname, './tasks/js/custom.js')
     },
     output: {
         filename: '[name].js', // The output ES5 bundle, [name] is replaced by the entry key
@@ -38,7 +38,7 @@ module.exports = (env = {}) => {
     if (entry === 'core') {
         return {
             mode: 'development',
-            entry: path.resolve(__dirname, './src/core.js'),
+            entry: path.resolve(__dirname, './core/js/custom.js'),
             output: {
                 filename: 'core-bundle.js',
                 path: path.resolve(__dirname, 'dist'),
@@ -51,7 +51,7 @@ module.exports = (env = {}) => {
     if (entry === 'tasks') {
         return {
             mode: 'development',
-            entry: path.resolve(__dirname, './src/tasks.js'),
+            entry: path.resolve(__dirname, './tasks/js/custom'),
             output: {
                 filename: 'tasks-bundle.js',
                 path: path.resolve(__dirname, 'dist'),
