@@ -12,18 +12,7 @@
     <div class="container">
         {% include 'includes/header.html' %}
         <div class="row align-items-start">
-            <div class="col-3">
-                <p>&nbsp</p>
-                <h3>New Task</h3>
-                <form class="form">
-                  <textarea name="textarea" id="newTaskDashBoard"></textarea>
-                  <button class="btn btn-secondary" type="submit">save</button>
-                </form>
-                <form class="d-inline-block" method="GET" action="#">
-                  <button id="taskCreateBtn" class="btn btn-primary open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal">New Task</button>
-                </form>
-            </div>
-            <div class="contentWD col-9">
+            <div class="contentWD col-12">
                 <h1>{% block page_heading %}Your content{% endblock %}</h1>
                 {% block content %}
                     <p> some sort of content </p>
@@ -31,6 +20,9 @@
             </div>
         </div>
         {% include 'includes/footer.html' %}
+        <div class="fixed-bottom p-3 d-flex justify-content-start">
+          <a class="btn btn-warning btn-lg bottom-0 start-0 m-2" data-bs-toggle="offcanvas" href="#newTaskCanvas" role="button" aria-controls="offcanvasExample"><i class="bi bi-vector-pen"></i> new</a>
+        </div>
     </div>
     <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
     <script type="module" src="{% static 'dist/tasks-bundle.js' %}"></script>

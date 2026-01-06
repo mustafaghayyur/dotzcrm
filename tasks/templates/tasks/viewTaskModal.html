@@ -5,10 +5,8 @@
 <div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true" data-bs-keyboard="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header position-relative">
+      <div class="modal-header">
         <h3 class="modal-title" id="taskDetailsModalLabel"><div class="h6 text-muted">[Task #<span id="tid" ></span>]</div><span id="description"></span></h5>
-        <a href="#" class="btn-secondary btn-small mx-5 px-5 mt-3 position-absolute top-0 end-0" id="addWatcher" role="button" ><i class="bi bi-bookmark-fill"></i></a>
-        <a href="#" class="btn-secondary btn-small mx-5 px-5 mt-3 position-absolute top-0 end-0 d-none" id="removeWatcher" role="button" ><i class="bi bi-bookmark-x-fill"></i></a>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -54,13 +52,15 @@
             </td>
             <td colspan="2" class="text-center align-text-bottom">
               <form class="d-inline-block" method="GET" action="#">
-                <button id="taskEditBtn" class="button open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal">edit</button>
+                <button id="taskEditBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-pencil-square"></i> edit</button>
               </form>
               <form class="d-inline-block" action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="">
-                <button class="button" type="submit" id="deleteTaskBtn" data-task-id="">delete</button>
+                <button class="btn btn-secondary btn-sm" type="submit" id="deleteTaskBtn" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
               </form>
+              <a href="#" class="btn btn-primary btn-sm mx-3" id="addWatcher" role="button" ><i class="bi bi-eye-fill"></i></a>
+              <a href="#" class="btn btn-secondary btn-sm mx-3 d-none" id="removeWatcher" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
             </td>
           </tr>
         </table>
