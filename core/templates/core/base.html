@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %} Template {% endblock %} - Dotz CRM</title>
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/dotzstrap.css' %}">
   </head>
   <body>
     <div class="container">
@@ -27,6 +27,6 @@
         {% include 'includes/footer.html' %}
     </div>
     <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <script type="module" src="{% static 'core/js/custom.js' %}"></script>
+    <script type="module" src="{% static 'dist/core-bundle.js' %}"></script>
   </body>
 </html>

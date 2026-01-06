@@ -1,27 +1,27 @@
 /**
  * This file will hold various mappers our JS libraries may need to operate with data 
  */
+import { convertDateTimeToLocal } from "../../core/js/helpers.js";
 
 /**
  * This mapper function only finds dom elements matching items in the 'keys' list, if resultSet has the key
  * as well, then subs the resultSet[key] into the HTML of the matching dom elememnt.
  * 
- * containerId is irrelevent. This is a callback function passed to Fetcher()
+ * containerId is irrelevent in this mapper. This is a callback function passed to Fetcher()
  * 
  * @param {object} resultSet - retrieved from Fetcher() internal function fetchResource()
- * @param {string|Element} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
+ * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
+
+// Keys we expect in the resultSet (keeps defined order)
+export const keys = [
+    'id','tid','did','lid','sid','aid','vid','description','details','status','visibility','deadline',
+    'creator_id','parent_id','assignor_id','assignee_id','dlatest','llatest','slatest','alatest','vlatest',
+    'tcreate_time','dcreate_time','lcreate_time','screate_time','acreate_time','vcreate_time',
+    'tdelete_time','ddelete_time','ldelete_time','sdelete_time','adelete_time','vdelete_time','tupdate_time'
+];
+
 export function taskDetailsMapper(resultSet, containerId) {
-    console.log('See how api sends back resultSet, containerId: ', resultSet, containerId);
-
-    // Keys we expect in the resultSet (keeps defined order)
-    const keys = [
-        'id','tid','did','lid','sid','aid','vid','description','details','status','visibility','deadline',
-        'creator_id','parent_id','assignor_id','assignee_id','dlatest','llatest','slatest','alatest','vlatest',
-        'tcreate_time','dcreate_time','lcreate_time','screate_time','acreate_time','vcreate_time',
-        'tdelete_time','ddelete_time','ldelete_time','sdelete_time','adelete_time','vdelete_time','tupdate_time'
-    ];
-
     function formatValue(v) {
         if (v === null || v === undefined) return '';
         if (typeof v === 'object') {
@@ -55,4 +55,66 @@ export function taskDetailsMapper(resultSet, containerId) {
             }
         }
     });
+
+    let editBtn = document.getElementById('taskEditBtn');
+    editBtn.addEventListener('click', () => {
+        prefillEditForm(resultSet);
+    });
 }
+
+/**
+ * Not a mapper. A helper function.
+ * This function simply pre-populates the Edit Task Form with record details, for which it was invoked.
+ * @param {object} data: the data-object which will fill the form fields.
+ */
+function prefillEditForm(data){
+    const form = document.querySelector('#taskEditForm'); // Get the form element
+
+    if (!(form instanceof HTMLElement)) {
+        console.log('Error: form could not be found. Cannot pre-populate.');
+        return;
+    }
+
+    keys.forEach(key => {
+        let value = data && Object.prototype.hasOwnProperty.call(data, key) ? data[key] : undefined;
+        let field = form.elements.namedItem(key);
+
+        if (!value || !field) {
+            return; // @todo, should I have better handling here? What about missing values for fields?
+        }
+
+        // If the key ends with '_time' or contains 'deadline', convert to appropriate format first
+        if (/(_time$)|deadline/.test(key)) {
+            field.value = convertDateTimeToLocal(value);
+            return; // continue to next key after handling datetime/deadline
+        }
+
+        field.value = value;
+    });
+}
+
+/**
+ * Maps error/success messages to elements in dom. 
+ * Used by Fetcher() when posting form to rest/tasks/crud.
+ */
+export const editFormResponseMapper = {};
+/**export editFormResponseMapper {
+    description: '<div class="info-danger"></div>', 
+    status: <div class="info-danger"></div>, 
+    visibility: <div class="info-danger"></div>,
+    aid: <div class="info-danger"></div>,
+    assignee_id: <div class="info-danger"></div>,
+    assignor_id: <div class="info-danger"></div>,
+    csrfmiddlewaretoken: <div class="info-danger"></div>,
+    deadline: <div class="info-danger"></div>,
+    description: <div class="info-danger"></div>,
+    details: <div class="info-danger"></div>,
+    did: <div class="info-danger"></div>,
+    lid: <div class="info-danger"></div>,
+    parent_id: <div class="info-danger"></div>,
+    sid: <div class="info-danger"></div>,
+    status: <div class="info-danger"></div>,
+    tid: <div class="info-danger"></div>,
+    vid: <div class="info-danger"></div>,
+    visibility: <div class="info-danger"></div>,
+};*/

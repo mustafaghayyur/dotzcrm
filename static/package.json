@@ -1,6 +1,33 @@
 {
+  "name": "@dotz/crm",
+  "version": "0.1.0",
+  "description": "FrontEnd of CRM + PM Software from Web Dotz",
+  "main": "dist/core-bundle.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "webpack --config webpack.config.js",
+    "prebuild": "npm run clean",
+    "build:core": "webpack --config webpack.config.js --env entry=core",
+    "prebuild:core": "npm run clean",
+    "build:tasks": "webpack --config webpack.config.js --env entry=tasks",
+    "prebuild:tasks": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "2388479 ONTARIO INC.",
+  "license": "MIT",
   "dependencies": {
     "bootstrap": "^5.3.8",
-    "bootstrap-icons": "^1.13.1"
+    "bootstrap-icons": "^1.13.1",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/cli": "^7.28.3",
+    "@babel/preset-env": "^7.28.5",
+    "babel-loader": "^10.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "rimraf": "^5.0.0"
   }
 }

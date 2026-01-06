@@ -3,10 +3,13 @@ __pycache__/
 *.pyo
 *.pyd
 node_modules/
-project/settings.py
 COMMANDS.md
 .env
 *.log
 db.sqlite3
 backups/
 *.code-workspace
+
+# @todo remove static/css from ignore list before launch
+/static/css/*
+static/dist/

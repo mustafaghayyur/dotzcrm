@@ -1,5 +1,6 @@
 /**
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
+ * @param {function} callbackFunction 
  */
 export function TabbedDashBoard(callbackFunction = null) {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');
@@ -73,7 +74,7 @@ export function TabbedDashBoard(callbackFunction = null) {
                         more = '<a class="btn position-absolute top-0 end-0 m-3" data-bs-toggle="collapse" href="#collapseExample-' + escapeHtml(item.id) + '" role="button" aria-expanded="false" aria-controls="collapseExample-' + escapeHtml(item.id) + '"><i class="bi bi-info-circle"></i></a>'
                         details = '<div class="collapse" id="collapseExample-' + escapeHtml(item.id) + '"><div class="card card-body">' + escapeHtml(item.details) + '</div></div>'
                 }
-                li.innerHTML = '<div class="position-relative"><a class="link task-details-link" data-task-id="'+ escapeHtml(item.id) +'" role="button" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
+                li.innerHTML = '<div class="position-relative"><a class="link task-details-link" data-task-id="'+ escapeHtml(item.id) +'" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">' + escapeHtml(String(desc)) + '</a>' + meta + more + details + '</div>';
                 ul.appendChild(li);
             });
             container.innerHTML = '';

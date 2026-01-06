@@ -1,0 +1,28 @@
+<!-- Button trigger modal -->
+<!--a class="btn btn-primary task-details-link" data-taskId="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
+
+<!-- Modal -->
+<div class="modal fade" id="taskEditModal" tabindex="-1" aria-labelledby="taskEditModalLabel" aria-hidden="true" data-bs-keyboard="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5>Task Modification Panel</h5>
+        <h3 class="modal-title" id="taskEditModalLabel"><div class="h6 text-muted d-none">[Task #<span id="tid" ></span>]</div><span id="description" class="d-none"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="taskEditModalResponse"></div>
+        <form method="post" id="taskEditForm">
+            {% csrf_token %}
+            <table class="table table-striped">
+                {{ form.as_table }}
+                <tr>
+                    <th></th>
+                    <td><input type="submit" value="Save" id="taskEditFormSaveBtn"></td>
+                </tr>
+            </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

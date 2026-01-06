@@ -1,3 +1,4 @@
+import merge from 'lodash/merge';
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
  * request definition is fetched, and any resultant response from the API
@@ -24,7 +25,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
      */
     async function fetchResource(reqObj) {
         spinner = getSpinner()
-        console.log('tracking spinner: 4', spinner);
         let container = document.getElementById(containerId)
         try {
             let response = await fetch(reqObj);
@@ -37,7 +37,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             
             if (contentType.includes('application/json')) {
                 let data = await response.json();
-                console.log('inside Fetcher() seeing raw response: ', data);
                 renderResponse(data.results);
             } else {
                 let text = await response.text();
@@ -46,7 +45,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         } catch (err) {
             container.innerHTML = '<div class="alert alert-danger">Error loading: ' + escapeHtml(err.message) + '</div>';
         } finally {
-            console.log('tracking spinner: 5', spinner);
             spinner.classList.add('d-none');
         }
     }
@@ -139,23 +137,19 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
      * Generate, set and return spinner element inside container.
      */
     function getSpinner() {
-        console.log('tracking spinner: 1', spinner);
         if (spinner !== null && spinner instanceof HTMLElement) {
             return spinner;
         }
 
         let id = containerId + 'Spinner'
         let container = document.getElementById(containerId)
-        console.log('tracking spinner: ', id, containerId, container);
         if (container !== null && container instanceof HTMLElement) {
             container.innerHTML = '<div class="spinner-border text-primary" role="status" id=' + id +'><span class="visually-hidden">Loading...</span></div>';
         }
 
         spinner = document.getElementById(id)
-        console.log('tracking spinner: 2', spinner);
 
         if (spinner instanceof HTMLElement) {
-            console.log('tracking spinner: 3', spinner);
             return spinner;
         }
 
@@ -170,13 +164,14 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 }
 
 /**
- * Use thid function to aquire Request object to supply to Fetcher().
+ * Use this function to aquire Request object to supply to Fetcher().
  * Helps form a proper request definition object
  */
-export function defineRequest(url, headers = { 'Content-Type': 'application/json' }) {
-    return new Request(url, {
+export function defineRequest(url, options = {}) {
+    const defaults = {
         method: 'GET',
-        headers: headers,
-        // ... other options
-    });
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const finalOptions = merge(defaults, options);
+    return new Request(url, finalOptions);
 }

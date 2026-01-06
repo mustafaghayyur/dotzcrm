@@ -5,6 +5,7 @@ from django.urls import reverse
 from .drm.crud import *
 from core.helpers.crud import isValidId
 from core.helpers import misc
+from core.modules.TasksEditForm import *
 
 def dashboard(request):
     """
@@ -14,7 +15,8 @@ def dashboard(request):
     still iterate `tasks` continue to work. The tab-specific data is fetched
     by the client via the REST endpoints.
     """
-    return render(request, 'tasks/index.html', {'timestamp': None})
+    form = TasksEditForm()
+    return render(request, 'tasks/index.html', {'form': form})
 
 def viewTaskDetails(request, id):
     if isValidId({'id': id}, 'id'):
