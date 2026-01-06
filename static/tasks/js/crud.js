@@ -1,6 +1,7 @@
 import { Fetcher, defineRequest } from "../../core/js/async.js";
 import { keys, editFormResponseMapper } from "./mappers.js";
 import { validate } from './validate.js';
+import { cleanForm } from "../../core/js/helper_forms.js";
 
 export function UpdateTask(form) {
     let dictionary = {};
@@ -69,15 +70,10 @@ export function DeleteTask() {
     Fetcher(request, 'taskDetailsModalResponse', editFormResponseMapper);
 }
 
-export function cleanCreateTaskForm(form) {
-    
-    keys.forEach(key => {
-        const field = document.querySelector('#taskEditForm input[name="'+key+'"]');
-        if (!(field instanceof HTMLElement)){
-            return;  // return only the foreach loop...
-        }
-        console.log('Cleaning field name = ', field);
-        field.value = '';
-    });
-
+/**
+ * Wrapper for clean function.
+ * @param {string} formId: should be the while Id with the # selection 
+ */
+export function cleanTaskForm(formId) {
+    cleanForm(formId, keys);
 }
