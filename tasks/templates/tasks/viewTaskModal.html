@@ -43,7 +43,6 @@
           <tr>
             <td colspan="2" class="text-center align-text-bottom">
               <div class="d-none">
-                <span id="tid"></span>
                 <span id="did"></span>
                 <span id="lid"></span>
                 <span id="sid"></span>
@@ -58,7 +57,7 @@
               <form class="d-inline-block" action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="">
-                <button class="button" type="submit">delete</button>
+                <button class="button" type="submit" id="deleteTaskBtn" data-task-id="">delete</button>
               </form>
             </td>
           </tr>

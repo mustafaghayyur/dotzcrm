@@ -1,7 +1,8 @@
 /**
  * This file will hold various mappers our JS libraries may need to operate with data 
  */
-import { convertDateTimeToLocal } from "../../core/js/helpers.js";
+import { convertDateTimeToLocal } from "../../core/js/helper_dates.js";
+import { makeElement } from "../../core/js/helper_mapper.js";
 
 /**
  * This mapper function only finds dom elements matching items in the 'keys' list, if resultSet has the key
@@ -97,24 +98,27 @@ function prefillEditForm(data){
  * Maps error/success messages to elements in dom. 
  * Used by Fetcher() when posting form to rest/tasks/crud.
  */
-export const editFormResponseMapper = {};
-/**export editFormResponseMapper {
-    description: '<div class="info-danger"></div>', 
-    status: <div class="info-danger"></div>, 
-    visibility: <div class="info-danger"></div>,
-    aid: <div class="info-danger"></div>,
-    assignee_id: <div class="info-danger"></div>,
-    assignor_id: <div class="info-danger"></div>,
-    csrfmiddlewaretoken: <div class="info-danger"></div>,
-    deadline: <div class="info-danger"></div>,
-    description: <div class="info-danger"></div>,
-    details: <div class="info-danger"></div>,
-    did: <div class="info-danger"></div>,
-    lid: <div class="info-danger"></div>,
-    parent_id: <div class="info-danger"></div>,
-    sid: <div class="info-danger"></div>,
-    status: <div class="info-danger"></div>,
-    tid: <div class="info-danger"></div>,
-    vid: <div class="info-danger"></div>,
-    visibility: <div class="info-danger"></div>,
-};*/
+export const editFormResponseMapper = {
+    description: makeElement('span', 'rec-itm'), 
+    status: makeElement('span', 'rec-itm'), 
+    visibility: makeElement('span', 'rec-itm'),
+    aid: makeElement('span', 'rec-itm'),
+    assignee_id: makeElement('span', 'rec-itm'),
+    assignor_id: makeElement('span', 'rec-itm'),
+    csrfmiddlewaretoken: makeElement('span', 'rec-itm'),
+    deadline: makeElement('span', 'rec-itm'),
+    description: makeElement('span', 'rec-itm'),
+    details: makeElement('span', 'rec-itm'),
+    did: makeElement('span', 'rec-itm'),
+    lid: makeElement('span', 'rec-itm'),
+    parent_id: makeElement('span', 'rec-itm'),
+    sid: makeElement('span', 'rec-itm'),
+    status: makeElement('span', 'rec-itm'),
+    tid: makeElement('span', 'rec-itm'),
+    vid: makeElement('span', 'rec-itm'),
+    visibility: makeElement('span', 'rec-itm'),
+    error: makeElement('span', 'rec-itm'),
+    errors: makeElement('span', 'rec-itm'),
+    message: makeElement('span', 'rec-itm'),
+    messages: makeElement('span', 'rec-itm'),
+};

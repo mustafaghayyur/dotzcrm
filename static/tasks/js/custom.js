@@ -3,8 +3,8 @@
  */
 import { TabbedDashBoard } from "./dashboard.js";
 import { Fetcher, defineRequest } from "../../core/js/async.js";
-import { taskDetailsMapper, keys, editFormResponseMapper } from "./mappers.js";
-import { validate } from './validate.js';
+import { taskDetailsMapper } from "./mappers.js";
+import { UpdateTask, CreateTask, DeleteTask, cleanCreateTaskForm } from './crud.js';
 
 // implment dashboard on index.html
 document.addEventListener(
@@ -31,36 +31,34 @@ function addListenersToTasks(container){
     }
 }
 
+/**
+ * CRUD Operations Setup...
+ */
 const form = document.querySelector('#taskEditForm'); // Get the form element
-
 if (!(form instanceof HTMLElement)) {
     console.log('Error: form could not be found. Cannot pre-populate.', form);
 }
 
-form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    let dictionary = {};
-
-    const formData = new FormData(form);
-    const formObject = Object.fromEntries(formData.entries());
-    console.log('Form Data:', formObject);
-
-    keys.forEach(key => {
-        let val = formObject[key];
-
-        if (!val) {
-            dictionary[key] = validate(key, val);
-        }
-    });
-
-    let request = defineRequest('/rest/tasks/crud/0/', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-
-    Fetcher(request, 'taskEditModalResponse', editFormResponseMapper);
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const tid = document.querySelector('#taskEditForm input[name="tid"]');
+    if (!(tid instanceof HTMLElement)) {
+        throw Error('Cannot find `tid` field, unable to perform edit/create operation.');
+    }
+    if(tid.value){
+        UpdateTask(form);
+    }else{
+        CreateTask(form);
+    }
 });
 
+const deleteBtn = document.getElementById('deleteTaskBtn');
+deleteBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    DeleteTask();
+});
+
+const createTaskBtn = document.getElementById('taskCreateBtn');
+createTaskBtn.addEventListener('click', (e) => {
+    cleanCreateTaskForm(form);
+});

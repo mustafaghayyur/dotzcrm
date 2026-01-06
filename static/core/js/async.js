@@ -104,7 +104,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                     continue;
                 }
                 
-                if (typeof value === 'object' && !value instanceof HTMLElement) {
+                if (typeof value === 'object' && !(value instanceof HTMLElement)) {
                     child = generateRecordDom(record[key], wrapperTag, (i + 1), value);
                     if (child instanceof HTMLElement) {
                         dom.appendChild(child);
