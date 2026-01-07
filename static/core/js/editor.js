@@ -1,11 +1,12 @@
 /**
  * Live text editor for all rich text editing needs.
+ * @todo: make mobile and tablet compatable.
  * Use: add following element to dom:
  *  > <div class="rich-editor" contenteditable="true" placeholder="start typing..."></div>
- * @todo: implement this function.
+ * @param {string} elementId: the CSS selector of the editable element (e.g. '#myEditor') 
 */
-document.addEventListener('DOMContentLoaded', () => {
-    const editor = document.querySelector('.rich-editor');
+export function Editor(elementId){
+    const editor = document.querySelector(elementId + '.rich-editor');
     editor.addEventListener('keyup', () => {
         // Get the current HTML content of the editor
         let html = editor.innerHTML;
@@ -14,40 +15,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const selection = window.getSelection();
         const range = selection.getRangeAt(0);
 
-        // Define the regex for **bold** text. The (.*?) captures the text inside the asterisks.
-        // The g flag is for global search, i for case-insensitive (optional).
+        // Define tag-based styles: [b]...[-b], [i]...[-i], [u]...[-u], [h1]...[-h1], etc.
+        // Patterns use non-greedy multiline captures so tags can wrap multiple lines.
         const styles = {
             bold: {
-                regex: /\*\*(.*?)\*\*/g,
-                replacement: '<b>$1</b>',
+                regex: /\*\*(.*?)\*\*\s/g, // regex: /\[b\]([\s\S]*?)\[-b\]/g,
+                replacement: '<b>$1</b> ',
             },
             italic: {
-                regex: /\*(.*?)\*/g,
-                replacement: '<i>$1</i>',
+                regex: /\*\s(.*?)\s\*\s/g,
+                replacement: '<i>$1</i> ',
             },
             underline: {
-                regex: /__(.*?)__/g,
-                replacement: '<u>$1</u>',
-            },
-            h1: {
-                regex: /# (.*?)\n/g,
-                replacement: '<h1>$1</h1>',
+                regex: /__(.*?)__\s/g,
+                replacement: '<u>$1</u> ',
             },
             h2: {
-                regex: /## (.*?)\n/g,
-                replacement: '<h2>$1</h2>',
+                // Matches '# heading' at start or immediately after a newline, captures text until newline or end
+                regex: /(^|\r?\n|\<div\>)#\s([^\r\n]+)(?=\r?\n|$)/g,
+                replacement: '$1<h2>$2</h2>',
             },
             h3: {
-                regex: /### (.*?)\n/g,
-                replacement: '<h3>$1</h3>',
+                regex: /(^|\r?\n|\<div\>)##\s([^\r\n]+)(?=\r?\n|$)/g,
+                replacement: '$1<h3>$2</h3>',
+            },
+            h4: {
+                regex: /(^|\r?\n|\<div\>)###\s([^\r\n]+)(?=\r?\n|$)/g,
+                replacement: '$1<h4>$2</h4>',
             },
             red: {
-                regex: /~~(.*?)~~/g,
-                replacement: '<span style="color:red;">$1</span>',
+                regex: /\[red\]([\s\S]*?)\[-red\]/g,
+                replacement: '<span class="text-red">$1</span> ',
             },
             green: {
-                regex: /==(.+?)==/g,
-                replacement: '<span style="color:green;">$1</span>',
+                regex: /\[yellow\]([\s\S]*?)\[-yellow\]/g,
+                replacement: '<span class="text-yellow">$1</span> ',
             },
         };
 
@@ -67,4 +69,4 @@ document.addEventListener('DOMContentLoaded', () => {
         selection.removeAllRanges();
         selection.addRange(range);
     });
-});
+}

@@ -5,81 +5,45 @@ import { TabbedDashBoard } from "./dashboard.js";
 import { Fetcher, defineRequest } from "../../core/js/async.js";
 import { taskDetailsMapper } from "./mappers.js";
 import { UpdateTask, CreateTask, DeleteTask, cleanTaskForm } from './crud.js';
+//import { Editor } from "../../core/js/editor.js";
 
-// implment dashboard on index.html
-document.addEventListener(
-    'DOMContentLoaded', 
-    TabbedDashBoard(addListenersToTasks)
-);
+document.addEventListener('DOMContentLoaded', () => {
+    
+    TabbedDashBoard(addListenersToTasks); // implment dashboard on index.html
+    //Editor('#newTaskTextBox');
 
-watchbtn = document.getElementById('addWatcher');
-unwatchbtn = document.getElementById('removeWatcher');
-
-watchbtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    const tid = document.getElementById('tid').innerText;
-    let dictionary = {task_id: tid, watcher_id: 'me'};
-    const request = defineRequest('/rest/tasks/watch/' + tid, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-    Fetcher(request, 'watchTaskResponse', {}, () => {
-        watchbtn.classList.add('d-none');
-        unwatchbtn.classList.remove('d-none');
-    });
-});
-
-unwatchbtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    const tid = document.getElementById('tid').innerText;
-    let dictionary = { wid: tid };
-    const request = defineRequest('/rest/tasks/watch/' + tid, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-    Fetcher(request, 'watchTaskResponse', {}, () => {
-        unwatchbtn.classList.add('d-none');
-        watchbtn.classList.remove('d-none');
-    });
-});
-
-/**
- * CRUD Operations Setup...
- */
-const form = document.querySelector('#taskEditForm'); // Get the form element
-if (!(form instanceof HTMLElement)) {
-    console.log('Error: form could not be found. Cannot pre-populate.', form);
-}
-
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const tid = document.querySelector('#taskEditForm input[name="tid"]');
-    if (!(tid instanceof HTMLElement)) {
-        throw Error('Cannot find `tid` field, unable to perform edit/create operation.');
+    /**
+     * CRUD Operations Setup...
+     */
+    const form = document.querySelector('#taskEditForm'); // Get the form element
+    if (!(form instanceof HTMLElement)) {
+        console.log('Error: form could not be found. Cannot pre-populate.', form);
     }
-    if(tid.value){
-        UpdateTask(form);
-    }else{
-        CreateTask(form);
-    }
-});
 
-const deleteBtn = document.getElementById('deleteTaskBtn');
-deleteBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    DeleteTask();
-});
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const tid = document.querySelector('#taskEditForm input[name="tid"]');
+        if (!(tid instanceof HTMLElement)) {
+            throw Error('Cannot find `tid` field, unable to perform edit/create operation.');
+        }
+        if(tid.value){
+            UpdateTask(form);
+        }else{
+            CreateTask(form);
+        }
+    });
 
-const openFormBtn = document.querySelectorAll('.open-form');
-openFormBtn.forEach(button => {
-    button.addEventListener('click', () => {
-        cleanTaskForm('#taskEditForm');
+    const deleteBtn = document.getElementById('deleteTaskBtn');
+    deleteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        DeleteTask();
+    });
+
+    const openFormBtn = document.querySelectorAll('.open-form');
+    openFormBtn.forEach(button => {
+        button.addEventListener('click', () => {
+            cleanTaskForm('#taskEditForm');
+        });
     });
 });
 
@@ -102,3 +66,4 @@ function addListenersToTasks(container){
         });
     }
 }
+

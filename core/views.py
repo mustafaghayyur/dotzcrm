@@ -10,6 +10,16 @@ def index (request):
 
     return render(request, 'core/generic.html', context)
 
+def register(request):
+    """
+        @todo: add proper welcome message for new users.
+    """
+    context = {
+        'heading': 'Onboarding',
+        'content': 'Please see our technical staff for gaining access to the system.',
+    }
+    return render(request, 'core/generic.html', context)
+
 # For class based views use the method_decorator with the name='dispatch' 
 # argument to apply the decorator to the main view logic:
 # from django.contrib.auth.decorators import login_not_required

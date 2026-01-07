@@ -3,6 +3,15 @@
 @import "../node_modules/bootstrap/scss/mixins/banner";
 @include bsBanner("");
 
+$primary: #eeeeee;
+//$secondary: rgb(108 117 125); //#8c8b8b;
+//$success: #eeeeee;
+$info: #403939;
+//$warning: #ffc107;
+//$danger: #7f131e;
+//$light: #eeeeee;
+//$dark: #15181c;
+
 // 1. Include functions and variables
 @import "../node_modules/bootstrap/scss/functions";
 @import "../node_modules/bootstrap/scss/variables";
@@ -13,7 +22,23 @@
 
 // 2. Override variables here
 // e.x.: $body-bg: #eeeeee;
+
+
 $bootstrap-icons-font-dir: "../node_modules/bootstrap-icons/font/fonts";
+$lead-font-size:              $font-size-base * 1.25;
+$lead-font-weight:            300;
+$small-font-size:             .875em;
+$text-muted:                  $gray-600;
+$mark-padding:                .2em;
+$mark-bg:                     #fcf8e3;
+$headings-color:              null;
+$list-inline-padding:         .5rem;
+
+$blockquote-margin-y:         $spacer;
+$blockquote-font-size:        $font-size-base * 1.25;
+$blockquote-footer-color:     $gray-600;
+$blockquote-footer-font-size: $small-font-size;
+
 
 // 3. Import the rest of Bootstrap
 //@import "../node_modules/bootstrap/scss/bootstrap";

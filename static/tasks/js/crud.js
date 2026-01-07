@@ -77,3 +77,44 @@ export function DeleteTask() {
 export function cleanTaskForm(formId) {
     cleanForm(formId, keys);
 }
+
+/**
+ * Calls the appropriate api for watcher.
+ * @param {string} action: enum ('add' | 'remove') 
+ */
+export function watcherPost(action, watchbtn, unwatchbtn){
+    const tid = document.getElementById('tid').innerText;
+    
+    const dictionary = {
+        add: {task_id: tid, watcher_id: 'me'},
+        remove: { wid: tid }
+    };
+    const params = {
+        add: {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dictionary.add),
+        },
+        remove: {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dictionary.remove),
+        }
+    };
+    const callbacks = {
+        add: () => {
+            watchbtn.classList.add('d-none');
+            unwatchbtn.classList.remove('d-none');
+        },
+        remove: () => {
+            unwatchbtn.classList.add('d-none');
+            watchbtn.classList.remove('d-none');
+        }
+    }
+    const request = defineRequest('/rest/tasks/watch/' + tid, params[action]);
+    Fetcher(request, 'watchTaskResponse', {}, callbacks[action]());
+}
