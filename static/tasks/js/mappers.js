@@ -1,16 +1,9 @@
-/**
- * This file will hold various mappers our JS libraries may need to operate with data 
- */
-import { convertDateTimeToLocal } from "../../core/js/helpers.js";
+import { makeElement } from "../../core/js/helper_mapper.js";
+import { watcherPost } from "./crud.js";
+import { prefillEditForm } from './form_handling.js';
 
 /**
- * This mapper function only finds dom elements matching items in the 'keys' list, if resultSet has the key
- * as well, then subs the resultSet[key] into the HTML of the matching dom elememnt.
- * 
- * containerId is irrelevent in this mapper. This is a callback function passed to Fetcher()
- * 
- * @param {object} resultSet - retrieved from Fetcher() internal function fetchResource()
- * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
+ * This file will hold various mappers our JS libraries may need to operate with data 
  */
 
 // Keys we expect in the resultSet (keeps defined order)
@@ -21,6 +14,15 @@ export const keys = [
     'tdelete_time','ddelete_time','ldelete_time','sdelete_time','adelete_time','vdelete_time','tupdate_time'
 ];
 
+/**
+ * This mapper function only finds dom elements matching items in the 'keys' list, if resultSet has the key
+ * as well, then subs the resultSet[key] into the HTML of the matching dom elememnt.
+ * 
+ * containerId is irrelevent in this mapper. This is a callback function passed to Fetcher()
+ * 
+ * @param {object} resultSet - retrieved from Fetcher() internal function fetchResource()
+ * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
+ */
 export function taskDetailsMapper(resultSet, containerId) {
     function formatValue(v) {
         if (v === null || v === undefined) return '';
@@ -56,65 +58,51 @@ export function taskDetailsMapper(resultSet, containerId) {
         }
     });
 
+    // add edit button
     let editBtn = document.getElementById('taskEditBtn');
     editBtn.addEventListener('click', () => {
         prefillEditForm(resultSet);
     });
-}
 
-/**
- * Not a mapper. A helper function.
- * This function simply pre-populates the Edit Task Form with record details, for which it was invoked.
- * @param {object} data: the data-object which will fill the form fields.
- */
-function prefillEditForm(data){
-    const form = document.querySelector('#taskEditForm'); // Get the form element
-
-    if (!(form instanceof HTMLElement)) {
-        console.log('Error: form could not be found. Cannot pre-populate.');
-        return;
-    }
-
-    keys.forEach(key => {
-        let value = data && Object.prototype.hasOwnProperty.call(data, key) ? data[key] : undefined;
-        let field = form.elements.namedItem(key);
-
-        if (!value || !field) {
-            return; // @todo, should I have better handling here? What about missing values for fields?
-        }
-
-        // If the key ends with '_time' or contains 'deadline', convert to appropriate format first
-        if (/(_time$)|deadline/.test(key)) {
-            field.value = convertDateTimeToLocal(value);
-            return; // continue to next key after handling datetime/deadline
-        }
-
-        field.value = value;
+    // add (un)watcher button(s)
+    let watchbtn = document.getElementById('addWatcher');
+    let unwatchbtn = document.getElementById('removeWatcher');
+    watchbtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        watcherPost('add', watchbtn, unwatchbtn);
+    });
+    unwatchbtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        watcherPost('add', watchbtn, unwatchbtn);
     });
 }
 
 /**
+ * Generic mapper - might be used to catch error messages, etc...
  * Maps error/success messages to elements in dom. 
- * Used by Fetcher() when posting form to rest/tasks/crud.
+ * May be used by Fetcher() in forms for rest/tasks/crud/.
  */
-export const editFormResponseMapper = {};
-/**export editFormResponseMapper {
-    description: '<div class="info-danger"></div>', 
-    status: <div class="info-danger"></div>, 
-    visibility: <div class="info-danger"></div>,
-    aid: <div class="info-danger"></div>,
-    assignee_id: <div class="info-danger"></div>,
-    assignor_id: <div class="info-danger"></div>,
-    csrfmiddlewaretoken: <div class="info-danger"></div>,
-    deadline: <div class="info-danger"></div>,
-    description: <div class="info-danger"></div>,
-    details: <div class="info-danger"></div>,
-    did: <div class="info-danger"></div>,
-    lid: <div class="info-danger"></div>,
-    parent_id: <div class="info-danger"></div>,
-    sid: <div class="info-danger"></div>,
-    status: <div class="info-danger"></div>,
-    tid: <div class="info-danger"></div>,
-    vid: <div class="info-danger"></div>,
-    visibility: <div class="info-danger"></div>,
-};*/
+export const editFormResponseMapper = {
+    description: makeElement('span', 'rec-itm'), 
+    status: makeElement('span', 'rec-itm'), 
+    visibility: makeElement('span', 'rec-itm'),
+    aid: makeElement('span', 'rec-itm'),
+    assignee_id: makeElement('span', 'rec-itm'),
+    assignor_id: makeElement('span', 'rec-itm'),
+    csrfmiddlewaretoken: makeElement('span', 'rec-itm'),
+    deadline: makeElement('span', 'rec-itm'),
+    description: makeElement('span', 'rec-itm'),
+    details: makeElement('span', 'rec-itm'),
+    did: makeElement('span', 'rec-itm'),
+    lid: makeElement('span', 'rec-itm'),
+    parent_id: makeElement('span', 'rec-itm'),
+    sid: makeElement('span', 'rec-itm'),
+    status: makeElement('span', 'rec-itm'),
+    tid: makeElement('span', 'rec-itm'),
+    vid: makeElement('span', 'rec-itm'),
+    visibility: makeElement('span', 'rec-itm'),
+    error: makeElement('span', 'rec-itm'),
+    errors: makeElement('span', 'rec-itm'),
+    message: makeElement('span', 'rec-itm'),
+    messages: makeElement('span', 'rec-itm'),
+};

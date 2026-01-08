@@ -13,4 +13,5 @@ urlpatterns = [
     path('password_reset/done/', PWResetViewComplete.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', ResetTokenView.as_view(), name = 'password_reset_confirm'),
     path('reset/done/', ResetView.as_view(), name = 'password_reset_complete'),
+    path('register/', views.register, name='register'),
 ]

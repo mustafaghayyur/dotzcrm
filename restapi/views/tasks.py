@@ -81,19 +81,19 @@ def task_crud(request, pk, format=None):
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
-def comments_crud(request, pk, format=None):
+def comment_crud(request, pk, format=None):
     method = request.method
     
     try:
         match method:
             case 'GET':
-                return Comments.detail(request, pk, format)
+                return CommentMethods.detail(request, pk, format)
             case 'POST':
-                return Comments.create(request, format)
+                return CommentMethods.create(request, format)
             case 'PUT':
-                return Comments.edit(request, format)
+                return CommentMethods.edit(request, format)
             case 'DELETE':
-                return Comments.delete(request, pk, format)
+                return CommentMethods.delete(request, pk, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
@@ -101,4 +101,85 @@ def comments_crud(request, pk, format=None):
         return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def comments_list(request, type, format=None):
+    """
+        List all  tasks for type of request
+    """
+    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
+    conditions = {
+        'tdelete_time': 'is Null',
+        'assignee_id': 1  # @todo readd: request.user.id,
+    }
+
+    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
+
+    try:
+        pgntn = pagination.assembleParamsForView(request.query_params)
+        
+        records = Comments().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
+        serialized = TaskO2ORecord(records, many=True)
+        
+        return Response({
+            'page': pgntn['page'],
+            'page_size': pgntn['page_size'],
+            'has_more': pagination.determineHasMore(records, pgntn['page_size']),
+            'results': serialized.data
+        })
+    except ValidationError as e:
+        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST', 'GET', 'DELETE'])
+def watcher_crud(request, pk, format=None):
+    method = request.method
     
+    try:
+        match method:
+            case 'GET':
+                return WatchersMethods.detail(request, pk, format)
+            case 'POST':
+                return WatchersMethods.create(request, format)
+            case 'DELETE':
+                return WatchersMethods.delete(request, pk, format)
+            case _:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    except ValidationError as e:
+        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def watchers_list(request, type, format=None):
+    """
+        List all  tasks for type of request
+    """
+    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
+    conditions = {
+        'tdelete_time': 'is Null',
+        'assignee_id': 1  # @todo readd: request.user.id,
+    }
+
+    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
+
+    try:
+        pgntn = pagination.assembleParamsForView(request.query_params)
+        
+        records = Comments().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
+        serialized = TaskO2ORecord(records, many=True)
+        
+        return Response({
+            'page': pgntn['page'],
+            'page_size': pgntn['page_size'],
+            'has_more': pagination.determineHasMore(records, pgntn['page_size']),
+            'results': serialized.data
+        })
+    except ValidationError as e:
+        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+

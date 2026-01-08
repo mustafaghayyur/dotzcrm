@@ -55,3 +55,38 @@
   .tab-dashboard { background: #403939; }
 }
 
+.rich-editor {
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  min-height: 200px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.text-red {
+  background-color: #bbc2c9;
+  color: #923333;
+}
+
+.text-yellow {
+  background-color: #32383d;
+  color: #e8cb4a;
+}
+
+#newTaskTextBox {
+  width: 90%;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+  margin-left: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  height: 20rem;
+  font-size: medium;
+  line-height: normal;
+  font-weight: 400;
+}
+
+.text-justify {
+  text-align: justify !important;
+}
