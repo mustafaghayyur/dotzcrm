@@ -1,22 +1,48 @@
-/**
- * Allows us to request a modal for matched key/value pairs
- * @param {str} key: key you are requesting
- * @param {str} value: value it should hold
- * @param {str} modal: #modalId we should show if true
- */
-export function showModal(key, value, modal) {
-    // Check if the 'modal' parameter is set to 'open'
-    if (getQueryParam(key) === value) {
-        // Select the modal element using its ID
-        const modalEl = document.getElementById(modal);
+import { Fetcher, defineRequest } from "./async.js";
 
-        // Create a new Bootstrap Modal instance (for Bootstrap 5+)
+/**
+ * Allows us to request a modal for matched url paam-key.
+ * Only IDs of database records are assumed as keys.
+ * @param {str} keyToFetch: key you are requesting
+ * @param {str} responseContainer: 'containerId' where any responses should be printed.
+ * @param {str} modal: 'modalId' we should show if true
+ * @param {function} callbackFunction: has to be a callable function that deals with Fetcher's results
+ */
+export function showModal(keyToFetch, responseContainer, modal, callbackFunction) {
+    let idToFetch = getQueryParam(keyToFetch);
+    if (isValidInteger(idToFetch)) {
+        idToFetch = parseInt(idToFetch);
+    } else {
+        if (responseContainer instanceof HTMLElement) {
+            responseContainer.textContent = 'Id: ' + idToFetch + ' could not be read, record could not be fetched.';
+        }
+    }
+
+    const request = defineRequest('/rest/tasks/crud/' + idToFetch + '/');
+    Fetcher(request, responseContainer, {}, (response) => {
+        // Select the modal element using its ID and show it
+        const modalEl = document.getElementById(modal);
         if (modalEl) {
             const modalInstance = new bootstrap.Modal(modalEl);
             modalInstance.show();
         }
-    }
+        
+        // callback to populate modal with fetched response.results
+        callbackFunction(response, modal); // all callbackFunctions would have to take these two params
+    });
+
 }
+
+/**
+ * You can pass a string containing a valid integer, or a number directly.
+ * @param {int|string} value: variable you wish to check. 
+ */
+export function isValidInteger (value) {
+  if (value === null || typeof value === 'boolean') {
+    return false;
+  }
+  return Number.isInteger(+value);
+};
 
 /**
  * Returns requested param's value if set in url params.
@@ -24,5 +50,29 @@ export function showModal(key, value, modal) {
  */
 export function getQueryParam(paramStr) {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+    return urlParams.get(paramStr);
+}
+
+/**
+ * Adds or updates a URL parameter in the browser's address bar without reloading the page.
+ * 
+ * @param {string} key The parameter name.
+ * @param {string} value The parameter value.
+ * @param {boolean} [addToHistory=true] Whether to add a new entry to the browser history (pushState) or replace the current one (replaceState).
+ */
+export function updateUrlParam(key, value, addToHistory = true) {
+    // Create a URL object from the current window location
+    const url = new URL(window.location.href);
+
+    // Use URLSearchParams.set() to add or update the parameter
+    url.searchParams.set(key, value);
+
+    // Determine which history method to use
+    if (addToHistory) {
+        // pushState adds a new entry to the history, allowing the back button to work
+        window.history.pushState({}, '', url.href);
+    } else {
+        // replaceState modifies the current history entry, preventing a new history entry
+        window.history.replaceState({}, '', url.href);
+    }
 }

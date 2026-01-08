@@ -115,6 +115,6 @@ export function watcherPost(action, watchbtn, unwatchbtn){
             watchbtn.classList.remove('d-none');
         }
     }
-    const request = defineRequest('/rest/tasks/watch/' + tid, params[action]);
-    Fetcher(request, 'watchTaskResponse', {}, callbacks[action]());
+    const request = defineRequest('/rest/tasks/watch/' + tid + '/', params[action]);
+    Fetcher(request, 'watchTaskResponse', {}, callbacks[action]);
 }

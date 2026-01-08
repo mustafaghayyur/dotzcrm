@@ -5,12 +5,16 @@ import { TabbedDashBoard } from "./dashboard.js";
 import { Fetcher, defineRequest } from "../../core/js/async.js";
 import { taskDetailsMapper } from "./mappers.js";
 import { UpdateTask, CreateTask, DeleteTask, cleanTaskForm } from './crud.js';
+import { showModal, updateUrlParam } from "../../core/js/modal_linking.js";
 //import { Editor } from "../../core/js/editor.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     
     TabbedDashBoard(addListenersToTasks); // implment dashboard on index.html
     //Editor('#newTaskTextBox');
+
+    // Allow opening of task-modals from url:
+    showModal('task_id', 'taskDetailsModalResponse', 'taskDetailsModal', taskDetailsMapper);
 
     /**
      * CRUD Operations Setup...
@@ -61,7 +65,8 @@ function addListenersToTasks(container){
             let id = task.dataset.taskId;
             let request = defineRequest('/rest/tasks/crud/' + id);
             task.addEventListener('click', ()=>{
-                Fetcher(request, 'taskDetailsModalResponse', {}, taskDetailsMapper)
+                Fetcher(request, 'taskDetailsModalResponse', {}, taskDetailsMapper);
+                updateUrlParam('task_id', id);
             });
         });
     }

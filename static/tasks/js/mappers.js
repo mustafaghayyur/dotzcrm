@@ -65,8 +65,8 @@ export function taskDetailsMapper(resultSet, containerId) {
     });
 
     // add (un)watcher button(s)
-    watchbtn = document.getElementById('addWatcher');
-    unwatchbtn = document.getElementById('removeWatcher');
+    let watchbtn = document.getElementById('addWatcher');
+    let unwatchbtn = document.getElementById('removeWatcher');
     watchbtn.addEventListener('click', (e) => {
         e.preventDefault();
         watcherPost('add', watchbtn, unwatchbtn);
