@@ -33,7 +33,6 @@ def task_list(request, type, format=None):
     match type:
         case 'private':
             conditions['visibility'] = 'private'
-            selectors.append('details')
         case 'workspaces':
             conditions['workspace'] = None
             conditions['assignee_id'] = None

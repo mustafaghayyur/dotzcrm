@@ -13,5 +13,14 @@ export function cleanForm(formId, keys) {
         }
         field.value = '';
     });
+}
 
+/**
+ * Helps prevent xss attacks. 
+ * Django should be performing this check.
+ * @param {string} str: string to escape 
+ * @returns 
+ */
+export function escapeHtml(str) {
+    return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
 }

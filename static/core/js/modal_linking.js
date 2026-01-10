@@ -16,6 +16,7 @@ export function showModal(keyToFetch, responseContainer, modal, callbackFunction
         if (responseContainer instanceof HTMLElement) {
             responseContainer.textContent = 'Id: ' + idToFetch + ' could not be read, record could not be fetched.';
         }
+        return null;
     }
 
     const request = defineRequest('/rest/tasks/crud/' + idToFetch + '/');

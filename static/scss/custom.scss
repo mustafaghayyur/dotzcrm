@@ -1,4 +1,7 @@
-/* custom.scss */
+/** custom.scss
+ * Used by Dotz CRM Devs. 
+ * Do not modify.
+ */
 
 /* reenie-beanie-regular - latin */
 @font-face {
@@ -29,9 +32,14 @@
   font-style: normal;
 }
 
-/* Tabbed dashboard styles */
+.container pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Begin Tabbed dashboard styles */
 .tab-dashboard {
-  background: #fff;
+  background: #403939;
   border-radius: 6px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
@@ -42,18 +50,25 @@
   background-color: #342c2c;
 }
 
-.tab-results {
+.tab-dashboard .nav-tabs {
+  border-bottom: 1px solid $secondary;
+  padding-bottom: 1px;
+}
+
+.tab-dashboard .nav-tabs .nav-link.active {
+  background-color: rgb(54, 40, 40);
+}
+
+.tab-dashboard .nav-tabs .nav-link:hover {
+  background-color: rgb(54, 40, 40);
+  transition: background-color 0.1s ease;
+}
+
+.tab-dashboard .tab-results {
   min-height: 6rem;
+  background-color: #212529
 }
-
-.tab-results pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-@media (prefers-color-scheme: dark) {
-  .tab-dashboard { background: #403939; }
-}
+/* End Tabbed dashboard styles */
 
 .rich-editor {
   border: 1px solid #ced4da;
