@@ -6,12 +6,11 @@ from restapi.validators.tasks import *
 from tasks.drm.crud import CRUD
 from core.helpers import pagination, misc
 from .helpers.task import *
+from tasks.drm.mapper_values import ValuesMapper
 
 """
-    Views starting with [_H_] are not directly accessible by django urls.
-    They serve to handle (thus the 'H') a specific HTTP method request.
-
-    _H_ usually acompany {someObject}_crud() views; and handle full crud operations.
+    Classes under views/helpers are not directly accessible by django urls.
+    They serve to handle a specific HTTP method request.
 
     NOTE: the [request] argument being passed to views with the @api_view decorator,
         is not the conventional Django request object. Rather, DRF's enhanced
@@ -22,10 +21,10 @@ def task_list(request, type, format=None):
     """
         List all  tasks for type of request
     """
-    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
+    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'assignor_id']
     conditions = {
         'tdelete_time': 'is Null',
-        'assignee_id': 1  # @todo readd: request.user.id,
+        'assignee_id': request.user.id
     }
 
     #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
@@ -34,9 +33,11 @@ def task_list(request, type, format=None):
         case 'private':
             conditions['visibility'] = 'private'
         case 'workspaces':
+            vm = ValuesMapper()
             conditions['workspace'] = None
-            conditions['assignee_id'] = None
             conditions['visibility'] = 'workspaces'
+            conditions['status'] = [vm.status('assigned'), vm.status('queued'), vm.status('started')]
+            selectors.append('deadline')
         case '_':
             pass
 

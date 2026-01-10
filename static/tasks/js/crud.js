@@ -1,7 +1,8 @@
 import { Fetcher, defineRequest } from "../../core/js/async.js";
-import { keys, editFormResponseMapper } from "./mappers.js";
+import { keys, genericTaskResponseMapper } from "./mappers.js";
 import { validate } from './validate.js';
 import { cleanForm } from "../../core/js/helper_forms.js";
+import { confirmDeletion } from "../../core/js/helper_generic.js";
 
 export function UpdateTask(form) {
     let dictionary = {};
@@ -25,7 +26,7 @@ export function UpdateTask(form) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', editFormResponseMapper);
+    Fetcher(request, 'taskEditModalResponse', genericTaskResponseMapper);
 }
 
 export function CreateTask(form) {
@@ -50,7 +51,7 @@ export function CreateTask(form) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', editFormResponseMapper);
+    Fetcher(request, 'taskEditModalResponse', genericTaskResponseMapper);
 }
 
 export function DeleteTask() {
@@ -60,6 +61,10 @@ export function DeleteTask() {
         throw Error('Record ID for detletion not found.');
     }
 
+    if (!confirmDeletion(id.textContent)) {
+        return null;
+    }
+
     let request = defineRequest('/rest/tasks/crud/' + id.textContent + '/', {
         method: 'DELETE',
         headers: {
@@ -67,7 +72,7 @@ export function DeleteTask() {
         },
     });
 
-    Fetcher(request, 'taskDetailsModalResponse', editFormResponseMapper);
+    Fetcher(request, 'taskDetailsModalResponse', genericTaskResponseMapper);
 }
 
 /**

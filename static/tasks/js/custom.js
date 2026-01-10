@@ -10,7 +10,6 @@ import { showModal } from "../../core/js/modal_linking.js";
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
     TabbedDashBoard(tasksCallbacks, true); // implment dashboard on index.html
     
     //Editor('#newTaskTextBox');

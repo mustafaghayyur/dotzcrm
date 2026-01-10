@@ -1,5 +1,3 @@
-import { escapeHtml } from "./helper_forms";
-
 /**
  * Implements a tabbed dashboard of REST endpoints
  */
@@ -38,11 +36,11 @@ export function TabbedDashBoard(callbackFunctionsDictionary, singleCall = true) 
      * This sets the event handler for tables loading data
      */
     tabs.forEach(tab => {
+        name = tab.dataset.tabName;
+        extra = tab.dataset.extra;
+        called[name] = false;
         tab.addEventListener('click', () => {
-            name = tab.dataset.tabName;
-            extra = tab.dataset.extra;
             setActiveTab(name);
-            called[name] = false;
         });
 
         if (extra === 'default') {
@@ -63,7 +61,7 @@ export function TabbedDashBoard(callbackFunctionsDictionary, singleCall = true) 
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
  * @param {function} callbackFunction 
  */
-export function TabbedDashBoardOld(callbackFunction = null) {
+/**export function TabbedDashBoardOld(callbackFunction = null) {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');
     const containers = {
         private: document.getElementById('privateContainer'),
@@ -155,7 +153,7 @@ export function TabbedDashBoardOld(callbackFunction = null) {
     /**
      * This sets the event handler for tables loading data
      */
-    tabs.forEach(tab => {
+/**     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             let info = tab.dataset.tab;
             setActiveTab(info);
@@ -167,5 +165,5 @@ export function TabbedDashBoardOld(callbackFunction = null) {
             tab.click()
         }
     });
-}
+}*/
 
