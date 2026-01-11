@@ -1,8 +1,6 @@
-import { makeElement } from "../../core/js/helper_mapper.js";
+import { makeElement, formatValue } from "../../core/js/helper_mapper.js";
 import { escapeHtml } from "../../core/js/helper_forms.js";
-import { watcherPost } from "./crud.js";
-import { prefillEditForm } from './form_handling.js';
-import { addListenersToTasks, toggleTodoStatus, deleteTodo } from "./dashboardSettings.js";
+import { addListenersToTasks, addOptionsFunctionalityOnTaskDetailsPane } from './listeners.js';
 
 /**
  * This file will hold various mappers our JS libraries may need to operate with data 
@@ -26,18 +24,6 @@ export const keys = [
  * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
 export function taskDetailsMapper(resultSet, containerId) {
-    function formatValue(v) {
-        if (v === null || v === undefined) return '';
-        if (typeof v === 'object') {
-            try {
-                return JSON.stringify(v, null, 2);
-            } catch (e) {
-                return String(v);
-            }
-        }
-        return String(v);
-    }
-
     keys.forEach(key => {
         let fieldDomElement = document.getElementById(key);
 
@@ -55,30 +41,15 @@ export function taskDetailsMapper(resultSet, containerId) {
             }
         }
     });
-
-    // add edit button
-    let editBtn = document.getElementById('taskEditBtn');
-    editBtn.addEventListener('click', () => {
-        prefillEditForm(resultSet);
-    });
-
-    // add (un)watcher button(s)
-    let watchbtn = document.getElementById('addWatcher');
-    let unwatchbtn = document.getElementById('removeWatcher');
-    watchbtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        watcherPost('add', watchbtn, unwatchbtn);
-    });
-    unwatchbtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        watcherPost('remove', watchbtn, unwatchbtn);
-    });
+    addOptionsFunctionalityOnTaskDetailsPane(resultSet);
 }
 
 /**
- * @todo: make appropriate mapper for task-list fetched.
+ * Callback function for Fetcher() that maps retieved user's tasks to page elements.
+ * @param {obj} data: results object from Fetcher call
+ * @param {str} containerId: Id of the container to show any error messages.
  */
-export function displayFetchedTaskList(data, containerId) {
+export function fetchedTaskListMapper(data, containerId) {
     const ulId = containerId.replace(/Responses$/,'List');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
@@ -95,6 +66,8 @@ export function displayFetchedTaskList(data, containerId) {
             li.querySelector('deadline').textContent = convertToDisplayLocal(item.deadline);
             ul.appendChild(li);
         });
+
+        addListenersToTasks(ul);
     } else {
         originalLiItem.innerHTML = '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
         container.appendChild(originalLiItem);
@@ -102,9 +75,11 @@ export function displayFetchedTaskList(data, containerId) {
 }
 
 /**
- * @todo: make appropriate mapper for todo-list fetched.
+ * Callback function for Fetcher() that maps fetched ToDos to page elemments.
+ * @param {obj} data: results object from Fetcher call
+ * @param {str} containerId: Id of the container to show any error messages.
  */
-export function displayFetchedTodoList(data, containerId) {
+export function fetchedTodoListMapper(data, containerId) {
     // I want to take the value held in containerId, and replace 'Responses' with List to get the ul id.
     const ulId = containerId.replace(/Responses$/,'List');
     let ul = document.getElementById(ulId); // should be the ul parent node.

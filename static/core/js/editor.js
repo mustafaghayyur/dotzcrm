@@ -1,12 +1,16 @@
 /**
  * Live text editor for all rich text editing needs.
+ * 
  * @todo: make mobile and tablet compatable.
- * Use: add following element to dom:
- *  > <div class="rich-editor" contenteditable="true" placeholder="start typing..."></div>
- * @param {string} elementId: the CSS selector of the editable element (e.g. '#myEditor') 
+ * Use Instructions: add following element to dom, replacing 'elementId' and 'hidden_field_id' correctly:
+ *  > <div id="elementId" class="rich-editor" data-field-id="hidden_field_id" contenteditable="true" placeholder="start typing..."></div>
+ *  > <input type="hidden" id="hidden_field_id" name="hidden_field_name">
+ * 
+ * @param {string} elementId: the CSS selector of the editable element (e.g. 'myEditor') 
 */
 export function Editor(elementId){
-    const editor = document.querySelector(elementId + '.rich-editor');
+    const editor = document.getElementById(elementId); // class '.rich-editor' should be there as well...
+
     editor.addEventListener('keyup', () => {
         // Get the current HTML content of the editor
         let html = editor.innerHTML;

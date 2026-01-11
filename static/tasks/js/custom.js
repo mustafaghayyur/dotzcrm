@@ -1,49 +1,58 @@
+import { Fetcher, defineRequest } from "../../core/js/async.js";
 import { TabbedDashBoard } from "../../core/js/dashboard.js";
-import { taskDetailsMapper } from "./mappers.js";
-import { tasksCallbacks } from "./dashboardSettings.js";
-import { UpdateTask, CreateTask, DeleteTask, cleanTaskForm } from './crud.js';
+import { taskDetailsMapper, fetchedTodoListMapper, fetchedTaskListMapper } from "./mappers.js";
+import { UpdateTask, CreateTask } from './crud.js';
+import { cleanTaskForm } from './form_handling.js';
 import { showModal } from "../../core/js/modal_linking.js";
-//import { Editor } from "../../core/js/editor.js";
 
 /**
  * This file holds custom JS to implement UI on Tasks Module
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    TabbedDashBoard(tasksCallbacks, true); // implment dashboard on index.html
     
-    //Editor('#newTaskTextBox');
+    // Tasks' TabbedDashBoard() call has singlecall enabled, 
+    // data will not be refreshed, while switching between tabs
+    TabbedDashBoard({
+        // 'Personal' tab of the tasks dashboard:
+        personal: () => {
+            let request = null;
+            request = defineRequest('/rest/tasks/private', { credentials: 'same-origin' });
+            Fetcher(request, 'personalTabResponses', {}, fetchedTodoListMapper);
+
+            request = defineRequest('/rest/tasks/workspaces', { credentials: 'same-origin' });
+            Fetcher(request, 'workspacesTabResponses', {}, fetchedTaskListMapper);
+        },
+        // 'Workspaces' tab of tasks dashboard:
+        workspaces: () => {},
+    }, true);
+    
+    
 
     // Allow opening of task-modals from url:
-    showModal('task_id', 'taskDetailsModalResponse', 'taskDetailsModal', taskDetailsMapper);
+    showModal(
+        'task_id', 
+        'taskDetailsModalResponse', 
+        'taskDetailsModal', 
+        taskDetailsMapper
+    );
 
-    /**
-     * CRUD Operations Setup...
-     */
-    const form = document.querySelector('#taskEditForm'); // Get the form element
-    if (!(form instanceof HTMLElement)) {
-        console.log('Error: form could not be found. Cannot pre-populate.', form);
-    }
-
-    form.addEventListener('submit', (e) => {
+    // Edit Task Modal: Save Operations Setup...
+    const editTaskSaveBtn = document.getElementById('taskEditFormSaveBtn');
+    editTaskSaveBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const tid = document.querySelector('#taskEditForm input[name="tid"]');
         if (!(tid instanceof HTMLElement)) {
             throw Error('Cannot find `tid` field, unable to perform edit/create operation.');
         }
         if(tid.value){
-            UpdateTask(form);
+            UpdateTask('taskEditForm');
         }else{
-            CreateTask(form);
+            CreateTask('taskEditForm');
         }
     });
 
-    const deleteBtn = document.getElementById('deleteTaskBtn');
-    deleteBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        DeleteTask();
-    });
-
+    // add 'clean form' functionality to all .open-form btns...
     const openFormBtn = document.querySelectorAll('.open-form');
     openFormBtn.forEach(button => {
         button.addEventListener('click', () => {
@@ -51,4 +60,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
