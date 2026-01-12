@@ -47,7 +47,9 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         } catch (err) {
             container.innerHTML = '<div class="alert alert-danger">Error loading: ' + escapeHtml(err.message) + '</div>';
         } finally {
-            spinner.classList.add('d-none');
+            if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {
+                spinner.classList.add('d-none');
+            }
         }
     }
 

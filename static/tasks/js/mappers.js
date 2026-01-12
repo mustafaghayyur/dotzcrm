@@ -113,6 +113,25 @@ export function fetchedTodoListMapper(data, containerId) {
     }
 }
 
+export function commentsMapper(data, containerId) {
+    let container = document.getElementById(containerId);
+    let comment = container.getElementById('commmentContainer');
+
+    if (Array.isArray(data)) {
+        let newComment = null;
+        data.forEach(item => {
+            newComment = comment.cloneNode(true);    
+            newComment.classList.remove('d-none');
+
+            newComment.querySelector('.creator_id').textContent = item.creator_id;
+            newComment.querySelector('.create_time').textContent = item.create_time;
+            newComment.querySelector('.update_time').textContent = item.update_time;
+            newComment.querySelector('.comment_text').innerHTML = item.comment;
+        });
+    }
+        
+}
+
 /**
  * Generic mapper - might be used to catch error messages, etc...
  * Maps error/success messages to elements in dom. 

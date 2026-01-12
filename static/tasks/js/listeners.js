@@ -1,9 +1,9 @@
 import { Fetcher, defineRequest } from "../../core/js/async.js";
 import { updateUrlParam } from "../../core/js/modal_linking.js";
-import { watcherPost } from "./crud.js";
+import { createWatcher, removeWatcher, DeleteTask, createCommentForTask } from "./crud.js";
 import { prefillEditForm } from './form_handling.js';
 import { Editor } from '../../core/js/editor.js';
-import { DeleteTask  } from "./crud.js";
+import { taskDetailsMapper, commentsMapper } from './mappers.js';
 
 /**
  * A place to define various listeners that don't belong anywhere else...
@@ -35,10 +35,10 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
     });
     unwatchbtn.addEventListener('click', (e) => {
         e.preventDefault();
-        deleteWatcher(resultSet['tid'], 'addWatcher', 'removeWatcher');
+        removeWatcher(resultSet['tid'], 'addWatcher', 'removeWatcher');
     });
 
-    // finally, implement rich-text editor and comments form.
+    // next, implement rich-text editor and comments form.
     Editor('commentEditor');
     let saveCommentBtn = document.getElementById('saveComment');
     saveCommentBtn.addEventListener('click', (e) => {
@@ -46,8 +46,12 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
         let editor = document.getElementById('commentEditor');
         let hiddenCommentInput = document.getElementById(editor.dataset.fieldId);
         hiddenCommentInput.value = editor.innerHTML;
-        saveCommentForTask('add', 'createComment');
+        createCommentForTask('newCommentForm');
     });
+
+    // finally, retrieve task-level-comments..
+    let request = defineRequest('/rest/tasks/comments/');
+    Fetcher(request, "comments", {}, commentsMapper);
 }
 
 /**

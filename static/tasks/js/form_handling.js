@@ -52,7 +52,7 @@ export function generateDictionaryFromForm(formId, keysList = null) {
     const form = document.getElementById(formId);
 
     if (!(form instanceof HTMLElement)) {
-        console.log('Error: form could not be found. Cannot pre-populate.', form);
+        console.log('Error: form could not be found. Cannot form request object.', form);
     }
 
     // 1. Create a FormData object from the form element
@@ -62,10 +62,10 @@ export function generateDictionaryFromForm(formId, keysList = null) {
     const formObject = Object.fromEntries(formData.entries());
 
     if (keysList !== null && Array.isArray(keysList)) {
-        let dictionary = null;
+        let dictionary = {};
         keysList.forEach(key => {    
-            if (!formObject[key]) {
-                dictionary[key] = validate(formObject[key], val);
+            if (formObject[key]) {
+                dictionary[key] = validate(formObject[key]);
             }
         });
 

@@ -103,7 +103,7 @@ def comment_crud(request, pk, format=None):
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def comments_list(request, type, format=None):
+def comments_list(request, format=None):
     """
         List all  tasks for type of request
     """

@@ -82,7 +82,7 @@ export function createWatcher(taskId, watchBtnId, unwatchBtnId){
 
     const request = defineRequest('/rest/tasks/watch/0/', params);
     Fetcher(request, 
-        'watchTaskResponse', {}, 
+        'taskDetailsModalResponse', {}, 
         () => {
             watchbtn.classList.add('d-none');
             unwatchbtn.classList.remove('d-none');
@@ -114,7 +114,7 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
     const request = defineRequest('/rest/tasks/watch/0/', params);
     Fetcher(
         request, 
-        'watchTaskResponse', {}, 
+        'taskDetailsModalResponse', {}, 
         () => {
             unwatchbtn.classList.add('d-none');
             watchbtn.classList.remove('d-none');

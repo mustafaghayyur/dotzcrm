@@ -69,17 +69,16 @@
             <div class="col-12">
               <form method="post" id="newCommentForm">
                 {% csrf_token %}
-                <div id="commentEditor" class="rich-editor" data-field-name="comment" contenteditable="true" placeholder="add comment..."></div>
-                <input type="hidden" id="comment" name="comment">
-                <input type="text"  maxlength="6000" required="" id="id_description">
+                <div id="commentEditor" class="rich-editor" data-field-id="comment" contenteditable="true" placeholder="add comment..."></div>
+                <input type="hidden" id="comment" maxlength="7000" name="comment">
                 <button id="saveComment" class="btn btn-info btn-sm" type="button"><i class="bi bi-pencil-square"></i> comment</button>
               </form>
             </div>
           </div>
-          <div id="commmentContainer" class="row">
+          <div id="commmentContainer" class="row d-none">
             <div id="commentRecord" class="col-11" data-comment-id="">
               <span class="creator_id"></span> | <span class="create_time"></span> | <span class="update_time"></span>
-              <div class="comment-text"></div>
+              <div class="comment_text"></div>
               <div class="children"></div>
             </div>
             <div class="col-1 options">
