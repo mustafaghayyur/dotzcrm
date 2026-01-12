@@ -1,4 +1,6 @@
 import merge from 'lodash/merge';
+import { escapeHtml } from "./helper_forms";
+
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
  * request definition is fetched, and any resultant response from the API
@@ -24,8 +26,8 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
      * @param {*} request - Request object
      */
     async function fetchResource(reqObj) {
-        spinner = getSpinner()
-        let container = document.getElementById(containerId)
+        spinner = getSpinner();
+        let container = document.getElementById(containerId);
         try {
             let response = await fetch(reqObj);
             
@@ -45,7 +47,9 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         } catch (err) {
             container.innerHTML = '<div class="alert alert-danger">Error loading: ' + escapeHtml(err.message) + '</div>';
         } finally {
-            spinner.classList.add('d-none');
+            if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {
+                spinner.classList.add('d-none');
+            }
         }
     }
 
@@ -125,25 +129,16 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
     }
 
     /**
-     * helper function for safe rendering of user-supplied code.
-     * @todo - see if better escape operations are needed.
-     * @param {*} str - string to escape
-     */
-    function escapeHtml(str) {
-        return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
-    }
-
-    /**
      * Generate, set and return spinner element inside container.
      */
     function getSpinner() {
-        if (spinner !== null && spinner instanceof HTMLElement) {
+        if (spinner !== null && (spinner instanceof HTMLElement)) {
             return spinner;
         }
 
         let id = containerId + 'Spinner'
         let container = document.getElementById(containerId)
-        if (container !== null && container instanceof HTMLElement) {
+        if (container !== null && (container instanceof HTMLElement)) {
             container.innerHTML = '<div class="spinner-border text-primary" role="status" id=' + id +'><span class="visually-hidden">Loading...</span></div>';
         }
 

@@ -10,23 +10,46 @@
   <div class="tab-dashboard">
     <ul class="nav nav-tabs" role="tablist" id="tasksTab">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-private-btn" data-tab="private" type="button" role="tab" aria-controls="tab-private" aria-selected="true">Private</button>
+        <button class="nav-link mx-1 active" id="tab-personal-btn" data-tab-name="personal" data-extra="default" type="button" role="tab" aria-controls="tab-personal" aria-selected="true">Personal</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-workspaces-btn" data-tab="workspaces" type="button" role="tab" aria-controls="tab-workspaces" aria-selected="false">Workspaces</button>
+        <button class="nav-link mx-1" id="tab-workspaces-btn" data-tab-name="workspaces" data-extra="" type="button" role="tab" aria-controls="tab-workspaces" aria-selected="false">Workspaces</button>
       </li>
     </ul>
 
     <div class="tab-content mt-3">
-      <div class="tab-pane active" id="tab-private" role="tabpanel" aria-labelledby="tab-private-btn">
-        <div id="privateContainer" class="tab-results">
-          <div class="spinner-border text-primary" role="status" id="privateSpinner"><span class="visually-hidden">Loading...</span></div>
+      <div class="tab-pane active" id="tab-personal" role="tabpanel" aria-labelledby="tab-personal-btn">
+        <div id="personalContainer" class="tab-results">
+          <div class="container">
+            <div class="row align-items-start">
+              <div id="personal" class="col-6">
+                <h4 class="mx-2 mt-2">My TODOs...</h4>
+                <div id="personalTabResponses"></div>
+                <ul id="personalTabList" class="list-group m-2">
+                  <li class="list-group-item position-relative">
+                    <span id="" class="btn btn-info btn-sm status"><i class="bi bi-clipboard queued d-none"></i><i class="bi bi-clipboard-check-fill completed d-none"></i></span>
+                    <span id="" class="description" data-task-id=""></span>
+                    <div class="delete position-absolute end-0 top-0"><i class="bi bi-trash3"></i></div>
+                  </li>
+                </ul>
+              </div>
+              <div id="workspaces" class="col-6">
+                <h4 class="mx-2 mt-2">WORKSPACES:</h4>
+                <div id="workspacesTabResponses"></div>
+                <ul id="workspacesTabList" class="list-group  m-2 workspace-tasks">
+                  <li class="list-group-item">
+                    <a class="link task-details-link description" data-task-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal"></a>
+                    <div class="text-muted small"><span class="status"></span> | <span class="tupdate_time"></span> | Deadline: <span class="deadline"></span></div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="tab-pane" id="tab-workspaces" role="tabpanel" aria-labelledby="tab-workspaces-btn">
         <div id="workspacesContainer" class="tab-results">
-          <div class="spinner-border text-primary d-none" role="status" id="workspacesSpinner"><span class="visually-hidden">Loading...</span></div>
         </div>
       </div>
     </div>

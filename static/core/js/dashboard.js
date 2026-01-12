@@ -1,8 +1,67 @@
 /**
+ * Implements a tabbed dashboard of REST endpoints
+ */
+export function TabbedDashBoard(callbackFunctionsDictionary, singleCall = true) {
+    const tabs = document.querySelectorAll('.tab-dashboard .nav-link');
+    let called = {};
+    let name = null;
+    let extra = null;
+    let pane = null;
+
+    /**
+     * Central element of tabbled dashboards.
+     * @param {string} tabName: from the "#tab-{something}" pass the {something} 
+     */
+    function setActiveTab(tabName) {
+        tabs.forEach(tab => {
+            name = tab.dataset.tabName;
+            pane = document.getElementById('tab-' + name);
+            if (name === tabName) {
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected','true');
+                pane.classList.add('active');
+                if (typeof callbackFunctionsDictionary[name] === 'function' && called[name] === false) {
+                    called[name] = true;
+                    callbackFunctionsDictionary[name]();
+                }
+            } else {
+                tab.classList.remove('active');
+                tab.setAttribute('aria-selected','false');
+                pane.classList.remove('active');
+            }
+        });
+    }
+
+    /**
+     * This sets the event handler for tables loading data
+     */
+    tabs.forEach(tab => {
+        name = tab.dataset.tabName;
+        extra = tab.dataset.extra;
+        called[name] = false;
+        tab.addEventListener('click', () => {
+            setActiveTab(name);
+        });
+
+        if (extra === 'default') {
+            tab.click(); // trigger default  tab
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+/**
  * Implements a two-tab dashboard and lazy-fetching of REST endpoints
  * @param {function} callbackFunction 
  */
-export function TabbedDashBoard(callbackFunction = null) {
+/**export function TabbedDashBoardOld(callbackFunction = null) {
     const tabs = document.querySelectorAll('#tasksTab .nav-link');
     const containers = {
         private: document.getElementById('privateContainer'),
@@ -94,7 +153,7 @@ export function TabbedDashBoard(callbackFunction = null) {
     /**
      * This sets the event handler for tables loading data
      */
-    tabs.forEach(tab => {
+/**     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             let info = tab.dataset.tab;
             setActiveTab(info);
@@ -106,5 +165,5 @@ export function TabbedDashBoard(callbackFunction = null) {
             tab.click()
         }
     });
-}
+}*/
 

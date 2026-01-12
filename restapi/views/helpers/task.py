@@ -2,7 +2,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 
-from restapi.validators.tasks import *
+from tasks.validators.tasks import *
 from tasks.drm.crud import CRUD, Comments, Watchers
 from core.helpers import pagination, crud
 

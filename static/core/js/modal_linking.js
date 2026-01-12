@@ -1,6 +1,9 @@
 import { Fetcher, defineRequest } from "./async.js";
 
 /**
+ * @todo: show failiure message for not-found requests
+ * @todo: add support for tabs and off-canvas modals
+ * @todo: support multi-paramed requests...
  * Allows us to request a modal for matched url paam-key.
  * Only IDs of database records are assumed as keys.
  * @param {str} keyToFetch: key you are requesting
@@ -16,6 +19,7 @@ export function showModal(keyToFetch, responseContainer, modal, callbackFunction
         if (responseContainer instanceof HTMLElement) {
             responseContainer.textContent = 'Id: ' + idToFetch + ' could not be read, record could not be fetched.';
         }
+        return null;
     }
 
     const request = defineRequest('/rest/tasks/crud/' + idToFetch + '/');

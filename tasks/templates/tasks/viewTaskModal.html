@@ -52,18 +52,41 @@
             </td>
             <td colspan="2" class="text-center align-text-bottom">
               <form class="d-inline-block" method="GET" action="#">
-                <button id="taskEditBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-pencil-square"></i> edit</button>
+                <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-pencil-square"></i> edit</button>
               </form>
               <form class="d-inline-block" action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="">
-                <button class="btn btn-secondary btn-sm" type="submit" id="deleteTaskBtn" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
+                <button id="deleteTaskBtn" class="btn btn-secondary btn-sm" type="submit" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
               </form>
-              <a href="#" class="btn btn-info btn-sm mx-3" id="addWatcher" role="button" ><i class="bi bi-eye-fill"></i></a>
-              <a href="#" class="btn btn-secondary btn-sm mx-3 d-none" id="removeWatcher" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
+              <a id="addWatcher" href="#" class="btn btn-info btn-sm mx-3" role="button" ><i class="bi bi-eye-fill"></i></a>
+              <a id="removeWatcher" href="#" class="btn btn-secondary btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
             </td>
           </tr>
         </table>
+        <div id="comments" class="container">
+          <div id="createComment" class="row">
+            <div class="col-12">
+              <form method="post" id="newCommentForm">
+                {% csrf_token %}
+                <div id="commentEditor" class="rich-editor" data-field-id="comment" contenteditable="true" placeholder="add comment..."></div>
+                <input type="hidden" id="comment" maxlength="7000" name="comment">
+                <button id="saveComment" class="btn btn-info btn-sm" type="button"><i class="bi bi-pencil-square"></i> comment</button>
+              </form>
+            </div>
+          </div>
+          <div id="commmentContainer" class="row d-none">
+            <div id="commentRecord" class="col-11" data-comment-id="">
+              <span class="creator_id"></span> | <span class="create_time"></span> | <span class="update_time"></span>
+              <div class="comment_text"></div>
+              <div class="children"></div>
+            </div>
+            <div class="col-1 options">
+              <div id="replyComment" class="btn btn-sm btn-info"><i class="bi bi-reply"></i></div>
+              <div id="deleteComment" class="btn btn-sm btn-info"><i class="bi bi-trash3"></i></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

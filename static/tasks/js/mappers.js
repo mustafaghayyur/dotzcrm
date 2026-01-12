@@ -1,6 +1,6 @@
-import { makeElement } from "../../core/js/helper_mapper.js";
-import { watcherPost } from "./crud.js";
-import { prefillEditForm } from './form_handling.js';
+import { makeElement, formatValue } from "../../core/js/helper_mapper.js";
+import { escapeHtml } from "../../core/js/helper_forms.js";
+import { addListenersToTasks, addOptionsFunctionalityOnTaskDetailsPane } from './listeners.js';
 
 /**
  * This file will hold various mappers our JS libraries may need to operate with data 
@@ -24,22 +24,6 @@ export const keys = [
  * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
 export function taskDetailsMapper(resultSet, containerId) {
-    function formatValue(v) {
-        if (v === null || v === undefined) return '';
-        if (typeof v === 'object') {
-            try {
-                return JSON.stringify(v, null, 2);
-            } catch (e) {
-                return String(v);
-            }
-        }
-        return String(v);
-    }
-
-    function escapeHtml(str) {
-        return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
-    }
-
     keys.forEach(key => {
         let fieldDomElement = document.getElementById(key);
 
@@ -57,24 +41,95 @@ export function taskDetailsMapper(resultSet, containerId) {
             }
         }
     });
+    addOptionsFunctionalityOnTaskDetailsPane(resultSet);
+}
 
-    // add edit button
-    let editBtn = document.getElementById('taskEditBtn');
-    editBtn.addEventListener('click', () => {
-        prefillEditForm(resultSet);
-    });
+/**
+ * Callback function for Fetcher() that maps retieved user's tasks to page elements.
+ * @param {obj} data: results object from Fetcher call
+ * @param {str} containerId: Id of the container to show any error messages.
+ */
+export function fetchedTaskListMapper(data, containerId) {
+    const ulId = containerId.replace(/Responses$/,'List');
+    let ul = document.getElementById(ulId); // should be the ul parent node.
+    let originalLiItem = ul.querySelector('li.list-group-item');
+    ul.innerHTML = '';
+    let li = null;
+    
+    if (Array.isArray(data)) {
+        data.forEach(item => {
+            li = originalLiItem.cloneNode(true);
+            li.querySelector('.description').dataset.taskId = escapeHtml(item.tid);
+            li.querySelector('.description').textContent = item.description || JSON.stringify(item);
+            li.querySelector('status').textContent = escapeHtml(item.status);
+            li.querySelector('tupdate_time').textContent = convertToDisplayLocal(item.tupdate_time);
+            li.querySelector('deadline').textContent = convertToDisplayLocal(item.deadline);
+            ul.appendChild(li);
+        });
 
-    // add (un)watcher button(s)
-    let watchbtn = document.getElementById('addWatcher');
-    let unwatchbtn = document.getElementById('removeWatcher');
-    watchbtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        watcherPost('add', watchbtn, unwatchbtn);
-    });
-    unwatchbtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        watcherPost('add', watchbtn, unwatchbtn);
-    });
+        addListenersToTasks(ul);
+    } else {
+        originalLiItem.innerHTML = '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+        container.appendChild(originalLiItem);
+    }
+}
+
+/**
+ * Callback function for Fetcher() that maps fetched ToDos to page elemments.
+ * @param {obj} data: results object from Fetcher call
+ * @param {str} containerId: Id of the container to show any error messages.
+ */
+export function fetchedTodoListMapper(data, containerId) {
+    // I want to take the value held in containerId, and replace 'Responses' with List to get the ul id.
+    const ulId = containerId.replace(/Responses$/,'List');
+    let ul = document.getElementById(ulId); // should be the ul parent node.
+    let originalLiItem = ul.querySelector('li.list-group-item');
+    ul.innerHTML = '';
+    let li = null;
+
+    if (Array.isArray(data)) {
+        data.forEach(item => {
+            li = originalLiItem.cloneNode(true);
+            let status = li.querySelector('.status').querySelector('.' + item.status);
+            let desc = li.querySelector('.description');
+            desc.dataset.taskId = escapeHtml(item.tid);
+            desc.textContent = item.description || JSON.stringify(item);
+            
+            if (item.status === 'completed') {
+                desc.classList.add('text-decoration-line-through');
+            }
+            if (status instanceof HTMLElement) {
+                status.classList.remove('d-none');
+            }
+            
+            li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item.tid, item.status) });
+            li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tid, item.description) });
+
+            ul.appendChild(li);
+        });
+    } else {
+        originalLiItem.innerHTML = '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+        container.appendChild(originalLiItem);
+    }
+}
+
+export function commentsMapper(data, containerId) {
+    let container = document.getElementById(containerId);
+    let comment = container.getElementById('commmentContainer');
+
+    if (Array.isArray(data)) {
+        let newComment = null;
+        data.forEach(item => {
+            newComment = comment.cloneNode(true);    
+            newComment.classList.remove('d-none');
+
+            newComment.querySelector('.creator_id').textContent = item.creator_id;
+            newComment.querySelector('.create_time').textContent = item.create_time;
+            newComment.querySelector('.update_time').textContent = item.update_time;
+            newComment.querySelector('.comment_text').innerHTML = item.comment;
+        });
+    }
+        
 }
 
 /**
@@ -82,7 +137,7 @@ export function taskDetailsMapper(resultSet, containerId) {
  * Maps error/success messages to elements in dom. 
  * May be used by Fetcher() in forms for rest/tasks/crud/.
  */
-export const editFormResponseMapper = {
+export const genericTaskResponseMapper = {
     description: makeElement('span', 'rec-itm'), 
     status: makeElement('span', 'rec-itm'), 
     visibility: makeElement('span', 'rec-itm'),

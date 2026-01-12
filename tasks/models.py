@@ -63,21 +63,6 @@ class Visibility(models.Model):
 
     objects = VisibilityQuerySet.as_manager()
 
-class Watcher(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    watcher = models.ForeignKey(
-        sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
-        on_delete=models.CASCADE,  # Define what happens when the related user is deleted
-    )
-    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-    # note: updates are banned on this table.
-    # application level control to be implemented.
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-
-    objects = WatcherQuerySet.as_manager()
-
-
 # The table to manage assignor/assignee for each task
 class Assignment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -99,17 +84,39 @@ class Assignment(models.Model):
 
     objects = AssignmentQuerySet.as_manager()
 
+class Watcher(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    watcher = models.ForeignKey(
+        sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
+        on_delete=models.CASCADE,  # Define what happens when the related user is deleted
+    )
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+    # note: updates are banned on this table.
+    # application level control to be implemented.
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = WatcherQuerySet.as_manager()
+
 # NOTE: Comments model must ALWAYS be named Comment
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    creator = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = CommentQuerySet.as_manager()
 
+
+class EditLog(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    user = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    changed_cols = models.CharField(max_length=1000)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
 
 # @todo - link tasks with tickets
 # This model allows tickets to be mentioned in tasks

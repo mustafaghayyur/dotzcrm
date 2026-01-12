@@ -2,34 +2,7 @@ from rest_framework.serializers import Serializer, IntegerField, ChoiceField, Ch
 
 from tasks.drm.mapper_values import *
 from core.helpers import validators
-
-"""
-    Repeating options saved to dictionaries for convinient reuse...
-"""
-intNullableOpts = {
-    'allow_null': True, 
-    'required': False, 
-    'validators': [validators.isPositiveIdOrNone]
-}
-
-intMandatoryOpts = {
-    'allow_null': False, 
-    'required': True, 
-    'validators': [validators.isPositiveIdAlways]
-}
-
-datetimeNullableOpts = {
-    'allow_null': True, 
-    'required': False, 
-    'validators': [validators.isPastDatetimeOrNone]
-}
-
-latestChoiceOpts = {
-    'choices': [(c.value, c.value) for c in Latest], 
-    'allow_null': True,
-    'required': False,
-    'validators': [validators.isLatestChoicetOrNone]
-}
+from restapi.validators.generic import *
 
 class DateTimeFieldForJS(DateTimeField):
     def to_representation(self, value):
@@ -116,6 +89,7 @@ class Comment(Serializer):
     id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intMandatoryOpts)
     comment = CharField(allow_null=False, required=True, min_length=50, max_length=6000)
+    creator_id = IntegerField(**intNullableOpts)
     parent_id = IntegerField(**intNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     update_time = DateTimeFieldForJS(**datetimeNullableOpts)
