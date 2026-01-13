@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django import forms
 from rest_framework.exceptions import ValidationError
 import re

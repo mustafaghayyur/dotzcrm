@@ -24,8 +24,8 @@ class TaskO2ORecord(Serializer):
     description = CharField(allow_null=False, required=True, min_length=20, max_length=255)
     details = CharField(allow_null=True, required=False, min_length=50)
     
-    status = ChoiceField(choices=[(c.value, c.value) for c in Status], default=Status.created.value)
-    visibility = ChoiceField(choices=[(c.value, c.value) for c in Visibility], default=Visibility.private.value)
+    status = ChoiceField(choices=[(c.value, c.value) for c in Status])
+    visibility = ChoiceField(choices=[(c.value, c.value) for c in Visibility])
 
     deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 

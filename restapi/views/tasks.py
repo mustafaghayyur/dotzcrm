@@ -45,7 +45,10 @@ def task_list(request, type, format=None):
         pgntn = pagination.assembleParamsForView(request.query_params)
         
         records = CRUD().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
+        misc.log(records, 'raw records')
         serialized = TaskO2ORecord(records, many=True)
+        misc.log(serialized, 'serialized records')
+        misc.log(serialized.data, 'serialized.data records')
         
         return Response({
             'page': pgntn['page'],
@@ -54,7 +57,7 @@ def task_list(request, type, format=None):
             'results': serialized.data
         })
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(f'ValidationError: {e}', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
@@ -76,7 +79,7 @@ def task_crud(request, pk, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(f'ValidationErrors: {e}', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 

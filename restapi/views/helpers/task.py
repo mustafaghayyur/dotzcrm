@@ -4,7 +4,7 @@ from rest_framework import status
 
 from tasks.validators.tasks import *
 from tasks.drm.crud import CRUD, Comments, Watchers
-from core.helpers import pagination, crud
+from core.helpers import pagination, crud, misc
 
 """
     These Static Classes are meant to help views with CRUD operations
@@ -34,6 +34,7 @@ class OneToOnes():
             Edit single task record (with all it's related child-tables).
         """
         serializer = TaskO2ORecord(data=request.data)
+
         if serializer.is_valid():
             result = CRUD().update(serializer.validated_data)
             return Response({
@@ -41,8 +42,9 @@ class OneToOnes():
                 'page_size': 1,
                 'has_more': False,
                 'results': result,
-            }, status=status.HTTP_201_CREATED)
+            }, status=status.HTTP_204_NO_CONTENT)
         else:
+            misc.log(serializer.errors, 'serializer.errors')
             raise ValidationError('Could not validate submitted data.')
     
     @staticmethod
@@ -87,7 +89,7 @@ class CommentMethods():
                 'page_size': 1,
                 'has_more': False,
                 'results': result,
-            }, status=status.HTTP_201_CREATED)
+            }, status=status.HTTP_201_CREATED) # @todo: make 200/201(?) response WITH the created comment returned
         else:
             raise ValidationError('Could not validate submitted data.')
     
@@ -104,7 +106,7 @@ class CommentMethods():
                 'page_size': 1,
                 'has_more': False,
                 'results': result,
-            })
+            }, status=status.HTTP_204_NO_CONTENT) # @todo: make 200 response with the updated comment
         else:
             raise ValidationError('Could not validate submitted data.')
     
