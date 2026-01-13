@@ -19,6 +19,24 @@ class OneToOnes():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = CRUD().create(serializer.validated_data)
+            # attempt to serialize the newly created consolidated record
+            if result:
+                try:
+                    rec = result[0] if isinstance(result, (list, tuple)) else result
+                    serialized = TaskO2ORecord(rec)
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': serialized.data,
+                    }, status=status.HTTP_201_CREATED)
+                except Exception:
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': result,
+                    }, status=status.HTTP_201_CREATED)
             return Response({
                 'page': 1,
                 'page_size': 1,
@@ -26,7 +44,7 @@ class OneToOnes():
                 'results': result,
             }, status=status.HTTP_201_CREATED)
         else:
-            raise ValidationError('Could not validate submitted data.')
+            return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     @staticmethod
     def edit(request, format=None):
@@ -37,15 +55,33 @@ class OneToOnes():
 
         if serializer.is_valid():
             result = CRUD().update(serializer.validated_data)
+            # attempt to serialize the updated consolidated record
+            if result:
+                try:
+                    rec = result[0] if isinstance(result, (list, tuple)) else result
+                    serialized = TaskO2ORecord(rec)
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': serialized.data,
+                    }, status=status.HTTP_200_OK)
+                except Exception:
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': result,
+                    }, status=status.HTTP_200_OK)
             return Response({
                 'page': 1,
                 'page_size': 1,
                 'has_more': False,
                 'results': result,
-            }, status=status.HTTP_204_NO_CONTENT)
+            }, status=status.HTTP_200_OK)
         else:
             misc.log(serializer.errors, 'serializer.errors')
-            raise ValidationError('Could not validate submitted data.')
+            return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     @staticmethod
     def delete(request, pk, format=None):
@@ -84,6 +120,24 @@ class CommentMethods():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = Comments().create(serializer.validated_data)
+            # attempt to return the created comment record consolidated through serializer
+            if result:
+                try:
+                    rec = result[0] if isinstance(result, (list, tuple)) else result
+                    serialized = TaskO2ORecord(rec)
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': serialized.data,
+                    }, status=status.HTTP_201_CREATED)
+                except Exception:
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': result,
+                    }, status=status.HTTP_201_CREATED)
             return Response({
                 'page': 1,
                 'page_size': 1,
@@ -91,7 +145,7 @@ class CommentMethods():
                 'results': result,
             }, status=status.HTTP_201_CREATED) # @todo: make 200/201(?) response WITH the created comment returned
         else:
-            raise ValidationError('Could not validate submitted data.')
+            return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     @staticmethod
     def edit(request, format=None):
@@ -101,14 +155,32 @@ class CommentMethods():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = Comments().update(serializer.validated_data)
+            # attempt to return the updated comment consolidated through serializer
+            if result:
+                try:
+                    rec = result[0] if isinstance(result, (list, tuple)) else result
+                    serialized = TaskO2ORecord(rec)
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': serialized.data,
+                    }, status=status.HTTP_200_OK)
+                except Exception:
+                    return Response({
+                        'page': 1,
+                        'page_size': 1,
+                        'has_more': False,
+                        'results': result,
+                    }, status=status.HTTP_200_OK)
             return Response({
                 'page': 1,
                 'page_size': 1,
                 'has_more': False,
                 'results': result,
-            }, status=status.HTTP_204_NO_CONTENT) # @todo: make 200 response with the updated comment
+            }, status=status.HTTP_200_OK) # @todo: make 200 response with the updated comment
         else:
-            raise ValidationError('Could not validate submitted data.')
+            return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     @staticmethod
     def delete(request, pk, format=None):
@@ -148,6 +220,24 @@ class WatchersMethods():
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
             result = Watchers().create(serializer.validated_data)
+            # attempt to return created watcher consolidated through serializer
+            if result:
+                try:
+                    rec = result[0] if isinstance(result, (list, tuple)) else result
+                    serialized = TaskO2ORecord(rec)
+                    return Response({
+                            'page': 1,
+                            'page_size': 1,
+                            'has_more': False,
+                            'results': serialized.data,
+                        }, status=status.HTTP_201_CREATED)
+                except Exception:
+                    return Response({
+                            'page': 1,
+                            'page_size': 1,
+                            'has_more': False,
+                            'results': result,
+                        }, status=status.HTTP_201_CREATED)
             return Response({
                     'page': 1,
                     'page_size': 1,
@@ -155,7 +245,7 @@ class WatchersMethods():
                     'results': result,
                 }, status=status.HTTP_201_CREATED)
         else:
-            raise ValidationError('Could not validate submitted data.')
+            return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     @staticmethod
     def edit(request, format=None):

@@ -26,12 +26,23 @@ class CRUD(Background.CrudOperations):
         if not masterRecord:
             raise Exception('Master Record could not be found. RLC cannot be created in {self.space}.CRUD.create()')
 
+created_raw = None
         for pk in self.rlcIdCols:
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
             model = globals()[t['model']]  # retrieve Model class with global scope
-    
-            self.createChildTable(model, tbl, t['table'], t['cols'], True)
+
+            created = self.createChildTable(model, tbl, t['table'], t['cols'], True)
+            if created:
+                # attempt to return the created CT record in the module's 'read' shape
+                try:
+                    created_raw = self.read({pk: created.id})
+                    if created_raw:
+                        return created_raw
+                except Exception:
+                    # fallthrough if read isn't available or fails
+                    return created
+        return None
 
     def read(self):
         pass  # defined in individual Module's class extensions.
@@ -53,6 +64,7 @@ class CRUD(Background.CrudOperations):
         if not masterRecord:
             raise Exception(f'No valid record found for provided {self.space} ID for RLC update, in: {self.space}.CRUD.update().')
 
+        updated_raw = None
         for pk in self.rlcIdCols:
             
             originalRLC = self.read({pk: self.submission[pk], mtId: self.submission[mtId]})
@@ -67,6 +79,15 @@ class CRUD(Background.CrudOperations):
                 
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], originalRLC, True)
+
+            # attempt to return the updated record
+            try:
+                updated_raw = self.read({pk: self.submission[pk], mtId: self.submission[mtId]})
+                if updated_raw:
+                    return updated_raw
+            except Exception:
+                return None
+        return None
 
     def deleteById(self, rlcId):
         """

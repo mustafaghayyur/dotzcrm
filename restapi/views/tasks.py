@@ -57,7 +57,8 @@ def task_list(request, type, format=None):
             'results': serialized.data
         })
     except ValidationError as e:
-        return Response(f'ValidationError: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response({'errors': details}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
@@ -79,7 +80,8 @@ def task_crud(request, pk, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response(f'ValidationErrors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response({'errors': details}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 
@@ -131,7 +133,8 @@ def comments_list(request, format=None):
             'results': serialized.data
         })
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response({'errors': details}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
 

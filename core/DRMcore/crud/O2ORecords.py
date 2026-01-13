@@ -41,6 +41,12 @@ class CRUD(Background.CrudOperations):
 
             self.createChildTable(model, tbl, t['table'], t['cols'])
 
+        # return the consolidated, full record for the created master
+        try:
+            return self.fetchFullRecordForUpdate(masterRecord.id)
+        except Exception:
+            return None
+
     def read(self):
         pass  # defined in individual Module's class extensions.
 
@@ -84,6 +90,12 @@ class CRUD(Background.CrudOperations):
 
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
+
+        # return the consolidated, full record for the updated master
+        try:
+            return self.fetchFullRecordForUpdate(self.submission[mId])
+        except Exception:
+            return None
 
     def delete(self, masterId):
         """

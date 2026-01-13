@@ -42,7 +42,13 @@ class CRUD(Background.CrudOperations):
         if skip:
             return None
 
-        self.createChildTable(model, tbl, t['table'], t['cols'])
+        created = self.createChildTable(model, tbl, t['table'], t['cols'])
+        if created:
+            try:
+                return self.read({self.pk: created.id})
+            except Exception:
+                return created
+        return None
 
     def read(self, definitions):
         """
