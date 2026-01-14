@@ -5,9 +5,9 @@ from .views import tasks
 
 urlpatterns = [
     path('tasks/<str:type>', tasks.task_list),
-    path('tasks/crud/<int:pk>/', tasks.task_crud),
-    path('tasks/watch/<int:pk>/', tasks.watcher_crud),
-    path('tasks/comment/<int:pk>/', tasks.comment_crud),
+    path('tasks/crud/<int:id>/', tasks.task_crud),
+    path('tasks/watch/<int:id>/', tasks.watcher_crud),
+    path('tasks/comment/<int:id>/', tasks.comment_crud),
     path('tasks/comments/', tasks.comments_list),
     path('tasks/watchers/', tasks.watchers_list),
 ]

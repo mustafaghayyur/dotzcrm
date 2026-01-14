@@ -1,3 +1,5 @@
+from .strings import isPrimitiveType
+
 def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file = "/Users/mustafa/Sites/python/server1/DEBUGGER.log", crud = False):
     """
         Simple logger. Use by importing core.helpers.misc

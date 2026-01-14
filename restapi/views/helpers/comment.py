@@ -1,34 +1,30 @@
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 
 from tasks.validators.tasks import *
-from tasks.drm.crud import CRUD
+from tasks.drm.crud import Comments
 from core.helpers import crud, misc
 
 """
     These Static Classes are meant to help views with CRUD operations
 """
-
-class OneToOnes():
+class CommentMethods():
     @staticmethod
     def create(request, format=None):
         """
-            Create single task record (with all it's related child-tables).
+            Create single comment record (with all it's related child-tables).
         """
         serializer = TaskO2ORecord(data=request.data)
         if serializer.is_valid():
-            result = CRUD().create(serializer.validated_data)
-            misc.log(result, 'Peaking into task create result')
+            result = Comments().create(serializer.validated_data)
+            misc.log(result, 'Peaking into comment create result')
             if result:
                 try:
-                    record = CRUD().fetchFullRecordForUpdate(result.id)
+                    record = Comments().read({'cid': result.id})
                     retrievedSerialized = TaskO2ORecord(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
-                    
                 except Exception:
                     return Response(crud.generateError("Could not retrieve created record."), status=status.HTTP_400_BAD_REQUEST)
-            
             return Response(crud.generateError("Could not determine create response."), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(serializer.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)
@@ -36,46 +32,45 @@ class OneToOnes():
     @staticmethod
     def edit(request, format=None):
         """
-            Edit single task record (with all it's related child-tables).
+            Edit single comment record (with all it's related child-tables).
         """
         serializer = TaskO2ORecord(data=request.data)
-
         if serializer.is_valid():
-            result = CRUD().update(serializer.validated_data)
-            # attempt to serialize the updated consolidated record
+            result = Comments().update(serializer.validated_data)
             if result:
                 misc.log(result, 'Peaking into comment update result')
                 try:
-                    record = CRUD().fetchFullRecordForUpdate(result.id)
+                    record = Comments().read({'cid': result.id})
                     retrievedSerialized = TaskO2ORecord(record[0])
-                    return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
+                    return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK) # @todo: correct response?
                 except Exception:
                     return Response(crud.generateError("Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
             return Response(crud.generateError("Could not determine update response."), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
-                
+    
     @staticmethod
     def delete(request, id, format=None):
         """
-            Delete single task record (with all it's related child-tables).
+            Delete single comment record (with all it's related child-tables).
         """
         if crud.isValidId({'id': id}, 'id'):
-            crud = CRUD().delete(id)
+            crud = Comments().delete(id)
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         
-        return Response(crud.generateError('Task id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
+        return Response(crud.generateError('Comment id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
     @staticmethod
     def detail(request, id, format=None):
         """
-            Retrieve single task record (with all it's related child-tables).
+            Retrieve single comment record (with all it's related child-tables).
         """
         if crud.isValidId({'id': id}, 'id'):
-            record = CRUD().fetchFullRecordForUpdate(id)
+            record = Comments().read(['all'], {'tid': id, 'tdelete_time': 'is NULL'})
             if record:
                 serialized = TaskO2ORecord(record[0])
                 return Response(crud.generateResponse(serialized.data))
-            return Response(crud.generateError('No task record found.'), status=status.HTTP_400_BAD_REQUEST)
-        return Response(crud.generateError('Task Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateError('No comment record found.'), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError('Comment Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
+        
         

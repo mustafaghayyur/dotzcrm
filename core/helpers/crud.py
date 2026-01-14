@@ -1,7 +1,6 @@
 from django import forms
 from rest_framework.exceptions import ValidationError
 import re
-from . import misc
 
 from tasks.drm.mapper_values import Latest 
 
@@ -61,7 +60,9 @@ def formulateProperDate(date):
     return matches[1] + '-' + matches[2] + '-' + matches[3] + ' ' + '00:00:00'
 
 def recordsToDictionary(rawQuerySet, selectors):
-     # Convert RawQuerySet / DB row objects into plain dicts keyed by selectors
+    """
+    Convert RawQuerySet / DB row objects into plain dicts keyed by selectors
+    """
     recordsToDict = []
     for rec in (rawQuerySet or []):
         row = {}
@@ -74,8 +75,37 @@ def recordsToDictionary(rawQuerySet, selectors):
             row['id'] = id
 
         recordsToDict.append(row)
-        
+
     return recordsToDict
+
+def generateError(object, additionalMsg = None):
+    """
+        Generates json friendly errors for RestAPI Response().
+    """
+    dictionary = {}
+    dictionary['errors'] = object
+
+    if additionalMsg is not None:
+        dictionary['messages'] = additionalMsg
+    
+    return dictionary
+
+def generateResponse(results, page = 1, pageSize = 1, hasMore = False, additionalMsg = None):
+    """
+        Generates standard response object to send to RestAPI Response()
+    """
+    dictionary = {
+        'page': page,
+        'page_size': pageSize,
+        'has_more': hasMore,
+    }
+
+    dictionary['results'] = results
+
+    if additionalMsg is not None:
+        dictionary['messages'] = additionalMsg
+
+    return dictionary
 
 class DateTimeLocalInput(forms.DateTimeInput):
     # Needed by some CRUD operations.
