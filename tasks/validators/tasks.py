@@ -1,15 +1,10 @@
-from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, DateTimeField
+from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField
 
 from tasks.drm.mapper_values import *
 from core.helpers import validators
 from restapi.validators.generic import *
 
-class DateTimeFieldForJS(DateTimeField):
-    def to_representation(self, value):
-        # Example format: '2025-01-03T01:55:00Z' (simplified format, often preferred)
-        return value.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-class TaskO2ORecord(Serializer):
+class TaskO2ORecordSerializerGeneric(Serializer):
     """
         Serializer for O2O Task records.
     """
@@ -84,21 +79,3 @@ class TaskO2ORecord(Serializer):
             data['id'] = data['tid']
             return super().to_internal_value(data)
     """
-
-class Comment(Serializer):
-    id = IntegerField(**intNullableOpts)
-    task_id = IntegerField(**intMandatoryOpts)
-    comment = CharField(allow_null=False, required=True, min_length=50, max_length=6000)
-    creator_id = IntegerField(**intNullableOpts)
-    parent_id = IntegerField(**intNullableOpts)
-    create_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    update_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-
-class Watcher(Serializer):
-    id = IntegerField(**intNullableOpts)
-    task_id = IntegerField(**intMandatoryOpts)
-    watcher_id = IntegerField(**intMandatoryOpts)
-    latest = ChoiceField(**latestChoiceOpts)
-    create_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    delete_time = DateTimeFieldForJS(**datetimeNullableOpts)

@@ -30,3 +30,8 @@ latestChoiceOpts = {
     'required': False,
     'validators': [validators.isLatestChoicetOrNone]
 }
+
+class DateTimeFieldForJS(DateTimeField):
+    def to_representation(self, value):
+        # Example format: '2025-01-03T01:55:00Z' (simplified format, often preferred)
+        return value.strftime('%Y-%m-%dT%H:%M:%SZ')

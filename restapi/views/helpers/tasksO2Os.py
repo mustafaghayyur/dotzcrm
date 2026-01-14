@@ -1,4 +1,3 @@
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -16,18 +15,18 @@ class OneToOnes():
         """
             Create single task record (with all it's related child-tables).
         """
-        serializer = TaskO2ORecord(data=request.data)
+        serializer = TaskO2ORecordSerializerGeneric(data=request.data)
         if serializer.is_valid():
             result = CRUD().create(serializer.validated_data)
             misc.log(result, 'Peaking into task create result')
             if result:
                 try:
                     record = CRUD().fetchFullRecordForUpdate(result.id)
-                    retrievedSerialized = TaskO2ORecord(record[0])
+                    retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
                     
-                except Exception:
-                    return Response(crud.generateError("Could not retrieve created record."), status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return Response(crud.generateError(e, "Could not retrieve created record."), status=status.HTTP_400_BAD_REQUEST)
             
             return Response(crud.generateError("Could not determine create response."), status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -38,7 +37,7 @@ class OneToOnes():
         """
             Edit single task record (with all it's related child-tables).
         """
-        serializer = TaskO2ORecord(data=request.data)
+        serializer = TaskO2ORecordSerializerGeneric(data=request.data)
 
         if serializer.is_valid():
             result = CRUD().update(serializer.validated_data)
@@ -47,10 +46,10 @@ class OneToOnes():
                 misc.log(result, 'Peaking into comment update result')
                 try:
                     record = CRUD().fetchFullRecordForUpdate(result.id)
-                    retrievedSerialized = TaskO2ORecord(record[0])
+                    retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
-                except Exception:
-                    return Response(crud.generateError("Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return Response(crud.generateError(e, "Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
             return Response(crud.generateError("Could not determine update response."), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
@@ -74,7 +73,7 @@ class OneToOnes():
         if crud.isValidId({'id': id}, 'id'):
             record = CRUD().fetchFullRecordForUpdate(id)
             if record:
-                serialized = TaskO2ORecord(record[0])
+                serialized = TaskO2ORecordSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
             return Response(crud.generateError('No task record found.'), status=status.HTTP_400_BAD_REQUEST)
         return Response(crud.generateError('Task Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)

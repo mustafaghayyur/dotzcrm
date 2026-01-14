@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from tasks.validators.tasks import *
+from tasks.validators.comments import CommentSerializerGeneric
 from tasks.drm.crud import Comments
 from core.helpers import crud, misc
 
@@ -14,17 +14,17 @@ class CommentMethods():
         """
             Create single comment record (with all it's related child-tables).
         """
-        serializer = TaskO2ORecord(data=request.data)
+        serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             result = Comments().create(serializer.validated_data)
             misc.log(result, 'Peaking into comment create result')
             if result:
                 try:
                     record = Comments().read({'cid': result.id})
-                    retrievedSerialized = TaskO2ORecord(record[0])
+                    retrievedSerialized = CommentSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
-                except Exception:
-                    return Response(crud.generateError("Could not retrieve created record."), status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return Response(crud.generateError(e, "Could not retrieve created record."), status=status.HTTP_400_BAD_REQUEST)
             return Response(crud.generateError("Could not determine create response."), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(serializer.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)
@@ -34,17 +34,17 @@ class CommentMethods():
         """
             Edit single comment record (with all it's related child-tables).
         """
-        serializer = TaskO2ORecord(data=request.data)
+        serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             result = Comments().update(serializer.validated_data)
             if result:
                 misc.log(result, 'Peaking into comment update result')
                 try:
                     record = Comments().read({'cid': result.id})
-                    retrievedSerialized = TaskO2ORecord(record[0])
+                    retrievedSerialized = CommentSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK) # @todo: correct response?
-                except Exception:
-                    return Response(crud.generateError("Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return Response(crud.generateError(e, "Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
             return Response(crud.generateError("Could not determine update response."), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
@@ -68,7 +68,7 @@ class CommentMethods():
         if crud.isValidId({'id': id}, 'id'):
             record = Comments().read(['all'], {'tid': id, 'tdelete_time': 'is NULL'})
             if record:
-                serialized = TaskO2ORecord(record[0])
+                serialized = CommentSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
             return Response(crud.generateError('No comment record found.'), status=status.HTTP_400_BAD_REQUEST)
         return Response(crud.generateError('Comment Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)

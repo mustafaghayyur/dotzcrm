@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from tasks.validators.tasks import *
+from tasks.validators.watchers import WatcherSerializerGeneric
 from tasks.drm.crud import Watchers
 from core.helpers import crud, misc
 
@@ -15,7 +15,7 @@ class WatchersMethods():
             Create watcher record.
             @current_user focussed
         """
-        serializer = TaskO2ORecord(data=request.data)
+        serializer = WatcherSerializerGeneric(data=request.data)
         if serializer.is_valid():
             result = Watchers().create(serializer.validated_data)
             if result:
@@ -54,7 +54,7 @@ class WatchersMethods():
         if crud.isValidId({'id': id}, 'id'):
             record = Watchers().read(['wid'], {'task_id': id, 'watcher_id': request.user.id, 'wdelete_time': 'is NULL', 'wlatest': 1})
             if record:
-                serialized = TaskO2ORecord(record[0])
+                serialized = WatcherSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
             return Response(crud.generateError('No watcher record found.'), status=status.HTTP_400_BAD_REQUEST)
         return Response(crud.generateError('Watcher Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
