@@ -1,0 +1,8 @@
+Many-to-Many CRUD Operations that can be used through out the system.
+    
+In a M2M relationship, there are two key columns to watch out for: 
+    - FirstId: refers to the first FK of another table we are tracking
+    - SecondId: refers to the second FK of yet, another table we wish
+    the firstId to be associated with.
+
+Note: first and second can carry significance for each specific 'Model' that inherits this class. Should be appropriately assigned in mapper.

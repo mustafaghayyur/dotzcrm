@@ -80,14 +80,12 @@ class Comments(RevisionlessChildren.CRUD):
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
-        for pk in self.rlcIdCols:
-            model = globals()[self.mapper.models(pk)]
-            if pk in definitions:
-                # specific record being sought:
-                rawObjs = model.objects.fetchById(definitions[pk])
+        model = globals()[self.mapper.models(self.pk)]
+        if self.pk in definitions:
+            rawObjs = model.objects.fetchById(definitions[self.pk])  # specific record being sought
 
-            else:
-                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.mapper.master('foreignKeyName')])
+        else:
+            rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.mapper.master('foreignKeyName')])
         
         if rawObjs:
             return rawObjs

@@ -1,17 +1,6 @@
 from . import background
 from core.helpers import strings, misc
 
-##########################################################################
-# The QuerySet family of definitions will be essential to maintaining
-# strict data-integrity and database-interactions standards.
-#
-# Where Django ORM's standard functions are not used to operate
-# on the MySQL DB, these QuerySet methods should be used to
-# interact with the MySQL DB.
-#
-# DO NOT use raw queries anywhere outside of QuerySets in this project.
-##########################################################################
-
 class MTQuerySet(background.QuerySetManager):
     """
         Master Table QuerySet.

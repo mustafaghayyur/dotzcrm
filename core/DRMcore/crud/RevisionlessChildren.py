@@ -47,6 +47,7 @@ class CRUD(Background.CrudOperations):
         self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
 
         mtId = self.mapper.master('abbreviation') + 'id'
+        mtForeignKey = self.mapper.master('foreignKeyName')
 
         # masterRecords gets the parent record id, to which this RLC belongs
         masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
@@ -56,7 +57,7 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'No valid record found for provided {self.space} ID for RLC update, in: {self.space}.CRUD.update().')
 
         
-        originalRLC = self.read({'pk': self.submission[self.pk], mtId: self.submission[mtId]})
+        originalRLC = self.read({self.pk: self.submission[self.pk], mtForeignKey: self.submission[mtForeignKey]})
         self.log(originalRLC, 'JUST CONFIRMING if originalRLC record is being fetched correctly in updateRLC()')
 
         if not originalRLC:
@@ -74,7 +75,7 @@ class CRUD(Background.CrudOperations):
             Validates a given dictionary of key: value pairs. If valid, 
             attempts to save deletion update to DB. Else, throws an exception.
         """
-        if not isinstance(rlcId, int) or rlcId < 1:
+        if not crud.isValidId({'id': rlcId}, 'id'):
             raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
@@ -88,7 +89,7 @@ class CRUD(Background.CrudOperations):
             Validates a given dictionary of key: value pairs. If valid, 
             attempts to save deletion update to DB. Else, throws an exception.
         """
-        if not isinstance(masterId, int) or masterId < 1:
+        if not crud.isValidId({'id': masterId}, 'id'):
             raise Exception(f'RLC Records could not be deleted. Invalid Master-ID supplied in {self.space}.CRUD.delete()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)

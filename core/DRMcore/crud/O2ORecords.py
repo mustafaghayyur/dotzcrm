@@ -8,7 +8,7 @@ from core.helpers import crud
 """
 class CRUD(Background.CrudOperations):
 
-    mtModel = None  # set inheritor class
+    mtModel = None  # set in inheritor class
 
     def __init__(self):
         super().__init__()
@@ -19,9 +19,6 @@ class CRUD(Background.CrudOperations):
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        
-        # self.log(self.submission, 'FORM-------------------------------------')
-        # self.log(completeRecord, 'DB-------------------------------------', 2)
         
         masterRecord = self.createMasterTable(self.mapper.master('abbreviation'), self.mtModel)
 
@@ -89,20 +86,21 @@ class CRUD(Background.CrudOperations):
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
 
-        return { mId: self.submission[mId] }
+        return { mId: self.submission[mId] } # since .update() operation only returns # of rows affected, not the updated record.
 
     def delete(self, masterId):
         """
             Validates a given record ID. If valid, attempts to  mark record
             as deleted in DB. Else, throws an exception.
         """
-        if not isinstance(masterId, int) or masterId < 1:
+        mtId = self.mapper.master('abbreviation') + 'id'
+        if not crud.isValidId({mtId: masterId}, masterId):
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
 
-            if pk == self.mapper.master('abbreviation') + 'id':
+            if pk == mtId:
                 continue  # skip, we delete master table at the end.
 
             t = crud.generateModelInfo(self.mapper, tbl)
