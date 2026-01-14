@@ -27,8 +27,7 @@ class CRUD(Background.CrudOperations):
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
 
-        tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(self.mapper, tbl)
+        t = crud.generateModelInfo(self.mapper, self.tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
         
         skip = False
@@ -42,14 +41,8 @@ class CRUD(Background.CrudOperations):
         if skip:
             return None
 
-        created = self.createChildTable(model, tbl, t['table'], t['cols'])
-        if created:
-            try:
-                return self.read({self.pk: created.id})
-            except Exception:
-                return created
-        return None
-
+        return self.createChildTable(model, self.tbl, t['table'], t['cols'])
+        
     def read(self, definitions):
         """
             See documentation on definitions formulation.
@@ -60,8 +53,7 @@ class CRUD(Background.CrudOperations):
         if 'latest' not in definitions:
             definitions['latest'] = True
 
-        tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(self.mapper, tbl)
+        t = crud.generateModelInfo(self.mapper, self.tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
         if self.pk in definitions:
@@ -97,8 +89,7 @@ class CRUD(Background.CrudOperations):
         if not crud.isValidId(self.submission, self.pk):
             raise Exception(f'No valid M2M ID provided, in: {self.space}.CRUD.update().')
         
-        tbl = self.pk[0]  # child table abbreviation
-        t = crud.generateModelInfo(self.mapper, tbl)
+        t = crud.generateModelInfo(self.mapper, self.tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
         originalM2M = self.read({self.pk: self.submission[self.pk]})
@@ -108,7 +99,7 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'No valid M2M record found for provided ID, in: {self.space}.CRUD.update().')
             
         # determine if an update is necessary and carry out update operations...
-        self.updateChildTable(model, tbl, t['table'], t['cols'], originalM2M)
+        return self.updateChildTable(model, self.tbl, t['table'], t['cols'], originalM2M)
 
     def deleteById(self, m2mId):
         """
@@ -118,11 +109,10 @@ class CRUD(Background.CrudOperations):
         if not isinstance(m2mId, int) or m2mId < 1:
             raise Exception(f'M2M Record could not be deleted. Invalid id supplied in {self.space}.CRUD.deleteM2M()')
 
-        tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(self.mapper, tbl)
+        t = crud.generateModelInfo(self.mapper, self.tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
-        self.__deleteChildTableById(model, tbl, t['table'], t['cols'], m2mId)
+        return self.deleteChildTableById(model, self.tbl, t['table'], t['cols'], m2mId)
 
     def deleteAllForFirstCol(self, firstColId):
         """
@@ -132,18 +122,17 @@ class CRUD(Background.CrudOperations):
         if not isinstance(firstColId, int) or firstColId < 1:
             raise Exception(f'M2M Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2M()')
 
-        tbl = self.pk[0]  # table abbreviation
-        t = crud.generateModelInfo(self.mapper, tbl)
+        t = crud.generateModelInfo(self.mapper, self.tbl)
         model = globals()[t['model']]  # retrieve Model class with global scope
 
-        self.__deleteAllM2M(model, tbl, t['table'], t['cols'], firstColId)
+        return self.deleteAllM2M(model, self.tbl, t['table'], t['cols'], firstColId)
 
-    def __deleteAllM2M(self, modelClass, tbl, tableName, columnsList, firstColId):
+    def deleteAllM2M(self, modelClass, tbl, tableName, columnsList, firstColId):
         """
             Helper function for deleteAllForFirstCol()
             For M2M type nodes only
         """
-        self.log(None, f'ENTERING deleteAllForFirstCol for CT [{tbl}]')
+        self.log(None, f'ENTERING deleteAllForFirstCol for CT [{self.tbl}]')
         
         fieldsF = {}  # fields to find records with
         fieldsF[self.firstCol] = firstColId
@@ -152,16 +141,16 @@ class CRUD(Background.CrudOperations):
         fieldsU['delete_time'] = timezone.now()
         fieldsU['latest'] = self.mapper.values.latest('archive')
 
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
+        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
 
-    def __deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
+    def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
         """
             Helper function for deleteById()
             For M2M type nodes only
         """
-        self.log(None, f'ENTERING deleteById for CT [{tbl}]')
+        self.log(None, f'ENTERING deleteById for CT [{self.tbl}]')
         
         fieldsF = {}  # fields to find records with
         fieldsF['id'] = childId
@@ -170,5 +159,5 @@ class CRUD(Background.CrudOperations):
         fieldsU['delete_time'] = timezone.now()
         fieldsU['latest'] = self.mapper.values.latest('archive')
 
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}]')
+        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)

@@ -66,6 +66,8 @@ class Comments(RevisionlessChildren.CRUD):
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
+        self.tbl = 'c'
+        self.pk = 'cid'
 
         self.mapper = TasksMapper()
         super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
@@ -101,7 +103,8 @@ class Watchers(M2MChildren.CRUD):
     def __init__(self):
         self.pk = 'wid'  # set table_abbrv for use in queries.
         self.space = 'tasks'  # holds the name of current module/space
-
+        self.tbl = 'w'
+        
         self.mapper = TasksMapper()
 
         cols = self.mapper.m2mFields(self.pk[0])

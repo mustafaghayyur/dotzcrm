@@ -18,9 +18,11 @@ class ErrorHandling:
             raise Exception(f'Provided dictionary length zero in: {space}.CRUD.{operation}().')
 
     def mtIdValidation(self, operation, dictionary):
+        # @todo @important: circle back and see if this logic is 100% occurate
         masterId = self.mapper.master('foreignKeyName')
         mId = self.mapper.master('abbreviation') + 'id'
         flag = False
+        proper = None
 
         if  mId not in dictionary:
             dictionary[mId] = ''

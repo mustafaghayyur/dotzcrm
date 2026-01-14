@@ -41,11 +41,8 @@ class CRUD(Background.CrudOperations):
 
             self.createChildTable(model, tbl, t['table'], t['cols'])
 
-        # return the consolidated, full record for the created master
-        try:
-            return self.fetchFullRecordForUpdate(masterRecord.id)
-        except Exception:
-            return None
+        # return masterRecord.id
+        return masterRecord
 
     def read(self):
         pass  # defined in individual Module's class extensions.
@@ -76,8 +73,9 @@ class CRUD(Background.CrudOperations):
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk == mId:
-                self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
-                continue
+                if crud.isValidId(self.submission, pk):
+                    self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
+                    continue
 
             if pk not in self.submission:
                 self.createChildTable(model, tbl, t['table'], t['cols'])
@@ -91,11 +89,7 @@ class CRUD(Background.CrudOperations):
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
 
-        # return the consolidated, full record for the updated master
-        try:
-            return self.fetchFullRecordForUpdate(self.submission[mId])
-        except Exception:
-            return None
+        return { mId: self.submission[mId] }
 
     def delete(self, masterId):
         """
@@ -120,7 +114,7 @@ class CRUD(Background.CrudOperations):
         # once all children records have been updated with delete markers
         t = crud.generateModelInfo(self.mapper, self.mapper.master('abbreviation'))
         model = globals()[t['model']]
-        self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
+        return self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
 
 
     def pruneLatestRecords(self, fetchedRecords, mId):
@@ -128,6 +122,7 @@ class CRUD(Background.CrudOperations):
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
             for each CT.
+            @todo: implement the whole operation!
         """
         pass
 
