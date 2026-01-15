@@ -22,6 +22,7 @@ ALLOWED_HOSTS = ["pylocal1.priv.co", "pylocal1.priv.co:8080"]
 # Application definition
 
 INSTALLED_APPS = [
+    'users.apps.UsersConfig',
     'restapi.apps.RestapiConfig',
     'core.apps.CoreConfig',
     'customers.apps.CustomersConfig',
@@ -85,7 +86,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'users.User'
 
 
 # Password validation

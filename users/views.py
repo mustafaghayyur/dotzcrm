@@ -1,9 +1,20 @@
+from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm
 
 # Only Auth section Views defined here.
 
+@login_not_required
+def register(request):
+    """
+        @todo: add proper welcome message for new users.
+    """
+    context = {
+        'heading': 'Onboarding',
+        'content': 'Please see our technical staff for gaining access to the system.',
+    }
+    return render(request, 'core/generic.html', context)
 
 class LoginView(auth_views.LoginView):
     template_name = 'auth/login.html'
@@ -41,3 +52,4 @@ class ResetView(auth_views.PasswordResetCompleteView):
     template_name = 'auth/password_reset_done.html'
 
         
+

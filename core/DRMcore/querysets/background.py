@@ -2,7 +2,7 @@ import re
 from django.db import models
 
 from core.helpers import strings, crud, misc
-from core import settings  # tasks, rdbms
+from core import dotzSettings  # tasks, rdbms
 
 ##########################################################################
 # These Classes offer background operations to enhance QuerySet Classes.

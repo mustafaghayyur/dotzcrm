@@ -3,7 +3,7 @@ from django.conf import settings as sysconf
 
 # import our QuerySets:
 from .drm.querysets import *
-from core.models import User
+#from core.models import User
 
 
 # The main task table
@@ -104,7 +104,7 @@ class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='parent_comment')
-    # creator_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    creator_user = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -114,7 +114,7 @@ class Comment(models.Model):
 
 class EditLog(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE, db_default=1)
+    user = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE, db_default=1)
     changed_cols = models.CharField(max_length=6000)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
