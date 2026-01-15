@@ -32,20 +32,33 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             let response = await fetch(reqObj);
             
             if (!response.ok) {
-                throw new Error(response.status + ' ' + response.statusText);
+                const errorResponse = await response.json();
+                let msgHtml = '';
+                let errorHtml = '';
+                if (Object.hasOwn(errorResponse, 'errors') === true) {
+                    errorHtml = '<div class="small">' + escapeHtml(JSON.stringify(errorResponse.errors)) + '</div>';
+                    if (Object.hasOwn(errorResponse, 'messages') === true) {
+                        msgHtml = '<div>' + escapeHtml(JSON.stringify(errorResponse.messages)) + '</div>';
+                    }
+                }
+                const errHeading = '<div class="lead">Error loading: ' + escapeHtml(response.status + ' ' + response.statusText) + '</div>';
+                throw new Error(errHeading + msgHtml + errorHtml);
             }
 
             let contentType = response.headers.get('content-type') || '';
             
             if (contentType.includes('application/json')) {
                 let data = await response.json();
-                renderResponse(data.results);
+                if (Object.hasOwn(data, 'results') === true) {
+                    renderResponse(data.results);
+                    return true;
+                }
             } else {
                 let text = await response.text();
                 container.innerHTML = '<pre>' + escapeHtml(text) + '</pre>';
             }
         } catch (err) {
-            container.innerHTML = '<div class="alert alert-danger">Error loading: ' + escapeHtml(err.message) + '</div>';
+            container.innerHTML = '<div class="alert alert-danger">' + err.message + '</div>';
         } finally {
             if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {
                 spinner.classList.add('d-none');

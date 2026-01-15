@@ -70,7 +70,7 @@ class Comments(RevisionlessChildren.CRUD):
         self.pk = 'cid'
 
         self.mapper = TasksMapper()
-        super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
+        super().__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
     def read(self, definitions):
         """
@@ -80,7 +80,7 @@ class Comments(RevisionlessChildren.CRUD):
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
-        model = globals()[self.mapper.models(self.pk)]
+        model = globals()[self.mapper.models(self.tbl)]
         if self.pk in definitions:
             rawObjs = model.objects.fetchById(definitions[self.pk])  # specific record being sought
 
@@ -108,5 +108,5 @@ class Watchers(M2MChildren.CRUD):
         cols = self.mapper.m2mFields(self.pk[0])
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
-        super.__init__()
+        super().__init__()
         
