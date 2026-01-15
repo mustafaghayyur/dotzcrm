@@ -1,6 +1,6 @@
 from django.utils import timezone
 from . import Validation
-from core import settings
+from core import dotzSettings
 from .staticHelpers import ValuesHandler
 from core.helpers import misc, crud
 
@@ -17,7 +17,7 @@ class CrudOperations(Validation.ErrorHandling):
 
     def __init__(self):
         # loads configs related to the module (defined in self.space)
-        self.module = getattr(settings, self.space)
+        self.module = getattr(dotzSettings, self.space)
 
         # holds all O2O primary keys for given space/module
         self.idCols = self.mapper.generateRelationTypeIds('o2o')

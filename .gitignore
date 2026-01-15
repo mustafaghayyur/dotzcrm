@@ -13,3 +13,4 @@ backups/
 # @todo remove static/css from ignore list before launch
 /static/css/*
 /static/dist/
+requirements.txt
