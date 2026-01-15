@@ -8,7 +8,7 @@ from core.helpers import crud
 """
 class CRUD(Background.CrudOperations):
 
-    mtModel = None  # set inheritor class
+    mtModel = None  # set in inheritor class
 
     def __init__(self):
         super().__init__()
@@ -19,9 +19,6 @@ class CRUD(Background.CrudOperations):
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        
-        # self.log(self.submission, 'FORM-------------------------------------')
-        # self.log(completeRecord, 'DB-------------------------------------', 2)
         
         masterRecord = self.createMasterTable(self.mapper.master('abbreviation'), self.mtModel)
 
@@ -40,6 +37,9 @@ class CRUD(Background.CrudOperations):
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             self.createChildTable(model, tbl, t['table'], t['cols'])
+
+        # return masterRecord.id
+        return masterRecord
 
     def read(self):
         pass  # defined in individual Module's class extensions.
@@ -70,8 +70,9 @@ class CRUD(Background.CrudOperations):
             model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk == mId:
-                self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
-                continue
+                if crud.isValidId(self.submission, pk):
+                    self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
+                    continue
 
             if pk not in self.submission:
                 self.createChildTable(model, tbl, t['table'], t['cols'])
@@ -85,18 +86,21 @@ class CRUD(Background.CrudOperations):
             # determine if an update is necessary and carry out update operations...
             self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
 
+        return { mId: self.submission[mId] } # since .update() operation only returns # of rows affected, not the updated record.
+
     def delete(self, masterId):
         """
             Validates a given record ID. If valid, attempts to  mark record
             as deleted in DB. Else, throws an exception.
         """
-        if not isinstance(masterId, int) or masterId < 1:
+        mtId = self.mapper.master('abbreviation') + 'id'
+        if not crud.isValidId({mtId: masterId}, masterId):
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         for pk in self.idCols:
             tbl = pk[0]  # table abbreviation
 
-            if pk == self.mapper.master('abbreviation') + 'id':
+            if pk == mtId:
                 continue  # skip, we delete master table at the end.
 
             t = crud.generateModelInfo(self.mapper, tbl)
@@ -108,7 +112,7 @@ class CRUD(Background.CrudOperations):
         # once all children records have been updated with delete markers
         t = crud.generateModelInfo(self.mapper, self.mapper.master('abbreviation'))
         model = globals()[t['model']]
-        self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
+        return self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
 
 
     def pruneLatestRecords(self, fetchedRecords, mId):
@@ -116,6 +120,7 @@ class CRUD(Background.CrudOperations):
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
             for each CT.
+            @todo: implement the whole operation!
         """
         pass
 

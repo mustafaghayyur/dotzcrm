@@ -66,9 +66,11 @@ class Comments(RevisionlessChildren.CRUD):
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
+        self.tbl = 'c'
+        self.pk = 'cid'
 
         self.mapper = TasksMapper()
-        super.__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
+        super().__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
 
     def read(self, definitions):
         """
@@ -78,14 +80,12 @@ class Comments(RevisionlessChildren.CRUD):
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
-        for pk in self.rlcIdCols:
-            model = globals()[self.mapper.models(pk)]
-            if pk in definitions:
-                # specific record being sought:
-                rawObjs = model.objects.fetchById(definitions[pk])
+        model = globals()[self.mapper.models(self.tbl)]
+        if self.pk in definitions:
+            rawObjs = model.objects.fetchById(definitions[self.pk])  # specific record being sought
 
-            else:
-                rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.mapper.master('foreignKeyName')])
+        else:
+            rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.mapper.master('foreignKeyName')])
         
         if rawObjs:
             return rawObjs
@@ -101,11 +101,12 @@ class Watchers(M2MChildren.CRUD):
     def __init__(self):
         self.pk = 'wid'  # set table_abbrv for use in queries.
         self.space = 'tasks'  # holds the name of current module/space
-
+        self.tbl = 'w'
+        
         self.mapper = TasksMapper()
 
         cols = self.mapper.m2mFields(self.pk[0])
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
-        super.__init__()
+        super().__init__()
         

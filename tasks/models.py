@@ -3,11 +3,12 @@ from django.conf import settings as sysconf
 
 # import our QuerySets:
 from .drm.querysets import *
+from core.models import User
 
 
 # The main task table
 class Task(models.Model):
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=2000)
     creator = models.ForeignKey(
         sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
         on_delete=models.CASCADE,  # Define what happens when the related user is deleted
@@ -102,8 +103,8 @@ class Watcher(models.Model):
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-    creator = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='parent_comment')
+    # creator_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -113,10 +114,27 @@ class Comment(models.Model):
 
 class EditLog(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    user = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    changed_cols = models.CharField(max_length=1000)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, db_default=1)
+    changed_cols = models.CharField(max_length=6000)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+"""
+-- Forward SQL: Add column user_id in tasks_editlog
+ALTER TABLE `tasks_editlog` 
+ADD COLUMN `user_id` int NOT NULL, 
+ADD CONSTRAINT `tasks_comment_creator_user_id_eef3bae9_fk_auth_user_id` 
+FOREIGN KEY (`user_id`) REFERENCES `auth_user`(`id`);
+
+ALTER TABLE `tasks_editlog` ADD COLUMN `user_id` int DEFAULT 1 NOT NULL , 
+ADD CONSTRAINT `tasks_editlog_user_id_951881f6_fk_auth_user_id` 
+FOREIGN KEY (`user_id`) REFERENCES `auth_user`(`id`);
+""",
+"""
+-- Reverse SQL: Drop column creator_user_id from tasks_comment
+ALTER TABLE `tasks_editlog` DROP FOREIGN KEY `tasks_comment_creator_user_id_eef3bae9_fk_auth_user_id`;
+ALTER TABLE `tasks_editlog` DROP COLUMN `creator_user_id`;
+"""
 
 # @todo - link tasks with tickets
 # This model allows tickets to be mentioned in tasks

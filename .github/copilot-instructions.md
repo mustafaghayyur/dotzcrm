@@ -12,7 +12,7 @@ Concise, actionable guidance to get an AI coding agent productive in this reposi
 ## Key patterns & concrete examples ⚠️
 - LAWS OF CRUD: implement CUD in DRM classes and, when applicable, update the corresponding `core/DRMcore/querysets` logic. Example: change in tasks CRUD should touch `tasks/drm/crud.py` and any query logic in `core/DRMcore/querysets` or `tasks/drm/querysets`.
 - Query assembly: QuerySetManager and mapper objects build selectors/conditions (see `core/DRMcore/querysets/background.py`); follow the selectors/conditions/limit style used across `restapi` views (e.g., `restapi/views/tasks.py`).
-- REST endpoints use DRF `@api_view` and return paginated JSON with `results` — follow the shape in `restapi/views/tasks.py` (use `CRUD().read(...)`, serializers like `TaskO2ORecord`).
+- REST endpoints use DRF `@api_view` and return paginated JSON with `results` — follow the shape in `restapi/views/tasks.py` (use `CRUD().read(...)`, serializers like `TaskO2ORecordSerializerGeneric`).
 - Internal helper views: conventionally, view helpers found in `views/helpers/` directory, are not directly exposed to URLs (see docstring in `restapi/views/tasks.py`).
 - Logging: CRUD validation and logging occur via `core/DRMcore/crud/Validation.py` (calls `misc.log(..., crud=True)`); logs are written to `core/settings.py` configured path (`tasks['crud_logger_file']`, defaults to `/Users/mustafa/Sites/python/server1/CRUD.log`) and only when `DEBUG` is True.
 

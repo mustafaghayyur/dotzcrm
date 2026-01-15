@@ -2,11 +2,17 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from tasks.validators.tasks import *
-from tasks.drm.crud import CRUD
-from core.helpers import pagination, misc
-from .helpers.task import *
+
+from core.helpers import pagination, crud, misc
+
+from tasks.drm.crud import *
 from tasks.drm.mapper_values import ValuesMapper
+from tasks.validators.tasks import TaskO2ORecordSerializerGeneric
+from tasks.validators.comments import CommentSerializerGeneric
+from tasks.validators.watchers import WatcherSerializerGeneric
+from .helpers.tasksO2Os import OneToOnes
+from .helpers.taskComments import CommentMethods
+from .helpers.taskWatchers import WatchersMethods
 
 """
     Classes under views/helpers are not directly accessible by django urls.
@@ -45,62 +51,61 @@ def task_list(request, type, format=None):
         pgntn = pagination.assembleParamsForView(request.query_params)
         
         records = CRUD().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
-        serialized = TaskO2ORecord(records, many=True)
-        
-        return Response({
-            'page': pgntn['page'],
-            'page_size': pgntn['page_size'],
-            'has_more': pagination.determineHasMore(records, pgntn['page_size']),
-            'results': serialized.data
-        })
+        serialized = TaskO2ORecordSerializerGeneric(records, many=True)
+        hasMore = pagination.determineHasMore(records, pgntn['page_size'])
+        return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+    
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
-def task_crud(request, pk, format=None):
+def task_crud(request, id, format=None):
     method = request.method
     
     try:
         match method:
             case 'GET':
-                return OneToOnes.detail(request, pk, format)
+                return OneToOnes.detail(request, id, format)
             case 'POST':
                 return OneToOnes.create(request, format)
             case 'PUT':
                 return OneToOnes.edit(request, format)
             case 'DELETE':
-                return OneToOnes.delete(request, pk, format)
+                return OneToOnes.delete(request, id, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
-def comment_crud(request, pk, format=None):
+def comment_crud(request, id, format=None):
     method = request.method
     
     try:
         match method:
             case 'GET':
-                return CommentMethods.detail(request, pk, format)
+                return CommentMethods.detail(request, id, format)
             case 'POST':
                 return CommentMethods.create(request, format)
             case 'PUT':
                 return CommentMethods.edit(request, format)
             case 'DELETE':
-                return CommentMethods.delete(request, pk, format)
+                return CommentMethods.delete(request, id, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def comments_list(request, format=None):
@@ -109,49 +114,48 @@ def comments_list(request, format=None):
     """
     selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
-        'tdelete_time': 'is Null',
-        'assignee_id': 1  # @todo readd: request.user.id,
+        #'delete_time': 'is Null',
+        'task_id': request.query_params.get('task_id', 0),
     }
 
     #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
 
     try:
-        pgntn = pagination.assembleParamsForView(request.query_params)
-        
-        records = Comments().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
-        serialized = TaskO2ORecord(records, many=True)
-        
-        return Response({
-            'page': pgntn['page'],
-            'page_size': pgntn['page_size'],
-            'has_more': pagination.determineHasMore(records, pgntn['page_size']),
-            'results': serialized.data
-        })
+        # pgntn = pagination.assembleParamsForView(request.query_params)
+        # limit=[str(pgntn['offset']), str(pgntn['page_size']
+        records = Comments().read(conditions)
+        misc.log(records, 'hello from comment lists')
+        serialized = CommentSerializerGeneric(records, many=True)
+        hasMore = pagination.determineHasMore(records, pgntn['page_size'])
+        return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+    
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST', 'GET', 'DELETE'])
-def watcher_crud(request, pk, format=None):
+def watcher_crud(request, id, format=None):
     method = request.method
     
     try:
         match method:
             case 'GET':
-                return WatchersMethods.detail(request, pk, format)
+                return WatchersMethods.detail(request, id, format)
             case 'POST':
                 return WatchersMethods.create(request, format)
             case 'DELETE':
-                return WatchersMethods.delete(request, pk, format)
+                return WatchersMethods.delete(request, id, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def watchers_list(request, type, format=None):
@@ -170,16 +174,14 @@ def watchers_list(request, type, format=None):
         pgntn = pagination.assembleParamsForView(request.query_params)
         
         records = Comments().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
-        serialized = TaskO2ORecord(records, many=True)
+        serialized = WatcherSerializerGeneric(records, many=True)
         
-        return Response({
-            'page': pgntn['page'],
-            'page_size': pgntn['page_size'],
-            'has_more': pagination.determineHasMore(records, pgntn['page_size']),
-            'results': serialized.data
-        })
+        hasMore = pagination.determineHasMore(records, pgntn['page_size'])
+        return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+    
     except ValidationError as e:
-        return Response(f'errors: {e}', status=status.HTTP_400_BAD_REQUEST)
+        details = getattr(e, 'detail', str(e))
+        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(f'Error: {e}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 

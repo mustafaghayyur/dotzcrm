@@ -14,10 +14,6 @@ class CTQuerySet(background.QuerySetManager):
     """
         Primarily for One-to-One types
 
-        One-to-One data models have a singular, unique relation to each other.
-        These tables also carry revisions, making the 'latest' demarcation 
-        necessary.
-
         Though this class carries some common functions needed by all 
         child tables of Master Table (M2M, RLC).
     """
