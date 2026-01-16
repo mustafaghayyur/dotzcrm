@@ -1,6 +1,6 @@
 from django.utils import timezone
 from . import Background
-from core.helpers import crud
+from core.helpers import crud, misc
 
 """
     Many-to-Many CRUD Operations that can be used through out the system.
@@ -20,24 +20,17 @@ class CRUD(Background.CrudOperations):
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
-        
-        skip = False
-
+        misc.log(dictionary, 'Peeking into dictionary from M2MCrud')
         if not crud.isValidId(self.submission, self.firstCol):
-            skip = True
-
+            return None
         if not crud.isValidId(self.submission, self.secondCol):
-            skip = True
-
-        if skip:
             return None
         
         # first, we attempt o update any existing records matching first & second M2M cols...
-        self.updateChildTable(model, self.tbl, t['table'], t['cols'])
+        self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'])
 
         # next, we will create a new record for first andsecond columns.
-        return self.createChildTable(model, self.tbl, t['table'], t['cols'])
+        return self.createChildTable(t['model'], self.tbl, t['table'], t['cols'])
         
     def read(self, definitions):
         """
@@ -47,29 +40,29 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
         if 'latest' not in definitions:
-            definitions['latest'] = True
+            definitions['latest'] = self.mapper.values.latest('latest')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
+        rawObjs = None
 
         if self.pk in definitions:
             if crud.isValidId(definitions, self.pk):
                 # specific record being sought:
-                rawObjs = model.objects.fetchById(definitions[self.pk])
+                rawObjs = t['model'].objects.fetchById(definitions[self.pk])
             
         if self.firstCol in definitions and self.secondCol not in definitions:        
             if crud.isValidId(definitions, self.firstCol):
                 if definitions['latest']:
-                    rawObjs = model.objects.fetchAllCurrentByFirstId(definitions[self.firstCol])
+                    rawObjs = t['model'].objects.fetchAllCurrentByFirstId(definitions[self.firstCol])
         
         if self.secondCol in definitions and self.firstCol not in definitions:
             if crud.isValidId(definitions, self.secondCol):
                 if definitions['latest']:
-                    rawObjs = model.objects.fetchAllCurrentBySecondId(definitions[self.secondCol])
+                    rawObjs = t['model'].objects.fetchAllCurrentBySecondId(definitions[self.secondCol])
         
         if self.firstCol in definitions and self.secondCol in definitions:        
             if crud.isValidId(definitions, self.firstCol) and crud.isValidId(definitions, self.secondCol):
-                rawObjs = model.objects.fetchAllRevisions(definitions[self.firstCol], definitions[self.secondCol])
+                rawObjs = t['model'].objects.fetchLatest(definitions[self.firstCol], definitions[self.secondCol], definitions['latest'])
 
         if rawObjs:
             return rawObjs
@@ -88,13 +81,12 @@ class CRUD(Background.CrudOperations):
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
 
-        if not crud.isValidId(self.saveSubmission[self.firstCol]) or not crud.isValidId(self.saveSubmission[self.secondCol]):
+        if not crud.isValidId(self.submission, self.firstCol) or not crud.isValidId(self.submission, self.secondCol):
             raise Exception(f'M2M Record could not be deleted. Invalid IDs supplied in {self.space}.CRUD.deleteM2M()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
 
-        return self.updateChildTable(model, self.tbl, t['table'], t['cols'])
+        return self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'])
 
     def deleteAllForFirstCol(self, firstColId):
         """
@@ -105,9 +97,8 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'M2M Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2M()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
 
-        return self.deleteAllM2M(model, self.tbl, t['table'], t['cols'], firstColId)
+        return self.deleteAllM2M(t['model'], self.tbl, t['table'], t['cols'], firstColId)
 
     def updateChildTable(self, modelClass, tbl, tableName, columnsList):
         """

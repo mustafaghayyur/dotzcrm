@@ -4,9 +4,12 @@ from tasks.drm.mapper_values import *
 from restapi.validators.generic import *
 
 class WatcherSerializerGeneric(Serializer):
+    """
+        Generic serializer, all fields must be nullable
+    """
     id = IntegerField(**intNullableOpts)
-    task_id = IntegerField(**intMandatoryOpts)
-    watcher_id = IntegerField(**intMandatoryOpts)
+    task_id = IntegerField(**intNullableOpts)
+    watcher_id = IntegerField(**intNullableOpts)
     latest = ChoiceField(**latestChoiceOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)

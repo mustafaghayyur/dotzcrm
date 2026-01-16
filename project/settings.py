@@ -68,6 +68,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication', # Or JWT authentication
+        # 'rest_framework.authentication.SessionAuthentication', # Comment or remove this line
+    ],
+    # ...
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

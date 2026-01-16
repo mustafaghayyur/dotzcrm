@@ -41,6 +41,18 @@ class TasksMapper(RelationshipMappers):
             'c': 'Comment',
         }
 
+    def _modelPaths(self):
+        return {
+            't': 'tasks.models',
+            'd': 'tasks.models',
+            'l': 'tasks.models',
+            's': 'tasks.models',
+            'v': 'tasks.models',
+            'a': 'tasks.models',
+            'w': 'tasks.models',
+            'c': 'tasks.models',
+        }
+
     def _master(self):
         return {
             'table': 'tasks_task',

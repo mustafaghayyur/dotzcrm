@@ -56,7 +56,7 @@ class CommentMethods():
         """
         if crud.isValidId({'id': id}, 'id'):
             crud = Comments().delete(id)
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
+            return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
         
         return Response(crud.generateError('Comment id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
@@ -70,7 +70,7 @@ class CommentMethods():
             if record:
                 serialized = CommentSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
-            return Response(crud.generateError('No comment record found.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateResponse([]))
         return Response(crud.generateError('Comment Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
         
         

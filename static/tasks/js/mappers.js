@@ -1,5 +1,7 @@
 import { makeElement, formatValue } from "../../core/js/helper_mapper.js";
 import { escapeHtml } from "../../core/js/helper_forms.js";
+import { convertToDisplayLocal } from '../../core/js/helper_dates.js';
+import { toggleTodoStatus, deleteTodo } from './crud.js';
 import { addListenersToTasks, addOptionsFunctionalityOnTaskDetailsPane } from './listeners.js';
 
 /**
@@ -61,9 +63,9 @@ export function fetchedTaskListMapper(data, containerId) {
             li = originalLiItem.cloneNode(true);
             li.querySelector('.description').dataset.taskId = escapeHtml(item.tid);
             li.querySelector('.description').textContent = item.description || JSON.stringify(item);
-            li.querySelector('status').textContent = escapeHtml(item.status);
-            li.querySelector('tupdate_time').textContent = convertToDisplayLocal(item.tupdate_time);
-            li.querySelector('deadline').textContent = convertToDisplayLocal(item.deadline);
+            li.querySelector('.status').textContent = escapeHtml(item.status);
+            li.querySelector('.tupdate_time').textContent = convertToDisplayLocal(item.tupdate_time);
+            li.querySelector('.deadline').textContent = convertToDisplayLocal(item.deadline);
             ul.appendChild(li);
         });
 
@@ -102,8 +104,8 @@ export function fetchedTodoListMapper(data, containerId) {
                 status.classList.remove('d-none');
             }
             
-            li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item.tid, item.status) });
-            li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tid, item.description) });
+            li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item); });
+            li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tid, item.description); });
 
             ul.appendChild(li);
         });

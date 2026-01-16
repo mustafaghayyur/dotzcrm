@@ -1,9 +1,10 @@
 import { Fetcher, defineRequest } from "../../core/js/async.js";
+import { isVariableEmpty } from "../../core/js/helper_generic.js";
 import { updateUrlParam } from "../../core/js/modal_linking.js";
 import { createWatcher, removeWatcher, DeleteTask, createCommentForTask } from "./crud.js";
 import { prefillEditForm } from './form_handling.js';
 import { Editor } from '../../core/js/editor.js';
-import { taskDetailsMapper, commentsMapper } from './mappers.js';
+import { taskDetailsMapper, commentsMapper, watcherMapper } from './mappers.js';
 
 /**
  * A place to define various listeners that don't belong anywhere else...
@@ -29,6 +30,19 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
     // add (un)watcher button(s)
     let watchbtn = document.getElementById('addWatcher');
     let unwatchbtn = document.getElementById('removeWatcher');
+    
+    const wtchrRequest = defineRequest('/rest/tasks/watch/' + resultSet['tid'] + '/');
+    Fetcher(wtchrRequest, 
+        'taskDetailsModalResponse', {}, (data, id) => {
+            console.log('checking if data is populated in watcher btn', data, id);
+            if (isVariableEmpty(data)) {
+                watchbtn.classList.remove('d-none');
+            } else {
+                unwatchbtn.classList.remove('d-none');
+            }
+        }
+    );
+
     watchbtn.addEventListener('click', (e) => {
         e.preventDefault();
         createWatcher(resultSet['tid'], 'addWatcher', 'removeWatcher');

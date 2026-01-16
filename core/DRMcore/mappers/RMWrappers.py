@@ -1,5 +1,4 @@
 from core.modules.Singleton import Singleton
-from core.helpers import misc
 
 class Wrappers(Singleton):
     """
@@ -47,6 +46,10 @@ class Wrappers(Singleton):
 
     def models(self, key = 'all'):
         info = self._models()
+        return self.returnValue(info, key)
+    
+    def modelPaths(self, key = 'all'):
+        info = self._modelPaths()
         return self.returnValue(info, key)
 
     def ignoreOnUpdates(self, key = 'all'):

@@ -4,9 +4,12 @@ from tasks.drm.mapper_values import *
 from restapi.validators.generic import *
 
 class CommentSerializerGeneric(Serializer):
+    """
+        Generic serializer, all fields must be nullable
+    """
     id = IntegerField(**intNullableOpts)
-    task_id = IntegerField(**intMandatoryOpts)
-    comment = CharField(allow_null=False, required=True, min_length=50, max_length=6000)
+    task_id = IntegerField(**intNullableOpts)
+    comment = CharField(allow_null=True, required=False, min_length=50, max_length=6000)
     creator_id = IntegerField(**intNullableOpts)
     parent_id = IntegerField(**intNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)

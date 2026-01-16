@@ -16,7 +16,7 @@ export function convertToDisplayLocal(mysqlString, displayOptions = null) {
     // Create a new Date object. The browser automatically interprets the 'Z' as UTC
     const dateObj = new Date(mysqlString);
 
-    if(displayOptions !== null && typeof displayOptions === 'object'){
+    if(displayOptions !== null && displayOptions !== 'default'){
         return new Intl.DateTimeFormat(navigator.language, displayOptions).format(dateObj);
     } 
     

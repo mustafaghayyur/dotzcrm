@@ -76,11 +76,10 @@ export function createWatcher(taskId, watchBtnId, unwatchBtnId){
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
+        }
     };
 
-    const request = defineRequest('/rest/tasks/watch/0/', params);
+    const request = defineRequest('/rest/tasks/watch/' + taskId + '/', params);
     Fetcher(request, 
         'taskDetailsModalResponse', {}, 
         () => {
@@ -100,24 +99,20 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
     let watchbtn = document.getElementById(watchBtnId);
     let unwatchbtn = document.getElementById(unwatchBtnId);
 
-    const dictionary = { 
-        task_id: taskId 
-    };
     const params = {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
+        }
     };
 
-    const request = defineRequest('/rest/tasks/watch/0/', params);
+    const request = defineRequest('/rest/tasks/watch/' + taskId + '/', params);
     Fetcher(
         request, 
         'taskDetailsModalResponse', {}, 
         () => {
-            unwatchbtn.classList.add('d-none');
             watchbtn.classList.remove('d-none');
+            unwatchbtn.classList.add('d-none');
         }
     );
 }
@@ -127,12 +122,13 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
  * @param {str} todoId: database ID for task record.
  * @param {str} oldStatus: the status to remove
  */
-export function toggleTodoStatus(todoId, oldStatus) {
+export function toggleTodoStatus(record) {
     const allStatuses = 'queuedcompleted'; // @todo: find a better determining operation ... no pun intended.
-    const newStatus = allStatuses.replace(oldStatus, '');
+    const newStatus = allStatuses.replace(record.status, '');
 
     const dictionary = {
-        tid: todoId,
+        tid: record.tid,
+        sid: record.sid,
         status: newStatus
     };
 
@@ -144,7 +140,7 @@ export function toggleTodoStatus(todoId, oldStatus) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', genericTaskResponseMapper);
+    Fetcher(request, 'personalTabResponses', genericTaskResponseMapper);
 
 }
 

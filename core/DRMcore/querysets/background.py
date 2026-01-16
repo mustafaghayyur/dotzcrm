@@ -1,7 +1,7 @@
 import re
 from django.db import models
 
-from core.helpers import strings, crud, misc
+from core.helpers import strings, crud
 from core import dotzSettings  # tasks, rdbms
 
 ##########################################################################
@@ -82,7 +82,6 @@ class QuerySetManager(models.QuerySet):
         for i in range(len(ordering)):
 
             if not isinstance(ordering[i], dict):
-                misc.log(ordering[i], 'ordering[i] is not a dict, so what is it?')
                 ordering[i] = None
                 continue
 
@@ -104,7 +103,6 @@ class QuerySetManager(models.QuerySet):
         orderByString = ''
 
         if not isinstance(ordering, list):
-            misc.log(ordering, 'passed orderList is not a list type. OrderingBy string is set to empty string')
             return orderByString
 
         for item in ordering:
