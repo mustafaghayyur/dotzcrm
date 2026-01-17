@@ -10,7 +10,7 @@ import { showModal } from "../../core/js/modal_linking.js";
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Checking if updates are happening,,,');
+
     // Tasks' TabbedDashBoard() call has singlecall enabled, 
     // data will not be refreshed, while switching between tabs
     TabbedDashBoard({
@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         personal: () => {
             let request = null;
             request = defineRequest('/rest/tasks/private', { credentials: 'same-origin' });
-            Fetcher(request, 'personalTabResponses', {}, fetchedTodoListMapper);
+            Fetcher(request, 'personalTabResponse', {}, fetchedTodoListMapper);
 
             request = defineRequest('/rest/tasks/workspaces', { credentials: 'same-origin' });
-            Fetcher(request, 'workspacesTabResponses', {}, fetchedTaskListMapper);
+            Fetcher(request, 'workspacesTabResponse', {}, fetchedTaskListMapper);
         },
         // 'Workspaces' tab of tasks dashboard:
         workspaces: () => {},

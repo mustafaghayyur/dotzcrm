@@ -52,7 +52,7 @@ export function taskDetailsMapper(resultSet, containerId) {
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export function fetchedTaskListMapper(data, containerId) {
-    const ulId = containerId.replace(/Responses$/,'List');
+    const ulId = containerId.replace(/Response$/,'List');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';
@@ -83,7 +83,7 @@ export function fetchedTaskListMapper(data, containerId) {
  */
 export function fetchedTodoListMapper(data, containerId) {
     // I want to take the value held in containerId, and replace 'Responses' with List to get the ul id.
-    const ulId = containerId.replace(/Responses$/,'List');
+    const ulId = containerId.replace(/Response$/,'List');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';
@@ -116,9 +116,12 @@ export function fetchedTodoListMapper(data, containerId) {
 }
 
 export function commentsMapper(data, containerId) {
-    console.log('commentsMapper() being called');
-    let container = document.getElementById(containerId);
+    let parentId = containerId.replace(/Response$/,'');
+    let container = document.getElementById(parentId);
+    let commentCreator = container.querySelector('#createComment');
     let comment = container.querySelector('#commmentContainer');
+    container.innerHTML = '';
+    container.appendChild(commentCreator);
 
     if (Array.isArray(data)) {
         let newComment = null;
@@ -126,10 +129,12 @@ export function commentsMapper(data, containerId) {
             newComment = comment.cloneNode(true);    
             newComment.classList.remove('d-none');
 
-            newComment.querySelector('.creator_id').textContent = item.creator_id;
-            newComment.querySelector('.create_time').textContent = item.create_time;
-            newComment.querySelector('.update_time').textContent = item.update_time;
+            newComment.querySelector('.creator_id').textContent = '' + item.creator_user_id + 'wrote...';
+            newComment.querySelector('.create_time').textContent = convertToDisplayLocal(item.create_time);
+            newComment.querySelector('.update_time').textContent = convertToDisplayLocal(item.update_time);
             newComment.querySelector('.comment_text').innerHTML = item.comment;
+
+            container.appendChild(newComment);
         });
     }
         

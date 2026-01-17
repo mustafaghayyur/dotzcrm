@@ -140,7 +140,7 @@ export function toggleTodoStatus(record) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'personalTabResponses', genericTaskResponseMapper);
+    Fetcher(request, 'personalTabResponse', genericTaskResponseMapper);
 
 }
 
@@ -161,7 +161,7 @@ export function deleteTodo(todoId, identifyer) {
         },
     });
 
-    Fetcher(request, 'personalTabResponses', genericTaskResponseMapper);
+    Fetcher(request, 'personalTabResponse', genericTaskResponseMapper);
 }
 
 /**

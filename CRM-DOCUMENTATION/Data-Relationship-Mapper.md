@@ -31,3 +31,27 @@ The QuerySet family of definitions will be essential to maintaining strict data-
 Where Django ORM's standard functions are not used to operate on the MySQL DB, these QuerySet methods should be used to interact with the MySQL DB.
 
 DO NOT use raw queries anywhere outside of QuerySets in this project.
+
+
+# Dotz CRM + PM Software's Relationship Types:
+
+### One-to-One Relationships
+
+One-to-One data models have a singular, unique relation to each other. These tables also carry revisions, making the 'latest' demarcation necessary.
+
+
+### RevisionLess Children Relationship types:
+
+
+
+### Many-to-Many Relationships Types:
+
+Many-to-Many CRUD Operations that can be used through out the system.
+    
+In a M2M relationship, there are two key columns to watch out for: 
+    - FirstId: refers to the first FK of another table we are tracking
+    - SecondId: refers to the second FK of yet, another table we wish
+    the firstId to be associated with.
+
+Note: first and second can carry significance for each specific 'Model' that inherits this class. Should be appropriately assigned in mapper.
+

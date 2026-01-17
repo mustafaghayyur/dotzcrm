@@ -20,10 +20,10 @@ class CRUD(Background.CrudOperations):
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        misc.log(dictionary, 'Checking submitted data to comments')
         mtId = self.mapper.master('abbreviation') + 'id'
+        masterId = self.mapper.master('foreignKeyName');
 
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[masterId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createRLC()')
 
         if not masterRecord:

@@ -19,7 +19,7 @@ class CommentMethods():
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             dictionary = serializer.validated_data
-            dictionary['creator_id'] = 1. # @todo: replace with current user id
+            dictionary['creator_user_id'] = 1 # @todo: replace with current user id
             result = Comments().create(dictionary)
             misc.log(result, 'Peaking into comment create result')
             if result:
@@ -41,7 +41,7 @@ class CommentMethods():
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             dictionary = serializer.validated_data
-            dictionary['creator_id'] = 1. # @todo: replace with current user id
+            dictionary['creator_user_id'] = 1  # @todo: replace with current user id
             result = Comments().update(dictionary)
             if result:
                 misc.log(result, 'Peaking into comment update result')
