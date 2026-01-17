@@ -10,7 +10,7 @@ import { showModal } from "../../core/js/modal_linking.js";
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+    console.log('Checking if updates are happening,,,');
     // Tasks' TabbedDashBoard() call has singlecall enabled, 
     // data will not be refreshed, while switching between tabs
     TabbedDashBoard({

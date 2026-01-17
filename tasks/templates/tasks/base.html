@@ -6,7 +6,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %} Template {% endblock %} - Task Manager</title>
-    <link rel="stylesheet" href="{% static 'css/dotzstrap.css' %}">  
+    <link rel="stylesheet" href="{% static 'css/dotzstrap.css' %}?time={{ timestamp }}"> 
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'media/favicon_bw/apple-touch-icon.png' %}?time={{ timestamp }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'media/favicon_bw/favicon-32x32.png' %}?time={{ timestamp }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'media/favicon_bw/favicon-16x16.png' %}?time={{ timestamp }}">
+    <link rel="manifest" href="{% static 'media/favicon_bw//site.webmanifest' %}?time={{ timestamp }}">
   </head>
   <body>
     <div class="container">
@@ -24,7 +28,7 @@
           <a class="btn btn-warning btn-lg bottom-0 start-0 m-2" data-bs-toggle="offcanvas" href="#newTaskCanvas" role="button" aria-controls="offcanvasExample"><i class="bi bi-vector-pen"></i> new</a>
         </div>
     </div>
-    <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <script type="module" src="{% static 'dist/tasks-bundle.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}?time={{ timestamp }}"></script>
+    <script type="module" src="{% static 'dist/tasks-bundle.js' %}?time={{ timestamp }}"></script>
   </body>
 </html>

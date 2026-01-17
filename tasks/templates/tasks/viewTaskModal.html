@@ -65,12 +65,14 @@
           </tr>
         </table>
         <div id="comments" class="container">
+          <div id="commentsResponse" class="d-none"></div>
           <div id="createComment" class="row">
             <div class="col-12">
               <form method="post" id="newCommentForm">
                 {% csrf_token %}
                 <div id="commentEditor" class="rich-editor" data-field-id="comment" contenteditable="true" placeholder="add comment..."></div>
                 <input type="hidden" id="comment" maxlength="7000" name="comment">
+                <input type="hidden" id="task_id" name="task_id">
                 <button id="saveComment" class="btn btn-info btn-sm" type="button"><i class="bi bi-pencil-square"></i> comment</button>
               </form>
             </div>

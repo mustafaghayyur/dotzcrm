@@ -4,7 +4,7 @@ import { updateUrlParam } from "../../core/js/modal_linking.js";
 import { createWatcher, removeWatcher, DeleteTask, createCommentForTask } from "./crud.js";
 import { prefillEditForm } from './form_handling.js';
 import { Editor } from '../../core/js/editor.js';
-import { taskDetailsMapper, commentsMapper, watcherMapper } from './mappers.js';
+import { taskDetailsMapper, commentsMapper } from './mappers.js';
 
 /**
  * A place to define various listeners that don't belong anywhere else...
@@ -34,7 +34,6 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
     const wtchrRequest = defineRequest('/rest/tasks/watch/' + resultSet['tid'] + '/');
     Fetcher(wtchrRequest, 
         'taskDetailsModalResponse', {}, (data, id) => {
-            console.log('checking if data is populated in watcher btn', data, id);
             if (isVariableEmpty(data)) {
                 watchbtn.classList.remove('d-none');
             } else {
@@ -57,15 +56,17 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
     let saveCommentBtn = document.getElementById('saveComment');
     saveCommentBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        let editor = document.getElementById('commentEditor');
-        let hiddenCommentInput = document.getElementById(editor.dataset.fieldId);
+        let editor = document.querySelector('#newCommentForm #commentEditor');
+        let hiddenCommentInput = document.querySelector('#newCommentForm #' + editor.dataset.fieldId);
         hiddenCommentInput.value = editor.innerHTML;
+        let taskIdField = document.querySelector('#newCommentForm #task_id');
+        taskIdField.value = resultSet['tid'];
         createCommentForTask('newCommentForm');
     });
 
     // finally, retrieve task-level-comments..
-    let request = defineRequest('/rest/tasks/comments/');
-    Fetcher(request, "comments", {}, commentsMapper);
+    let request = defineRequest('/rest/tasks/comments/?task_id=' + resultSet['tid']);
+    Fetcher(request, "commentsResponse", {}, commentsMapper);
 }
 
 /**

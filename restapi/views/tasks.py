@@ -121,7 +121,7 @@ def comments_list(request, format=None):
     #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
 
     try:
-        # pgntn = pagination.assembleParamsForView(request.query_params)
+        pgntn = pagination.assembleParamsForView(request.query_params)
         # limit=[str(pgntn['offset']), str(pgntn['page_size']
         records = Comments().read(conditions)
         misc.log(records, 'hello from comment lists')

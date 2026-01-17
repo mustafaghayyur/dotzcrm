@@ -116,8 +116,9 @@ export function fetchedTodoListMapper(data, containerId) {
 }
 
 export function commentsMapper(data, containerId) {
+    console.log('commentsMapper() being called');
     let container = document.getElementById(containerId);
-    let comment = container.getElementById('commmentContainer');
+    let comment = container.querySelector('#commmentContainer');
 
     if (Array.isArray(data)) {
         let newComment = null;

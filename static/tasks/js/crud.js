@@ -180,5 +180,5 @@ export function createCommentForTask(formId) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', genericTaskResponseMapper);
+    Fetcher(request, 'commentsResponse', genericTaskResponseMapper);
 }

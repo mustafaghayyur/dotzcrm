@@ -1,6 +1,6 @@
 from django.utils import timezone
 from . import Background
-from core.helpers import crud
+from core.helpers import crud, misc
 
 """
     Handles all crud operations for Revision-less Children (RLC) tables.
@@ -20,9 +20,8 @@ class CRUD(Background.CrudOperations):
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        
+        misc.log(dictionary, 'Checking submitted data to comments')
         mtId = self.mapper.master('abbreviation') + 'id'
-        # self.log(self.submission, 'FORM-------------------------------------')
 
         masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createRLC()')

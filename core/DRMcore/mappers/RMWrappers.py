@@ -1,4 +1,4 @@
-from core.modules.Singleton import Singleton
+from core.lib.Singleton import Singleton
 
 class Wrappers(Singleton):
     """
