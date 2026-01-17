@@ -27,7 +27,7 @@ def task_list(request, type, format=None):
     """
         List all  tasks for type of request
     """
-    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'assignor_id']
+    selectors = ['tid', 'sid', 'description', 'tupdate_time', 'status']
     conditions = {
         'tdelete_time': 'is Null',
         'assignee_id': request.user.id
@@ -121,7 +121,7 @@ def comments_list(request, format=None):
     #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
 
     try:
-        # pgntn = pagination.assembleParamsForView(request.query_params)
+        pgntn = pagination.assembleParamsForView(request.query_params)
         # limit=[str(pgntn['offset']), str(pgntn['page_size']
         records = Comments().read(conditions)
         misc.log(records, 'hello from comment lists')
@@ -137,17 +137,17 @@ def comments_list(request, format=None):
 
 
 @api_view(['POST', 'GET', 'DELETE'])
-def watcher_crud(request, id, format=None):
+def watcher_crud(request, taskId, format=None):
     method = request.method
     
     try:
         match method:
             case 'GET':
-                return WatchersMethods.detail(request, id, format)
+                return WatchersMethods.detail(request, taskId, format)
             case 'POST':
-                return WatchersMethods.create(request, format)
+                return WatchersMethods.create(request, taskId, format)
             case 'DELETE':
-                return WatchersMethods.delete(request, id, format)
+                return WatchersMethods.delete(request, taskId, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     

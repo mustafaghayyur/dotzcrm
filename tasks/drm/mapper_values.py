@@ -59,9 +59,9 @@ class Status(str, Enum):
 
 class Visibility(str, Enum):
     private = 'private'
-    assigned = 'assigned'
-    organization = 'organization'
-    stakeholders = 'stakeholders'
+    workspaces = 'workspaces'
+    assigned = 'assigned' # @todo: future feature implementation
+    stakeholders = 'stakeholders' # @todo: future feature implementation
 
 class Latest(int, Enum):
     archive = 2

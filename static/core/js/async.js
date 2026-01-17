@@ -45,6 +45,10 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 throw new Error(errHeading + msgHtml + errorHtml);
             }
 
+            if (typeof callbackFunction === 'function' && response.status === 204) {
+                return callbackFunction(response, containerId);
+            }
+
             let contentType = response.headers.get('content-type') || '';
             
             if (contentType.includes('application/json')) {

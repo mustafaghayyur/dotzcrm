@@ -6,7 +6,8 @@ from restapi.validators.generic import *
 
 class TaskO2ORecordSerializerGeneric(Serializer):
     """
-        Serializer for O2O Task records.
+        Generic Serializer for O2O Task records.
+        All fields must be non-mandatory.
     """
     id = IntegerField(**intNullableOpts)  # id = tid; but different places require different terms.
     tid = IntegerField(**intNullableOpts)
@@ -16,7 +17,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     aid = IntegerField(**intNullableOpts)
     vid = IntegerField(**intNullableOpts)
 
-    description = CharField(allow_null=False, required=True, min_length=20, max_length=255)
+    description = CharField(allow_null=True, required=False, min_length=20, max_length=255)
     details = CharField(allow_null=True, required=False, min_length=50)
     
     status = ChoiceField(allow_null=True, required=False, choices=[(c.value, c.value) for c in Status])
@@ -24,9 +25,9 @@ class TaskO2ORecordSerializerGeneric(Serializer):
 
     deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 
-    creator_id = IntegerField(**intMandatoryOpts)
+    creator_id = IntegerField(**intNullableOpts)
     parent_id = IntegerField(**intNullableOpts)
-    assignor_id = IntegerField(**intMandatoryOpts)
+    assignor_id = IntegerField(**intNullableOpts)
     assignee_id = IntegerField(**intNullableOpts)
 
     dlatest = ChoiceField(**latestChoiceOpts)

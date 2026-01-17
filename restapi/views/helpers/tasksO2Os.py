@@ -45,7 +45,7 @@ class OneToOnes():
             if result:
                 misc.log(result, 'Peaking into comment update result')
                 try:
-                    record = CRUD().fetchFullRecordForUpdate(result.id)
+                    record = CRUD().fetchFullRecordForUpdate(result['tid'])
                     retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
                 except Exception as e:
@@ -60,8 +60,8 @@ class OneToOnes():
             Delete single task record (with all it's related child-tables).
         """
         if crud.isValidId({'id': id}, 'id'):
-            crud = CRUD().delete(id)
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
+            rec = CRUD().delete(id)
+            return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
         
         return Response(crud.generateError('Task id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
@@ -75,6 +75,6 @@ class OneToOnes():
             if record:
                 serialized = TaskO2ORecordSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
-            return Response(crud.generateError('No task record found.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateResponse([]), status=status.HTTP_400_BAD_REQUEST)
         return Response(crud.generateError('Task Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
         

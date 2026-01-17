@@ -2,7 +2,7 @@ from django.utils import timezone
 from . import Validation
 from core import dotzSettings
 from .staticHelpers import ValuesHandler
-from core.helpers import misc, crud
+from core.helpers import crud, strings
 
 
 """
@@ -224,11 +224,12 @@ class CrudOperations(Validation.ErrorHandling):
     def _generateCreatorId(self):
         if 'assignor_id' in self.submission:
             if self.submission['assignor_id'] is not None:
-                if isinstance(self.submission['assignor_id'], object):
-                    return self.submission['assignor_id'].id  
-                else:
+
+                if strings.isPrimitiveType(self.submission['assignor_id']):
                     return self.submission['assignor_id']
-        
+                if hasattr(self.submission['assignor_id'], 'id'):
+                    return self.submission['assignor_id'].id
+                
         return None
 
     

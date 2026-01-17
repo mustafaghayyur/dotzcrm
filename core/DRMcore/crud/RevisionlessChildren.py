@@ -1,6 +1,6 @@
 from django.utils import timezone
 from . import Background
-from core.helpers import crud
+from core.helpers import crud, misc
 
 """
     Handles all crud operations for Revision-less Children (RLC) tables.
@@ -20,20 +20,18 @@ class CRUD(Background.CrudOperations):
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        
         mtId = self.mapper.master('abbreviation') + 'id'
-        # self.log(self.submission, 'FORM-------------------------------------')
+        masterId = self.mapper.master('foreignKeyName');
 
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[masterId]})
         self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createRLC()')
 
         if not masterRecord:
             raise Exception('Master Record could not be found. RLC cannot be created in {self.space}.CRUD.create()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
 
-        return self.createChildTable(model, self.tbl, t['table'], t['cols'], True)
+        return self.createChildTable(t['model'], self.tbl, t['table'], t['cols'], True)
         
     def read(self):
         pass  # defined in individual Module's class extensions.
@@ -64,10 +62,9 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'No valid RLC record found for provided ID, in: {self.space}.CRUD.update().')
         
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
             
         # determine if an update is necessary and carry out update operations...
-        return self.updateChildTable(model, self.tbl, t['table'], t['cols'], originalRLC, True)
+        return self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'], originalRLC, True)
 
     def deleteById(self, rlcId):
         """
@@ -79,9 +76,8 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
 
-        return self.deleteChildTableById(model, self.tbl, t['table'], t['cols'], rlcId)
+        return self.deleteChildTableById(t['model'], self.tbl, t['table'], t['cols'], rlcId)
 
     def deleteAllForMT(self, masterId):
         """
@@ -93,9 +89,8 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'RLC Records could not be deleted. Invalid Master-ID supplied in {self.space}.CRUD.delete()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        model = globals()[t['model']]  # retrieve Model class with global scope
 
-        return self.deleteChildTable(model, self.tbl, t['table'], t['cols'], masterId, True)
+        return self.deleteChildTable(t['model'], self.tbl, t['table'], t['cols'], masterId, True)
 
     def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
         """

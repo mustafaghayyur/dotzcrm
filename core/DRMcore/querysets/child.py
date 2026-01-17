@@ -1,8 +1,6 @@
 from django.db import models
 from . import background
 
-from core.helpers import misc
-
 """
     =======================================================================
     Children QuerySets will be based on the various data-models we use
@@ -36,8 +34,6 @@ class CTQuerySet(background.QuerySetManager):
             SELECT * FROM {self.tbl}
                 WHERE id = %s;
             """
-
-        misc.log(self.master_col, 'Het MG, I doubt you will find this. But if so, we have attempted to test self.master_col here.')
         return self.raw(query, [cId])
 
     def fetchLatest(self, mtId):
@@ -122,8 +118,8 @@ class M2MQuerySet(CTQuerySet):
     """
 
     def __init__(self, model=None, query=None, using=None, hints=None):
-        tbl = self.mappers.getAbbreviationForTable(self.tbl)
-        cols = self.mappers.m2mFields(tbl)
+        tbl = self.mapper.getAbbreviationForTable(self.tbl)
+        cols = self.mapper.m2mFields(tbl)
 
         if cols is None:
             raise Exception('Unable to fetch M2M Fields. Abort.')
@@ -158,6 +154,21 @@ class M2MQuerySet(CTQuerySet):
 
         latest = self.mapper.values.latest('latest')
         return self.raw(query, [firstId, latest])
+    
+    def fetchLatest(self, firstId, secondId, latest):
+        """
+            Fetch latest rec for First & Second Ids.
+            Overwrites CTQuerySet.fetchLatest()
+        """
+        query = f"""
+            SELECT * FROM {self.tbl}
+                WHERE {self.firstColumn} = %s
+                AND {self.secondColumn} = %s
+                AND latest = %s
+                ORDER BY create_time DESC
+            """
+
+        return self.raw(query, [firstId, secondId, latest])
 
     def fetchAllRevisions(self, firstId, secondId):
         """

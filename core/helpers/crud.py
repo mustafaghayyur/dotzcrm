@@ -1,12 +1,14 @@
+import importlib
 import re
 from django.conf import settings as ds 
 from django.forms import DateTimeInput
-from .misc import log
+from . import misc
 
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     tableName = mapper.tables(tbl)
+    module = importlib.import_module(mapper.modelPaths(tbl))
     return {
-        'model': mapper.models(tbl),  # identify model
+        'model': getattr(module, mapper.models(tbl)),  # instantiate model class using importlib
         'table': tableName,  # identify table
         'cols': mapper.tableFields(tableName),  # grab column names
     }
@@ -15,7 +17,7 @@ def isValidId(dictionary, idKey):
     if idKey in dictionary and dictionary[idKey] is not None:
         if isinstance(dictionary[idKey], int) and dictionary[idKey] > 0:
             return True
-        
+        misc.log([idKey, dictionary[idKey]], 'inspecting dictionary[idKey] in isValidId()')
         if not isinstance(dictionary[idKey], int) and dictionary[idKey].isdigit():
             item = int(dictionary[idKey])
             if item > 0:
@@ -89,7 +91,7 @@ def generateError(object, additionalMsg = None):
         dictionary['messages'] = additionalMsg
     
     if ds.DEBUG:
-        log(object, 'Error Trace:', 3) # logs the error with full trace in debug-mode only
+        misc.log(object, 'Error Trace:', 3) # logs the error with full trace in debug-mode only
 
     return dictionary
 

@@ -61,12 +61,21 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.lib.project_vars.ContextForDotzCRMPM',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication', # Or JWT authentication
+        # 'rest_framework.authentication.SessionAuthentication', # Comment or remove this line
+    ],
+    # ...
+}
 
 
 # Database

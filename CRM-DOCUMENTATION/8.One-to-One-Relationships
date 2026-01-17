@@ -1,2 +1,0 @@
-
-One-to-One data models have a singular, unique relation to each other. These tables also carry revisions, making the 'latest' demarcation necessary.

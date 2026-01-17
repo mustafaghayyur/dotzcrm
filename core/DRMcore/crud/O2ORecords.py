@@ -1,5 +1,4 @@
 from . import Background
-from tasks.models import *
 from core.helpers import crud
 
 """
@@ -34,9 +33,8 @@ class CRUD(Background.CrudOperations):
 
             tbl = pk[0]  # table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
-            model = globals()[t['model']]  # retrieve Model class with global scope
 
-            self.createChildTable(model, tbl, t['table'], t['cols'])
+            self.createChildTable(t['model'], tbl, t['table'], t['cols'])
 
         # return masterRecord.id
         return masterRecord
@@ -59,7 +57,7 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
 
         if len(records) > 1:
-            completeRecord = self.pruneLatestRecords(records, mId)
+            completeRecord = records[0] # self.pruneLatestRecords(records, mId) @todo: implement pruneLatestRecords()
         else:
             completeRecord = records[0]
 
@@ -67,24 +65,24 @@ class CRUD(Background.CrudOperations):
         for pk in self.idCols:
             tbl = pk[0]  # child table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
-            model = globals()[t['model']]  # retrieve Model class with global scope
 
             if pk == mId:
                 if crud.isValidId(self.submission, pk):
-                    self.updateMasterTable(model, t['table'], t['cols'], completeRecord)
+                    self.updateMasterTable(t['model'], t['table'], t['cols'], completeRecord)
                     continue
-
+            
+            # @todo: we could remove the need for child-ids from updates, making front-end dev easier. Not very important.
             if pk not in self.submission:
-                self.createChildTable(model, tbl, t['table'], t['cols'])
+                self.createChildTable(t['model'], tbl, t['table'], t['cols'])
                 continue
                 
             if not crud.isValidId(self.submission, pk):
                 # create a new record for child table if pk is invalid
-                self.createChildTable(model, tbl, t['table'], t['cols'])
+                self.createChildTable(t['model'], tbl, t['table'], t['cols'])
                 continue
 
             # determine if an update is necessary and carry out update operations...
-            self.updateChildTable(model, tbl, t['table'], t['cols'], completeRecord)
+            self.updateChildTable(t['model'], tbl, t['table'], t['cols'], completeRecord)
 
         return { mId: self.submission[mId] } # since .update() operation only returns # of rows affected, not the updated record.
 
@@ -104,15 +102,13 @@ class CRUD(Background.CrudOperations):
                 continue  # skip, we delete master table at the end.
 
             t = crud.generateModelInfo(self.mapper, tbl)
-            model = globals()[t['model']]  # retrieve Model class with global scope
 
             # run a 'delete' operation for latest child table record. 
-            self.deleteChildTable(model, tbl, t['table'], t['cols'], masterId)
+            self.deleteChildTable(t['model'], tbl, t['table'], t['cols'], masterId)
 
         # once all children records have been updated with delete markers
         t = crud.generateModelInfo(self.mapper, self.mapper.master('abbreviation'))
-        model = globals()[t['model']]
-        return self.deleteMasterTable(model, self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
+        return self.deleteMasterTable(t['model'], self.mapper.master('foreignKeyName'), t['table'], t['cols'], masterId)
 
 
     def pruneLatestRecords(self, fetchedRecords, mId):
@@ -131,9 +127,8 @@ class CRUD(Background.CrudOperations):
                 continue  # can't prune MT duplicates...
 
             t = crud.generateModelInfo(self.mapper, tbl)
-            model = globals()[t['model']]  # retrieve Model class with global scope
 
-            self.checkChildForMultipleLatests(model, tbl, t['table'], t['cols'], fetchedRecords)
+            self.checkChildForMultipleLatests(t['model'], tbl, t['table'], t['cols'], fetchedRecords)
 
         records = self.fetchFullRecordForUpdate(mId)
 

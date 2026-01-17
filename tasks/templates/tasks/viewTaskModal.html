@@ -59,23 +59,25 @@
                 <input type="hidden" name="id" value="">
                 <button id="deleteTaskBtn" class="btn btn-secondary btn-sm" type="submit" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
               </form>
-              <a id="addWatcher" href="#" class="btn btn-info btn-sm mx-3" role="button" ><i class="bi bi-eye-fill"></i></a>
+              <a id="addWatcher" href="#" class="btn btn-info btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-fill"></i></a>
               <a id="removeWatcher" href="#" class="btn btn-secondary btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
             </td>
           </tr>
         </table>
         <div id="comments" class="container">
+          <div id="commentsResponse" class=""></div>
           <div id="createComment" class="row">
             <div class="col-12">
               <form method="post" id="newCommentForm">
                 {% csrf_token %}
                 <div id="commentEditor" class="rich-editor" data-field-id="comment" contenteditable="true" placeholder="add comment..."></div>
                 <input type="hidden" id="comment" maxlength="7000" name="comment">
+                <input type="hidden" id="task_id" name="task_id">
                 <button id="saveComment" class="btn btn-info btn-sm" type="button"><i class="bi bi-pencil-square"></i> comment</button>
               </form>
             </div>
           </div>
-          <div id="commmentContainer" class="row d-none">
+          <div id="commmentContainer" class="row m-2 my-3 py-3 d-none">
             <div id="commentRecord" class="col-11" data-comment-id="">
               <span class="creator_id"></span> | <span class="create_time"></span> | <span class="update_time"></span>
               <div class="comment_text"></div>

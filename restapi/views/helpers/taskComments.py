@@ -14,9 +14,13 @@ class CommentMethods():
         """
             Create single comment record (with all it's related child-tables).
         """
+        misc.log(request.data, 'Peaking into comment dictionary')
+
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
-            result = Comments().create(serializer.validated_data)
+            dictionary = serializer.validated_data
+            dictionary['creator_user_id'] = 1 # @todo: replace with current user id
+            result = Comments().create(dictionary)
             misc.log(result, 'Peaking into comment create result')
             if result:
                 try:
@@ -36,7 +40,9 @@ class CommentMethods():
         """
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
-            result = Comments().update(serializer.validated_data)
+            dictionary = serializer.validated_data
+            dictionary['creator_user_id'] = 1  # @todo: replace with current user id
+            result = Comments().update(dictionary)
             if result:
                 misc.log(result, 'Peaking into comment update result')
                 try:
@@ -56,7 +62,7 @@ class CommentMethods():
         """
         if crud.isValidId({'id': id}, 'id'):
             crud = Comments().delete(id)
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
+            return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
         
         return Response(crud.generateError('Comment id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
@@ -70,7 +76,7 @@ class CommentMethods():
             if record:
                 serialized = CommentSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
-            return Response(crud.generateError('No comment record found.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateResponse([]))
         return Response(crud.generateError('Comment Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
         
         

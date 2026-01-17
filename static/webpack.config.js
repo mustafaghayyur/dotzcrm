@@ -51,7 +51,7 @@ module.exports = (env = {}) => {
     if (entry === 'tasks') {
         return {
             mode: 'development',
-            entry: path.resolve(__dirname, './tasks/js/custom'),
+            entry: path.resolve(__dirname, './tasks/js/custom.js'),
             output: {
                 filename: 'tasks-bundle.js',
                 path: path.resolve(__dirname, 'dist'),

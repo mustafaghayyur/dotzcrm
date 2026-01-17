@@ -1,4 +1,5 @@
 import { Fetcher, defineRequest } from "../../core/js/async.js";
+import { isVariableEmpty } from "../../core/js/helper_generic.js";
 import { updateUrlParam } from "../../core/js/modal_linking.js";
 import { createWatcher, removeWatcher, DeleteTask, createCommentForTask } from "./crud.js";
 import { prefillEditForm } from './form_handling.js';
@@ -29,6 +30,18 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
     // add (un)watcher button(s)
     let watchbtn = document.getElementById('addWatcher');
     let unwatchbtn = document.getElementById('removeWatcher');
+    
+    const wtchrRequest = defineRequest('/rest/tasks/watch/' + resultSet['tid'] + '/');
+    Fetcher(wtchrRequest, 
+        'taskDetailsModalResponse', {}, (data, id) => {
+            if (isVariableEmpty(data)) {
+                watchbtn.classList.remove('d-none');
+            } else {
+                unwatchbtn.classList.remove('d-none');
+            }
+        }
+    );
+
     watchbtn.addEventListener('click', (e) => {
         e.preventDefault();
         createWatcher(resultSet['tid'], 'addWatcher', 'removeWatcher');
@@ -43,15 +56,17 @@ export function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
     let saveCommentBtn = document.getElementById('saveComment');
     saveCommentBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        let editor = document.getElementById('commentEditor');
-        let hiddenCommentInput = document.getElementById(editor.dataset.fieldId);
+        let editor = document.querySelector('#newCommentForm #commentEditor');
+        let hiddenCommentInput = document.querySelector('#newCommentForm #' + editor.dataset.fieldId);
         hiddenCommentInput.value = editor.innerHTML;
+        let taskIdField = document.querySelector('#newCommentForm #task_id');
+        taskIdField.value = resultSet['tid'];
         createCommentForTask('newCommentForm');
     });
 
     // finally, retrieve task-level-comments..
-    let request = defineRequest('/rest/tasks/comments/');
-    Fetcher(request, "comments", {}, commentsMapper);
+    let request = defineRequest('/rest/tasks/comments/?task_id=' + resultSet['tid']);
+    Fetcher(request, "commentsResponse", {}, commentsMapper);
 }
 
 /**

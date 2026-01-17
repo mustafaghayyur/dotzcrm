@@ -10,14 +10,17 @@ from core.helpers import crud, misc
 """  
 class WatchersMethods():
     @staticmethod
-    def create(request, format=None):
+    def create(request, taskId, format=None):
         """
             Create watcher record.
             @current_user focussed
         """
-        serializer = WatcherSerializerGeneric(data=request.data)
-        if serializer.is_valid():
-            result = Watchers().create(serializer.validated_data)
+        if crud.isValidId({'id': taskId}, 'id'):
+            dictinary = {
+                'task_id': taskId,
+                'watcher_id': 1 #request.user.id @todo: remove 1 and add user id.
+            }
+            result = Watchers().create(dictinary)
             if result:
                 misc.log(result, 'peaking into Watcher create result')
                 return Response(crud.generateResponse({'wid': result.id}), status=status.HTTP_201_CREATED) # @todo: can 201 responses carry payloads?
@@ -33,29 +36,38 @@ class WatchersMethods():
         return Response(crud.generateError('Watcher records cannot be updated.'), status=status.HTTP_400_BAD_REQUEST) 
     
     @staticmethod
-    def delete(request, id, format=None):
+    def delete(request, taskId, format=None):
         """
             Delete single watcher record.
             @current_user focussed
         """
-        if crud.isValidId({'id': id}, 'id'):
-            crud = Watchers().delete(id)
+        if crud.isValidId({'id': taskId}, 'id'):
+            dictinary = {
+                'task_id': taskId,
+                'watcher_id': 1 #request.user.id @todo: remove 1 and add user id.
+            }
+            Watchers().delete(dictinary)
             # @todo: confirm if crud is showing deletion
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
+            return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
         
         return Response(crud.generateError('Watcher ID not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
     @staticmethod
-    def detail(request, id, format=None):
+    def detail(request, taskId, format=None):
         """
             Retrieve single watcher record.
             @current_user focussed
         """
-        if crud.isValidId({'id': id}, 'id'):
-            record = Watchers().read(['wid'], {'task_id': id, 'watcher_id': request.user.id, 'wdelete_time': 'is NULL', 'wlatest': 1})
+        misc.log(taskId, 'taskId and dic')
+        if crud.isValidId({'id': taskId}, 'id'):
+            dictinary = {
+                'task_id': taskId,
+                'watcher_id': 1 #request.user.id @todo: remove 1 and add user id.
+            }
+            record = Watchers().read(dictinary)
             if record:
                 serialized = WatcherSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
-            return Response(crud.generateError('No watcher record found.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateResponse([]))
         return Response(crud.generateError('Watcher Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
         

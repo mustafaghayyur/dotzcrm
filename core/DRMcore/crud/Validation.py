@@ -18,28 +18,26 @@ class ErrorHandling:
             raise Exception(f'Provided dictionary length zero in: {space}.CRUD.{operation}().')
 
     def mtIdValidation(self, operation, dictionary):
-        # @todo @important: circle back and see if this logic is 100% occurate
-        masterId = self.mapper.master('foreignKeyName')
-        mId = self.mapper.master('abbreviation') + 'id'
-        flag = False
-        proper = None
+        """
+            Ensures master-record-id is present in submitted-dictionary.
+        """        
+        keys = ['id', self.mapper.master('abbreviation') + 'id', self.mapper.master('foreignKeyName')]
+        id = None
 
-        if  mId not in dictionary:
-            dictionary[mId] = ''
-            flag = True
-
-        if 'id' not in dictionary and not flag:
-            dictionary['id'] = dictionary[mId]
-
-        if masterId not in dictionary and not flag:
-            dictionary[masterId] = dictionary[mId]
-
-        if 'id' not in dictionary or masterId not in dictionary:
-            raise Exception(f'Could not complete operation; master-id is missing. In {self.space}.CRUD.{operation}()')
-
-        if not crud.isValidId(dictionary, mId):
-            raise Exception(f'Could not complete operation; master-id not valid. In {self.space}.CRUD.{operation}()')
-
+        for key in keys:
+            if key not in dictionary:
+                dictionary[key] = None
+        
+        for key in keys:
+            if dictionary[key] is not None:
+                id = dictionary[key]
+        
+        if id is None or not crud.isValidId({'id': id}, 'id'):
+            raise Exception(f'Could not complete operation; master-record-id is not valid or missing. In {self.space}.CRUD.{operation}()')
+        
+        for key in keys:
+            dictionary[key] = id
+        
         return dictionary
 
 
