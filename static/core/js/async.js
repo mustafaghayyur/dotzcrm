@@ -1,5 +1,6 @@
 import merge from 'lodash/merge';
 import { escapeHtml } from "./helper_forms";
+import { checkVariableType } from "./helper_generic";
 
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
@@ -179,11 +180,54 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
  * Use this function to aquire Request object to supply to Fetcher().
  * Helps form a proper request definition object
  */
-export function defineRequest(url, options = {}) {
+export function defineRequest(urlKey, urlParams = {}, options = {}) {
+    const urlTemplate = selectUrlTemplate(urlKey);
+    let url = generateUrl(urlTemplate, urlParams);
+    
     const defaults = {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     };
     const finalOptions = merge(defaults, options);
     return new Request(url, finalOptions);
+}
+
+function selectUrlTemplate(urlKey) {
+    if (checkVariableType(urlKey) !== 'string') {
+        throw new Error('defineRequest() - urlKey must be a string in format "app.key"');
+    }
+    parts = urlKey.split('.');
+    if (parts.length > 1) {
+        throw new Error('defineRequest() - urlKey must be in format "app.key"');
+    }
+    return projectUrls[parts[0]][parts[1]];
+}
+
+function generateUrl(template, params) {
+    let inputs = RegExp('({input[0-9]+})', 'g');
+    return template.replace(inputs, (match, input) => {
+        if (input in params) {
+            return encodeURIComponent(params[input]);
+        } else {
+            throw new Error('generateUrl() - missing url parameter: ' + input);
+        }
+    });
+}
+
+/**
+ * All urls for CRM + PM Software
+ */
+const projectUrls = {
+    auth: {
+        login: '/accounts/token/',
+        refresh: '/accounts/token/refresh/',
+    },
+    task: {
+        crud: '/rest/tasks/crud/{input1}/',
+        list: '/rest/tasks/{input1}/',
+        comment_crud: '/rest/tasks/comments/crud/{input1}/',
+        comment_list: '/rest/tasks/comments/',
+        watcher_crud: '/rest/tasks/watchers/crud/{input1}/',
+        watcher_list: '/rest/tasks/watchers/{input1}/',
+    }
 }
