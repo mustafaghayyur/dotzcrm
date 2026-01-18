@@ -1,6 +1,5 @@
 import merge from 'lodash/merge';
-import { escapeHtml } from "../helpers/forms";
-import { checkVariableType } from "../helpers/generic";
+import helper from "../helpers/main";
 
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
@@ -37,12 +36,12 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 let msgHtml = '';
                 let errorHtml = '';
                 if (Object.hasOwn(errorResponse, 'errors') === true) {
-                    errorHtml = '<div class="small">' + escapeHtml(JSON.stringify(errorResponse.errors)) + '</div>';
+                    errorHtml = '<div class="small">' + helper.forms.escapeHtml(JSON.stringify(errorResponse.errors)) + '</div>';
                     if (Object.hasOwn(errorResponse, 'messages') === true) {
-                        msgHtml = '<div>' + escapeHtml(JSON.stringify(errorResponse.messages)) + '</div>';
+                        msgHtml = '<div>' + helper.forms.escapeHtml(JSON.stringify(errorResponse.messages)) + '</div>';
                     }
                 }
-                const errHeading = '<div class="lead">Error loading: ' + escapeHtml(response.status + ' ' + response.statusText) + '</div>';
+                const errHeading = '<div class="lead">Error loading: ' + helper.forms.escapeHtml(response.status + ' ' + response.statusText) + '</div>';
                 throw new Error(errHeading + msgHtml + errorHtml);
             }
 
@@ -60,7 +59,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 }
             } else {
                 let text = await response.text();
-                container.innerHTML = '<pre>' + escapeHtml(text) + '</pre>';
+                container.innerHTML = '<pre>' + helper.forms.escapeHtml(text) + '</pre>';
             }
         } catch (err) {
             container.innerHTML = '<div class="alert alert-danger">' + err.message + '</div>';
@@ -93,7 +92,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             container.innerHTML = '';
             container.appendChild(ul);
         } else {
-            container.innerHTML = '<pre>' + escapeHtml(JSON.stringify(resultSet, null, 2)) + '</pre>';
+            container.innerHTML = '<pre>' + helper.forms.escapeHtml(JSON.stringify(resultSet, null, 2)) + '</pre>';
         }
     }
 
@@ -120,7 +119,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             if (key in record) {
                 if (value instanceof HTMLElement) {
                     let el = value;
-                    el.innerHTML = escapeHtml(String(record[key]));
+                    el.innerHTML = helper.forms.escapeHtml(String(record[key]));
                     dom.appendChild(el);
                     i++;
                     continue;
@@ -196,7 +195,7 @@ export function defineRequest(urlKey, urlParams = {}, options = {}) {
 }
 
 function selectUrlTemplate(urlKey) {
-    if (checkVariableType(urlKey) !== 'string') {
+    if (helper.generic.checkVariableType(urlKey) !== 'string') {
         throw new Error('defineRequest() - urlKey must be a string in format "app.key"');
     }
     parts = urlKey.split('.');
@@ -207,7 +206,7 @@ function selectUrlTemplate(urlKey) {
 }
 
 function generateUrl(template, params) {
-    if (checkVariableType(params) === 'string') {
+    if (helper.generic.checkVariableType(params) === 'string') {
         params = {
             input1: params
         };

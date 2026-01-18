@@ -1,4 +1,4 @@
-import { convertToDisplayLocal } from "../../../core/js/helpers/dates";
+import helper from "../../../core/js/helpers/main";
 
 export function commentsMapper(data, containerId) {
     let parentId = containerId.replace(/Response$/,'');
@@ -15,8 +15,8 @@ export function commentsMapper(data, containerId) {
             newComment.classList.remove('d-none');
 
             newComment.querySelector('.creator_id').textContent = '' + item.creator_user_id + 'wrote...';
-            newComment.querySelector('.create_time').textContent = convertToDisplayLocal(item.create_time);
-            newComment.querySelector('.update_time').textContent = convertToDisplayLocal(item.update_time);
+            newComment.querySelector('.create_time').textContent = helper.dates.convertToDisplayLocal(item.create_time);
+            newComment.querySelector('.update_time').textContent = helper.dates.convertToDisplayLocal(item.update_time);
             newComment.querySelector('.comment_text').innerHTML = item.comment;
 
             container.appendChild(newComment);

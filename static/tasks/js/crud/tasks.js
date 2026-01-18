@@ -1,8 +1,8 @@
-import { Fetcher, defineRequest } from "../../core/js/lib/async.js";
-import { genericTaskResponseMapper } from "./components/taskDetails.js";
-import { TasksO2OKeys } from "./constants.js";
-import { confirmDeletion } from "../../core/js/helpers/generic.js";
-import { generateDictionaryFromForm } from './form_handling.js';
+import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
+import { genericTaskResponseMapper } from "../components/taskDetails.js";
+import { TasksO2OKeys } from "../constants.js";
+import { generateDictionaryFromForm } from '../helpers/forms.js';
+import helper from "../../../core/js/helpers/main";
 
 /**
  * Allows submitted form to update existing record.
@@ -45,7 +45,7 @@ export function CreateTask(formId) {
  * @param {str} formId: dom element id attr value for form 
  */
 export function DeleteTask(taskId, identifyer) {
-    if (!confirmDeletion(identifyer)) {
+    if (!helper.forms.confirmDeletion(identifyer)) {
         return null;
     }
     //const id = document.querySelector('#taskDetailsModal #tid');
@@ -58,64 +58,6 @@ export function DeleteTask(taskId, identifyer) {
     });
 
     Fetcher(request, 'taskDetailsModalResponse', genericTaskResponseMapper);
-}
-
-/**
- * Creates a new record in the back-end for current user as watcher of supplied task id.
- * @param {int} taskId: database ID for task in question
- * @param {str} watchBtnId: html dom element id attr value
- * @param {str} unwatchBtnId: html dom element id attr value
- */
-export function createWatcher(taskId, watchBtnId, unwatchBtnId){    
-    let watchbtn = document.getElementById(watchBtnId);
-    let unwatchbtn = document.getElementById(unwatchBtnId);
-
-    const dictionary = {
-        task_id: taskId
-    };
-    const params = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    };
-
-    const request = defineRequest('/rest/tasks/watch/' + taskId + '/', params);
-    Fetcher(request, 
-        'taskDetailsModalResponse', {}, 
-        () => {
-            watchbtn.classList.add('d-none');
-            unwatchbtn.classList.remove('d-none');
-        }
-    );
-}
-
-/**
- * Removes existing record in the back-end for current user as watcher of supplied task id.
- * @param {int} taskId: database ID for task in question
- * @param {str} watchBtnId: html dom element id attr value
- * @param {str} unwatchBtnId: html dom element id attr value
- */
-export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
-    let watchbtn = document.getElementById(watchBtnId);
-    let unwatchbtn = document.getElementById(unwatchBtnId);
-
-    const params = {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    };
-
-    const request = defineRequest('/rest/tasks/watch/' + taskId + '/', params);
-    Fetcher(
-        request, 
-        'taskDetailsModalResponse', {}, 
-        () => {
-            watchbtn.classList.remove('d-none');
-            unwatchbtn.classList.add('d-none');
-        }
-    );
 }
 
 /**
@@ -151,7 +93,7 @@ export function toggleTodoStatus(record) {
  * @param {string} identifyer: any term to identify the ToDo to user during confirmation. 
  */
 export function deleteTodo(todoId, identifyer) {
-    if (!confirmDeletion(identifyer)) {
+    if (!helper.forms.confirmDeletion(identifyer)) {
         return null;
     }
 
@@ -163,23 +105,4 @@ export function deleteTodo(todoId, identifyer) {
     });
 
     Fetcher(request, 'personalTabResponse', genericTaskResponseMapper);
-}
-
-/**
- * Allows for adding new comments.
- * @param {str} action: enum ['add']
- * @param {str} formId: html dom id attribute value for entire form.
- */
-export function createCommentForTask(formId) {
-    let dictionary = generateDictionaryFromForm(formId);
-
-    let request = defineRequest('/rest/tasks/comment/0/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-
-    Fetcher(request, 'commentsResponse', genericTaskResponseMapper);
 }

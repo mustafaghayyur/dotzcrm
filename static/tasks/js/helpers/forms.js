@@ -1,8 +1,6 @@
-import { convertDateTimeToLocal } from "../../../core/js/helpers/dates.js";
-import { TasksO2OKeys } from "../mappers.js";
-import { cleanForm, formToDictionary } from "../../../core/js/helpers/forms.js";
+import { TasksO2OKeys } from "../constants.js";
 import { validate } from './validate.js';
-import { checkVariableType } from "../../../core/js/helpers/generic.js";
+import helper from "../../../core/js/helpers/main";
 
 /**
  * A helper function.
@@ -18,7 +16,7 @@ export function prefillEditForm(data){
  * @param {string} formId: should be the while Id with the # selection 
  */
 export function cleanTaskForm(formId) {
-    cleanForm(formId, TasksO2OKeys);
+    helper.generic.cleanForm(formId, TasksO2OKeys);
 }
 
 /**
@@ -29,9 +27,9 @@ export function cleanTaskForm(formId) {
  * @param {list} keys: optional list of keys to check/validate
  */
 export function generateDictionaryFromForm(formId, keys = null) {
-    let dictionary = formToDictionary(formId, keys = null);
+    let dictionary = helper.forms.formToDictionary(formId, keys = null);
 
-    if (checkVariableType(keysList) === 'list') {
+    if (helper.generic.checkVariableType(keysList) === 'list') {
         keysList.forEach(key => {    
             if (dictionary[key]) {
                 dictionary[key] = validate(dictionary[key]);

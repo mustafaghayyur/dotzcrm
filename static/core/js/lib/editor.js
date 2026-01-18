@@ -1,3 +1,5 @@
+import helper from "../helpers/main";
+
 /**
  * Live text editor for all rich text editing needs.
  * 

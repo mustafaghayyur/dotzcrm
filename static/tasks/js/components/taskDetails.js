@@ -1,6 +1,5 @@
-import { makeDomElement, formatValueToString, getter } from "../../../core/js/helpers/generic.js";
-import { escapeHtml } from "../helpers/forms.js";
 import { TasksO2OKeys } from "./constants.js";
+import helper from "../../../core/js/helpers/main";
 
 /**
  * This mapper function only finds dom elements matching items in the 'TasksO2OKeys' list, if resultSet has the key
@@ -16,16 +15,16 @@ export function taskDetailsMapper(resultSet, containerId) {
         let fieldContainer = document.getElementById(key);
 
         if (fieldContainer instanceof HTMLElement) {
-            let data = getter(resultSet, key, undefined);
-            let item = formatValueToString(data);
+            let data = helper.generic.getter(resultSet, key, undefined);
+            let item = helper.generic.formatValueToString(data);
 
             if (item && (item.startsWith('{') || item.startsWith('['))) {
-                let pre = makeDomElement('pre', 'm-1');
-                pre.textContent = escapeHtml(item);
+                let pre = helper.generic.makeDomElement('pre', 'm-1');
+                pre.textContent = helper.forms.escapeHtml(item);
                 fieldContainer.appendChild(pre);
                 return;
             }
-            fieldContainer.textContent = escapeHtml(item);
+            fieldContainer.textContent = helper.forms.escapeHtml(item);
         }
     });
     addOptionsFunctionalityOnTaskDetailsPane(resultSet);

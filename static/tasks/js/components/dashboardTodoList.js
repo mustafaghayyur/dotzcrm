@@ -1,4 +1,5 @@
 import { toggleTodoStatus, deleteTodo } from '../crud.js';
+import helper from "../../../core/js/helpers/main";
 
 /**
  * Callback function for Fetcher() that maps fetched ToDos to page elemments.
@@ -18,7 +19,7 @@ export function fetchedTodoListMapper(data, containerId) {
             li = originalLiItem.cloneNode(true);
             let status = li.querySelector('.status').querySelector('.' + item.status);
             let desc = li.querySelector('.description');
-            desc.dataset.taskId = escapeHtml(item.tid);
+            desc.dataset.taskId = helper.forms.escapeHtml(item.tid);
             desc.textContent = item.description || JSON.stringify(item);
             
             if (item.status === 'completed') {
@@ -34,7 +35,7 @@ export function fetchedTodoListMapper(data, containerId) {
             ul.appendChild(li);
         });
     } else {
-        originalLiItem.innerHTML = '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+        originalLiItem.innerHTML = '<pre>' + helper.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
         container.appendChild(originalLiItem);
     }
 }

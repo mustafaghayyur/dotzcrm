@@ -1,6 +1,7 @@
 import { Fetcher, defineRequest } from '../../../core/js/lib/async.js';
-import { convertToDisplayLocal } from "../../../core/js/helpers/dates.js";
 import { taskDetailsMapper } from './taskDetails.js';
+import helper from "../../../core/js/helpers/main";
+
 /**
  * Callback function for Fetcher() that maps retieved user's tasks to page elements.
  * @param {obj} data: results object from Fetcher call
@@ -16,17 +17,17 @@ export function fetchedTaskListMapper(data, containerId) {
     if (Array.isArray(data)) {
         data.forEach(item => {
             li = originalLiItem.cloneNode(true);
-            li.querySelector('.description').dataset.taskId = escapeHtml(item.tid);
+            li.querySelector('.description').dataset.taskId = helper.forms.escapeHtml(item.tid);
             li.querySelector('.description').textContent = item.description || JSON.stringify(item);
-            li.querySelector('.status').textContent = escapeHtml(item.status);
-            li.querySelector('.tupdate_time').textContent = convertToDisplayLocal(item.tupdate_time);
-            li.querySelector('.deadline').textContent = convertToDisplayLocal(item.deadline);
+            li.querySelector('.status').textContent = helper.forms.escapeHtml(item.status);
+            li.querySelector('.tupdate_time').textContent = helper.dates.convertToDisplayLocal(item.tupdate_time);
+            li.querySelector('.deadline').textContent = helper.dates.convertToDisplayLocal(item.deadline);
             ul.appendChild(li);
         });
 
         addListenersToTasks(ul);
     } else {
-        originalLiItem.innerHTML = '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+        originalLiItem.innerHTML = '<pre>' + helper.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
         container.appendChild(originalLiItem);
     }
 

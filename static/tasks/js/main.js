@@ -1,7 +1,7 @@
 import { Fetcher, defineRequest } from "../../core/js/async.js";
 import { TabbedDashBoard } from "../../core/js/dashboard.js";
 import { taskDetailsMapper, fetchedTodoListMapper, fetchedTaskListMapper } from "./mappers.js";
-import { UpdateTask, CreateTask } from './crud.js';
+import { UpdateTask, CreateTask } from './crud/tasks.js';
 import { cleanTaskForm } from './form_handling.js';
 import { showModal } from "../../core/js/modal_linking.js";
 import { Main } from '../../core/js/lib/app.js';
@@ -36,21 +36,6 @@ Main(() => {
         'taskDetailsModal', 
         taskDetailsMapper
     );
-
-    // Edit Task Modal: Save Operations Setup...
-    const editTaskSaveBtn = document.getElementById('taskEditFormSaveBtn');
-    editTaskSaveBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const tid = document.querySelector('#taskEditForm input[name="tid"]');
-        if (!(tid instanceof HTMLElement)) {
-            throw Error('Cannot find `tid` field, unable to perform edit/create operation.');
-        }
-        if(tid.value){
-            UpdateTask('taskEditForm');
-        }else{
-            CreateTask('taskEditForm');
-        }
-    });
 
     // add 'clean form' functionality to all .open-form btns...
     const openFormBtn = document.querySelectorAll('.open-form');
