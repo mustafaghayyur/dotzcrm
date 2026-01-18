@@ -186,7 +186,10 @@ export function defineRequest(urlKey, urlParams = {}, options = {}) {
     
     const defaults = {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': ' Bearer ' + getAccessToken(),
+        },
     };
     const finalOptions = merge(defaults, options);
     return new Request(url, finalOptions);
@@ -204,6 +207,11 @@ function selectUrlTemplate(urlKey) {
 }
 
 function generateUrl(template, params) {
+    if (checkVariableType(params) === 'string') {
+        params = {
+            input1: params
+        };
+    }
     let inputs = RegExp('({input[0-9]+})', 'g');
     return template.replace(inputs, (match, input) => {
         if (input in params) {
@@ -214,6 +222,46 @@ function generateUrl(template, params) {
     });
 }
 
+function getAccessToken() {
+    // retrieves time of last token refresh
+    const lastAccess = tokenLastRefreshed();
+
+    // check if token is older than 60 minutes
+    if (lastAccess - Date.now() > 3600000) {
+        // refresh token
+        return refreshToken();
+    } else {
+        return getCurrentAccessToken();
+    }
+}
+
+function refreshToken() {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken === null) {
+        throw new Error('refreshToken() - no refresh token found in localStorage');
+    }
+
+    const request = new Request(projectUrls.auth.refresh, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+    });
+
+    Fetcher(request, 'tokenRefreshContainer', {}, (response) => {
+        if (response.status === 200) {
+            return response.json().then(data => {
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+                localStorage.setItem('token_last_refreshed', Date.now().toString());
+                return data.access;
+            });
+        } else {
+            throw new Error('refreshToken() - failed to refresh token, status: ' + response.status);
+        }
+    });
+}
 /**
  * All urls for CRM + PM Software
  */
@@ -231,3 +279,14 @@ const projectUrls = {
         watcher_list: '/rest/tasks/watchers/{input1}/',
     }
 }
+
+/**
+ * localStorage.setItem(key, value): Stores a key-value pair.
+ * localStorage.getItem(key): Retrieves a value by its key.
+ * localStorage.removeItem(key): Removes a specific item by its key.
+ * localStorage.clear(): Clears all data stored for the current domain. 
+ * 
+ * OR 
+ * 
+ * http cookie with HttpOnly, Secure, and SameSite flags
+ */

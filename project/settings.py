@@ -149,7 +149,7 @@ STATICFILES_DIRS = [
 SECRET_KEY = 'django-insecure-o2(acg+&sx$ds=$_7-_6zfh)_^s3)r-wm#f2f7=k1tcpx)ugra'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,

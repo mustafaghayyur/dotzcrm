@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Only Auth section Views defined here.
 
@@ -15,6 +16,13 @@ def register(request):
         'content': 'Please see our technical staff for gaining access to the system.',
     }
     return render(request, 'core/generic.html', context)
+
+class ObtainTokenView(TokenObtainPairView):
+    pass
+
+class RefreshTokenView(TokenRefreshView):
+    pass
+
 
 class LoginView(auth_views.LoginView):
     template_name = 'auth/login.html'
