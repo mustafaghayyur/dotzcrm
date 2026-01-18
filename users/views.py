@@ -1,9 +1,7 @@
 from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render
-from django.contrib.auth import views as auth_views, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from core.dotzSettings import dotzSettings
 
 # Only Auth section Views defined here.
 

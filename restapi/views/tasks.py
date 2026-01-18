@@ -181,7 +181,7 @@ def watchers_list(request, taskId, format=None):
         records = Watchers().read(conditions)
         if records:
             serialized = WatcherSerializerGeneric(records, many=True)
-            return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+            return Response(crud.generateResponse(serialized.data))
     
     except ValidationError as e:
         return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
