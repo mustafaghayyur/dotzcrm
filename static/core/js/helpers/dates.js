@@ -1,12 +1,4 @@
 /**
- * This module will carry common functions needed throughout the app...
- */
-
-// You can also access specific local time components like this:
-// console.log(`Local Hour: ${dateObject.getHours()}`);
-// console.log(`Local Minutes: ${dateObject.getMinutes()}`);
-
-/**
  * Convert's a datetime value supplied by the back-end into a human-readable date and time value,
  * in the timezone of the current browser.
  * @param {string} mysqlString: needs to be in format: "YYYY-MM-DDTHH:MM:SS.000Z"
@@ -112,6 +104,7 @@ export function convertLocalToBackendUTC(localDate) {
 }
 
 /**
+ * Can correct sloppy dates formed by users.
  * Useful to ensure user supplied values are formatted correctly.
  * @param {string} dtValuePrivided - user supplied string representation of the datetime value
  */

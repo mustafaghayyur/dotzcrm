@@ -4,12 +4,12 @@ import { taskDetailsMapper, fetchedTodoListMapper, fetchedTaskListMapper } from 
 import { UpdateTask, CreateTask } from './crud.js';
 import { cleanTaskForm } from './form_handling.js';
 import { showModal } from "../../core/js/modal_linking.js";
+import { Main } from '../../core/js/lib/app.js';
 
 /**
- * This file holds custom JS to implement UI on Tasks Module
+ * Begin Tasks Application:
  */
-
-document.addEventListener('DOMContentLoaded', () => {
+Main(() => {
 
     // Tasks' TabbedDashBoard() call has singlecall enabled, 
     // data will not be refreshed, while switching between tabs

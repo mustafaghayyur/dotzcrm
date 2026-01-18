@@ -1,6 +1,6 @@
 import merge from 'lodash/merge';
-import { escapeHtml } from "./helper_forms";
-import { checkVariableType } from "./helper_generic";
+import { escapeHtml } from "../helpers/forms";
+import { checkVariableType } from "../helpers/generic";
 
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied

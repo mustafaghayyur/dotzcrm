@@ -10,6 +10,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
+# @todo: revisit these account endpoints and get accounts section working
 @api_view(['PUT'])
 def changeUserPassword(request, format=None):
     """

@@ -1,6 +1,7 @@
-import { Fetcher, defineRequest } from "../../core/js/async.js";
-import { keys, genericTaskResponseMapper } from "./mappers.js";
-import { confirmDeletion } from "../../core/js/helper_generic.js";
+import { Fetcher, defineRequest } from "../../core/js/lib/async.js";
+import { genericTaskResponseMapper } from "./components/taskDetails.js";
+import { TasksO2OKeys } from "./constants.js";
+import { confirmDeletion } from "../../core/js/helpers/generic.js";
 import { generateDictionaryFromForm } from './form_handling.js';
 
 /**
@@ -8,7 +9,7 @@ import { generateDictionaryFromForm } from './form_handling.js';
  * @param {str} formId: dom element id attr value for form 
  */
 export function UpdateTask(formId) {
-    let dictionary = generateDictionaryFromForm(formId, keys);
+    let dictionary = generateDictionaryFromForm(formId, TasksO2OKeys);
 
     let request = defineRequest('/rest/tasks/crud/0/', {
         method: 'PUT',
@@ -26,7 +27,7 @@ export function UpdateTask(formId) {
  * @param {str} formId: dom element id attr value for form 
  */
 export function CreateTask(formId) {
-    let dictionary = generateDictionaryFromForm(formId, keys);
+    let dictionary = generateDictionaryFromForm(formId, TasksO2OKeys);
 
     let request = defineRequest('/rest/tasks/crud/0/', {
         method: 'POST',

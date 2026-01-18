@@ -1,4 +1,3 @@
-
 /**
  * confirms any deletion before the event.
  * @param {string} identifyer
@@ -50,4 +49,47 @@ export function checkVariableType(variable) {
         }
     }
     return typeof variable; // Handles null, undefined, number, boolean, etc.
+}
+
+/**
+ * Takes an object and key, and returns the value or a default you provide.
+ * @param {obj} object 
+ * @param {str} key 
+ * @param {*} defaultsTo 
+ * @returns 
+ */
+export function getter(object, key, defaultsTo = null) {
+    if (checkVariableType(object) === 'dictionary'){
+        return (object && Object.prototype.hasOwnProperty.call(object, key)) ? object[key] : defaultsTo;
+    }
+    return defaultsTo;
+}
+
+/**
+ * takes tag type, class name, id name and forms a simple dom element.
+ * @param {str} tagName 
+ * @param {str} className 
+ * @param {str} idName 
+ */
+export function makeDomElement(tagName, className = null, idName = null) {
+    let dom = document.createElement(tagName);
+    dom.className = className;
+    dom.idName = idName;
+    return dom;
+}
+
+/**
+ * Display values retrieved from database to front-end.
+ * @param {*} value
+ * @returns front-end friendly display
+ */
+export function formatValueToString(value) {
+    if (checkVariableType(value) === 'dictionary'){
+        try {
+            return JSON.stringify(value, null, 2);
+        } catch (e) {
+            return String(value); // just send the value
+        }
+    }
+    return String(value);
 }
