@@ -6,6 +6,7 @@ def index (request):
     context = {
         'heading': 'Welcome',
         'content': 'This is a initial view for the CRM + PM Software',
+        'loginRequired': 'false',
     }
 
     return render(request, 'core/generic.html', context)
@@ -19,6 +20,7 @@ def index (request):
 def notFoundError(request, exception):
     context = {
         'Message': 'Hello',
-        'exception': exception
+        'exception': exception,
+        'loginRequired': 'false',
     }
     return render(request, "core/404.html", context, status=404)
