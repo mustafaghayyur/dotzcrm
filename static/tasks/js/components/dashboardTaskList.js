@@ -1,13 +1,12 @@
 import { Fetcher, defineRequest } from '../../../core/js/lib/async.js';
-import { taskDetailsMapper } from './taskDetails.js';
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
 /**
  * Callback function for Fetcher() that maps retieved user's tasks to page elements.
  * @param {obj} data: results object from Fetcher call
  * @param {str} containerId: Id of the container to show any error messages.
  */
-export function fetchedTaskListMapper(data, containerId) {
+export default function (data, containerId) {
     const ulId = containerId.replace(/Response$/,'List');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
@@ -45,7 +44,7 @@ export function fetchedTaskListMapper(data, containerId) {
                 let id = task.dataset.taskId;
                 let request = defineRequest('/rest/tasks/crud/' + id);
                 task.addEventListener('click', ()=>{
-                    Fetcher(request, 'taskDetailsModalResponse', {}, taskDetailsMapper);
+                    Fetcher(request, 'taskDetailsModalResponse', {}, helper.tasks.load('taskDetails'));
                     updateUrlParam('task_id', id);
                 });
             });

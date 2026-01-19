@@ -1,6 +1,7 @@
-import { checkVariableType, getter } from "./generic.js";
+import generic from "./generic.js";
+import dates from "./dates.js";
 
-const forms = {
+export default {
     /**
      * confirms any deletion before the event.
      * @param {string} identifyer
@@ -18,9 +19,9 @@ const forms = {
      * @param {list} keys: keys is a list of all keys possible in the given form.
      */
     cleanForm: (formId, keys) => {
-        
+        const form = document.getElementById(formId);
         keys.forEach(key => {
-            const field = document.querySelector(formId+' [name="'+key+'"]');
+            const field = form.querySelector('[name="'+key+'"]');
             if (!(field instanceof HTMLElement)){
                 return;  // return only the foreach loop...
             }
@@ -58,7 +59,7 @@ const forms = {
         // 2. Convert the FormData entries into a plain JavaScript object (dictionary format)
         const formObject = Object.fromEntries(formData.entries());
 
-        if (checkVariableType(keysList) === 'list') {
+        if (generic.checkVariableType(keysList) === 'list') {
             let dictionary = {};
             keysList.forEach(key => {    
                 if (formObject[key]) {
@@ -94,7 +95,7 @@ const forms = {
             }
 
             if (hasDateTimeData(key)) {
-                field.value = convertDateTimeToLocal(value);  // convert to appropriate format first
+                field.value = dates.convertDateTimeToLocal(value);  // convert to appropriate format first
                 return;
             }
 
@@ -111,7 +112,5 @@ const forms = {
     hasDateTimeData: (key) => {
         return /(_time$)|deadline/.test(key);
     }
-}
-
-export default forms;
+};
 

@@ -1,15 +1,13 @@
 import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
-import { genericTaskResponseMapper } from "../components/taskDetails.js";
 import { TasksO2OKeys } from "../constants.js";
-import { generateDictionaryFromForm } from '../helpers/forms.js';
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
 /**
  * Allows submitted form to update existing record.
  * @param {str} formId: dom element id attr value for form 
  */
 export function UpdateTask(formId) {
-    let dictionary = generateDictionaryFromForm(formId, TasksO2OKeys);
+    let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
 
     let request = defineRequest('/rest/tasks/crud/0/', {
         method: 'PUT',
@@ -19,7 +17,7 @@ export function UpdateTask(formId) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', genericTaskResponseMapper);
+    Fetcher(request, 'taskEditModalResponse', helper.tasks.load('genericRecordDetails'));
 }
 
 /**
@@ -27,7 +25,7 @@ export function UpdateTask(formId) {
  * @param {str} formId: dom element id attr value for form 
  */
 export function CreateTask(formId) {
-    let dictionary = generateDictionaryFromForm(formId, TasksO2OKeys);
+    let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
 
     let request = defineRequest('/rest/tasks/crud/0/', {
         method: 'POST',
@@ -37,7 +35,7 @@ export function CreateTask(formId) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', genericTaskResponseMapper);
+    Fetcher(request, 'taskEditModalResponse', helper.tasks.load('genericRecordDetails'));
 }
 
 /**
@@ -57,7 +55,7 @@ export function DeleteTask(taskId, identifyer) {
         },
     });
 
-    Fetcher(request, 'taskDetailsModalResponse', genericTaskResponseMapper);
+    Fetcher(request, 'taskDetailsModalResponse', helper.tasks.load('genericRecordDetails'));
 }
 
 /**
@@ -83,7 +81,7 @@ export function toggleTodoStatus(record) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'personalTabResponse', genericTaskResponseMapper);
+    Fetcher(request, 'personalTabResponse', helper.tasks.load('genericRecordDetails'));
 
 }
 
@@ -104,5 +102,5 @@ export function deleteTodo(todoId, identifyer) {
         },
     });
 
-    Fetcher(request, 'personalTabResponse', genericTaskResponseMapper);
+    Fetcher(request, 'personalTabResponse', helper.tasks.load('genericRecordDetails'));
 }

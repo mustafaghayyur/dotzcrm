@@ -1,6 +1,6 @@
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
-
+export default function () {
     // Edit Task Modal: Save Operations Setup...
     const editTaskSaveBtn = document.getElementById('taskEditFormSaveBtn');
     editTaskSaveBtn.addEventListener('click', (e) => {
@@ -15,3 +15,4 @@ import helper from "../../../core/js/helpers/main";
             CreateTask('taskEditForm');
         }
     });
+}

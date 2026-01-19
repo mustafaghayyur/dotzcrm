@@ -1,5 +1,5 @@
 import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
 /**
  * Creates a new record in the back-end for current user as watcher of supplied task id.

@@ -1,12 +1,12 @@
-import { toggleTodoStatus, deleteTodo } from '../crud.js';
-import helper from "../../../core/js/helpers/main";
+import { toggleTodoStatus, deleteTodo } from '../crud/tasks.js';
+import helper from "../helper.js";
 
 /**
  * Callback function for Fetcher() that maps fetched ToDos to page elemments.
  * @param {obj} data: results object from Fetcher call
  * @param {str} containerId: Id of the container to show any error messages.
  */
-export function fetchedTodoListMapper(data, containerId) {
+export default function (data, containerId) {
     // I want to take the value held in containerId, and replace 'Responses' with List to get the ul id.
     const ulId = containerId.replace(/Response$/,'List');
     let ul = document.getElementById(ulId); // should be the ul parent node.

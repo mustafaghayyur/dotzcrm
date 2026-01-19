@@ -1,8 +1,5 @@
 import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
-import { genericTaskResponseMapper } from "../components/genericRecordDetails.js";
-import { generateDictionaryFromForm } from '.../helpers/forms.js';
-import helper from "../../../core/js/helpers/main";
-
+import helper from "../helper.js";
 
 /**
  * Allows for adding new comments.
@@ -10,7 +7,7 @@ import helper from "../../../core/js/helpers/main";
  * @param {str} formId: html dom id attribute value for entire form.
  */
 export function createCommentForTask(formId) {
-    let dictionary = generateDictionaryFromForm(formId);
+    let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId);
 
     let request = defineRequest('/rest/tasks/comment/0/', {
         method: 'POST',
@@ -20,5 +17,5 @@ export function createCommentForTask(formId) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'commentsResponse', genericTaskResponseMapper);
+    Fetcher(request, 'commentsResponse', helper.tasks.load('genericRecordDetails'));
 }

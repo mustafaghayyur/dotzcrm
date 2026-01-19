@@ -1,4 +1,4 @@
-const generic = {
+export default {
     /**
      * supports only dictionary, list and string data-types.
      * @param {*} item
@@ -21,7 +21,7 @@ const generic = {
     /**
      * Returns a string based definition of data-type.
      * @param {*} variable: any value type
-     * @returns ['string' | 'list' | 'null' | 'dictionary' | 'undefined' | 'number' | etc..]
+     * @returns ['string' | 'list' | 'null' | 'dictionary' | 'undefined' | 'integer' | etc..]
      */
     checkVariableType: (variable) => {
         if (typeof variable === 'string') {
@@ -32,6 +32,12 @@ const generic = {
         }
         if (variable === null) {
             return 'null';
+        }
+        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+value)) {
+            return 'number';
+        }
+        if (variable instanceof HTMLElement) {
+            return 'domelement'
         }
         if (typeof variable === 'object' && variable !== null) {
             if (Object.prototype.toString.call(variable) === '[object Object]') {
@@ -84,8 +90,16 @@ const generic = {
         return String(value);
     },
 
+    /**
+     * Loads a component specified with arguments.
+     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
+     * @param {str} app: name of django app/module we are operating in 
+     * @returns 
+     */
     load: async (component, app) => {
-        const modulePath = `../../../${app}/js/components/${component}.js`;
+        const componentPath = component.replace(/\./, '/');
+        console.log('Inside load(), checking if component path is generating correctly', component, componentPath);
+        const modulePath = `../../../${app}/js/components/${componentPath}.js`;
         try {
             // The import() function accepts the string variable
             const module = await import(modulePath);
@@ -94,6 +108,4 @@ const generic = {
             console.error('Error loading component:', error);
         }
     }
-}
-
-export default generic;
+};

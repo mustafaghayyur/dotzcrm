@@ -1,11 +1,11 @@
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
 /**
  * Generic mapper - might be used to catch error messages, etc...
  * Maps error/success messages to elements in dom. 
  * May be used by Fetcher() in forms for rest/tasks/crud/.
  */
-export const genericTaskResponseMapper = {
+const genericTaskResponseMapper = {
     description: helper.generic.makeDomElement('span', 'rec-itm'), 
     status: helper.generic.makeDomElement('span', 'rec-itm'), 
     visibility: helper.generic.makeDomElement('span', 'rec-itm'),
@@ -29,3 +29,5 @@ export const genericTaskResponseMapper = {
     message: helper.generic.makeDomElement('span', 'rec-itm'),
     messages: helper.generic.makeDomElement('span', 'rec-itm'),
 };
+
+export default genericTaskResponseMapper

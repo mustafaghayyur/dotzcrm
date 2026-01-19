@@ -1,4 +1,4 @@
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
 /**
  * @todo implement

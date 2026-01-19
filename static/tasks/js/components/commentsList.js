@@ -1,6 +1,6 @@
-import helper from "../../../core/js/helpers/main";
+import helper from "../helper.js";
 
-export function commentsMapper(data, containerId) {
+export default function (data, containerId) {
     let parentId = containerId.replace(/Response$/,'');
     let container = document.getElementById(parentId);
     let commentCreator = container.querySelector('#createComment');

@@ -1,5 +1,5 @@
 
-const dates = {
+export default {
     /**
      * Convert's a datetime value supplied by the back-end into a human-readable date and time value,
      * in the timezone of the current browser.
@@ -130,5 +130,3 @@ const dates = {
         }
     }
 };
-
-export default dates;

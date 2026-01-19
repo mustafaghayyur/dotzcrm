@@ -1,5 +1,5 @@
-import { TasksO2OKeys } from "./constants.js";
-import helper from "../../../core/js/helpers/main";
+import { TasksO2OKeys } from "../constants.js";
+import helper from "../helper.js";
 
 /**
  * This mapper function only finds dom elements matching items in the 'TasksO2OKeys' list, if resultSet has the key
@@ -10,7 +10,7 @@ import helper from "../../../core/js/helpers/main";
  * @param {object} resultSet - retrieved from Fetcher() internal function fetchResource()
  * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
-export function taskDetailsMapper(resultSet, containerId) {
+export default function (resultSet, containerId) {
     TasksO2OKeys.forEach(key => {
         let fieldContainer = document.getElementById(key);
 
@@ -37,7 +37,7 @@ export function taskDetailsMapper(resultSet, containerId) {
         // add edit button
         let editBtn = document.getElementById('editTaskBtn');
         editBtn.addEventListener('click', () => {
-            prefillEditForm(resultSet);
+            prefillEditForm(resultSet, TasksO2OKeys);
         });
 
         // add delete button functionality
@@ -86,7 +86,6 @@ export function taskDetailsMapper(resultSet, containerId) {
 
         // finally, retrieve task-level-comments..
         let request = defineRequest('/rest/tasks/comments/?task_id=' + resultSet['tid']);
-        Fetcher(request, "commentsResponse", {}, commentsMapper);
+        Fetcher(request, "commentsResponse", {}, helper.tasks.load('commentsList'));
     }
-
 }
