@@ -8,7 +8,7 @@ const appConfig = {
     mode: 'development', // on prod change to: 'production',
     entry: {
         // Defines two separate entry points and their output names
-        'core-bundle': path.resolve(__dirname, './core/js/custom.js'),
+        //'core-bundle': path.resolve(__dirname, './core/js/custom.js'),
         'tasks-bundle': path.resolve(__dirname, './tasks/js/custom.js')
     },
     output: {
@@ -35,7 +35,7 @@ const appConfig = {
 module.exports = (env = {}) => {
     const entry = env.entry;
 
-    if (entry === 'core') {
+    /**if (entry === 'core') {
         return {
             mode: 'development',
             entry: path.resolve(__dirname, './core/js/custom.js'),
@@ -46,12 +46,12 @@ module.exports = (env = {}) => {
             module: appConfig.module,
             stats: appConfig.stats,
         };
-    }
+    }*/
 
     if (entry === 'tasks') {
         return {
             mode: 'development',
-            entry: path.resolve(__dirname, './tasks/js/custom.js'),
+            entry: path.resolve(__dirname, './tasks/js/main.js'),
             output: {
                 filename: 'tasks-bundle.js',
                 path: path.resolve(__dirname, 'dist'),

@@ -177,3 +177,13 @@ def resetUserPassword(request, format=None):
     except Exception as e:
         return Response(crud.generateError(e, "Errors have occurred."), status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+def retrieveSettings(request):
+    context = {
+        'username': 'sysadmin',
+        'user_id': 1,
+        'allowed_routes': 'hhtp'
+    }
+    
+    Response(crud.generateResponse(context))
+

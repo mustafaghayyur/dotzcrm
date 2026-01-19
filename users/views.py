@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render
 from django.contrib.auth.forms import AuthenticationForm
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Only Auth section Views defined here.
 
@@ -17,69 +16,6 @@ def register(request):
     }
     return render(request, 'core/generic.html', context)
 
-class ObtainTokenView(TokenObtainPairView):
-    def post(self, request, *args, **kwargs):
-        """
-        Override post to add access and refresh tokens as HTTP-only cookies.
-        Tokens are set with HttpOnly, Secure, and SameSite flags for security.
-        """
-        response = super().post(request, *args, **kwargs)
-        
-        if response.status_code == 200:
-            access_token = response.data.get('access')
-            refresh_token = response.data.get('refresh')
-            
-            # Set access token cookie
-            if access_token:
-                response.set_cookie(
-                    key='access_token',
-                    value=access_token,
-                    max_age=1 * 60 * 60,  # 1 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
-                    httponly=True,
-                    secure=True,
-                    samesite='Strict',
-                    path='/'
-                )
-            
-            # Set refresh token cookie
-            if refresh_token:
-                response.set_cookie(
-                    key='refresh_token',
-                    value=refresh_token,
-                    max_age=24 * 60 * 60,  # 24 hours (matches JWT_REFRESH_TOKEN_LIFETIME)
-                    httponly=True,
-                    secure=True,
-                    samesite='Strict',
-                    path='/'
-                )
-        
-        return response
-
-
-class RefreshTokenView(TokenRefreshView):
-    def post(self, request, *args, **kwargs):
-        """
-        Override post to add refreshed access token as HTTP-only cookie.
-        Token is set with HttpOnly, Secure, and SameSite flags for security.
-        """
-        response = super().post(request, *args, **kwargs)
-        
-        if response.status_code == 200:
-            access_token = response.data.get('access')
-            
-            # Set new access token cookie
-            if access_token:
-                response.set_cookie(
-                    key='access_token',
-                    value=access_token,
-                    max_age=1 * 60 * 60,  # 1 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
-                    httponly=True,
-                    secure=True,
-                    samesite='Strict',
-                    path='/'
-                )
-        
-        return response
 
 
 def login(request):
@@ -155,4 +91,5 @@ def passwordReset4(request):
         'loginRequired': 'false',
     }
     render(request, 'auth/password_reset_comlplete.html', context)
+
 
