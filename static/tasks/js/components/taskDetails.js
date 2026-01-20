@@ -19,7 +19,7 @@ export default function (resultSet, containerId) {
             let item = helper.generic.formatValueToString(data);
 
             if (item && (item.startsWith('{') || item.startsWith('['))) {
-                let pre = helper.generic.makeDomElement('pre', 'm-1');
+                let pre = helper.app.makeDomElement('pre', 'm-1');
                 pre.textContent = helper.forms.escapeHtml(item);
                 fieldContainer.appendChild(pre);
                 return;

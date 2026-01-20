@@ -1,6 +1,7 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 
 from core.helpers import crud
 from restapi.lib.helpers import getUserFromJwtCookie
@@ -178,12 +179,82 @@ def resetUserPassword(request, format=None):
         return Response(crud.generateError(e, "Errors have occurred."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def retrieveSettings(request):
-    context = {
-        'username': 'sysadmin',
-        'user_id': 1,
-        'allowed_routes': 'hhtp'
+    """
+    Retrieve API settings based on authentication status.
+    - Accessible to both authenticated and anonymous users
+    - Returns userSettings if valid JWT token is present
+    - Returns anonymousSettings if no valid token or anonymous user
+    """
+    # Anonymous settings for unauthenticated users
+    anonymousSettings = {
+        'is_authenticated': False,
+        'allowed_routes': {
+            'api': {
+                'auth': {
+                    'login': '/accounts/rest/token/',
+                    'refresh': '/accounts/rest/token/refresh/',
+                    'settings': '/accounts/rest/settings/'
+                },
+            },
+            'ui': {
+                'auth': {
+                    'login': '/accounts/login/',
+                    'register': '/accounts/register/'
+                },
+            }
+        }
     }
     
-    Response(crud.generateResponse(context))
+    try:
+        # Try to authenticate user from JWT cookie
+        user = getUserFromJwtCookie(request)
+        
+        # User is authenticated - return user settings
+        userSettings = {
+            'is_authenticated': True,
+            'username': user.username,
+            'user_id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_active': user.is_active,
+            'is_leader': user.is_leader,
+            'authenticated': True,
+            'allowed_routes': {
+                'api': {
+                    'auth': {
+                        'login': '/accounts/rest/token/',
+                        'refresh': '/accounts/rest/token/refresh/',
+                        'settings': '/accounts/rest/settings/',
+                        'logout': '/accounts/rest/logout/',
+                        'change_password': '/accounts/rest/change-password/',
+                    },
+                    'task': {
+                        'crud': '/rest/tasks/crud/{input1}/',
+                        'list': '/rest/tasks/{input1}/',
+                        'comment_crud': '/rest/tasks/comments/crud/{input1}/',
+                        'comment_list': '/rest/tasks/comments/',
+                        'watcher_crud': '/rest/tasks/watchers/crud/{input1}/',
+                        'watcher_list': '/rest/tasks/watchers/{input1}/',
+                    },
+                },
+                'ui': {
+                    'auth': {
+                        'login': '/accounts/login/',
+                        'register': '/accounts/register/',
+                    },
+                    'apps': {
+                        'tasks': '/tasks/',
+                    }
+                }
+            }
+        }
+        
+        return Response(crud.generateResponse(userSettings))
+        
+    except (InvalidToken, Exception):
+        # User is not authenticated or token is invalid - return anonymous settings
+        return Response(crud.generateResponse(anonymousSettings))
 

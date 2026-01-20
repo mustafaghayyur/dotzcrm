@@ -1,4 +1,5 @@
 import generic from '../../core/js/helpers/generic.js';
+import app from '../../core/js/helpers/app.js';
 import forms from '../../core/js/helpers/forms.js';
 import dates from '../../core/js/helpers/dates.js';
 import formsLocal from './helpers/forms.js';
@@ -9,6 +10,7 @@ import formsLocal from './helpers/forms.js';
  */
 export default {
     generic: generic,
+    app: app,
     forms: forms,
     dates: dates,
     tasks: {
@@ -19,6 +21,8 @@ export default {
          * Loads a compoenent specified with argument.
          * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName'
          */
-        //load: generic.load(commponent, 'tasks')
+        load: (commponent) => {
+            generic.load(commponent, 'tasks');
+        }
     }
 };

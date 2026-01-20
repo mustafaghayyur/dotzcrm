@@ -4,8 +4,8 @@ export default {
      * @param {*} item
      * @returns bool
      */
-    isVariableEmpty: (item) => {
-        const type = checkVariableType(item);
+    isVariableEmpty: function (item) {
+        const type = this.checkVariableType(item);
         if (type === 'dictionary' && Object.keys(item).length === 0) {
             return true;
         }
@@ -23,7 +23,7 @@ export default {
      * @param {*} variable: any value type
      * @returns ['string' | 'list' | 'null' | 'dictionary' | 'undefined' | 'integer' | etc..]
      */
-    checkVariableType: (variable) => {
+    checkVariableType: function (variable) {
         if (typeof variable === 'string') {
             return 'string';
         }
@@ -33,7 +33,7 @@ export default {
         if (variable === null) {
             return 'null';
         }
-        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+value)) {
+        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable)) {
             return 'number';
         }
         if (variable instanceof HTMLElement) {
@@ -47,6 +47,11 @@ export default {
         return typeof variable; // Handles null, undefined, number, boolean, etc.
     },
 
+    isPrimitiveValue: function (variable) {
+        let type = this.checkVariableType(variable);
+        const allowed = ['string', 'number', 'bigint', "boolean", 'undefined', 'null', 'symbol']
+    },
+
     /**
      * Takes an object and key, and returns the value or a default you provide.
      * @param {obj} object 
@@ -54,7 +59,7 @@ export default {
      * @param {*} defaultsTo 
      * @returns 
      */
-    getter: (object, key, defaultsTo = null) => {
+    getter: function (object, key, defaultsTo = null) {
         if (checkVariableType(object) === 'dictionary') {
             return (object && Object.prototype.hasOwnProperty.call(object, key)) ? object[key] : defaultsTo;
         }
@@ -62,24 +67,11 @@ export default {
     },
 
     /**
-     * takes tag type, class name, id name and forms a simple dom element.
-     * @param {str} tagName 
-     * @param {str} className 
-     * @param {str} idName 
-     */
-    makeDomElement: (tagName, className = null, idName = null) => {
-        let dom = document.createElement(tagName);
-        dom.className = className;
-        dom.idName = idName;
-        return dom;
-    },
-
-    /**
      * Display values retrieved from database to front-end.
      * @param {*} value
      * @returns front-end friendly display
      */
-    formatValueToString: (value) => {
+    formatValueToString: function (value) {
         if (checkVariableType(value) === 'dictionary') {
             try {
                 return JSON.stringify(value, null, 2);
@@ -90,22 +82,13 @@ export default {
         return String(value);
     },
 
-    /**
-     * Loads a component specified with arguments.
-     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
-     * @param {str} app: name of django app/module we are operating in 
-     * @returns 
-     */
-    load: async (component, app) => {
-        const componentPath = component.replace(/\./, '/');
-        console.log('Inside load(), checking if component path is generating correctly', component, componentPath);
-        const modulePath = `../../../${app}/js/components/${componentPath}.js`;
-        try {
-            // The import() function accepts the string variable
-            const module = await import(modulePath);
-            return module.default;
-        } catch (error) {
-            console.error('Error loading component:', error);
+    loopObject: function (object, callbackFunction) {
+        for (const key in object) {
+            // .hasOwnProperty ensures only defined properties are looped.
+            if (Object.hasOwnProperty.call(object, key)) {
+                callbackFunction(key, object[key]);
+            }
         }
     }
 };
+

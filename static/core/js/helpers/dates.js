@@ -6,7 +6,7 @@ export default {
      * @param {string} mysqlString: needs to be in format: "YYYY-MM-DDTHH:MM:SS.000Z"
      * @param {object} displayOptions: object spefifying paramerters for display (see default for ideas)
      */
-    convertToDisplayLocal: (mysqlString, displayOptions = null) => {
+    convertToDisplayLocal: function (mysqlString, displayOptions = null) {
         // Create a new Date object. The browser automatically interprets the 'Z' as UTC
         const dateObj = new Date(mysqlString);
 
@@ -37,7 +37,7 @@ export default {
      * @param {string} mysqlString: needs to be in format: "YYYY-MM-DDTHH:MM:SS.000Z"
      * @returns {string} datetime-local formatted string "YYYY-MM-DDTHH:MM" (local timezone)
      */
-    convertDateTimeToLocal: (mysqlString) => {
+    convertDateTimeToLocal: function (mysqlString) {
         try {
             if (!mysqlString) return '';
 
@@ -64,7 +64,7 @@ export default {
      * @param {Date object | string} localString: string can be "YYYY-MM-DDTHH:MM" (local timezone)
      * @returns string format "YYYY-MM-DDTHH:MM:SS.000Z"
      */
-    convertLocalToBackendUTC: (localDate) => {
+    convertLocalToBackendUTC: function (localDate) {
         try {
             if (!localDate) return '';
 
@@ -110,7 +110,7 @@ export default {
      * Useful to ensure user supplied values are formatted correctly.
      * @param {string} dtValuePrivided - user supplied string representation of the datetime value
      */
-    sloppyDateTimeCorrection: (dtValuePrivided) => {
+    sloppyDateTimeCorrection: function (dtValuePrivided) {
         try {
             const dt = new Date(dtValuePrivided);
             const pad = str => String(str).padStart(2, '0');

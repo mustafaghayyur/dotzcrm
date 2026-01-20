@@ -5,8 +5,11 @@ export default () => {
     const form = document.getElementById('loginForm');
     const submit = form.querySelector('.form-submit');
 
-    submit.addEventListener('click', () => {
+    submit.addEventListener('click', (e) => {
+        e.preventDefault();
         const dictionary = helper.tasks.forms.generateDictionaryFromForm('loginForm');
+        console.log('What is the dictionary looking like? ', dictionary);
+
         const request = defineRequest('auth.login', '', { 
             method: 'POST',
             headers: {
@@ -16,9 +19,12 @@ export default () => {
             credentials: 'same-origin',
             body: JSON.stringify(dictionary),
         });
-        Fetcher(request, 'authenticationResponse', {}, () => {
-            window.location.href = helper.routes.dashboard;
-            window.location.reload();
+        console.log('Heloooooooo3');
+        Fetcher(request, 'authenticationResponse', {}, (data, containerId) => {
+            console.log('Heloooooooo1');
+            let urls = helper.app.memFetch('allowed_routes', true);
+            console.log('checking login if urls are coming correctly...', urls);
+            window.location.href = urls.ui.apps.tasks;
         });
     });
 }

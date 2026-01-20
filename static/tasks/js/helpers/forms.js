@@ -29,13 +29,13 @@ export default {
     generateDictionaryFromForm: (formId, keys = null) => {
         let dictionary = helper.forms.formToDictionary(formId, keys = null);
 
-        if (helper.generic.checkVariableType(keysList) === 'list') {
-            keysList.forEach(key => {    
+        if (helper.generic.checkVariableType(keys) === 'list') {
+            keys.forEach(key => {    
                 if (dictionary[key]) {
                     dictionary[key] = validate(dictionary[key]);
                 }
             });
-            return dictionary;
         }
+        return dictionary;
     }
 };

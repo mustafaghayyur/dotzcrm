@@ -3,8 +3,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 # from rest_framework.decorators import authentication_classes, permission_classes
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from core.helpers import pagination, crud, misc
 
@@ -27,7 +25,6 @@ from .helpers.taskWatchers import WatchersMethods
 
     Possible decorators:
         @authentication_classes([JWTAuthentication])
-        @permission_classes([IsAuthenticated])
 """
 @api_view(['GET'])
 def task_list(request, type, format=None):

@@ -75,6 +75,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             if (contentType.includes('application/json')) {
                 let data = await response.json();
                 if (Object.hasOwn(data, 'results') === true) {
+                    console.log('gellloooooo6');
                     renderResponse(data.results);
                     return true;
                 }
@@ -201,6 +202,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
  * Helps form a proper request definition object
  */
 export function defineRequest(urlKey, urlParams = {}, options = {}) {
+    console.log('checking what URL is being called: ', urlKey);
     const urlTemplate = selectUrlTemplate(urlKey);
     let url = generateUrl(urlTemplate, urlParams);
     

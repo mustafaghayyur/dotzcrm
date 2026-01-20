@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
+from django.conf import settings
+from core.helpers import misc
 # Only Auth section Views defined here.
 
 class ObtainTokenView(TokenObtainPairView):
@@ -15,6 +16,8 @@ class ObtainTokenView(TokenObtainPairView):
             access_token = response.data.get('access')
             refresh_token = response.data.get('refresh')
             
+            secureFlag = False if settings.DEBUG  else True  # sets secure=false flag if debug is on.
+
             # Set access token cookie
             if access_token:
                 response.set_cookie(
@@ -22,7 +25,7 @@ class ObtainTokenView(TokenObtainPairView):
                     value=access_token,
                     max_age=1 * 60 * 60,  # 1 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
                     httponly=True,
-                    secure=True,
+                    secure=secureFlag,
                     samesite='Strict',
                     path='/'
                 )
@@ -34,11 +37,11 @@ class ObtainTokenView(TokenObtainPairView):
                     value=refresh_token,
                     max_age=24 * 60 * 60,  # 24 hours (matches JWT_REFRESH_TOKEN_LIFETIME)
                     httponly=True,
-                    secure=True,
+                    secure=secureFlag,
                     samesite='Strict',
                     path='/'
                 )
-        
+        misc.log(response, 'Insvestigating the response from token create')
         return response
 
 

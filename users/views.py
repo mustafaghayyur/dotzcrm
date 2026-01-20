@@ -23,11 +23,9 @@ def login(request):
         Handle user login with JWT token generation.
         GET: Display login form
     """
-    context ={
-        'loginRequired': 'false',
-    }
     form = AuthenticationForm()
     context = {
+        'loginRequired': 'false',
         'next': 'task_index',
         'form': form,
     }

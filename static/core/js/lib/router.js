@@ -1,4 +1,5 @@
 import generic from "../helpers/generic.js";
+import app from "../helpers/app.js";
 import { Fetcher, defineRequest } from "./async.js";
 
 /**
@@ -102,13 +103,13 @@ export default function () {
             if (where === 'default') {
                 let div = null;
                 errors.forEach(error, () => {
-                    div = generic.makeDomElement('div', 'small');
+                    div = app.makeDomElement('div', 'small');
                     div.textContent = error;
                     responseContainer.appendChild(div);
                 });
             } else {
                 errors.forEach(error, () => {
-                    div = generic.makeDomElement('div', 'small');
+                    div = app.makeDomElement('div', 'small');
                     console.log('Error in Router: ', error);
                 });
             }

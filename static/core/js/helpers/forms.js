@@ -9,7 +9,7 @@ export default {
      * 
      * @todo: implement
      */
-    confirmDeletion: (identifyer) => {
+    confirmDeletion: function (identifyer) {
         return true;
     },
     /**
@@ -18,7 +18,7 @@ export default {
      * @param {string} formId: should be the while id value along with the '#' selector
      * @param {list} keys: keys is a list of all keys possible in the given form.
      */
-    cleanForm: (formId, keys) => {
+    cleanForm: function (formId, keys) {
         const form = document.getElementById(formId);
         keys.forEach(key => {
             const field = form.querySelector('[name="'+key+'"]');
@@ -36,7 +36,7 @@ export default {
      * @param {string} str: string to escape 
      * @returns 
      */
-    escapeHtml: (str) => {
+    escapeHtml: function (str) {
         return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
     },
 
@@ -46,7 +46,7 @@ export default {
      * @param {string} formId: should be string html id attribute value
      * @param {*} keysList: optional list of keys to check/validate
      */
-    formToDictionary: (formId, keysList = null) => {
+    formToDictionary: function (formId, keysList = null) {
         const form = document.getElementById(formId);
 
         if (!(form instanceof HTMLElement)) {
@@ -78,7 +78,7 @@ export default {
      * @param {str} formId: html dom id attr value 
      * @param {list} keys: holds list of all possible fields to expect for form.
      */
-    prefillForms: (data, formId, keys) => {
+    prefillForms: function (data, formId, keys) {
         const form = document.getElementById(formId); // Get the form element
 
         if (!(form instanceof HTMLElement)) {
@@ -109,7 +109,7 @@ export default {
      * @param {str} key: inidvidual key name which should correlate with a Model column name in Django.
      * @returns 
      */
-    hasDateTimeData: (key) => {
+    hasDateTimeData: function (key) {
         return /(_time$)|deadline/.test(key);
     }
 };
