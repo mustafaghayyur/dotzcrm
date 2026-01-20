@@ -1,14 +1,12 @@
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.decorators import permission_classes
-# from rest_framework.permissions import AllowAny
 from django.conf import settings
 from core.helpers import crud, misc
-# Only Auth section Views defined here.
 
+# from rest_framework.permissions import AllowAny| IsAuthenticated
+# permission_classes = [AllowAny] | permission_classes = [IsAuthenticated]
 class ObtainTokenView(TokenObtainPairView):
-    # permission_classes = [AllowAny]  # @todo: needed?
-    
     def post(self, request, *args, **kwargs):
         """
         Override post to add access and refresh tokens as HTTP-only cookies.
