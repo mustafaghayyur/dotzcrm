@@ -9,7 +9,7 @@ import helper from "../helper.js";
 export function UpdateTask(formId) {
     let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
 
-    let request = defineRequest('/rest/tasks/crud/0/', {
+    let request = defineRequest('api.tasks.crud', '0', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ export function UpdateTask(formId) {
 export function CreateTask(formId) {
     let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
 
-    let request = defineRequest('/rest/tasks/crud/0/', {
+    let request = defineRequest('api.tasks.crud', '0', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export function DeleteTask(taskId, identifyer) {
     }
     //const id = document.querySelector('#taskDetailsModal #tid');
 
-    let request = defineRequest('/rest/tasks/crud/' + taskId + '/', {
+    let request = defineRequest('api.tasks.crud', String(taskId), {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export function toggleTodoStatus(record) {
         status: newStatus
     };
 
-    let request = defineRequest('/rest/tasks/crud/0/', {
+    let request = defineRequest('api.tasks.crud', '0', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export function deleteTodo(todoId, identifyer) {
         return null;
     }
 
-    let request = defineRequest('/rest/tasks/crud/' + todoId + '/', {
+    let request = defineRequest('api.tasks.crud', String(todoId), {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',

@@ -1,9 +1,9 @@
 import { Fetcher, defineRequest } from "../../core/js/lib/async.js";
 import { TabbedDashBoard } from "../../core/js/lib/dashboard.js";
-//import { showModal } from "../../core/js/lib/modal_linking.js";
+//import { showModal } from "../../core/js/lib/router.js";
 import { Main } from '../../core/js/lib/app.js';
 import helper from './helper.js';
-//import { TasksO2OKeys } from "./constants.js";
+import { TasksO2OKeys } from "./constants.js";
 
 /**
  * Begin Tasks Application:
@@ -16,10 +16,10 @@ Main(() => {
         // 'Personal' tab of the tasks dashboard:
         personal: () => {
             let request = null;
-            //request = defineRequest('/rest/tasks/private', { credentials: 'same-origin' });
-            //Fetcher(request, 'personalTabResponse', {}, helper.tasks.load('dashboardTodoList'));
+            request = defineRequest('api.tasks.list', 'private', { credentials: 'same-origin' });
+            Fetcher(request, 'personalTabResponse', {}, helper.tasks.load('dashboardTodoList'));
 
-            request = defineRequest('/rest/tasks/workspaces', { credentials: 'same-origin' });
+            request = defineRequest('api.tasks.list', 'workspaces', { credentials: 'same-origin' });
             Fetcher(request, 'workspacesTabResponse', {}, helper.tasks.load('dashboardTaskList'));
         },
         // 'Workspaces' tab of tasks dashboard:
@@ -33,7 +33,7 @@ Main(() => {
         'taskDetailsModalResponse', 
         'taskDetailsModal', 
         taskDetailsMapper
-    );
+    );*/
 
     // add 'clean form' functionality to all .open-form btns...
     const openFormBtn = document.querySelectorAll('.open-form');
@@ -41,5 +41,5 @@ Main(() => {
         button.addEventListener('click', () => {
             helper.tasks.forms.cleanTaskForm('taskEditForm', TasksO2OKeys);
         });
-    });**/
+    });
 });

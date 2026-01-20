@@ -9,7 +9,7 @@ import helper from "../helper.js";
 export function createCommentForTask(formId) {
     let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId);
 
-    let request = defineRequest('/rest/tasks/comment/0/', {
+    let request = defineRequest('api.tasks.comments_crud', '0', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -231,13 +231,13 @@ def retrieveSettings(request):
                         'logout': '/accounts/rest/logout/',
                         'change_password': '/accounts/rest/change-password/',
                     },
-                    'task': {
+                    'tasks': {
                         'crud': '/rest/tasks/crud/{input1}/',
                         'list': '/rest/tasks/{input1}/',
-                        'comment_crud': '/rest/tasks/comments/crud/{input1}/',
-                        'comment_list': '/rest/tasks/comments/',
-                        'watcher_crud': '/rest/tasks/watchers/crud/{input1}/',
-                        'watcher_list': '/rest/tasks/watchers/{input1}/',
+                        'comments_crud': '/rest/tasks/comment/crud/{input1}/',
+                        'comments_list': '/rest/tasks/comments/',
+                        'watchers_crud': '/rest/tasks/watcher/crud/{input1}/',
+                        'watchers_list': '/rest/tasks/watchers/{input1}/',
                     },
                 },
                 'ui': {

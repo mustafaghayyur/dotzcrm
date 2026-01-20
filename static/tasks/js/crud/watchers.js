@@ -21,7 +21,7 @@ export function createWatcher(taskId, watchBtnId, unwatchBtnId){
         }
     };
 
-    const request = defineRequest('/rest/tasks/watch/' + taskId + '/', params);
+    const request = defineRequest('api.tasks.watchers_crud', String(taskId), params);
     Fetcher(request, 
         'taskDetailsModalResponse', {}, 
         () => {
@@ -48,7 +48,7 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
         }
     };
 
-    const request = defineRequest('/rest/tasks/watch/' + taskId + '/', params);
+    const request = defineRequest('api.tasks.watchers_crud', String(taskId), params);
     Fetcher(
         request, 
         'taskDetailsModalResponse', {}, 

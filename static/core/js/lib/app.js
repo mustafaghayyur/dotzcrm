@@ -8,15 +8,15 @@ import app from "../helpers/app.js";
 
 export function Main(callbackFunction) {
     document.addEventListener('DOMContentLoaded', () => {
-        const request = defineRequest('auth.settings');
+        const request = defineRequest('api.auth.settings');
         Fetcher(request, 'authenticationResponse', {}, (data, containerId) => {
             generic.loopObject(data, (key, val) => {
                 app.memSave(key, data[key]);
-                console.log(`inside Main() saving settings ... Key: ${key}, Value: `, data[key]);
             });
 
             const loginRequired = document.getElementById('loginRequired');
             app.memSave('loginRequired', loginRequired.dataset.loginRequired);
+            
             if (!data.is_authenticated && loginRequired.dataset.loginRequired === 'true') {
                 relocateToLogin();
             }
@@ -29,7 +29,6 @@ export function Main(callbackFunction) {
 
     function relocateToLogin() {
         let urls = app.memFetch('allowed_routes', true);
-        console.log('We have made it to relocateToLogiN! What is urls looking like?', urls);
         window.location.href = urls.ui.auth.login;
     }
 }

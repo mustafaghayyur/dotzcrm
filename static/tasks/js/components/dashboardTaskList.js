@@ -42,7 +42,7 @@ export default function (data, containerId) {
             let tasks = container.querySelectorAll('.task-details-link');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
-                let request = defineRequest('/rest/tasks/crud/' + id);
+                let request = defineRequest('api.tasks.crud', String(id));
                 task.addEventListener('click', ()=>{
                     Fetcher(request, 'taskDetailsModalResponse', {}, helper.tasks.load('taskDetails'));
                     updateUrlParam('task_id', id);

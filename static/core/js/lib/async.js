@@ -1,26 +1,7 @@
 import merge from 'lodash/merge';
 import forms from "../helpers/forms.js";
 import generic from "../helpers/generic.js";
-
-
-/**
- * All urls for CRM + PM Software
- */
-const projectUrls = {
-    auth: {
-        login: '/accounts/rest/token/',
-        refresh: '/accounts/rest/token/refresh/',
-        settings: '/accounts/rest/settings/'
-    },
-    task: {
-        crud: '/rest/tasks/crud/{input1}/',
-        list: '/rest/tasks/{input1}/',
-        comment_crud: '/rest/tasks/comments/crud/{input1}/',
-        comment_list: '/rest/tasks/comments/',
-        watcher_crud: '/rest/tasks/watchers/crud/{input1}/',
-        watcher_list: '/rest/tasks/watchers/{input1}/',
-    }
-}
+import app from "../helpers/app.js";
 
 /**
  * This class handles one fetch ooperation for one DOM element. The supplied
@@ -75,7 +56,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             if (contentType.includes('application/json')) {
                 let data = await response.json();
                 if (Object.hasOwn(data, 'results') === true) {
-                    console.log('gellloooooo6');
                     renderResponse(data.results);
                     return true;
                 }
@@ -192,7 +172,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 
     /**
      * Implementation of Fetcher...
-     * see console logs for errors found during rendering of response...
      */
     fetchResource(request);
 }
@@ -202,7 +181,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
  * Helps form a proper request definition object
  */
 export function defineRequest(urlKey, urlParams = {}, options = {}) {
-    console.log('checking what URL is being called: ', urlKey);
     const urlTemplate = selectUrlTemplate(urlKey);
     let url = generateUrl(urlTemplate, urlParams);
     
@@ -210,7 +188,6 @@ export function defineRequest(urlKey, urlParams = {}, options = {}) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            //'Authorization': ' Bearer ' + getAccessToken(),
         },
     };
     const finalOptions = merge(defaults, options);
@@ -222,19 +199,41 @@ function selectUrlTemplate(urlKey) {
         throw new Error('defineRequest() - urlKey must be a string in format "app.key"');
     }
     const parts = urlKey.split('.');
-    if (parts.length < 2 || parts.length > 3) {
+    const projectUrls = app.memFetch('allowed_routes', true);
+
+    if (parts.length === 2) {
+        return projectUrls[parts[0]][parts[1]];
+    }
+    if (parts.length === 3) {
+        return projectUrls[parts[0]][parts[1]][parts[2]];
+    } else {
         throw new Error('defineRequest() - urlKey must be in format "app.key"');
     }
-    return projectUrls[parts[0]][parts[1]];
 }
 
+
+/**
+ * @todo: setup authentication mechanism
+ */
 function generateUrl(template, params) {
-    if (generic.checkVariableType(params) === 'string') {
+    const paramType = generic.checkVariableType(params);
+    if (paramType === 'string') {
+        let param = params;
         params = {
-            input1: params
+            input1: param
         };
     }
-    let inputs = RegExp('({input[0-9]+})', 'g');
+    if (paramType === 'null') {
+        params = {
+            input1: ''
+        };
+    }
+    if (paramType === 'dictionary' && generic.isVariableEmpty(paramType)) {
+        params = {
+            input1: ''
+        };
+    }
+    let inputs = RegExp('{(input[0-9]+)}', 'g');
     return template.replace(inputs, (match, input) => {
         if (input in params) {
             return encodeURIComponent(params[input]);
@@ -262,12 +261,13 @@ function tokenLastRefreshed(){
 }
 
 function refreshToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (refreshToken === null) {
-        throw new Error('refreshToken() - no refresh token found in localStorage');
+    const lastRefreshed = app.memFetch('token_last_refreshed');
+
+    if (lastRefreshed > Date.now() - 86400) {
+        throw new Error('Your session has expired. Please login again to continue.');
     }
 
-    const request = new Request(projectUrls.auth.refresh, {
+    const request = defineRequest('api.auth.refresh', '', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -288,14 +288,3 @@ function refreshToken() {
         }
     });
 }
-
-/**
- * localStorage.setItem(key, value): Stores a key-value pair.
- * localStorage.getItem(key): Retrieves a value by its key.
- * localStorage.removeItem(key): Removes a specific item by its key.
- * localStorage.clear(): Clears all data stored for the current domain. 
- * 
- * OR 
- * 
- * http cookie with HttpOnly, Secure, and SameSite flags
- */

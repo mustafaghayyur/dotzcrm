@@ -79,7 +79,7 @@ export default function () {
          */
         routeWhere: (route, callbackFunction) => {
             if (generic.checkVariableType(route) !== 'string') {
-                errors.push('Api ruote key not in string format.');
+                errors.push('Api ruote key not in string format: "interface.app.node".');
             }
 
             if (generic.checkVariableType(responseContainer) !== 'domelement') {

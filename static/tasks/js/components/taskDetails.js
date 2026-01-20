@@ -1,3 +1,4 @@
+import { Fetcher, defineRequest } from '../../../core/js/lib/async.js';
 import { TasksO2OKeys } from "../constants.js";
 import helper from "../helper.js";
 
@@ -51,10 +52,10 @@ export default function (resultSet, containerId) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
         
-        const wtchrRequest = defineRequest('/rest/tasks/watch/' + resultSet['tid'] + '/');
+        const wtchrRequest = defineRequest('api.tasks.watchers_crud', String(resultSet['tid']));
         Fetcher(wtchrRequest, 
             'taskDetailsModalResponse', {}, (data, id) => {
-                if (isVariableEmpty(data)) {
+                if (helper.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
                 } else {
                     unwatchbtn.classList.remove('d-none');
@@ -85,7 +86,7 @@ export default function (resultSet, containerId) {
         });
 
         // finally, retrieve task-level-comments..
-        let request = defineRequest('/rest/tasks/comments/?task_id=' + resultSet['tid']);
+        let request = defineRequest('api.tasks.comments_list', String(resultSet['tid']));
         Fetcher(request, "commentsResponse", {}, helper.tasks.load('commentsList'));
     }
 }

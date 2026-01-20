@@ -113,14 +113,14 @@ def comment_crud(request, id, format=None):
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def comments_list(request, format=None):
+def comments_list(request, taskId, format=None):
     """
         List all  tasks for type of request
     """
     selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
         #'delete_time': 'is Null',
-        'task_id': request.query_params.get('task_id', 0),
+        'task_id': taskId, # old: request.query_params.get('task_id', 0),
     }
 
     #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
@@ -171,7 +171,7 @@ def watchers_list(request, taskId, format=None):
         List all watchers for task and current user
     """
     conditions = {
-        'task_id': None, # @todo: implement
+        'task_id': taskId,
         'latest': ValuesMapper().latest('latest')  # @todo readd: request.user.id,
     }
     try:
