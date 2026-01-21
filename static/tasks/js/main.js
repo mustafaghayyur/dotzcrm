@@ -17,6 +17,8 @@ Main(() => {
         personal: () => {
             let request = null;
             request = defineRequest('api.tasks.list', 'private', { credentials: 'same-origin' });
+            //const mod1 = );
+            //console.log('checking loader: ', mod1);
             Fetcher(request, 'personalTabResponse', {}, helper.tasks.load('dashboardTodoList'));
 
             request = defineRequest('api.tasks.list', 'workspaces', { credentials: 'same-origin' });

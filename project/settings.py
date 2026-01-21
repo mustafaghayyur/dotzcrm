@@ -73,8 +73,8 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'core.lib.authentication.JWTAuthentication',
+        #'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'core.lib.authentication.JWTAuthenticationCookies',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Optional: Requires authentication for all views by default
@@ -150,7 +150,7 @@ STATICFILES_DIRS = [
 SECRET_KEY = 'django-insecure-o2(acg+&sx$ds=$_7-_6zfh)_^s3)r-wm#f2f7=k1tcpx)ugra'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,

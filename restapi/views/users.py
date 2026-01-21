@@ -1,15 +1,15 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import InvalidToken
+from restapi.lib.helpers import getUserFromJwtCookie
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 
 from core.helpers import crud
-from restapi.lib.helpers import getUserFromJwtCookie
-from users.models import *
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import InvalidToken
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError as DjangoValidationError
+from users.models import User
 
 # @todo: revisit these account endpoints and get accounts section working
 @api_view(['PUT'])
@@ -53,11 +53,9 @@ def changeUserPassword(request, format=None):
         
         # Create response with new tokens in JSON
         context = {
-            'results': {
-                'message': 'Password changed successfully. Access tokens updated.',
-                'access_token': str(access),
-                'refresh_token': str(refresh),
-            }
+            'message': 'Password changed successfully. Access tokens updated.',
+            'access_token': str(access),
+            'refresh_token': str(refresh),
         }
         response = Response(crud.generateResponse(context))
         
@@ -187,26 +185,6 @@ def retrieveSettings(request):
     - Returns userSettings if valid JWT token is present
     - Returns anonymousSettings if no valid token or anonymous user
     """
-    # Anonymous settings for unauthenticated users
-    anonymousSettings = {
-        'is_authenticated': False,
-        'allowed_routes': {
-            'api': {
-                'auth': {
-                    'login': '/accounts/rest/token/',
-                    'refresh': '/accounts/rest/token/refresh/',
-                    'settings': '/accounts/rest/settings/'
-                },
-            },
-            'ui': {
-                'auth': {
-                    'login': '/accounts/login/',
-                    'register': '/accounts/register/'
-                },
-            }
-        }
-    }
-    
     try:
         # Try to authenticate user from JWT cookie
         user = getUserFromJwtCookie(request)
@@ -256,5 +234,22 @@ def retrieveSettings(request):
         
     except (InvalidToken, Exception):
         # User is not authenticated or token is invalid - return anonymous settings
-        return Response(crud.generateResponse(anonymousSettings))
+        return Response(crud.generateResponse({
+            'is_authenticated': False,
+            'allowed_routes': {
+                'api': {
+                    'auth': {
+                        'login': '/accounts/rest/token/',
+                        'refresh': '/accounts/rest/token/refresh/',
+                        'settings': '/accounts/rest/settings/'
+                    },
+                },
+                'ui': {
+                    'auth': {
+                        'login': '/accounts/login/',
+                        'register': '/accounts/register/'
+                    },
+                }
+            }
+        }))
 

@@ -1,94 +1,59 @@
 """
     This class extends RestFramework's original JWTAuthentication.
-    We introduce check for HTTMLOnly cookies carrying access_toeken and refresh_token
+    We introduce check for HTTPOnly cookies carrying access_token and refresh_token.
+    Falls back to session authentication and Authorization header if cookies not present.
 """
-from typing import Optional, TypeVar
-from django.contrib.auth.models import AbstractBaseUser
-from django.contrib.auth import get_user_model
-from django.utils.translation import gettext_lazy as _
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import authentication
-from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidToken, TokenError
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.utils import get_md5_hash_password
-from rest_framework_simplejwt.tokens import Token
-from rest_framework_simplejwt.models import TokenUser
+from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidToken
+from rest_framework.authentication import SessionAuthentication
+from django.contrib.auth import get_user_model
+from core.helpers import misc
 
-AuthUser = TypeVar("AuthUser", AbstractBaseUser, TokenUser)
+User = get_user_model()
 
-class CustomJWTAuthentication(JWTAuthentication):
-    def authenticate(self, request):
-        # Extract the token from the 'access_token' cookie
-        rawToken = request.COOKIES.get('access_token')
 
-        if rawToken is None:
-            return None
-
+class JWTAuthenticationCookies(JWTAuthentication):
+    """
+    Custom JWT authentication that extracts tokens from HTTP-only cookies.
+    Falls back to standard Authorization header if cookie not present.
+    Also supports session authentication as final fallback.
+    """
+    
+    def authenticate(self, request: Request) -> Optional[tuple[AuthUser, Token]]:
+        """
+        Extract JWT token from 'access_token' cookie first, then fall back to
+        Authorization header, then session authentication.
+        """
+        # Try to get token from cookie first
+        cookie_name = 'access_token'
+        raw_token = request.COOKIES.get(cookie_name)
+        misc.log(raw_token, 'raw_token - JWTAuthenticationCookies.authenticate()')
+        
+        # If no cookie, try Authorization header (standard JWT Bearer)
+        if raw_token is None:
+            auth_header = self.get_header(request)
+            misc.log(auth_header, 'auth_header - JWTAuthenticationCookies.authenticate()')
+            if auth_header is not None:
+                raw_token = self.get_raw_token(auth_header)
+        
+        # If still no token, try session authentication
+        if raw_token is None:
+            try:
+                session_auth = SessionAuthentication()
+                return session_auth.authenticate(request)
+            except Exception:
+                return None
+        
         # Validate the token and return the user
         try:
-            validatedToken = self.get_validated_token(rawToken)
-            user = self.get_user(validatedToken)
-            return (user, validatedToken)
+            validated_token = self.get_validated_token(raw_token)
+            misc.log(validated_token, 'validated_token - JWTAuthenticationCookies.authenticate()')
+            user = self.get_user(validated_token)
+            misc.log(user, 'user - JWTAuthenticationCookies.authenticate()')            
+            return user, validated_token
+        except InvalidToken as e:
+            raise AuthenticationFailed(f'Invalid token: {str(e)}')
         except Exception as e:
-            # Handle token validation errors (e.g., expired token)
-            return None
+            raise AuthenticationFailed(f'Authentication failed: {str(e)}')
 
-    def get_validated_token(self, raw_token: bytes) -> Token:
-        """
-        Validates an encoded JSON web token and returns a validated token
-        wrapper object.
-        """
-        messages = []
-        for AuthToken in api_settings.AUTH_TOKEN_CLASSES:
-            try:
-                return AuthToken(raw_token)
-            except TokenError as e:
-                messages.append(
-                    {
-                        "token_class": AuthToken.__name__,
-                        "token_type": AuthToken.token_type,
-                        "message": e.args[0],
-                    }
-                )
-
-        raise InvalidToken(
-            {
-                "detail": _("Given token not valid for any token type"),
-                "messages": messages,
-            }
-        )
-
-    def get_user(self, validated_token: Token) -> AuthUser:
-        """
-        Attempts to find and return a user using the given validated token.
-        We should overwite this method, so we don't touch the Database instead
-        storing all additional data in token's body.
-        """
-        try:
-            user_id = validated_token[api_settings.USER_ID_CLAIM]
-        except KeyError as e:
-            raise InvalidToken(
-                _("Token contained no recognizable user identification")
-            ) from e
-
-        try:
-            user = self.user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
-        except self.user_model.DoesNotExist as e:
-            raise AuthenticationFailed(
-                _("User not found"), code="user_not_found"
-            ) from e
-
-        if api_settings.CHECK_USER_IS_ACTIVE and not user.is_active:
-            raise AuthenticationFailed(_("User is inactive"), code="user_inactive")
-
-        if api_settings.CHECK_REVOKE_TOKEN:
-            if validated_token.get(
-                api_settings.REVOKE_TOKEN_CLAIM
-            ) != get_md5_hash_password(user.password):
-                raise AuthenticationFailed(
-                    _("The user's password has been changed."), code="password_changed"
-                )
-
-        return user

@@ -22,7 +22,7 @@ export default {
          * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName'
          */
         load: (commponent) => {
-            app.load(commponent, 'tasks');
+            return app.load(commponent, 'tasks');
         }
     }
 };

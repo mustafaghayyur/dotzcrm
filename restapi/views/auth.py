@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.decorators import permission_classes
 from django.conf import settings
@@ -13,48 +14,52 @@ class ObtainTokenView(TokenObtainPairView):
         Tokens are set with HttpOnly, Secure, and SameSite flags for security.
         Wraps response in 'results' property for frontend compatibility.
         """
-        response = super().post(request, *args, **kwargs)
-        
-        if response.status_code == 200:
-            access_token = response.data.get('access')
-            refresh_token = response.data.get('refresh')
+        try:
+            response = super().post(request, *args, **kwargs)
             
-            secureFlag = False if settings.DEBUG else True  # sets secure=false flag if debug is on.
+            if response.status_code == 200:
+                access_token = response.data.get('access')
+                refresh_token = response.data.get('refresh')
+                
+                secureFlag = False if settings.DEBUG else True  # sets secure=false flag if debug is on.
 
-            # Set access token cookie
-            if access_token:
-                response.set_cookie(
-                    key='access_token',
-                    value=access_token,
-                    max_age=1 * 60 * 60,  # 1 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
-                    httponly=True,
-                    secure=secureFlag,
-                    samesite='Strict',
-                    path='/'
-                )
-            
-            # Set refresh token cookie
-            if refresh_token:
-                response.set_cookie(
-                    key='refresh_token',
-                    value=refresh_token,
-                    max_age=24 * 60 * 60,  # 24 hours (matches JWT_REFRESH_TOKEN_LIFETIME)
-                    httponly=True,
-                    secure=secureFlag,
-                    samesite='Strict',
-                    path='/'
-                )
-            
-            # Wrap response data in 'results' property
-            formattedData = {
-                'results': {
-                    'access_token': access_token,
-                    'refresh_token': refresh_token,
+                # Set access token cookie
+                if access_token:
+                    response.set_cookie(
+                        key='access_token',
+                        value=access_token,
+                        max_age=1 * 60 * 60,  # 1 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
+                        httponly=True,
+                        secure=secureFlag,
+                        samesite='Strict',
+                        path='/'
+                    )
+                
+                # Set refresh token cookie
+                if refresh_token:
+                    response.set_cookie(
+                        key='refresh_token',
+                        value=refresh_token,
+                        max_age=24 * 60 * 60,  # 24 hours (matches JWT_REFRESH_TOKEN_LIFETIME)
+                        httponly=True,
+                        secure=secureFlag,
+                        samesite='Strict',
+                        path='/'
+                    )
+                
+                # Wrap response data in 'results' property
+                formattedData = {
+                    'results': {
+                        'access_token': access_token,
+                        'refresh_token': refresh_token,
+                    }
                 }
-            }
-            response.data = formattedData
-        
-        return response
+                response.data = formattedData
+            
+            return response
+        except Exception as e:
+            return Response(crud.generateError(e, "Token generation failiure."), status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class RefreshTokenView(TokenRefreshView):
@@ -66,31 +71,35 @@ class RefreshTokenView(TokenRefreshView):
         Token is set with HttpOnly, Secure, and SameSite flags for security.
         Wraps response in 'results' property for frontend compatibility.
         """
-        response = super().post(request, *args, **kwargs)
-        
-        if response.status_code == 200:
-            access_token = response.data.get('access')
+        try:
+            response = super().post(request, *args, **kwargs)
             
-            secureFlag = False if settings.DEBUG else True  # sets secure=false flag if debug is on.
-            
-            # Set new access token cookie
-            if access_token:
-                response.set_cookie(
-                    key='access_token',
-                    value=access_token,
-                    max_age=1 * 60 * 60,  # 6 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
-                    httponly=True,
-                    secure=secureFlag,
-                    samesite='Strict',
-                    path='/'
-                )
-            
-            formattedData = {
-                'results': {
-                    'access_token': access_token,
+            if response.status_code == 200:
+                access_token = response.data.get('access')
+                
+                secureFlag = False if settings.DEBUG else True  # sets secure=false flag if debug is on.
+                
+                # Set new access token cookie
+                if access_token:
+                    response.set_cookie(
+                        key='access_token',
+                        value=access_token,
+                        max_age=1 * 60 * 60,  # 6 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
+                        httponly=True,
+                        secure=secureFlag,
+                        samesite='Strict',
+                        path='/'
+                    )
+                
+                formattedData = {
+                    'results': {
+                        'access_token': access_token,
+                    }
                 }
-            }
-            response.data = formattedData
-        
-        return response
+                response.data = formattedData
+            
+            return response
+        except Exception as e:
+            return Response(crud.generateError(e, "Token refresh failiure."), status=status.HTTP_400_BAD_REQUEST)
+
 
