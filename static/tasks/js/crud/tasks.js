@@ -1,17 +1,17 @@
-import helper from "../helper.js";
+import $A from "../helper.js";
 
-const callback = await helper.tasks.load('genericRecordDetails');
-const TasksO2OKeys = helper.tasks.data['TasksO2OKeys'];
+const callback = await $A.tasks.load('genericRecordDetails');
+const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
 
 /**
  * Allows submitted form to update existing record.
  * @param {str} formId: dom element id attr value for form 
  */
 export function UpdateTask(formId) {
-    let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
+    let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
     
-    helper.fetch.body(
-        helper.fetch.route('api.tasks.crud', '0', {
+    $A.fetch.body(
+        $A.fetch.route('api.tasks.crud', '0', {
             method: 'PUT',
             body: JSON.stringify(dictionary),
         }), 
@@ -24,10 +24,10 @@ export function UpdateTask(formId) {
  * @param {str} formId: dom element id attr value for form 
  */
 export function CreateTask(formId) {
-    let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
+    let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
     
-    helper.fetch.body(
-        helper.fetch.route('api.tasks.crud', '0', {
+    $A.fetch.body(
+        $A.fetch.route('api.tasks.crud', '0', {
             method: 'POST',
             body: JSON.stringify(dictionary),
         }), 
@@ -41,15 +41,15 @@ export function CreateTask(formId) {
  * @param {str} formId: dom element id attr value for form 
  */
 export function DeleteTask(taskId, identifyer) {
-    if (!helper.forms.confirmDeletion(identifyer)) {
+    if (!$A.forms.confirmDeletion(identifyer)) {
         return null;
     }
 
-    const request = helper.fetch.route('api.tasks.crud', String(taskId), {
+    const request = $A.fetch.route('api.tasks.crud', String(taskId), {
         method: 'DELETE',
     });
 
-    helper.fetch.body(request, 'taskDetailsModalResponse', callback);
+    $A.fetch.body(request, 'taskDetailsModalResponse', callback);
 }
 
 /**
@@ -67,7 +67,7 @@ export function toggleTodoStatus(record) {
         status: newStatus
     };
 
-    let request = helper.fetch.route('api.tasks.crud', '0', {
+    let request = $A.fetch.route('api.tasks.crud', '0', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export function toggleTodoStatus(record) {
         body: JSON.stringify(dictionary),
     });
 
-    helper.fetch.body(request, 'personalTabResponse', callback);
+    $A.fetch.body(request, 'personalTabResponse', callback);
 
 }
 
@@ -85,16 +85,16 @@ export function toggleTodoStatus(record) {
  * @param {string} identifyer: any term to identify the ToDo to user during confirmation. 
  */
 export function deleteTodo(todoId, identifyer) {
-    if (!helper.forms.confirmDeletion(identifyer)) {
+    if (!$A.forms.confirmDeletion(identifyer)) {
         return null;
     }
 
-    let request = helper.fetch.route('api.tasks.crud', String(todoId), {
+    let request = $A.fetch.route('api.tasks.crud', String(todoId), {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
         },
     });
 
-    helper.fetch.body(request, 'personalTabResponse', callback);
+    $A.fetch.body(request, 'personalTabResponse', callback);
 }

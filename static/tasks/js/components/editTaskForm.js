@@ -1,4 +1,4 @@
-import helper from "../helper.js";
+import $A from "../helper.js";
 import { UpdateTask, CreateTask } from '../crud/tasks.js';
 
 export default function () {

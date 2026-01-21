@@ -1,4 +1,4 @@
-import helper from "../helper.js";
+import $A from "../helper.js";
 
 /**
  * Creates a new record in the back-end for current user as watcher of supplied task id.
@@ -20,8 +20,8 @@ export function createWatcher(taskId, watchBtnId, unwatchBtnId){
         }
     };
 
-    const request = helper.fetch.route('api.tasks.watchers_crud', String(taskId), params);
-    helper.fetch.body(request, 
+    const request = $A.fetch.route('api.tasks.watchers_crud', String(taskId), params);
+    $A.fetch.body(request, 
         'taskDetailsModalResponse', {}, 
         () => {
             watchbtn.classList.add('d-none');
@@ -47,8 +47,8 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
         }
     };
 
-    const request = helper.fetch.route('api.tasks.watchers_crud', String(taskId), params);
-    helper.fetch.body(
+    const request = $A.fetch.route('api.tasks.watchers_crud', String(taskId), params);
+    $A.fetch.body(
         request, 
         'taskDetailsModalResponse', {}, 
         () => {

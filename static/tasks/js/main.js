@@ -1,34 +1,34 @@
-import helper from './helper.js';
+import $A from './helper.js';
 import { Main } from '../../core/js/lib/app.js';
 
 /**
  * Begin Tasks Application
  */
 Main(async () => {
-    helper.dashboard({
+    $A.dashboard({
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
             let request = null;
-            const dashboardTodoList = await helper.tasks.load('dashboardTodoList');
-            const dashboardTaskList = await helper.tasks.load('dashboardTaskList');
+            const dashboardTodoList = await $A.tasks.load('dashboardTodoList');
+            const dashboardTaskList = await $A.tasks.load('dashboardTaskList');
 
-            request = helper.fetch.route('api.tasks.list', 'private');
-            helper.fetch.body(request, 'personalTabResponse', {}, dashboardTodoList);
+            request = $A.fetch.route('api.tasks.list', 'private');
+            $A.fetch.body(request, 'personalTabResponse', {}, dashboardTodoList);
 
-            request = helper.fetch.route('api.tasks.list', 'workspaces');
-            helper.fetch.body(request, 'workspacesTabResponse', {}, dashboardTaskList);
+            request = $A.fetch.route('api.tasks.list', 'workspaces');
+            $A.fetch.body(request, 'workspacesTabResponse', {}, dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
         workspaces: () => {},
     }, true);
 
-    const cleanForm = await helper.tasks.load('cleanFormFunctionality'); 
-    const taskDetailsWindow = await helper.tasks.load('taskDetails');
+    const cleanForm = await $A.tasks.load('cleanFormFunctionality'); 
+    const taskDetailsWindow = await $A.tasks.load('taskDetails');
 
     cleanForm();    // load form clean functionality..
     
     // Allow opening of task-modals from url:
-    helper.router.create(
+    $A.router.create(
         'task_id', 
         'taskDetailsModalResponse', 
         'taskDetailsModal', 

@@ -1,6 +1,6 @@
 import { removeWatcher, createWatcher } from "../crud/watchers.js";
 import { createCommentForTask } from "../crud/comments.js";
-import helper from "../helper.js";
+import $A from "../helper.js";
 
 /**
  * This mapper function only finds dom elements matching items in the 'TasksO2OKeys' list, if resultSet has the key
@@ -12,22 +12,22 @@ import helper from "../helper.js";
  * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
 export default function (resultSet, containerId) {
-    const TasksO2OKeys = helper.tasks.data['TasksO2OKeys'];
+    const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
     
     TasksO2OKeys.forEach(key => {
         let fieldContainer = document.getElementById(key);
 
         if (fieldContainer instanceof HTMLElement) {
-            let data = helper.generic.getter(resultSet, key, undefined);
-            let item = helper.generic.formatValueToString(data);
+            let data = $A.generic.getter(resultSet, key, undefined);
+            let item = $A.generic.formatValueToString(data);
 
             if (item && (item.startsWith('{') || item.startsWith('['))) {
-                let pre = helper.app.makeDomElement('pre', 'm-1');
-                pre.textContent = helper.forms.escapeHtml(item);
+                let pre = $A.app.makeDomElement('pre', 'm-1');
+                pre.textContent = $A.forms.escapeHtml(item);
                 fieldContainer.appendChild(pre);
                 return;
             }
-            fieldContainer.textContent = helper.forms.escapeHtml(item);
+            fieldContainer.textContent = $A.forms.escapeHtml(item);
         }
     });
     addOptionsFunctionalityOnTaskDetailsPane(resultSet);
@@ -40,7 +40,7 @@ export default function (resultSet, containerId) {
         // add edit button
         let editBtn = document.getElementById('editTaskBtn');
         editBtn.addEventListener('click', () => {
-            helper.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
+            $A.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
         });
 
         // add delete button functionality
@@ -54,11 +54,11 @@ export default function (resultSet, containerId) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
         
-        helper.fetch.body(
-            helper.fetch.route('api.tasks.watchers_crud', String(resultSet['tid'])), 
+        $A.fetch.body(
+            $A.fetch.route('api.tasks.watchers_crud', String(resultSet['tid'])), 
             'taskDetailsModalResponse', {}, 
             (data, id) => {
-                if (helper.generic.isVariableEmpty(data)) {
+                if ($A.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
                 } else {
                     unwatchbtn.classList.remove('d-none');
@@ -76,7 +76,7 @@ export default function (resultSet, containerId) {
         });
 
         // next, implement rich-text editor and comments form.
-        helper.editor.make('commentEditor');
+        $A.editor.make('commentEditor');
         let saveCommentBtn = document.getElementById('saveComment');
         saveCommentBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -89,12 +89,15 @@ export default function (resultSet, containerId) {
         });
 
         // finally, retrieve task-level-comments..
-        const callback = await helper.tasks.load('commentsList');
-        console.log('Checking COMMENTS CALLS: ', resultSet['tid'], String(resultSet['tid']));
-        helper.fetch.body(
-            helper.fetch.route('api.tasks.comments_list', String(resultSet['tid'])), 
+        const callback = await $A.tasks.load('commentsList');
+        $A.fetch.body(
+            $A.fetch.route('api.tasks.comments_list', String(resultSet['tid'])), 
             "commentsResponse", {}, 
             callback
         );
+
+        // New: we must now add edit functionality.
+        const enableEditFunctionality = await $A.tasks.load('editTaskForm');
+        enableEditFunctionality();  // call the component
     }
 }

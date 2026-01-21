@@ -1,4 +1,4 @@
-import helper from "../helper.js";
+import $A from "../helper.js";
 
 /**
  * Callback function for Fetcher() that maps retieved user's tasks to page elements.
@@ -15,17 +15,17 @@ export default function (data, containerId) {
     if (Array.isArray(data)) {
         data.forEach(item => {
             li = originalLiItem.cloneNode(true);
-            li.querySelector('.description').dataset.taskId = helper.forms.escapeHtml(item.tid);
+            li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tid);
             li.querySelector('.description').textContent = item.description || JSON.stringify(item);
-            li.querySelector('.status').textContent = helper.forms.escapeHtml(item.status);
-            li.querySelector('.tupdate_time').textContent = helper.dates.convertToDisplayLocal(item.tupdate_time);
-            li.querySelector('.deadline').textContent = helper.dates.convertToDisplayLocal(item.deadline);
+            li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);
+            li.querySelector('.tupdate_time').textContent = $A.dates.convertToDisplayLocal(item.tupdate_time);
+            li.querySelector('.deadline').textContent = $A.dates.convertToDisplayLocal(item.deadline);
             ul.appendChild(li);
         });
 
         addListenersToTasks(ul);
     } else {
-        originalLiItem.innerHTML = '<pre>' + helper.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+        originalLiItem.innerHTML = '<pre>' + $A.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
         container.appendChild(originalLiItem);
     }
 
@@ -41,11 +41,11 @@ export default function (data, containerId) {
             let tasks = container.querySelectorAll('.task-details-link');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
-                let request = helper.fetch.route('api.tasks.crud', String(id));
+                let request = $A.fetch.route('api.tasks.crud', String(id));
                 task.addEventListener('click', async ()=>{
-                    const callback = await helper.tasks.load('taskDetails');
-                    helper.fetch.body(request, 'taskDetailsModalResponse', {}, callback);
-                    helper.router.update('task_id', id);
+                    const callback = await $A.tasks.load('taskDetails');
+                    $A.fetch.body(request, 'taskDetailsModalResponse', {}, callback);
+                    $A.router.update('task_id', id);
                 });
             });
         }

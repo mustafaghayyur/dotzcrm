@@ -1,5 +1,4 @@
-import { Fetcher, defineRequest } from "./async.js";
-import generic from "../helpers/generic.js";
+import $A from "../helper.js";
 
 /**
  * @todo: show failiure message for not-found requests
@@ -13,10 +12,10 @@ import generic from "../helpers/generic.js";
  * @param {function} callbackFunction: has to be a callable function that deals with Fetcher's results
  */
 export function showModal(keyToFetch, routeToCall, modalId, callbackFunction) {
-    let idToFetch = generic.getQueryParam(keyToFetch);
+    let idToFetch = $A.generic.getQueryParam(keyToFetch);
     const responseContainer = document.getElementById(modalId + 'Response');
     
-    if (generic.checkVariableType(idToFetch) === 'number') {
+    if ($A.generic.checkVariableType(idToFetch) === 'number') {
         idToFetch = parseInt(idToFetch);
     } else {
         if (responseContainer instanceof HTMLElement) {

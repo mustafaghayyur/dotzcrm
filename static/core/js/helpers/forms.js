@@ -1,5 +1,4 @@
-import generic from "./generic.js";
-import dates from "./dates.js";
+import $A from "../helper.js";
 
 export default {
     /**
@@ -59,7 +58,7 @@ export default {
         // 2. Convert the FormData entries into a plain JavaScript object (dictionary format)
         const formObject = Object.fromEntries(formData.entries());
 
-        if (generic.checkVariableType(keysList) === 'list') {
+        if ($A.generic.checkVariableType(keysList) === 'list') {
             let dictionary = {};
             keysList.forEach(key => {    
                 if (formObject[key]) {
@@ -87,7 +86,7 @@ export default {
         }
 
         keys.forEach(key => {
-            let value = generic.getter(data, key, undefined);
+            let value = $A.generic.getter(data, key, undefined);
             let field = form.elements.namedItem(key);
 
             if (!value || !field) {
@@ -95,7 +94,7 @@ export default {
             }
 
             if (this.hasDateTimeData(key)) {
-                field.value = dates.convertDateTimeToLocal(value);  // convert to appropriate format first
+                field.value = $A.dates.convertDateTimeToLocal(value);  // convert to appropriate format first
                 return;
             }
 

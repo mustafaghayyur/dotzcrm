@@ -1,4 +1,4 @@
-import generic from "./generic";
+import $A from "../helper.js";
 
 export default {
     /**
@@ -44,7 +44,7 @@ export default {
      * @param {*} value 
      */
     memSave: function (key, value) {
-        if (generic.isPrimitiveValue(value)) {
+        if ($A.generic.isPrimitiveValue(value)) {
             localStorage.setItem(key, String(value));
         } else {
             localStorage.setItem(key, JSON.stringify(value));

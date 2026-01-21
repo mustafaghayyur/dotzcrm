@@ -26,7 +26,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 
     creator_id = IntegerField(**intNullableOpts)
-    parent_id = IntegerField(**intNullableOpts)
+    parent_id = IntegerField(**intNullableOpts) # @todo: parent_id should be nullable, serializer won't let it?
     assignor_id = IntegerField(**intNullableOpts)
     assignee_id = IntegerField(**intNullableOpts)
 
