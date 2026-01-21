@@ -1,4 +1,4 @@
-import helper from "../helper.js";
+import $A from "../helper.js";
 
 /**
  * @todo implement

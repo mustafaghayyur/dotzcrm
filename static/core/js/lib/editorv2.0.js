@@ -1,6 +1,6 @@
 // This is WIP.
 
-//import helper from "../helpers/main";
+//import $A from "../helpers/main";
 
 /**
  * Live text editor for all rich text editing needs.

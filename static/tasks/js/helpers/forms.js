@@ -1,4 +1,4 @@
-import helper from "../helper.js";
+import $A from "../helper.js";
 
 export default {
     /**
@@ -7,7 +7,7 @@ export default {
      * @param {object} data: the data-object which will fill the form fields.
      */
     prefillEditForm: (data, keys) => {
-        return helper.forms.prefillForms(data, 'taskEditForm', keys);
+        return $A.forms.prefillForms(data, 'taskEditForm', keys);
     },
 
     /**
@@ -15,7 +15,7 @@ export default {
      * @param {string} formId: should be the html Id attr value 
      */
     cleanTaskForm: (formId, keys) => {
-        helper.forms.cleanForm(formId, keys);
+        $A.forms.cleanForm(formId, keys);
     },
 
     /**
@@ -26,12 +26,12 @@ export default {
      * @param {list} keys: optional list of keys to check/validate
      */
     generateDictionaryFromForm: (formId, keys = null) => {
-        let dictionary = helper.forms.formToDictionary(formId, keys = null);
+        let dictionary = $A.forms.formToDictionary(formId, keys = null);
 
-        if (helper.generic.checkVariableType(keys) === 'list') {
+        if ($A.generic.checkVariableType(keys) === 'list') {
             keys.forEach(key => {    
                 if (dictionary[key]) {
-                    dictionary[key] = helper.tasks.validators.validate(dictionary[key]);
+                    dictionary[key] = $A.tasks.validators.validate(dictionary[key]);
                 }
             });
         }

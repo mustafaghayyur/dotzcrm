@@ -1,3 +1,5 @@
+import $A from "../helper.js";
+
 /**
  * Implements a tabbed dashboard of REST endpoints
  */

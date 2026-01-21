@@ -1,3 +1,5 @@
+import $A from "../helper.js";
+
 /**
  * Live text editor for all rich text editing needs.
  * 

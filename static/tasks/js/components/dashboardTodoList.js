@@ -1,5 +1,5 @@
 import { toggleTodoStatus, deleteTodo } from '../crud/tasks.js';
-import helper from "../helper.js";
+import $A from "../helper.js";
 
 /**
  * Callback function for Fetcher() that maps fetched ToDos to page elemments.
@@ -20,8 +20,8 @@ export default function (data, containerId) {
             li = originalLiItem.cloneNode(true);
             let status = li.querySelector('.status').querySelector('.' + item.status);
             let desc = li.querySelector('.description');
-            desc.dataset.taskId = helper.forms.escapeHtml(item.tid);
-            desc.textContent = helper.forms.escapeHtml(item.description) || helper.forms.escapeHtml(JSON.stringify(item));
+            desc.dataset.taskId = $A.forms.escapeHtml(item.tid);
+            desc.textContent = $A.forms.escapeHtml(item.description) || $A.forms.escapeHtml(JSON.stringify(item));
             
             if (item.status === 'completed') {
                 desc.classList.add('text-decoration-line-through');
@@ -36,7 +36,7 @@ export default function (data, containerId) {
             ul.appendChild(li);
         });
     } else {
-        originalLiItem.innerHTML = '<pre>' + helper.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+        originalLiItem.innerHTML = '<pre>' + $A.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
         container.appendChild(originalLiItem);
     }
 }
