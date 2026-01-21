@@ -43,9 +43,10 @@ export default function (data, containerId) {
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
                 let request = defineRequest('api.tasks.crud', String(id));
-                task.addEventListener('click', ()=>{
-                    Fetcher(request, 'taskDetailsModalResponse', {}, helper.tasks.load('taskDetails'));
-                    updateUrlParam('task_id', id);
+                task.addEventListener('click', async ()=>{
+                    const callback = await helper.tasks.load('taskDetails');
+                    Fetcher(request, 'taskDetailsModalResponse', {}, callback);
+                    helper.router().updateAddressBar('task_id', id);
                 });
             });
         }

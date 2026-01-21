@@ -60,7 +60,7 @@ export default {
      * @returns 
      */
     getter: function (object, key, defaultsTo = null) {
-        if (checkVariableType(object) === 'dictionary') {
+        if (this.checkVariableType(object) === 'dictionary') {
             return (object && Object.prototype.hasOwnProperty.call(object, key)) ? object[key] : defaultsTo;
         }
         return defaultsTo;
@@ -72,7 +72,7 @@ export default {
      * @returns front-end friendly display
      */
     formatValueToString: function (value) {
-        if (checkVariableType(value) === 'dictionary') {
+        if (this.checkVariableType(value) === 'dictionary') {
             try {
                 return JSON.stringify(value, null, 2);
             } catch (e) {

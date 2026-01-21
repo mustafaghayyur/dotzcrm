@@ -1,5 +1,6 @@
 import { Fetcher, defineRequest } from '../../../core/js/lib/async.js';
 import { TasksO2OKeys } from "../constants.js";
+import { removeWatcher, createWatcher } from "../crud/watchers.js";
 import helper from "../helper.js";
 
 /**
@@ -34,7 +35,7 @@ export default function (resultSet, containerId) {
     /**
      * Adds all the fancy buttons and widgets on the task-details modal.
      */
-    function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
+    async function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
         // add edit button
         let editBtn = document.getElementById('editTaskBtn');
         editBtn.addEventListener('click', () => {
@@ -86,7 +87,8 @@ export default function (resultSet, containerId) {
         });
 
         // finally, retrieve task-level-comments..
+        const callback = await helper.tasks.load('commentsList');
         let request = defineRequest('api.tasks.comments_list', String(resultSet['tid']));
-        Fetcher(request, "commentsResponse", {}, helper.tasks.load('commentsList'));
+        Fetcher(request, "commentsResponse", {}, callback);
     }
 }

@@ -190,6 +190,7 @@ export function defineRequest(urlKey, urlParams = {}, options = {}) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'same-origin'
     };
     const finalOptions = merge(defaults, options);
     return new Request(url, finalOptions);

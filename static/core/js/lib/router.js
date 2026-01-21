@@ -167,6 +167,9 @@ export default function () {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(paramStr);
     }
+
+    //return the kernal...
+    return kernel;
 }
 
 

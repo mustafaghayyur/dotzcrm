@@ -7,8 +7,8 @@ import loginForm from "./components/loginForm.js";
 //import { TasksO2OKeys } from "./constants.js";
 
 
-Main(() => {
-    const liginForm = helper.app.load('loginForm', 'users');
+Main(async () => {
+    const liginForm = await helper.app.load('loginForm', 'users');
     loginForm();
     //Routes.add('task_id').modal('taskDetailsModal').component(helper.tasks.load('taskDetails'));
 });

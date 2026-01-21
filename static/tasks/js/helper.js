@@ -3,6 +3,7 @@ import app from '../../core/js/helpers/app.js';
 import forms from '../../core/js/helpers/forms.js';
 import dates from '../../core/js/helpers/dates.js';
 import formsLocal from './helpers/forms.js';
+import router from '../../core/js/lib/router.js';
 //import validators from './helpers/validate.js';
 
 /**
@@ -24,5 +25,6 @@ export default {
         load: (commponent) => {
             return app.load(commponent, 'tasks');
         }
-    }
+    },
+    router: router
 };

@@ -14,15 +14,16 @@ Main(() => {
     // data will not be refreshed, while switching between tabs
     TabbedDashBoard({
         // 'Personal' tab of the tasks dashboard:
-        personal: () => {
+        personal: async () => {
             let request = null;
-            request = defineRequest('api.tasks.list', 'private', { credentials: 'same-origin' });
-            //const mod1 = );
-            //console.log('checking loader: ', mod1);
-            Fetcher(request, 'personalTabResponse', {}, helper.tasks.load('dashboardTodoList'));
+            const dashboardTodoList = await helper.tasks.load('dashboardTodoList');
+            const dashboardTaskList = await helper.tasks.load('dashboardTaskList');
 
-            request = defineRequest('api.tasks.list', 'workspaces', { credentials: 'same-origin' });
-            Fetcher(request, 'workspacesTabResponse', {}, helper.tasks.load('dashboardTaskList'));
+            request = defineRequest('api.tasks.list', 'private');
+            Fetcher(request, 'personalTabResponse', {}, dashboardTodoList);
+
+            request = defineRequest('api.tasks.list', 'workspaces');
+            Fetcher(request, 'workspacesTabResponse', {}, dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
         workspaces: () => {},

@@ -2,6 +2,8 @@ import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
 import { TasksO2OKeys } from "../constants.js";
 import helper from "../helper.js";
 
+const callback = await helper.tasks.load('genericRecordDetails');
+
 /**
  * Allows submitted form to update existing record.
  * @param {str} formId: dom element id attr value for form 
@@ -17,7 +19,7 @@ export function UpdateTask(formId) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', helper.tasks.load('genericRecordDetails'));
+    Fetcher(request, 'taskEditModalResponse', callback);
 }
 
 /**
@@ -35,7 +37,7 @@ export function CreateTask(formId) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'taskEditModalResponse', helper.tasks.load('genericRecordDetails'));
+    Fetcher(request, 'taskEditModalResponse', callback);
 }
 
 /**
@@ -55,7 +57,7 @@ export function DeleteTask(taskId, identifyer) {
         },
     });
 
-    Fetcher(request, 'taskDetailsModalResponse', helper.tasks.load('genericRecordDetails'));
+    Fetcher(request, 'taskDetailsModalResponse', callback);
 }
 
 /**
@@ -81,7 +83,7 @@ export function toggleTodoStatus(record) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'personalTabResponse', helper.tasks.load('genericRecordDetails'));
+    Fetcher(request, 'personalTabResponse', callback);
 
 }
 
@@ -102,5 +104,5 @@ export function deleteTodo(todoId, identifyer) {
         },
     });
 
-    Fetcher(request, 'personalTabResponse', helper.tasks.load('genericRecordDetails'));
+    Fetcher(request, 'personalTabResponse', callback);
 }
