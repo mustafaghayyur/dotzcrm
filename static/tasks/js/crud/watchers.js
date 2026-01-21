@@ -1,4 +1,3 @@
-import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
 import helper from "../helper.js";
 
 /**
@@ -21,8 +20,8 @@ export function createWatcher(taskId, watchBtnId, unwatchBtnId){
         }
     };
 
-    const request = defineRequest('api.tasks.watchers_crud', String(taskId), params);
-    Fetcher(request, 
+    const request = helper.fetch.route('api.tasks.watchers_crud', String(taskId), params);
+    helper.fetch.body(request, 
         'taskDetailsModalResponse', {}, 
         () => {
             watchbtn.classList.add('d-none');
@@ -48,8 +47,8 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
         }
     };
 
-    const request = defineRequest('api.tasks.watchers_crud', String(taskId), params);
-    Fetcher(
+    const request = helper.fetch.route('api.tasks.watchers_crud', String(taskId), params);
+    helper.fetch.body(
         request, 
         'taskDetailsModalResponse', {}, 
         () => {

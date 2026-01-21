@@ -1,8 +1,7 @@
-import { Fetcher, defineRequest } from "../../../core/js/lib/async.js";
-import { TasksO2OKeys } from "../constants.js";
 import helper from "../helper.js";
 
 const callback = await helper.tasks.load('genericRecordDetails');
+const TasksO2OKeys = helper.tasks.data['TasksO2OKeys'];
 
 /**
  * Allows submitted form to update existing record.
@@ -10,16 +9,14 @@ const callback = await helper.tasks.load('genericRecordDetails');
  */
 export function UpdateTask(formId) {
     let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
-
-    let request = defineRequest('api.tasks.crud', '0', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-
-    Fetcher(request, 'taskEditModalResponse', callback);
+    
+    helper.fetch.body(
+        helper.fetch.route('api.tasks.crud', '0', {
+            method: 'PUT',
+            body: JSON.stringify(dictionary),
+        }), 
+        'taskEditModalResponse', callback
+    );
 }
 
 /**
@@ -28,16 +25,15 @@ export function UpdateTask(formId) {
  */
 export function CreateTask(formId) {
     let dictionary = helper.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
-
-    let request = defineRequest('api.tasks.crud', '0', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-
-    Fetcher(request, 'taskEditModalResponse', callback);
+    
+    helper.fetch.body(
+        helper.fetch.route('api.tasks.crud', '0', {
+            method: 'POST',
+            body: JSON.stringify(dictionary),
+        }), 
+        'taskEditModalResponse', 
+        callback
+    );
 }
 
 /**
@@ -48,16 +44,12 @@ export function DeleteTask(taskId, identifyer) {
     if (!helper.forms.confirmDeletion(identifyer)) {
         return null;
     }
-    //const id = document.querySelector('#taskDetailsModal #tid');
 
-    let request = defineRequest('api.tasks.crud', String(taskId), {
+    const request = helper.fetch.route('api.tasks.crud', String(taskId), {
         method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
     });
 
-    Fetcher(request, 'taskDetailsModalResponse', callback);
+    helper.fetch.body(request, 'taskDetailsModalResponse', callback);
 }
 
 /**
@@ -75,7 +67,7 @@ export function toggleTodoStatus(record) {
         status: newStatus
     };
 
-    let request = defineRequest('api.tasks.crud', '0', {
+    let request = helper.fetch.route('api.tasks.crud', '0', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -83,7 +75,7 @@ export function toggleTodoStatus(record) {
         body: JSON.stringify(dictionary),
     });
 
-    Fetcher(request, 'personalTabResponse', callback);
+    helper.fetch.body(request, 'personalTabResponse', callback);
 
 }
 
@@ -97,12 +89,12 @@ export function deleteTodo(todoId, identifyer) {
         return null;
     }
 
-    let request = defineRequest('api.tasks.crud', String(todoId), {
+    let request = helper.fetch.route('api.tasks.crud', String(todoId), {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
         },
     });
 
-    Fetcher(request, 'personalTabResponse', callback);
+    helper.fetch.body(request, 'personalTabResponse', callback);
 }

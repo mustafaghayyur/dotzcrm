@@ -249,6 +249,9 @@ def retrieveSettings(request):
                         'login': '/accounts/login/',
                         'register': '/accounts/register/'
                     },
+                    'apps': {
+                        'tasks': '/tasks/',
+                    }
                 }
             }
         }))

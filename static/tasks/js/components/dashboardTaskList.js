@@ -1,4 +1,3 @@
-import { Fetcher, defineRequest } from '../../../core/js/lib/async.js';
 import helper from "../helper.js";
 
 /**
@@ -42,11 +41,11 @@ export default function (data, containerId) {
             let tasks = container.querySelectorAll('.task-details-link');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
-                let request = defineRequest('api.tasks.crud', String(id));
+                let request = helper.fetch.route('api.tasks.crud', String(id));
                 task.addEventListener('click', async ()=>{
                     const callback = await helper.tasks.load('taskDetails');
-                    Fetcher(request, 'taskDetailsModalResponse', {}, callback);
-                    helper.router().updateAddressBar('task_id', id);
+                    helper.fetch.body(request, 'taskDetailsModalResponse', {}, callback);
+                    helper.router.update('task_id', id);
                 });
             });
         }

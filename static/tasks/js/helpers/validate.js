@@ -5,6 +5,8 @@ import helper from "../helper.js";
  * @param {} value 
  * @returns 
  */
-export function validate(value) {
-    return value;
+export default {
+    validate: function (value) {
+        return value;
+    }
 }

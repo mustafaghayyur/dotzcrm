@@ -1,48 +1,37 @@
-import { Fetcher, defineRequest } from "../../core/js/lib/async.js";
-import { TabbedDashBoard } from "../../core/js/lib/dashboard.js";
-//import { showModal } from "../../core/js/lib/router.js";
-import { Main } from '../../core/js/lib/app.js';
 import helper from './helper.js';
-import { TasksO2OKeys } from "./constants.js";
+import { Main } from '../../core/js/lib/app.js';
 
 /**
- * Begin Tasks Application:
+ * Begin Tasks Application
  */
-Main(() => {
-
-    // Tasks' TabbedDashBoard() call has singlecall enabled, 
-    // data will not be refreshed, while switching between tabs
-    TabbedDashBoard({
+Main(async () => {
+    helper.dashboard({
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
             let request = null;
             const dashboardTodoList = await helper.tasks.load('dashboardTodoList');
             const dashboardTaskList = await helper.tasks.load('dashboardTaskList');
 
-            request = defineRequest('api.tasks.list', 'private');
-            Fetcher(request, 'personalTabResponse', {}, dashboardTodoList);
+            request = helper.fetch.route('api.tasks.list', 'private');
+            helper.fetch.body(request, 'personalTabResponse', {}, dashboardTodoList);
 
-            request = defineRequest('api.tasks.list', 'workspaces');
-            Fetcher(request, 'workspacesTabResponse', {}, dashboardTaskList);
+            request = helper.fetch.route('api.tasks.list', 'workspaces');
+            helper.fetch.body(request, 'workspacesTabResponse', {}, dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
         workspaces: () => {},
     }, true);
 
+    const cleanForm = await helper.tasks.load('cleanFormFunctionality'); 
+    const taskDetailsWindow = await helper.tasks.load('taskDetails');
+
+    cleanForm();    // load form clean functionality..
+    
     // Allow opening of task-modals from url:
-    /**Routes.add('task_id').modal('taskDetailsModal').component(helper.tasks.load('taskDetails'));
-    showModal(
+    helper.router.create(
         'task_id', 
         'taskDetailsModalResponse', 
         'taskDetailsModal', 
-        taskDetailsMapper
-    );*/
-
-    // add 'clean form' functionality to all .open-form btns...
-    const openFormBtn = document.querySelectorAll('.open-form');
-    openFormBtn.forEach(button => {
-        button.addEventListener('click', () => {
-            helper.tasks.forms.cleanTaskForm('taskEditForm', TasksO2OKeys);
-        });
-    });
+        taskDetailsWindow
+    );
 });

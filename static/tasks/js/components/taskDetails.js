@@ -1,6 +1,4 @@
-import { Fetcher, defineRequest } from '../../../core/js/lib/async.js';
-import { TasksO2OKeys } from "../constants.js";
-import { removeWatcher, createWatcher } from "../crud/watchers.js";
+import { removeWatcher, createWatcher, createCommentForTask } from "../crud/watchers.js";
 import helper from "../helper.js";
 
 /**
@@ -13,6 +11,8 @@ import helper from "../helper.js";
  * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
  */
 export default function (resultSet, containerId) {
+    const TasksO2OKeys = helper.tasks.data['TasksO2OKeys'];
+    
     TasksO2OKeys.forEach(key => {
         let fieldContainer = document.getElementById(key);
 
@@ -39,7 +39,7 @@ export default function (resultSet, containerId) {
         // add edit button
         let editBtn = document.getElementById('editTaskBtn');
         editBtn.addEventListener('click', () => {
-            prefillEditForm(resultSet, TasksO2OKeys);
+            helper.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
         });
 
         // add delete button functionality
@@ -53,9 +53,10 @@ export default function (resultSet, containerId) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
         
-        const wtchrRequest = defineRequest('api.tasks.watchers_crud', String(resultSet['tid']));
-        Fetcher(wtchrRequest, 
-            'taskDetailsModalResponse', {}, (data, id) => {
+        helper.fetch.body(
+            helper.fetch.route('api.tasks.watchers_crud', String(resultSet['tid'])), 
+            'taskDetailsModalResponse', {}, 
+            (data, id) => {
                 if (helper.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
                 } else {
@@ -74,7 +75,7 @@ export default function (resultSet, containerId) {
         });
 
         // next, implement rich-text editor and comments form.
-        Editor('commentEditor');
+        helper.editor.make('commentEditor');
         let saveCommentBtn = document.getElementById('saveComment');
         saveCommentBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -88,7 +89,10 @@ export default function (resultSet, containerId) {
 
         // finally, retrieve task-level-comments..
         const callback = await helper.tasks.load('commentsList');
-        let request = defineRequest('api.tasks.comments_list', String(resultSet['tid']));
-        Fetcher(request, "commentsResponse", {}, callback);
+        helper.fetch.body(
+            helper.fetch.route('api.tasks.comments_list', String(resultSet['tid'])), 
+            "commentsResponse", {}, 
+            callback
+        );
     }
 }

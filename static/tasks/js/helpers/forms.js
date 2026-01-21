@@ -1,4 +1,3 @@
-import { validate } from './validate.js';
 import helper from "../helper.js";
 
 export default {
@@ -32,7 +31,7 @@ export default {
         if (helper.generic.checkVariableType(keys) === 'list') {
             keys.forEach(key => {    
                 if (dictionary[key]) {
-                    dictionary[key] = validate(dictionary[key]);
+                    dictionary[key] = helper.tasks.validators.validate(dictionary[key]);
                 }
             });
         }

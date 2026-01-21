@@ -5,7 +5,7 @@ import helper from "../helper.js";
  * Maps error/success messages to elements in dom. 
  * May be used by Fetcher() in forms for rest/tasks/crud/.
  */
-const genericTaskResponseMapper = {
+export default {
     description: helper.app.makeDomElement('span', 'rec-itm'), 
     status: helper.app.makeDomElement('span', 'rec-itm'), 
     visibility: helper.app.makeDomElement('span', 'rec-itm'),
@@ -29,5 +29,3 @@ const genericTaskResponseMapper = {
     message: helper.app.makeDomElement('span', 'rec-itm'),
     messages: helper.app.makeDomElement('span', 'rec-itm'),
 };
-
-export default genericTaskResponseMapper
