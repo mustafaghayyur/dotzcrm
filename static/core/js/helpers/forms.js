@@ -87,14 +87,14 @@ export default {
         }
 
         keys.forEach(key => {
-            let value = getter(data, key, undefined);
+            let value = generic.getter(data, key, undefined);
             let field = form.elements.namedItem(key);
 
             if (!value || !field) {
                 return; // @todo: should I have better handling here? What about missing values for fields?
             }
 
-            if (hasDateTimeData(key)) {
+            if (this.hasDateTimeData(key)) {
                 field.value = dates.convertDateTimeToLocal(value);  // convert to appropriate format first
                 return;
             }

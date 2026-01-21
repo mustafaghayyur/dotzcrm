@@ -1,4 +1,5 @@
-import { removeWatcher, createWatcher, createCommentForTask } from "../crud/watchers.js";
+import { removeWatcher, createWatcher } from "../crud/watchers.js";
+import { createCommentForTask } from "../crud/comments.js";
 import helper from "../helper.js";
 
 /**
@@ -89,6 +90,7 @@ export default function (resultSet, containerId) {
 
         // finally, retrieve task-level-comments..
         const callback = await helper.tasks.load('commentsList');
+        console.log('Checking COMMENTS CALLS: ', resultSet['tid'], String(resultSet['tid']));
         helper.fetch.body(
             helper.fetch.route('api.tasks.comments_list', String(resultSet['tid'])), 
             "commentsResponse", {}, 

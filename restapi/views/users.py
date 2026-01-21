@@ -213,7 +213,7 @@ def retrieveSettings(request):
                         'crud': '/rest/tasks/crud/{input1}/',
                         'list': '/rest/tasks/{input1}/',
                         'comments_crud': '/rest/tasks/comment/{input1}/',
-                        'comments_list': '/rest/tasks/comments/',
+                        'comments_list': '/rest/tasks/comments/{input1}/',
                         'watchers_crud': '/rest/tasks/watcher/{input1}/',
                         'watchers_list': '/rest/tasks/watchers/{input1}/',
                     },

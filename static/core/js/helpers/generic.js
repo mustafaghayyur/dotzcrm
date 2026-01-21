@@ -89,6 +89,15 @@ export default {
                 callbackFunction(key, object[key]);
             }
         }
+    },
+    
+    /**
+     * Returns requested param's value if set in url params.
+     * @param {str} paramStr: whic key are you requesting?
+     */
+    getQueryParam: function (paramStr) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(paramStr);
     }
 };
 

@@ -122,9 +122,7 @@ def comments_list(request, taskId, format=None):
         #'delete_time': 'is Null',
         'task_id': taskId, # old: request.query_params.get('task_id', 0),
     }
-
-    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
-
+    
     try:
         pgntn = pagination.assembleParamsForView(request.query_params)
         # limit=[str(pgntn['offset']), str(pgntn['page_size']

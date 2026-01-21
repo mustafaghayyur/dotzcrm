@@ -7,7 +7,7 @@ export default {
      * @param {object} data: the data-object which will fill the form fields.
      */
     prefillEditForm: (data, keys) => {
-        return prefillForms(data, 'taskEditForm', keys);
+        return helper.forms.prefillForms(data, 'taskEditForm', keys);
     },
 
     /**
@@ -15,7 +15,7 @@ export default {
      * @param {string} formId: should be the html Id attr value 
      */
     cleanTaskForm: (formId, keys) => {
-        helper.generic.cleanForm(formId, keys);
+        helper.forms.cleanForm(formId, keys);
     },
 
     /**

@@ -184,6 +184,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 export function defineRequest(urlKey, urlParams = {}, options = {}) {
     const urlTemplate = selectUrlTemplate(urlKey);
     let url = generateUrl(urlTemplate, urlParams);
+    console.log('CHECKING defineREQUEST: ', urlKey, urlTemplate, url, urlParams);
     
     const defaults = {
         method: 'GET',
@@ -235,6 +236,7 @@ function generateUrl(template, params) {
             input1: ''
         };
     }
+    console.log('CHECKING IF PARAM IS OK AFTER PROCESSING: ', params);
     let inputs = RegExp('{(input[0-9]+)}', 'g');
     return template.replace(inputs, (match, input) => {
         if (input in params) {

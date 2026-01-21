@@ -28,12 +28,10 @@ class JWTAuthenticationCookies(JWTAuthentication):
         # Try to get token from cookie first
         cookie_name = 'access_token'
         raw_token = request.COOKIES.get(cookie_name)
-        misc.log(raw_token, 'raw_token - JWTAuthenticationCookies.authenticate()')
         
         # If no cookie, try Authorization header (standard JWT Bearer)
         if raw_token is None:
             auth_header = self.get_header(request)
-            misc.log(auth_header, 'auth_header - JWTAuthenticationCookies.authenticate()')
             if auth_header is not None:
                 raw_token = self.get_raw_token(auth_header)
         
@@ -48,9 +46,7 @@ class JWTAuthenticationCookies(JWTAuthentication):
         # Validate the token and return the user
         try:
             validated_token = self.get_validated_token(raw_token)
-            misc.log(validated_token, 'validated_token - JWTAuthenticationCookies.authenticate()')
             user = self.get_user(validated_token)
-            misc.log(user, 'user - JWTAuthenticationCookies.authenticate()')            
             return user, validated_token
         except InvalidToken as e:
             raise AuthenticationFailed(f'Invalid token: {str(e)}')

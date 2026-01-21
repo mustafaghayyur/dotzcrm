@@ -20,7 +20,7 @@ class CRUD(Background.CrudOperations):
         self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
-        misc.log(dictionary, 'Peeking into dictionary from M2MCrud')
+
         if not crud.isValidId(self.submission, self.firstCol):
             return None
         if not crud.isValidId(self.submission, self.secondCol):

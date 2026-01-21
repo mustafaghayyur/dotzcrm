@@ -64,18 +64,15 @@ class TaskO2ORecordSerializerGeneric(Serializer):
         if data.get('id', None) is None and data.get('tid', None) is not None:
             data['id'] = data['tid']
 
-        misc.log(data, 'I am in validate(), after the validation ')
         return data
 
     def validate_tid(self, value):
-        misc.log(value, 'validate_tid() being called.')
-        if value is None:
+\        if value is None:
             return self.initial_data.get('id')
         return value
 
     def to_internal_value(self, data):
-        misc.log(data, 'I am in to_internal_value()')
-        if data.get('id', None) is None and data.get('tid', None) is not None:
+\        if data.get('id', None) is None and data.get('tid', None) is not None:
             data = dict(data) # make a copy
             data['id'] = data['tid']
             return super().to_internal_value(data)

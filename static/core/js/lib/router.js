@@ -1,4 +1,5 @@
 import { Fetcher, defineRequest } from "./async.js";
+import generic from "../helpers/generic.js";
 
 /**
  * @todo: show failiure message for not-found requests
@@ -7,13 +8,15 @@ import { Fetcher, defineRequest } from "./async.js";
  * Allows us to request a modal for matched url paam-key.
  * Only IDs of database records are assumed as keys.
  * @param {str} keyToFetch: key you are requesting
- * @param {str} responseContainer: 'containerId' where any responses should be printed.
- * @param {str} modal: 'modalId' we should show if true
+ * @param {str} routeToCall: Fetcher() approved route to retrieve data from.
+ * @param {str} modalId: 'modalId' we should show if true
  * @param {function} callbackFunction: has to be a callable function that deals with Fetcher's results
  */
-export function showModal(keyToFetch, responseContainer, modal, callbackFunction) {
-    let idToFetch = getQueryParam(keyToFetch);
-    if (isValidInteger(idToFetch)) {
+export function showModal(keyToFetch, routeToCall, modalId, callbackFunction) {
+    let idToFetch = generic.getQueryParam(keyToFetch);
+    const responseContainer = document.getElementById(modalId + 'Response');
+    
+    if (generic.checkVariableType(idToFetch) === 'number') {
         idToFetch = parseInt(idToFetch);
     } else {
         if (responseContainer instanceof HTMLElement) {
@@ -22,39 +25,18 @@ export function showModal(keyToFetch, responseContainer, modal, callbackFunction
         return null;
     }
 
-    const request = defineRequest('/rest/tasks/crud/' + idToFetch + '/');
+    const request = defineRequest(routeToCall, idToFetch);
     Fetcher(request, responseContainer, {}, (response) => {
-        // Select the modal element using its ID and show it
-        const modalEl = document.getElementById(modal);
+        // Select the modalId element using its ID and show it
+        const modalEl = document.getElementById(modalId);
         if (modalEl) {
             const modalInstance = new bootstrap.Modal(modalEl);
             modalInstance.show();
         }
         
         // callback to populate modal with fetched response.results
-        callbackFunction(response, modal); // all callbackFunctions would have to take these two params
+        callbackFunction(response, modalId); // all callbackFunctions would have to take these two params
     });
-
-}
-
-/**
- * You can pass a string containing a valid integer, or a number directly.
- * @param {int|string} value: variable you wish to check. 
- */
-export function isValidInteger (value) {
-  if (value === null || typeof value === 'boolean') {
-    return false;
-  }
-  return Number.isInteger(+value);
-};
-
-/**
- * Returns requested param's value if set in url params.
- * @param {str} paramStr: whic key are you requesting?
- */
-export function getQueryParam(paramStr) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(paramStr);
 }
 
 /**
