@@ -9,12 +9,12 @@ from core.helpers import validators
 # Repeating options saved to dictionaries for convinient reuse...
 intNullableOpts = {
     'allow_null': True, 
-    'required': False, 
+    'required': False,
     'validators': [validators.isPositiveIdOrNone]
 }
 
 intMandatoryOpts = {
-    'allow_null': False, 
+    'allow_null': False,
     'required': True, 
     'validators': [validators.isPositiveIdAlways]
 }
@@ -29,6 +29,7 @@ latestChoiceOpts = {
     'choices': [(c.value, c.value) for c in Latest], 
     'allow_null': True,
     'required': False,
+    'allow_blank': True,
     'validators': [validators.isLatestChoicetOrNone]
 }
 

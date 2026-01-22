@@ -26,7 +26,7 @@ export default {
      * @param {list} keys: optional list of keys to check/validate
      */
     generateDictionaryFromForm: (formId, keys = null) => {
-        let dictionary = $A.forms.formToDictionary(formId, keys = null);
+        let dictionary = $A.forms.formToDictionary(formId);
 
         if ($A.generic.checkVariableType(keys) === 'list') {
             keys.forEach(key => {    

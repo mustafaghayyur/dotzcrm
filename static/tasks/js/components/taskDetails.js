@@ -95,9 +95,5 @@ export default function (resultSet, containerId) {
             "commentsResponse", {}, 
             callback
         );
-
-        // New: we must now add edit functionality.
-        const enableEditFunctionality = await $A.tasks.load('editTaskForm');
-        enableEditFunctionality();  // call the component
     }
 }

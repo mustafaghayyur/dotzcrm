@@ -24,9 +24,11 @@ Main(async () => {
 
     const cleanForm = await $A.tasks.load('cleanFormFunctionality'); 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
-
-    cleanForm();    // load form clean functionality..
+    const enableEditFunctionality = await $A.tasks.load('editTaskForm');
     
+    cleanForm();    // load form clean functionality..
+    enableEditFunctionality();  // we must now add edit functionality.
+        
     // Allow opening of task-modals from url:
     $A.router.create(
         'task_id', 

@@ -9,7 +9,7 @@ class CommentSerializerGeneric(Serializer):
     """
     id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
-    comment = CharField(allow_null=True, required=False, min_length=50, max_length=6000)
+    comment = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=6000)
     creator_user_id = IntegerField(**intNullableOpts)
     parent_id = IntegerField(**intNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)

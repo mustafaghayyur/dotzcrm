@@ -10,7 +10,8 @@ export function Main(callbackFunction) {
             const request = $A.fetch.route('api.auth.settings');
             $A.fetch.body(request, 'authenticationResponse', {}, (data, containerId) => {
                 $A.generic.loopObject(data, (key, val) => {
-                    $A.app.memSave(key, data[key]);
+                    $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
+                    return null;
                 });
 
                 const loginRequired = document.getElementById('loginRequired');

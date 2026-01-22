@@ -45,11 +45,11 @@ export default {
      * @param {string} formId: should be string html id attribute value
      * @param {*} keysList: optional list of keys to check/validate
      */
-    formToDictionary: function (formId, keysList = null) {
+    formToDictionary: function (formId) {
         const form = document.getElementById(formId);
 
         if (!(form instanceof HTMLElement)) {
-            console.log('Error: form could not be found. Cannot form request object.', form);
+            throw Error('Error: form could not be found. Cannot form request object.', form);
         }
 
         // 1. Create a FormData object from the form element
@@ -58,17 +58,13 @@ export default {
         // 2. Convert the FormData entries into a plain JavaScript object (dictionary format)
         const formObject = Object.fromEntries(formData.entries());
 
-        if ($A.generic.checkVariableType(keysList) === 'list') {
-            let dictionary = {};
-            keysList.forEach(key => {    
-                if (formObject[key]) {
-                    dictionary[key] = formObject[key];
-                }
-            });
+        let dictionary =  $A.generic.loopObject(formObject, (key, value) => {    
+            // basic conversion of primitive data types to null if they are an empty string
+            return $A.validators.primitivesToNull(formObject[key]);
+        });
+        console.log('In formtodictionary()... checking on dictionary...', dictionary, $A.generic.checkVariableType(dictionary));
 
-            return dictionary; // return validated data
-        }
-        return formObject; // return unvalidated data
+        return dictionary; // return validated data
     },
 
     /**

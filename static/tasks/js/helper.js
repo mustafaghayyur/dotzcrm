@@ -8,8 +8,8 @@ import data from './constants.js';
  */
 helper['tasks'] = {
         forms: formsLocal,
-        validators: validators,
-        data: data,
+        validators: validators, // can carry validation specific to tasks
+        data: data, // constants needed by tasks module.
         
         /**
          * Loads a compoenent specified with argument.

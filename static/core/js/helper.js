@@ -1,4 +1,5 @@
 import generic from './helpers/generic.js';
+import validators from './helpers/validators.js';
 import app from './helpers/app.js';
 import forms from './helpers/forms.js';
 import dates from './helpers/dates.js';
@@ -15,6 +16,7 @@ export default {
     app: app,
     forms: forms,
     dates: dates,
+    validators: validators,
     router: { 
         create: showModal,
         update: updateUrlParam
