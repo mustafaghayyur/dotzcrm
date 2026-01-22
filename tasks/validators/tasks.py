@@ -17,16 +17,16 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     aid = IntegerField(**intNullableOpts)
     vid = IntegerField(**intNullableOpts)
 
-    description = CharField(allow_null=True, required=False, min_length=20, max_length=255)
-    details = CharField(allow_null=True, required=False, min_length=50)
+    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
+    details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
     
-    status = ChoiceField(allow_null=True, required=False, choices=[(c.value, c.value) for c in Status])
-    visibility = ChoiceField(allow_null=True, required=False, choices=[(c.value, c.value) for c in Visibility])
+    status = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Status])
+    visibility = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Visibility])
 
     deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 
     creator_id = IntegerField(**intNullableOpts)
-    parent_id = IntegerField(**intNullableOpts)
+    parent_id = IntegerField(**intNullableOpts) # @todo: parent_id should be nullable, serializer won't let it?
     assignor_id = IntegerField(**intNullableOpts)
     assignee_id = IntegerField(**intNullableOpts)
 
@@ -64,18 +64,15 @@ class TaskO2ORecordSerializerGeneric(Serializer):
         if data.get('id', None) is None and data.get('tid', None) is not None:
             data['id'] = data['tid']
 
-        misc.log(data, 'I am in validate(), after the validation ')
         return data
 
     def validate_tid(self, value):
-        misc.log(value, 'validate_tid() being called.')
-        if value is None:
+\        if value is None:
             return self.initial_data.get('id')
         return value
 
     def to_internal_value(self, data):
-        misc.log(data, 'I am in to_internal_value()')
-        if data.get('id', None) is None and data.get('tid', None) is not None:
+\        if data.get('id', None) is None and data.get('tid', None) is not None:
             data = dict(data) # make a copy
             data['id'] = data['tid']
             return super().to_internal_value(data)

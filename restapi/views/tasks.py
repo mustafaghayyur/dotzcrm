@@ -2,6 +2,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+# from rest_framework.decorators import authentication_classes, permission_classes
 
 from core.helpers import pagination, crud, misc
 
@@ -21,19 +22,21 @@ from .helpers.taskWatchers import WatchersMethods
     NOTE: the [request] argument being passed to views with the @api_view decorator,
         is not the conventional Django request object. Rather, DRF's enhanced
         Request object.
+
+    Possible decorators:
+        @authentication_classes([JWTAuthentication])
 """
 @api_view(['GET'])
 def task_list(request, type, format=None):
     """
-        List all  tasks for type of request
+        List all tasks for type of request.
+        Requires a valid JWT token in the Authorization header.
     """
     selectors = ['tid', 'sid', 'description', 'tupdate_time', 'status']
     conditions = {
         'tdelete_time': 'is Null',
         'assignee_id': request.user.id
     }
-
-    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
 
     match type:
         case 'private':
@@ -56,15 +59,16 @@ def task_list(request, type, format=None):
         return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
     
     except ValidationError as e:
-        details = getattr(e, 'detail', str(e))
-        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
 def task_crud(request, id, format=None):
+    """
+        CRUD operations for individual Task O2O records.
+    """
     method = request.method
-    
     try:
         match method:
             case 'GET':
@@ -79,13 +83,15 @@ def task_crud(request, id, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        details = getattr(e, 'detail', str(e))
-        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
 def comment_crud(request, id, format=None):
+    """
+        CRUD operations for individual Comment records.
+    """
     method = request.method
     
     try:
@@ -102,24 +108,21 @@ def comment_crud(request, id, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        details = getattr(e, 'detail', str(e))
-        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def comments_list(request, format=None):
+def comments_list(request, taskId, format=None):
     """
         List all  tasks for type of request
     """
     selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
         #'delete_time': 'is Null',
-        'task_id': request.query_params.get('task_id', 0),
+        'task_id': taskId, # old: request.query_params.get('task_id', 0),
     }
-
-    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
-
+    
     try:
         pgntn = pagination.assembleParamsForView(request.query_params)
         # limit=[str(pgntn['offset']), str(pgntn['page_size']
@@ -130,14 +133,18 @@ def comments_list(request, format=None):
         return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
     
     except ValidationError as e:
-        details = getattr(e, 'detail', str(e))
-        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST', 'GET', 'DELETE'])
 def watcher_crud(request, taskId, format=None):
+    """
+        CRUD operations for individual Watcher O2O records.
+        Updates not allowed.
+        Handles watcher requests with current-user as watcher only
+    """
     method = request.method
     
     try:
@@ -152,36 +159,27 @@ def watcher_crud(request, taskId, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        details = getattr(e, 'detail', str(e))
-        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def watchers_list(request, type, format=None):
+def watchers_list(request, taskId, format=None):
     """
-        List all  tasks for type of request
+        List all watchers for task and current user
     """
-    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
-        'tdelete_time': 'is Null',
-        'assignee_id': 1  # @todo readd: request.user.id,
+        'task_id': taskId,
+        'latest': ValuesMapper().latest('latest')  # @todo readd: request.user.id,
     }
-
-    #misc.log(request.user, 'Investigating why assignee is not making it to query in rest.tasks.list()', 2)
-
     try:
-        pgntn = pagination.assembleParamsForView(request.query_params)
-        
-        records = Comments().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
-        serialized = WatcherSerializerGeneric(records, many=True)
-        
-        hasMore = pagination.determineHasMore(records, pgntn['page_size'])
-        return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+        records = Watchers().read(conditions)
+        if records:
+            serialized = WatcherSerializerGeneric(records, many=True)
+            return Response(crud.generateResponse(serialized.data))
     
     except ValidationError as e:
-        details = getattr(e, 'detail', str(e))
-        return Response(crud.generateError([e, details], "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 

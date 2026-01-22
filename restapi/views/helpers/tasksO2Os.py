@@ -18,7 +18,7 @@ class OneToOnes():
         serializer = TaskO2ORecordSerializerGeneric(data=request.data)
         if serializer.is_valid():
             result = CRUD().create(serializer.validated_data)
-            misc.log(result, 'Peaking into task create result')
+
             if result:
                 try:
                     record = CRUD().fetchFullRecordForUpdate(result.id)
@@ -43,7 +43,6 @@ class OneToOnes():
             result = CRUD().update(serializer.validated_data)
             # attempt to serialize the updated consolidated record
             if result:
-                misc.log(result, 'Peaking into comment update result')
                 try:
                     record = CRUD().fetchFullRecordForUpdate(result['tid'])
                     retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])

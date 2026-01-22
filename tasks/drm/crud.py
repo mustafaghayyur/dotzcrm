@@ -81,6 +81,7 @@ class Comments(RevisionlessChildren.CRUD):
             raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
         model = globals()[self.mapper.models(self.tbl)]
+
         if self.pk in definitions:
             rawObjs = model.objects.fetchById(definitions[self.pk])  # specific record being sought
 

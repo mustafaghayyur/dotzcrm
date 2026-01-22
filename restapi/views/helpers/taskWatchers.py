@@ -22,7 +22,6 @@ class WatchersMethods():
             }
             result = Watchers().create(dictinary)
             if result:
-                misc.log(result, 'peaking into Watcher create result')
                 return Response(crud.generateResponse({'wid': result.id}), status=status.HTTP_201_CREATED) # @todo: can 201 responses carry payloads?
             return Response(crud.generateError('Created record could not be fetched.'), status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -58,7 +57,6 @@ class WatchersMethods():
             Retrieve single watcher record.
             @current_user focussed
         """
-        misc.log(taskId, 'taskId and dic')
         if crud.isValidId({'id': taskId}, 'id'):
             dictinary = {
                 'task_id': taskId,

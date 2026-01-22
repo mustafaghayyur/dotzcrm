@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render
-from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm
 
 # Only Auth section Views defined here.
@@ -13,43 +12,82 @@ def register(request):
     context = {
         'heading': 'Onboarding',
         'content': 'Please see our technical staff for gaining access to the system.',
+        'loginRequired': 'false',
     }
     return render(request, 'core/generic.html', context)
 
-class LoginView(auth_views.LoginView):
-    template_name = 'auth/login.html'
-    next_page = 'task_index'
-    authentication_form = AuthenticationForm
-    extra_context = None
 
 
-class LogoutView(auth_views.LogoutView):
-    next_page = 'login'
-    template_name = 'auth/logged_out.html'
-    extra_context = None
-        
-class PWChangeView(auth_views.PasswordChangeView):
-    template_name = 'auth/password_change_form.html'
+def login(request):
+    """
+        Handle user login with JWT token generation.
+        GET: Display login form
+    """
+    form = AuthenticationForm()
+    context = {
+        'loginRequired': 'false',
+        'next': 'task_index',
+        'form': form,
+    }
+    return render(request, 'auth/login.html', context)
 
+def logout(request):
+    """
+        Handle user logout by destroying JWT tokens.
+        GET: Display logout confirmation page
+    """
+    context ={
+        'loginRequired': 'false',
+    }
+    # Create response with logout page
+    response = render(request, 'auth/logged_out.html', {'logged_out': 'tTrue'})
+    
+    # Delete authentication cookies
+    response.delete_cookie('access_token', path='/')
+    response.delete_cookie('refresh_token', path='/')
+    
+    return response
 
-class PWChangeViewComplete(auth_views.PasswordChangeDoneView):
-    template_name = 'auth/password_change_done.html'
+"""
+    Password Change is an authenticated-user's operation. Login required.
+"""
+def changePassword(request):
+    context ={
+        'loginRequired': 'true',
+    }
+    render(request, 'auth/password_change_form.html', context)
 
-        
-class PWResetView(auth_views.PasswordResetView):
-    template_name = 'auth/password_reset_form.html'
+def changePasswordDone(request):
+    context ={
+        'loginRequired': 'true',
+    }
+    render(request, 'auth/password_change_done.html', context)
 
-        
-class PWResetViewComplete(auth_views.PasswordResetDoneView):
-    template_name = 'auth/password_reset_email.html'
+"""
+    All Password-Reset views allow for non-authenticated users to reset password.
+"""
+def passwordReset1(request):
+    context ={
+        'loginRequired': 'false',
+    }
+    render(request, 'auth/password_reset_form.html', context)
 
-        
-class ResetTokenView(auth_views.PasswordResetConfirmView):
-    template_name = 'auth/password_reset_confirm.html'
+def passwordReset2(request):
+    context ={
+        'loginRequired': 'false',
+    }
+    render(request, 'auth/password_reset_done.html', context)
 
-        
-class ResetView(auth_views.PasswordResetCompleteView):
-    template_name = 'auth/password_reset_done.html'
+def passwordReset3(request):
+    context ={
+        'loginRequired': 'false',
+    }
+    render(request, 'auth/password_reset_confirm.html', context)
 
-        
+def passwordReset4(request):
+    context ={
+        'loginRequired': 'false',
+    }
+    render(request, 'auth/password_reset_comlplete.html', context)
+
 

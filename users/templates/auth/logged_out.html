@@ -1,0 +1,12 @@
+{% extends "users/base.html" %}
+
+{% block title %} Dotz CRM + PM Software {% endblock %}
+
+{% block page_heading %}Tasks Management Console{% endblock %}
+
+{% block content %}
+    <h5>You are logged out.</h5>
+
+    <p><a href="{% url 'login' %}">Log in again</a></p>
+    <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+{% endblock %}

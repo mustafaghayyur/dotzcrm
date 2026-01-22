@@ -6,4 +6,5 @@ def ContextForDotzCRMPM(request):
     """
     return {
         'timestamp': datetime.datetime.now(datetime.timezone.utc).timestamp(),
+        'loginRequired': 'true',
     }
