@@ -3,6 +3,7 @@ import validators from './helpers/validators.js';
 import app from './helpers/app.js';
 import forms from './helpers/forms.js';
 import dates from './helpers/dates.js';
+import constants from './constants.js';
 import { showModal, updateUrlParam } from './lib/router.js';
 import { Fetcher, defineRequest } from './lib/async.js';
 import { Editor } from './lib/editor.js';
@@ -12,6 +13,7 @@ import { TabbedDashBoard } from './lib/dashboard.js';
  * Assembles all core libraries into one callable helper object.
  */
 export default {
+    data: constants,
     generic: generic,
     app: app,
     forms: forms,

@@ -7,8 +7,9 @@
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidToken
-from rest_framework_simplejwt.tokens import Token
+from rest_framework_simplejwt.tokens import Token, RefreshToken
 from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.authentication import SessionAuthentication
 from django.contrib.auth import get_user_model
 from typing import Optional, Tuple
@@ -18,23 +19,15 @@ from core.helpers import misc
 User = get_user_model()
 
 
-class CustomUserToken(Token):
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
-    Custom token class that adds user details to the token payload.
-    Includes: user_id, username, email, first_name, last_name, is_active, user_level, user_settings
+    Custom token serializer that adds custom user claims to tokens.
     """
-    token_type = 'access'
-    lifetime = api_settings.ACCESS_TOKEN_LIFETIME  # Will use default from settings
-    
     @classmethod
-    def for_user(cls, user):
-        """
-        Create token for user with custom claims.
-        """
-        misc.log(lifetime, 'inisde CustomUserToken.for_user(), checking lifetime value')
-        token = super().for_user(user)
-        
-        # Add custom user claims
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add your custom claims here
         token['user_id'] = user.id
         token['username'] = user.username
         token['email'] = user.email
@@ -42,14 +35,7 @@ class CustomUserToken(Token):
         token['last_name'] = user.last_name
         token['is_active'] = user.is_active
         token['user_level'] = user.user_level
-        
-        # Add user_settings if it exists and is not too long
-        misc.log(token, 'token before user_settings')
-        user_settings = getattr(user, 'user_settings', '')
-        if user_settings and len(str(user_settings)) <= 750:
-            token['user_settings'] = user_settings
-
-        misc.log(token, 'token after user_settings')
+        # Add any other user data
         
         return token
 
@@ -79,20 +65,36 @@ class JWTAuthenticationCookies(JWTAuthentication):
         
         # If still no token, try session authentication
         if raw_token is None:
-            try:
-                session_auth = SessionAuthentication()
-                return session_auth.authenticate(request)
-            except Exception:
-                return None
+            return None
         
         # Validate the token and return the user
         try:
             validated_token = self.get_validated_token(raw_token)
             misc.log(validated_token, 'Checking to see validated token for user.')
-            user = self.get_user(validated_token)
+            user = {}  # self.get_user(validated_token) - we have chosen to disable touching the database on every authentication request.
             return user, validated_token
         except InvalidToken as e:
             raise AuthenticationFailed(f'Invalid token: {str(e)}')
         except Exception as e:
             raise AuthenticationFailed(f'Authentication failed: {str(e)}')
 
+
+def add_custom_claims_to_token(token, user):
+    """
+    Helper function to add custom user claims to a JWT token.
+    To be used when our changes are done.
+    """
+    token['user_id'] = user.id
+    token['username'] = user.username
+    token['email'] = user.email
+    token['first_name'] = user.first_name
+    token['last_name'] = user.last_name
+    token['is_active'] = user.is_active
+    token['user_level'] = user.user_level
+    
+    # Add user_settings if it exists and is not too long
+    user_settings = getattr(user, 'user_settings', '')
+    if user_settings and len(str(user_settings)) <= 750:
+        token['user_settings'] = user_settings
+    
+    return token

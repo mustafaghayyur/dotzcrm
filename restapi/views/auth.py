@@ -3,13 +3,21 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.decorators import permission_classes
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from django.conf import settings
-from core.helpers import crud, misc
+from core.helpers import crud
+from core.lib.authentication import CustomTokenObtainPairSerializer
+from restapi.lib.helpers import *
+
 
 class ObtainTokenView(TokenObtainPairView):
     """
-        Token issueance view.
+        Token issuance view.
+        Uses custom serializer to include additional user claims in the token.
     """
+    permission_classes = [AllowAny]
+    serializer_class = CustomTokenObtainPairSerializer
+    
     def post(self, request, *args, **kwargs):
         """
         Override post to add access and refresh tokens as HTTP-only cookies.
@@ -17,16 +25,11 @@ class ObtainTokenView(TokenObtainPairView):
         Wraps response in 'results' property for frontend compatibility.
         """
         try:
-            misc.log(request, 'inside ObtainTokenView() begin processing post')
             response = super().post(request, *args, **kwargs)
-            misc.log(response, 'inside ObtainTokenView() response from parent')
             
             if response.status_code == 200:
-                misc.log(response, '200 ook processing...')
                 access_token = response.data.get('access')
                 refresh_token = response.data.get('refresh')
-
-                misc.log([access_token, refresh_token], 'iaccess & refresh tokens')
                 
                 secureFlag = False if settings.DEBUG else True  # sets secure=false flag if debug is on.
 
@@ -35,7 +38,7 @@ class ObtainTokenView(TokenObtainPairView):
                     response.set_cookie(
                         key='access_token',
                         value=access_token,
-                        max_age=1 * 60 * 60,  # 1 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
+                        max_age=6 * 60 * 60,  # 6 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
                         httponly=True,
                         secure=secureFlag,
                         samesite='Strict',
@@ -63,17 +66,18 @@ class ObtainTokenView(TokenObtainPairView):
                 }
                 response.data = formattedData
             
-            misc.log(response, 'final response')
-            
             return response
         except Exception as e:
-            return Response(crud.generateError(e, "Token generation failiure."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateError(e, "Token generation failure."), status=status.HTTP_400_BAD_REQUEST)
 
 
 class RefreshTokenView(TokenRefreshView):
     """
-        Taken Refresh view
+        Token Refresh view.
+        Uses custom token to include additional user claims in the refreshed access token.
     """
+    permission_classes = [AllowAny]
+    
     def post(self, request, *args, **kwargs):
         """
         Override post to add refreshed access token as HTTP-only cookie.
@@ -93,7 +97,7 @@ class RefreshTokenView(TokenRefreshView):
                     response.set_cookie(
                         key='access_token',
                         value=access_token,
-                        max_age=1 * 60 * 60,  # 6 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
+                        max_age=6 * 60 * 60,  # 6 hours (matches JWT_ACCESS_TOKEN_LIFETIME)
                         httponly=True,
                         secure=secureFlag,
                         samesite='Strict',
@@ -106,6 +110,10 @@ class RefreshTokenView(TokenRefreshView):
                     }
                 }
                 response.data = formattedData
+            
+            return response
+        except Exception as e:
+            return Response(crud.generateError(e, "Token refresh failure."), status=status.HTTP_400_BAD_REQUEST)
             
             return response
         except Exception as e:

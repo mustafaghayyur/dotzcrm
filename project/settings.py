@@ -45,7 +45,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # "django.contrib.auth.middleware.LoginRequiredMiddleware",  # @todo - uncomment ... makes entire app closed
+    # "django.contrib.auth.middleware.LoginRequiredMiddleware",  # @todo: confirm this is no longer needed.
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.TimezoneMiddleware',
@@ -170,9 +170,10 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
 
-    # 'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',), -> old setting
-    'AUTH_TOKEN_CLASSES': ('core.lib.authentication.CustomUserToken',),  # Custom token class with user claims
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    #'AUTH_TOKEN_CLASSES': ('core.lib.authentication.CustomUserToken',),  # Custom token class with user claims
     'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_OBTAIN_SERIALIZER': 'core.lib.authentication.CustomTokenObtainPairSerializer',
 
     'JTI_CLAIM': 'jti',
 

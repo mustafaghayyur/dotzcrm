@@ -7,7 +7,7 @@ import $A from "../helper.js";
 export function Main(callbackFunction) {
     try {
         document.addEventListener('DOMContentLoaded', () => {
-            const request = $A.fetch.route('api.auth.settings');
+            const request = $A.fetch.route('api.settings');
             $A.fetch.body(request, 'authenticationResponse', {}, (data, containerId) => {
                 $A.generic.loopObject(data, (key, val) => {
                     $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
