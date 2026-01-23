@@ -176,6 +176,7 @@ def resetUserPassword(request, format=None):
     except Exception as e:
         return Response(crud.generateError(e, "Errors have occurred."), status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def retrieveSettings(request):

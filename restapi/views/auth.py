@@ -2,12 +2,14 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.decorators import permission_classes
+from rest_framework import status
 from django.conf import settings
 from core.helpers import crud, misc
 
-# from rest_framework.permissions import AllowAny| IsAuthenticated
-# permission_classes = [AllowAny] | permission_classes = [IsAuthenticated]
 class ObtainTokenView(TokenObtainPairView):
+    """
+        Token issueance view.
+    """
     def post(self, request, *args, **kwargs):
         """
         Override post to add access and refresh tokens as HTTP-only cookies.
@@ -15,11 +17,16 @@ class ObtainTokenView(TokenObtainPairView):
         Wraps response in 'results' property for frontend compatibility.
         """
         try:
+            misc.log(request, 'inside ObtainTokenView() begin processing post')
             response = super().post(request, *args, **kwargs)
+            misc.log(response, 'inside ObtainTokenView() response from parent')
             
             if response.status_code == 200:
+                misc.log(response, '200 ook processing...')
                 access_token = response.data.get('access')
                 refresh_token = response.data.get('refresh')
+
+                misc.log([access_token, refresh_token], 'iaccess & refresh tokens')
                 
                 secureFlag = False if settings.DEBUG else True  # sets secure=false flag if debug is on.
 
@@ -56,15 +63,17 @@ class ObtainTokenView(TokenObtainPairView):
                 }
                 response.data = formattedData
             
+            misc.log(response, 'final response')
+            
             return response
         except Exception as e:
             return Response(crud.generateError(e, "Token generation failiure."), status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class RefreshTokenView(TokenRefreshView):
-    # permission_classes = [AllowAny]
-    
+    """
+        Taken Refresh view
+    """
     def post(self, request, *args, **kwargs):
         """
         Override post to add refreshed access token as HTTP-only cookie.

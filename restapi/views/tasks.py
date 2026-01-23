@@ -30,7 +30,6 @@ from .helpers.taskWatchers import WatchersMethods
 def task_list(request, type, format=None):
     """
         List all tasks for type of request.
-        Requires a valid JWT token in the Authorization header.
     """
     selectors = ['tid', 'sid', 'description', 'tupdate_time', 'status']
     conditions = {
@@ -122,7 +121,7 @@ def comments_list(request, taskId, format=None):
         #'delete_time': 'is Null',
         'task_id': taskId, # old: request.query_params.get('task_id', 0),
     }
-    
+
     try:
         pgntn = pagination.assembleParamsForView(request.query_params)
         # limit=[str(pgntn['offset']), str(pgntn['page_size']

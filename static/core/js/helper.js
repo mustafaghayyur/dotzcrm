@@ -9,7 +9,7 @@ import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
 
 /**
- * Assembles all core and tasks 'helpers' libraries into one callable helper object.
+ * Assembles all core libraries into one callable helper object.
  */
 export default {
     generic: generic,

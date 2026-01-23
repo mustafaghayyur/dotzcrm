@@ -26,7 +26,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
 
     creator_id = IntegerField(**intNullableOpts)
-    parent_id = IntegerField(**intNullableOpts) # @todo: parent_id should be nullable, serializer won't let it?
+    parent_id = IntegerField(**intNullableOpts)
     assignor_id = IntegerField(**intNullableOpts)
     assignee_id = IntegerField(**intNullableOpts)
 
@@ -67,12 +67,12 @@ class TaskO2ORecordSerializerGeneric(Serializer):
         return data
 
     def validate_tid(self, value):
-\        if value is None:
+        if value is None:
             return self.initial_data.get('id')
         return value
 
     def to_internal_value(self, data):
-\        if data.get('id', None) is None and data.get('tid', None) is not None:
+        if data.get('id', None) is None and data.get('tid', None) is not None:
             data = dict(data) # make a copy
             data['id'] = data['tid']
             return super().to_internal_value(data)
