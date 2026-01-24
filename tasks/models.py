@@ -3,7 +3,7 @@ from django.conf import settings as sysconf
 
 # import our QuerySets:
 from .drm.querysets import *
-#from core.models import User
+from users.models import *
 
 
 # The main task table
@@ -116,6 +116,34 @@ class EditLog(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     user = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE, db_default=1)
     changed_cols = models.CharField(max_length=6000)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+
+class WorkSpace(models.Model):
+    name = models.CharField(max_length=1000)
+    description = models.CharField(max_length=6000)
+    type = models.CharField(max_length=30)  # enum of ['private' | 'open']
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+
+class WorkSpaceDepartment(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+class WorkSpaceUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+class WorkSpaceTasks(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
