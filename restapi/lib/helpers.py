@@ -3,21 +3,19 @@
 """
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from core.lib.authentication import JWTAuthenticationCookies
-from core.helpers import misc
 
 def isUserAuthenticated(request):
     """
         Confirms user has a valid token.
         Token carries all non-sensitive user data.
-        Returns token [key] => value pairs.
+        Returns User model object.
     """
     try:
         jwt_auth = JWTAuthenticationCookies()
-        _, tokenData = jwt_auth.authenticate(request)
-        misc.log(tokenData, 'inspecting user_auth in helpers.isUserAuthenticated()')
-        if tokenData is None:
-            raise InvalidToken('Token missing essential data. Cannot proceed.')
+        user, tokenData = jwt_auth.authenticate(request)
         
-        return tokenData
+        if user is None or tokenData is None:
+            raise InvalidToken('Token missing essential data. Cannot proceed.')
+        return user
     except (InvalidToken, TokenError) as e:
         raise InvalidToken(f'Token validation failed: {str(e)}')

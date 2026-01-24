@@ -20,18 +20,18 @@ def retrieveAppSettings(request):
     """
     try:
         # Try to authenticate user from JWT cookie
-        token = isUserAuthenticated(request)
+        user = isUserAuthenticated(request)
 
         # User is authenticated - return user settings
         userSettings = {
             'is_authenticated': True,
-            'username': token['username'],
-            'user_id': token['user_id'],
-            'email': token['email'],
-            'first_name': token['first_name'],
-            'last_name': token['last_name'],
-            'is_active': token['is_active'],
-            'user_level': token['user_level'],
+            'username': user.username,
+            'user_id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_active': user.is_active,
+            'user_level': user.user_level,
             'allowed_routes': {
                 'api': {
                     'auth': {
