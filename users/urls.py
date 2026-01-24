@@ -20,5 +20,4 @@ urlpatterns = [
     # API endpoints partaining to user records
     path('rest/password/change', users.changeUserPassword),
     path('rest/password/reset', users.changeUserPassword),
-    path('rest/settings/', users.retrieveSettings),
 ]

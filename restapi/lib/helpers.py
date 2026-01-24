@@ -1,44 +1,21 @@
-#from rest_framework_simplejwt.authentication import JWTAuthentication
+"""
+    This file will hold functions necessary for api views operations.
+"""
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from core.lib.authentication import JWTAuthenticationCookies
 
-def getUserFromJwtCookie(request):
+def isUserAuthenticated(request):
+    """
+        Confirms user has a valid token.
+        Token carries all non-sensitive user data.
+        Returns User model object.
+    """
     try:
         jwt_auth = JWTAuthenticationCookies()
-        user_auth = jwt_auth.authenticate(request)
-
-        if user_auth is None:
-            raise InvalidToken('Invalid token.')
+        user, tokenData = jwt_auth.authenticate(request)
         
-        user, _ = user_auth        
-        return user
-    except (InvalidToken, TokenError) as e:
-        raise InvalidToken(f'Token validation failed: {str(e)}')
-
-def getUserFromJwtCookieLegacy(request):
-    """
-        Legacy function. Extracts token from Authorization: Bearer headers.
-        We have moved on to using HTTPOnly cookies for token validation.
-    """
-    access_token = request.COOKIES.get('access_token')
-    
-    if not access_token:
-        raise InvalidToken('No access token found in cookies.')
-    
-    try:
-        jwt_auth = JWTAuthentication()
-        # Create a fake request object for JWT authentication
-        class FakeRequest:
-            def __init__(self, token):
-                self.META = {'HTTP_AUTHORIZATION': f'Bearer {token}'}
-        
-        fake_request = FakeRequest(access_token)
-        user_auth = jwt_auth.authenticate(fake_request)
-        
-        if user_auth is None:
-            raise InvalidToken('Invalid token.')
-        
-        user, _ = user_auth
+        if user is None or tokenData is None:
+            raise InvalidToken('Token missing essential data. Cannot proceed.')
         return user
     except (InvalidToken, TokenError) as e:
         raise InvalidToken(f'Token validation failed: {str(e)}')

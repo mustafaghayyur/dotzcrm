@@ -1,5 +1,6 @@
 import { removeWatcher, createWatcher } from "../crud/watchers.js";
 import { createCommentForTask } from "../crud/comments.js";
+import { DeleteTask } from '../crud/tasks.js';
 import $A from "../helper.js";
 
 /**

@@ -181,8 +181,12 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
  * Helps form a proper request definition object
  */
 export function defineRequest(urlKey, urlParams = {}, options = {}) {
-    const urlTemplate = selectUrlTemplate(urlKey);
-    let url = generateUrl(urlTemplate, urlParams);
+    let url = $A.data.settingsUrl;
+    
+    if (urlKey !== 'api.settings') {
+        const urlTemplate = selectUrlTemplate(urlKey);
+        url = generateUrl(urlTemplate, urlParams);
+    }
     
     const defaults = {
         method: 'GET',
