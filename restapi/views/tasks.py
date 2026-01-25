@@ -53,7 +53,7 @@ def task_list(request, type, format=None):
     try:
         pgntn = pagination.assembleParamsForView(request.query_params)
         
-        records = CRUD().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
+        records = Tasks().read(selectors, conditions, limit=[str(pgntn['offset']), str(pgntn['page_size'])])
         serialized = TaskO2ORecordSerializerGeneric(records, many=True)
         hasMore = pagination.determineHasMore(records, pgntn['page_size'])
         return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
@@ -66,7 +66,7 @@ def task_list(request, type, format=None):
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
 def task_crud(request, id, format=None):
     """
-        CRUD operations for individual Task O2O records.
+        Tasks operations for individual Task O2O records.
     """
     method = request.method
     try:
@@ -90,7 +90,7 @@ def task_crud(request, id, format=None):
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
 def comment_crud(request, id, format=None):
     """
-        CRUD operations for individual Comment records.
+        Tasks operations for individual Comment records.
     """
     method = request.method
     
@@ -141,7 +141,7 @@ def comments_list(request, taskId, format=None):
 @api_view(['POST', 'GET', 'DELETE'])
 def watcher_crud(request, taskId, format=None):
     """
-        CRUD operations for individual Watcher O2O records.
+        Tasks operations for individual Watcher O2O records.
         Updates not allowed.
         Handles watcher requests with current-user as watcher only
     """
