@@ -171,3 +171,8 @@ class TasksMapper(RelationshipMappers):
             Should be returned in string format.
         """
         return '20'
+
+
+
+#class WorkSpacesMapper(RelationshipMappers):
+
