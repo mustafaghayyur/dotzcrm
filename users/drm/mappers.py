@@ -1,6 +1,6 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
 
-class TasksMapper(RelationshipMappers):
+class UsersMapper(RelationshipMappers):
     """
         All calls should be made to following method names without the '_' prefix.
         RelationshipMappers() has proper wrapper functions.
@@ -15,14 +15,10 @@ class TasksMapper(RelationshipMappers):
             Change with care.
         """
         return {
-            't': 'tasks_task',
-            'd': 'tasks_details',
-            'l': 'tasks_deadline',
-            's': 'tasks_status',
-            'v': 'tasks_visibility',
-            'a': 'tasks_assignment',
-            'w': 'tasks_watcher',
-            'c': 'tasks_comment',
+            'u': 'auth_user',
+            'p': 'users_userprofile',
+            'r': 'users_userreportsto',
+            's': 'users_usersettings',
         }
 
     def _models(self):
@@ -31,43 +27,35 @@ class TasksMapper(RelationshipMappers):
             Change with care.
         """
         return {
-            't': 'Task',
-            'd': 'Details',
-            'l': 'Deadline',
-            's': 'Status',
-            'v': 'Visibility',
-            'a': 'Assignment',
-            'w': 'Watcher',
-            'c': 'Comment',
+            'u': 'User',
+            'p': 'UserProfile',
+            's': 'UserSettings',
+            'r': 'UserReportsTo',
         }
 
     def _modelPaths(self):
         return {
-            't': 'tasks.models',
-            'd': 'tasks.models',
-            'l': 'tasks.models',
-            's': 'tasks.models',
-            'v': 'tasks.models',
-            'a': 'tasks.models',
-            'w': 'tasks.models',
-            'c': 'tasks.models',
+            'u': 'users.models',
+            'p': 'users.models',
+            's': 'users.models',
+            'r': 'users.models',
         }
 
     def _master(self):
         return {
-            'table': 'tasks_task',
-            'abbreviation': 't',
-            'foreignKeyName': 'task_id',
+            'table': 'auth_user',
+            'abbreviation': 'u',
+            'foreignKeyName': 'user_id',
         }
 
     def _tablesForRelationType(self, relationType):
         match relationType:
             case 'o2o':
-                return ['t', 'd', 'l', 's', 'v', 'a']
+                return ['u', 'p', 's']
             case 'm2m':
-                return ['w']
+                return ['r']
             case 'rlc':
-                return ['c']
+                return []
             case 'm2o':
                 return []
             case _:
@@ -87,32 +75,24 @@ class TasksMapper(RelationshipMappers):
             Can carry any fields within a table to ignore in a certain operation
         """
         return {
-            'tasks_task': ['id'],
-            'tasks_details': ['id', 'latest', 'task_id'],
-            'tasks_deadline': ['id', 'latest', 'task_id'],
-            'tasks_status': ['id', 'latest', 'task_id'],
-            'tasks_visibility': ['id', 'latest', 'task_id'],
-            'tasks_assignment': ['id', 'latest', 'task_id'],
-            'tasks_watcher': ['id', 'latest', 'task_id'],
-            'tasks_comment': ['id', 'task_id'],
+            'auth_user': ['id'],
+            'users_userprofile': ['id', 'latest'],
+            'users_userreportsto': ['id', 'latest'],
+            'users_usersettings': ['id', 'latest'],
         }
 
     def _ignoreOnRetrieval(self):
-        return ['task_id']
+        return []
 
     def _tableFields(self):
         """
             Outline all tables within Tasks system here
         """
         return {
-            'tasks_task': ['id', 'description', 'create_time', 'update_time', 'delete_time', 'creator_id', 'parent_id'],
-            'tasks_details': ['id', 'details', 'latest', 'create_time', 'delete_time', 'task_id'],
-            'tasks_deadline': ['id', 'deadline', 'latest', 'create_time', 'delete_time', 'task_id'],
-            'tasks_status': ['id', 'status', 'latest', 'create_time', 'delete_time', 'task_id'],
-            'tasks_visibility': ['id', 'visibility', 'latest', 'create_time', 'delete_time', 'task_id'],
-            'tasks_assignment': ['id', 'latest', 'create_time', 'delete_time', 'assignee_id', 'assignor_id', 'task_id'],
-            'tasks_watcher': ['id', 'latest', 'create_time', 'delete_time', 'task_id', 'watcher_id'],
-            'tasks_comment': ['id', 'comment', 'parent_id', 'create_time', 'update_time', 'delete_time', 'task_id']
+            'auth_user': ['id', 'password', 'last_login', 'is_superuser', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'date_joined', 'create_time', 'delete_time', 'update_time', 'user_level'],
+            'users_userprofile': ['id', 'legal_first_name', 'legal_last_name', 'office_phone', 'office_ext', 'cell_phone', 'home_phone', 'office_location', 'create_time', 'update_time', 'delete_time', 'user_id'],
+            'users_userreportsto': ['id', 'create_time', 'delete_time', 'reports_to_id', 'user_id'],
+            'users_usersettings': ['id', 'settings', 'create_time', 'update_time', 'delete_time', 'user_id'],
         }
 
     def _m2mFields(self):
@@ -120,50 +100,168 @@ class TasksMapper(RelationshipMappers):
             Retrieves relational fields for specific M2M table.
         """
         return {
-            'w': {
-                'firstCol': 'task_id',
-                'secondCol': 'watcher_id',
+            'r': {
+                'firstCol': 'reports_to_id',
+                'secondCol': 'user_id',
             },
         }
 
     def _defaults_order_by(self):
         return [
             {
-                'tbl': 't',
+                'tbl': 'u',
                 'col': 'update_time',
                 'sort': 'DESC',
             },
             {
-                'tbl': 'd',
-                'col': 'create_time',
-                'sort': 'DESC',
-            },
-            {
-                'tbl': 'l',
-                'col': 'create_time',
+                'tbl': 'p',
+                'col': 'update_time',
                 'sort': 'DESC',
             },
             {
                 'tbl': 's',
-                'col': 'create_time',
+                'col': 'update_time',
                 'sort': 'DESC',
+            }
+        ]
+
+    def _defaults_where_conditions(self):
+        return {
+            # "latest": self.values.latest('latest'),
+            # "tdelete_time": 'IS NULL'
+        }
+    
+    def _defaults_limit_value(self):
+        """
+            Should be returned in string format.
+        """
+        return '20'
+
+
+
+
+
+
+
+class DepartmentsMapper(RelationshipMappers):
+    """
+        All calls should be made to following method names without the '_' prefix.
+        RelationshipMappers() has proper wrapper functions.
+    """
+
+    def __init__(self, VMClassInstance = None):
+        super().__init__(VMClassInstance)
+
+    def _tables(self):
+        """
+            These keys (table-abbreviations) will be used throughout code.
+            Change with care.
+        """
+        return {
+            'd': 'users_department',
+            'h': 'users_departmenthead',
+            't': 'users_usertodepartment',
+        }
+
+    def _models(self):
+        """
+            These keys (table-abbreviations) will be used throughout code.
+            Change with care.
+        """
+        return {
+            'd': 'Department',
+            'h': 'DepartmentHead',
+            't': 'UserToDepartment',
+        }
+
+    def _modelPaths(self):
+        return {
+            'd': 'users.models',
+            'h': 'users.models',
+            't': 'users.models',
+        }
+
+    def _master(self):
+        return {
+            'table': 'users_department',
+            'abbreviation': 'd',
+            'foreignKeyName': 'department_id',
+        }
+
+    def _tablesForRelationType(self, relationType):
+        match relationType:
+            case 'o2o':
+                return ['d']
+            case 'm2m':
+                return ['h', 't']
+            case 'rlc':
+                return []
+            case 'm2o':
+                return []
+            case _:
+                return []
+
+    def _commonFields(self):
+        """
+            These keys tend to be found in every table and cause problems 
+            if not handled separately
+
+            Note: 'latest' is intentionally excluded.
+        """
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+
+    def _ignoreOnUpdates(self):
+        """
+            Can carry any fields within a table to ignore in a certain operation
+        """
+        return {
+            'users_department': ['id', 'latest'],
+            'users_departmenthead': ['id', 'latest'],
+            'users_userreportsto': ['id', 'latest'],
+            'users_usertodepartment': ['id', 'latest'],
+        }
+
+    def _ignoreOnRetrieval(self):
+        return [] # @todo: inspect this for users and depts mappers
+
+    def _tableFields(self):
+        """
+            Outline all tables within Tasks system here
+        """
+        return {
+            'users_department': ['id', 'name', 'description', 'create_time', 'update_time', 'delete_time', 'parent_id'],
+            'users_departmenthead': ['id', 'create_time', 'delete_time', 'department_id', 'user_id'],
+            'users_usertodepartment': ['id', 'create_time', 'delete_time', 'department_id', 'user_id'],
+        }
+
+    def _m2mFields(self):
+        """
+            Retrieves relational fields for specific M2M table.
+        """
+        return {
+            'h': {
+                'firstCol': 'department_id',
+                'secondCol': 'user_id',
             },
-            {
-                'tbl': 'v',
-                'col': 'create_time',
-                'sort': 'DESC',
+            't': {
+                'firstCol': 'department_id',
+                'secondCol': 'user_id',
             },
+        }
+
+    def _defaults_order_by(self):
+        return [
             {
-                'tbl': 'a',
-                'col': 'create_time',
+                'tbl': 'd',
+                'col': 'update_time',
                 'sort': 'DESC',
             },
         ]
 
     def _defaults_where_conditions(self):
         return {
-            "latest": self.values.latest('latest'),
-            # "tdelete_time": 'IS NULL',  # @todo needs to be handled
+            # "latest": self.values.latest('latest'),
+            # "tdelete_time": 'IS NULL'
         }
     
     def _defaults_limit_value(self):

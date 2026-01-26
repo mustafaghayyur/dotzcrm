@@ -7,10 +7,10 @@ class ValuesMapper(ValuesMapperGeneric):
         Enums will be managed in the application layer.
     """
     
-    def latest(self, key = 'all'):
+    def userLevel(self, key = 'all'):
         values = {}
 
-        for itm in Latest:
+        for itm in UserLevel:
             values[itm.name] = itm.value
         
         if key is not None and key in values:
@@ -18,10 +18,10 @@ class ValuesMapper(ValuesMapperGeneric):
 
         return values
 
-    def status(self, key = 'all'):
+    def isActive(self, key = 'all'):
         values = {}
 
-        for itm in Status:
+        for itm in IsActive:
             values[itm.name] = itm.value
 
         if key is not None and key in values:
@@ -29,10 +29,10 @@ class ValuesMapper(ValuesMapperGeneric):
 
         return values
 
-    def visibility(self, key = 'all'):
+    def isStaff(self, key = 'all'):
         values = {}
 
-        for itm in Visibility:
+        for itm in IsStaff:
             values[itm.name] = itm.value
 
         if key is not None and key in values:
@@ -44,25 +44,22 @@ class ValuesMapper(ValuesMapperGeneric):
     Inheriting from 'str' ensures the values are strings, 
     making serialization to JSON straightforward.
 """
-class Status(str, Enum):
-    created = 'created'
-    assigned = 'assigned'
-    viewed = 'viewed'
-    queued = 'queued'
-    started = 'started'
-    onhold = 'onhold'
-    abandoned = 'abandoned'
-    reassigned = 'reassigned'
-    awaitingfeedback = 'awaitingfeedback'
-    completed = 'completed'
-    failed = 'failed'
+class UserLevel(str, Enum):
+    external = 5
+    member = 10
+    leader = 15
+    manager = 20
+    seniorMngr = 25
+    sysadmin = 99
 
-class Visibility(str, Enum):
-    private = 'private'
-    workspaces = 'workspaces'
-    assigned = 'assigned' # @todo: future feature implementation
-    stakeholders = 'stakeholders' # @todo: future feature implementation
+class IsActive(bool, Enum):
+    true = True
+    false = False
 
-class Latest(int, Enum):
-    archive = 2
-    latest = 1
+class IsStaff(bool, Enum):
+    true = True
+    false = False
+
+class IsSuper(bool, Enum):
+    true = True
+    false = False

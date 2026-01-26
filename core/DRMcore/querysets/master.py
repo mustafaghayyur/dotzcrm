@@ -10,6 +10,15 @@ class MTQuerySet(background.QuerySetManager):
         """
             Main fetch command. 
             Can be overwritten in App's own inheritor of class.
+            Fetches full Task records with latest One-to-One records (of sub tables).
+        
+            PARAMS:
+             - selectors: [list] list of columns you want
+             - conditions: [dictionary] key=>value pairs of what to select.
+             - orderBy: [string] any specific, legitimate ordering you want.
+             - limit: [string] number of records you want retrieved. Can accept offsets.
+        
+            See documentation on legitimate ways of forming selectors, conditions, etc in this call.
         """
         obj = self.compileVariables(selectors, conditions, orderBy, limit)
 

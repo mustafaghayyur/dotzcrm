@@ -5,6 +5,11 @@ class Wrappers(Singleton):
         All App-specific extensions of this class should only define the 
         '_' prefixed version of methods defined here, returning simple lists,
         dictionaries, etc as needed.
+
+        Note: M2M tables that connect two distict Mappers will have a two character
+        table abbreviation. Such as:
+            - Watchers table (in tasks) will be referred to as
+                '#w' instead of > 'w'
     """
 
     def defaults(self, requestedFunc):

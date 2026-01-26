@@ -17,20 +17,6 @@ class TaskQuerySet(master.MTQuerySet):
 
         super().__init__(model, query, using, hints)
         
-    def fetch(self, selectors = [], conditions = None, orderBy = None, limit = None):
-        """
-        # Fetches full Task records with latest One-to-One records (of sub tables).
-        #
-        # PARAMS:
-        #  - selectors: [list] list of columns you want
-        #  - conditions: [dictionary] key=>value pairs of what to select.
-        #  - orderBy: [string] any specific, legitimate ordering you want.
-        #  - limit: [string] number of records you want retrieved. Can accept offsets.
-        #
-        # See documentation on legitimate ways of forming selectors, conditions, etc in this call.
-        """
-        return super().fetch(selectors, conditions, orderBy, limit)
-
 
 class DetailQuerySet(child.CTQuerySet):
     tbl = 'tasks_details'

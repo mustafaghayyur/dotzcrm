@@ -47,13 +47,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
-    user_settings = models.CharField(
-        _("user settings"),
-        max_length=750,
-        blank=True,
-        default='',
-        help_text=_("User-specific settings stored as a configuration string."),
-    )
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)

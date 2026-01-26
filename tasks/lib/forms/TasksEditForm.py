@@ -5,6 +5,7 @@ from core.lib.FormsParent import Forms
 from tasks.models import *
 from users.models import *
 from tasks.drm.crud import Tasks
+from tasks.drm.mapper_values import Status, Visibility
 from users.drm.crud import Users
 from core.helpers import crud
 
@@ -53,8 +54,17 @@ class TasksEditForm(Forms):
     aid = forms.CharField(widget=forms.HiddenInput(), required=False)
     
     description = forms.CharField(max_length=255, empty_value="What's your task?")
-    status = forms.CharField(max_length=20)
-    visibility = forms.CharField(max_length=20)
+    
+    # Use enums from mapper_values for status and visibility choices
+    status = forms.ChoiceField(
+        choices=[(item.value, item.name.replace('_', ' ').title()) for item in Status],
+        help_text="Select the current status of the task"
+    )
+    visibility = forms.ChoiceField(
+        choices=[(item.value, item.name.replace('_', ' ').title()) for item in Visibility],
+        help_text="Select who can see this task"
+    )
+    
     details = forms.CharField(widget=forms.Textarea, empty_value="Enter long description here...")
     deadline = forms.DateTimeField(required=False, widget=crud.DateTimeLocalInput())
 
