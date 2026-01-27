@@ -1,18 +1,25 @@
-from core.lib.Singleton import Singleton
-from .schema.ver1 import schema
+from .schema.main import schema
+from .state import State
+from .modifiers import Manipulate
 
-class Wrappers(Singleton):
+class Wrappers:
     """
         All App-specific extensions of this class should only define the 
         '_' prefixed version of methods defined here, returning simple lists,
         dictionaries, etc as needed.
-
-        Note: M2M tables that connect two distict Mappers will have a two character
-        table abbreviation. Such as:
-            - Watchers table (in tasks) will be referred to as
-                '#w' instead of > 'w'
     """
-    tablesList = []  # holds tables use in specific mapper
+    state = None
+    tableList = None
+
+    def __init__(self):
+        if self.state is None:
+            self.state = State()
+
+        self.state.set('tables', Manipulate.makeTablesList(schema))
+        self.state.set('models', Manipulate.makeModelsList(schema))
+        self.state.set('paths', Manipulate.makeModelPathsList(schema))
+        self.state.set('cols', Manipulate.makeTableColsList(schema))
+
 
     def tables(self, key = 'all'):
         """

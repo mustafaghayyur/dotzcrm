@@ -141,10 +141,13 @@ class Comment(models.Model):
 
 
 
-### Tasks Mapper Models ###
+### WorkSpace Mapper Models ###
 
 
 class WorkSpace(models.Model):
+    """
+        O2O Model.
+    """
     name = models.CharField(max_length=1000)
     description = models.CharField(max_length=6000)
     type = models.CharField(max_length=30)  # enum of ['private' | 'open']

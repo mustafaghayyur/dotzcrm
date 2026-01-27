@@ -1,4 +1,5 @@
 from .RMWrappers import Wrappers
+from .state import State
 
 class RelationshipMappers(Wrappers):
     """
@@ -9,12 +10,20 @@ class RelationshipMappers(Wrappers):
         be stored in properties, so it can be shared across Query operations.
     """
     values = None  # holds the ValuesMapper instance
+    universal = False
 
 
-    def __init__(self, VMClassInstance = None):
+
+    def __init__(self, VMClassInstance = None, state = None):
         """
             setup value-mapper instance in constructor
         """
+        if state is not None and isinstance(state, State):
+            self.state = state
+            self.universal = True
+
+        super().__init__()
+
         if VMClassInstance is not None:
             self.setValuesMapper(VMClassInstance)
 
@@ -30,7 +39,7 @@ class RelationshipMappers(Wrappers):
         """
             Determine whether field is common among children tables.
         """
-        k = key[1:] if prefix else key  # grab correct key to compare
+        k = key[4:] if prefix else key  # grab correct key to compare
 
         if k in self.commonFields():
             return True
