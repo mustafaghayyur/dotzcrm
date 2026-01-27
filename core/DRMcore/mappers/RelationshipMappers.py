@@ -10,7 +10,11 @@ class RelationshipMappers(Wrappers):
     """
     values = None  # holds the ValuesMapper instance
 
+
     def __init__(self, VMClassInstance = None):
+        """
+            setup value-mapper instance in constructor
+        """
         if VMClassInstance is not None:
             self.setValuesMapper(VMClassInstance)
 
@@ -21,6 +25,7 @@ class RelationshipMappers(Wrappers):
         """
         self.values = VMClassInstance()
 
+
     def isCommonField(self, key, prefix = False):
         """
             Determine whether field is common among children tables.
@@ -30,6 +35,7 @@ class RelationshipMappers(Wrappers):
         if k in self.commonFields():
             return True
         return False
+
 
     def generateO2OFields(self):
         """
@@ -64,6 +70,7 @@ class RelationshipMappers(Wrappers):
 
         return recordKeys
 
+
     def generateRelationTypeIds(self, relationType):
         """
             Returns [list] of id column names with tbl prefix prepended.
@@ -78,12 +85,14 @@ class RelationshipMappers(Wrappers):
 
         return ids
 
+
     def abbreviations(self):
         """
             returns list of table abbreviations for App/Space/Module
         """
         tables = self.tables()
         return tables.keys()
+
 
     def getAbbreviationForTable(self, tableName):
         """
@@ -98,6 +107,7 @@ class RelationshipMappers(Wrappers):
             if tableName == name:
                 return abbrv
         return None
+
 
     def columnName(self, key):
         """

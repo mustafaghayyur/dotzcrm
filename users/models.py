@@ -1,17 +1,16 @@
 from django.db import models
-# from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils import timezone
 from django.contrib.auth.models import UserManager, PermissionsMixin
 
-# Create your models here.
+#### User Mapper Models ####
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
-        We will do our best not to modify columns already set in Django.
-        Only column additions.
+        We will do our best not to modify columns already set in Django. Only column additions.
+        Master table for Users mapper. O2O model.
     """
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
@@ -63,9 +62,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class UserProfile(models.Model):
     """
-        Extension of the User model, mean for the user profile section.
+        Extension of the User model, meant for the user profile sections.
+        O2O Model.
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     legal_first_name = models.CharField(max_length=150, blank=True, null=True)
     legal_last_name = models.CharField(max_length=150, blank=True, null=True)
     office_phone = models.CharField(max_length=15, blank=True, null=True)
@@ -74,17 +74,15 @@ class UserProfile(models.Model):
     home_phone = models.CharField(max_length=15, blank=True, null=True)
     office_location = models.CharField(max_length=250, blank=True, null=True)
     create_time = models.DateTimeField(auto_now_add=True)
-    update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
     def __str__(self):
         return f'{self.legal_first_name} {self.legal_last_name} [{self.user.username}]'
 
 class UserSettings(models.Model):
     """
-        We will keep this for future feature development.
-        User model's user_setting has limits on its size. 
-        This model can be used more freely.
+        RLC Model
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     settings = models.JSONField(null=True, blank=True)
@@ -92,9 +90,37 @@ class UserSettings(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+
+class UserReportsTo(models.Model):
+    """
+        User's boss(es). 
+        M2M Model.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    reports_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_to')
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+
+class EditLog(models.Model):
+    """
+        RLC Model
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_default=1)
+    change_log = models.JSONField(null=False, blank=False)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+
+
+#### Department Mapper Models ####
+
 class Department(models.Model):
     """
-        Departments, can be nested.
+        Departments, can be nested. 
+        Master table for Department Mapper.
     """
     name = models.CharField(max_length=70)
     description = models.CharField(max_length=1000)
@@ -104,30 +130,25 @@ class Department(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
 
 
-class UserToDepartment(models.Model):
+class DepartmentUser(models.Model):
     """
-        User's associent with departments. Can be M2M.
+        User's associent with departments. 
+        M2M Model.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
 class DepartmentHead(models.Model):
     """
-        Assigns head(s) to departments. Can be M2M.
+        Assigns head(s) to departments. 
+        M2M Model.
     """
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-
-class UserReportsTo(models.Model):
-    """
-        User's boss. Can be M2M.
-    """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
-    reports_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_to')
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     

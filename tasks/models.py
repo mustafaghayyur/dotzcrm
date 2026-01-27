@@ -1,13 +1,17 @@
 from django.db import models
 from django.conf import settings as sysconf
 
-# import our QuerySets:
-from .drm.querysets import *
+from .drm.querysets import *  # import our QuerySets
 from users.models import *
 
 
+### Tasks Mapper Models ###
+
 # The main task table
 class Task(models.Model):
+    """
+        O2O Model.
+    """
     description = models.CharField(max_length=2000)
     creator = models.ForeignKey(
         sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
@@ -22,6 +26,9 @@ class Task(models.Model):
 
 
 class Details(models.Model):
+    """
+        O2O Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     details = models.TextField()  # look into > difflib SequenceMatcher.quick_ratio()
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
@@ -32,6 +39,9 @@ class Details(models.Model):
 
 
 class Deadline(models.Model):
+    """
+        O2O Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
@@ -42,7 +52,11 @@ class Deadline(models.Model):
 
     objects = DeadlineQuerySet.as_manager()
 
+
 class Status(models.Model):
+    """
+        O2O Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)  # enum of ['assigned' | 'viewed' | 'queued' | 'started' | 'onhold' | 'abandoned' | 'reassigned' | 'awaitingfeedback' | 'completed' | 'failed']
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
@@ -53,7 +67,11 @@ class Status(models.Model):
 
     objects = StatusQuerySet.as_manager()
 
+
 class Visibility(models.Model):
+    """
+        O2O Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20)  # enum of ['private' | 'assigned' | 'organization' | 'stakeholders']
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
@@ -66,6 +84,9 @@ class Visibility(models.Model):
 
 # The table to manage assignor/assignee for each task
 class Assignment(models.Model):
+    """
+        O2O Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     assignor = models.ForeignKey(
         sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
@@ -85,7 +106,11 @@ class Assignment(models.Model):
 
     objects = AssignmentQuerySet.as_manager()
 
+
 class Watcher(models.Model):
+    """
+        M2M Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     watcher = models.ForeignKey(
         sysconf.AUTH_USER_MODEL,  # Reference the user model defined in settings
@@ -99,8 +124,11 @@ class Watcher(models.Model):
 
     objects = WatcherQuerySet.as_manager()
 
-# NOTE: Comments model must ALWAYS be named Comment
+
 class Comment(models.Model):
+    """
+        RLC Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='parent_comment')
@@ -112,12 +140,8 @@ class Comment(models.Model):
     objects = CommentQuerySet.as_manager()
 
 
-class EditLog(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    user = models.ForeignKey(sysconf.AUTH_USER_MODEL, on_delete=models.CASCADE, db_default=1)
-    changed_cols = models.CharField(max_length=6000)
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
+
+### Tasks Mapper Models ###
 
 
 class WorkSpace(models.Model):
@@ -130,68 +154,29 @@ class WorkSpace(models.Model):
 
 
 class WorkSpaceDepartment(models.Model):
+    """
+        M2M Model.
+    """
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
 class WorkSpaceUser(models.Model):
+    """
+        M2M Model.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
 class WorkSpaceTasks(models.Model):
+    """
+        M2M Model.
+    """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-"""
--- Forward SQL: Add column user_id in tasks_editlog
-ALTER TABLE `tasks_editlog` 
-ADD COLUMN `user_id` int NOT NULL, 
-ADD CONSTRAINT `tasks_comment_creator_user_id_eef3bae9_fk_auth_user_id` 
-FOREIGN KEY (`user_id`) REFERENCES `auth_user`(`id`);
-
-ALTER TABLE `tasks_editlog` ADD COLUMN `user_id` int DEFAULT 1 NOT NULL , 
-ADD CONSTRAINT `tasks_editlog_user_id_951881f6_fk_auth_user_id` 
-FOREIGN KEY (`user_id`) REFERENCES `auth_user`(`id`);
-""",
-"""
--- Reverse SQL: Drop column creator_user_id from tasks_comment
-ALTER TABLE `tasks_editlog` DROP FOREIGN KEY `tasks_comment_creator_user_id_eef3bae9_fk_auth_user_id`;
-ALTER TABLE `tasks_editlog` DROP COLUMN `creator_user_id`;
-"""
-
-# @todo - link tasks with tickets
-# This model allows tickets to be mentioned in tasks
-#class TaskTicketAssignment(models.Model):
-#    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
-#    ticket_id = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(auto_now_add=True)
-#    delete_time = models.DateTimeField(null=True, blank=True)
-    # note: updates are banned on this table.
-    # application level control to be implemented.
-
-
-# @todo - link tasks with Customers
-# This model allows customers to be mentioned in tasks
-#class TaskCustomerAssignment(models.Model):
-#    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
-#    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(auto_now_add=True)
-#    delete_time = models.DateTimeField(null=True, blank=True)
-    # note: updates are banned on this table.
-    # application level control to be implemented.
-
-
-# @todo - link tasks with documents
-# This model allows documents to be mentioned in tasks
-#class TaskCustomerAssignment(models.Model):
-#    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
-#    document_id = models.ForeignKey(Document, on_delete=models.CASCADE)
-#    create_time = models.DateTimeField(auto_now_add=True)
-#    delete_time = models.DateTimeField(null=True, blank=True)
-    # note: updates are banned on this table.
-    # application level control to be implemented.

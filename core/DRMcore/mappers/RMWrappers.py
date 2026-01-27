@@ -1,4 +1,5 @@
 from core.lib.Singleton import Singleton
+from .schema.ver1 import schema
 
 class Wrappers(Singleton):
     """
@@ -11,6 +12,56 @@ class Wrappers(Singleton):
             - Watchers table (in tasks) will be referred to as
                 '#w' instead of > 'w'
     """
+    tablesList = []  # holds tables use in specific mapper
+
+    def tables(self, key = 'all'):
+        """
+            Grabs the table value(s) from schema.
+        """
+        info = []
+        for tbl in self.tablesList:
+            info.append(schema[tbl]['table'])
+        return self.returnValue(info, key)
+
+    def models(self, key = 'all'):
+        """
+            Grabs the model value(s) from schema.
+        """
+        info = []
+        for tbl in self.tablesList:
+            info.append(schema[tbl]['model'])
+        return self.returnValue(info, key)
+    
+    def modelPaths(self, key = 'all'):
+        """
+            Grabs the model-path value(s) from schema.
+        """
+        info = []
+        for tbl in self.tablesList:
+            info.append(schema[tbl]['path'])
+        return self.returnValue(info, key)
+
+    def tableFields(self, name = 'all'):
+        """
+            Grabs the table-cols list(s) from schema.
+        """
+        info = []
+        for tbl in self.tablesList:
+            info.append(schema[tbl]['cols'])
+        return self.returnValue(info, name)
+
+    def tableAbbreviation(self, tableName):
+        """
+            Determine single full-table-name's correct abbreviation.
+        """
+        for tbl in schema:
+            if schema[tbl]['table'] == tableName:
+                return tbl
+        return None
+
+    def master(self, key = 'all'):
+        info = self._master()
+        return self.returnValue(info, key)
 
     def defaults(self, requestedFunc):
         """
@@ -37,28 +88,10 @@ class Wrappers(Singleton):
     def ignoreOnRetrieval(self):
         return self._ignoreOnRetrieval()
 
-    def tableFields(self, name = 'all'):
-        tables = self._tableFields()
-        return self.returnValue(tables, name)
-
-    def master(self, key = 'all'):
-        info = self._master()
-        return self.returnValue(info, key)
-
-    def tables(self, key = 'all'):
-        info = self._tables()
-        return self.returnValue(info, key)
-
-    def models(self, key = 'all'):
-        info = self._models()
-        return self.returnValue(info, key)
-    
-    def modelPaths(self, key = 'all'):
-        info = self._modelPaths()
-        return self.returnValue(info, key)
-
     def ignoreOnUpdates(self, key = 'all'):
         info = self._ignoreOnUpdates()
+        if key not in schema:
+            key = self.tableAbbreviations(key)  # ignoreOnUpdates() changed from ful-name-keys to abbreviations name
         return self.returnValue(info, key)
 
     def m2mFields(self, tbl = 'all'):

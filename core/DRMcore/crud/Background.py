@@ -70,7 +70,7 @@ class CrudOperations(Validation.ErrorHandling):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         fields = {}
-        ignored = self.mapper.ignoreOnUpdates(tableName)
+        ignored = self.mapper.ignoreOnUpdates(self.mapper.master('abbreviation'))
 
         for col in columnsList:
             if col in ignored:
@@ -104,7 +104,7 @@ class CrudOperations(Validation.ErrorHandling):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         updateRequired = False
-        ignored = self.mapper.ignoreOnUpdates(tableName)
+        ignored = self.mapper.ignoreOnUpdates(tbl)
         rlcFields = {}  # fields for RLC update
 
         for col in columnsList:
