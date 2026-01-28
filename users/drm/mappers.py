@@ -1,4 +1,5 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from .mapper_values import ValuesMapper
 
 class UsersMapper(RelationshipMappers):
     """
@@ -6,10 +7,11 @@ class UsersMapper(RelationshipMappers):
         RelationshipMappers() has proper wrapper functions.
     """
     def startUpCode(self):
+        # tables belonging to this mapper
         tables = ['usus', 'uspr', 'usre', 'usse', 'used']
-        additions = self.addTables(tables)
-
-        self.state.set('tablesUsed', additions)
+        self.state.set('tablesUsed', tables)
+        
+        self.setValuesMapper(ValuesMapper)
 
     def _master(self):
         return {

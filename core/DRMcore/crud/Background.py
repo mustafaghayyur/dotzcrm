@@ -20,8 +20,7 @@ class CrudOperations(Validation.ErrorHandling):
         self.module = getattr(dotzSettings, self.space)
 
         # holds all O2O primary keys for given space/module
-        self.idCols = self.mapper.generateRelationTypeIds('o2o')
-        self.rlcIdCols = self.mapper.generateRelationTypeIds('rlcIds')
+        self.idCols = self.generateRelationTypeIds('o2o')
 
         super().__init__()
 

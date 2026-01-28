@@ -118,7 +118,7 @@ class M2MQuerySet(CTQuerySet):
     """
 
     def __init__(self, model=None, query=None, using=None, hints=None):
-        tbl = self.mapper.getAbbreviationForTable(self.tbl)
+        tbl = self.mapper.tableAbbreviation(self.tbl)
         cols = self.mapper.m2mFields(tbl)
 
         if cols is None:

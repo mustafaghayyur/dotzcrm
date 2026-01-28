@@ -15,22 +15,6 @@ class RelationshipMappers(BaseOperations):
         info = self._master()
         return self.returnValue(info, key)
 
-    def defaults(self, requestedFunc):
-        """
-            Returns a self._defaults_{requestedFunc} method if defined.
-        """
-        if not isinstance(requestedFunc, str):
-            raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
-
-        requestedFunc = '_defaults_' + requestedFunc
-
-        if hasattr(self, requestedFunc):
-            functionCall = getattr(self, requestedFunc)
-            if callable(functionCall):
-                return functionCall()
-
-        return None
-
     def commonFields(self):
         return self._commonFields()
 
@@ -49,16 +33,4 @@ class RelationshipMappers(BaseOperations):
     def m2mFields(self, tbl = 'all'):
         relationships = self._m2mFields()
         return self.returnValue(relationships, tbl)
-
-    def returnValue(self, info, key):
-        """
-            Helper function. Used internally.
-        """
-        if key is not None and key in info:
-            return info[key]
-
-        if key == 'all':
-            return info
-
-        return None
 

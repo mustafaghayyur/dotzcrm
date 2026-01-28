@@ -7,15 +7,11 @@ class Background():
         Defines background utility operations.
     """
     state = None
-    universal = False
     values = None  # holds the ValuesMapper instance
 
     def __init__(self):
-        """
-        """
         if self.state is None:
             self.state = State()
-            self.universal = True
 
         self.state.set('tables', Manipulate.makeTablesList(schema))
         self.state.set('models', Manipulate.makeModelsList(schema))
@@ -31,18 +27,18 @@ class Background():
         """
         pass
 
-    def addTables(self, mapperTables: list):
+    def buildMapper(self, tableKeys):
         """
-        Merges tables defined in app-level mappers, and tables collected during 
-        query generting operations.
-        
-        :param mapperTables: list of tables defined in app-level child-class.
+            builds the mapper for crud operations            
         """
-        addedTables = self.state.get('addedTables')
-        if isinstance(addedTables, list):
-            mapperTables.extend(addedTables)
+        Manipulate.updateTablesUsed(self.state, tableKeys)
 
-        return mapperTables
+        mapperTables = self.state.get('tablesUsed')
+        addedTables = self.state.get('addedTables')
+        if isinstance(mapperTables, list) and isinstance(addedTables, list):
+            mapperTables.extend(addedTables)
+        self.state.set('tablesUsed', mapperTables)
+        
 
     def setNewStateObject(self, stateObj):
         if stateObj is not None and isinstance(stateObj, State):
@@ -53,6 +49,32 @@ class Background():
             Set's the self.values property
         """
         self.values = VMClassInstance()
+    
+    def defaults(self, requestedFunc):
+        """
+            Returns a self._defaults_{requestedFunc} method if defined (in app-level mapper definition).
+        """
+        if not isinstance(requestedFunc, str):
+            raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
 
+        requestedFunc = '_defaults_' + requestedFunc
 
+        if hasattr(self, requestedFunc):
+            functionCall = getattr(self, requestedFunc)
+            if callable(functionCall):
+                return functionCall()
+
+        return None
+
+    def returnValue(self, info, key):
+        """
+            Helper function. Used internally.
+        """
+        if key is not None and key in info:
+            return info[key]
+
+        if key == 'all':
+            return info
+
+        return None
     

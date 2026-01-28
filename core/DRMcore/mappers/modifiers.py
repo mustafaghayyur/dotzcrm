@@ -33,3 +33,18 @@ class Manipulate():
             dictionary[tbl] = schema[tbl]['model']
         
         return dictionary
+    
+    def updateTablesUsed(state, tables):
+        """
+            Adds a table to mapper for current crud operations.
+
+            :param state: [dict] state for mapper
+            :param tables: tables found in QuerySet paramerters
+        """
+        original = state.get('tablesUsed')
+        if isinstance(tables, list) and isinstance(original, list):
+            original.extend(tables)
+
+        state.set('tablesUsed', original)
+        return None
+    

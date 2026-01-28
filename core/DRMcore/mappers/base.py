@@ -102,36 +102,6 @@ class BaseOperations(Background):
         return recordKeys
 
 
-    def generateRelationTypeIds(self, relationType):
-        """
-            Returns [list] of id column names with tbl prefix prepended.
-            You can fetch 'o2o', 'm2m', 'rlc' columns with this.
-            Defaults to 'o2o'
-        """
-        abbrvs = self.tablesForRelationType(relationType)
-        ids = []
-
-        for abbrv in abbrvs:
-            ids.append(abbrv + 'id')
-
-        return ids
-
-
-    def getAbbreviationForTable(self, tableName):
-        """
-            returns specific table's abbreviation.
-        """
-        if not tableName:
-            return None
-
-        tables = self.tables()
-
-        for abbrv, name in tables.items():
-            if tableName == name:
-                return abbrv
-        return None
-
-
     def column(self, key):
         """
             In the future: if certain columns change name, this intermediary function
