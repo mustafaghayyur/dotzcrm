@@ -14,7 +14,8 @@ class Tasks(O2ORecords.CRUD):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
 
-        self.mapper = TasksMapper(ValuesMapper)
+        self.mapper = TasksMapper()
+        self.mapper.setValuesMapper(ValuesMapper)
         
         super().__init__()
 
@@ -68,9 +69,9 @@ class Comments(RevisionlessChildren.CRUD):
         self.mtModel = Task  # holds the class reference for Master Table's model
         self.tbl = 'c'
         self.pk = 'cid'
-
         self.mapper = TasksMapper()
-        super().__init__(Tasks)  # satisfy parent class' requirement for MasterCRUDClass
+        
+        self.setMasterCrudClass(Tasks)
 
     def read(self, definitions):
         """

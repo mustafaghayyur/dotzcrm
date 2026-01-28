@@ -9,9 +9,11 @@ class CRUD(Background.CrudOperations):
     tbl = None
     pk = None  # primary-key of RLC table in question
 
-    def __init__(self, MasterCRUDClass):
-        self.masterCrudObj = MasterCRUDClass()
+    def __init__(self):
         super().__init__()
+
+    def setMasterCrudClass(self, classReference):
+        self.masterCrudObj = classReference()
 
     def create(self, dictionary):
         """

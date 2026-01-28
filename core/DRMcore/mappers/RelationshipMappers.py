@@ -1,128 +1,64 @@
-from .RMWrappers import Wrappers
-from .state import State
+from .base import BaseOperations
+from .schema.main import schema
 
-class RelationshipMappers(Wrappers):
+class RelationshipMappers(BaseOperations):
     """
-        This class and its inheritors will help map tables to data in 
-        meaningful ways.
+        Along with BaseOperations(), RelationshipMappers() defines meaningful methods to
+        access vital schema related info for all your database crud operations.
 
-        The Mapper is Singleton. Thus, only data that relates to Schema should
-        be stored in properties, so it can be shared across Query operations.
+        References to _*() methods in the code point to data-definition functions defined
+        in child classes on app-level.
     """
-    values = None  # holds the ValuesMapper instance
-    universal = False
+    tableList = None
 
+    def master(self, key = 'all'):
+        info = self._master()
+        return self.returnValue(info, key)
 
-
-    def __init__(self, VMClassInstance = None, state = None):
+    def defaults(self, requestedFunc):
         """
-            setup value-mapper instance in constructor
+            Returns a self._defaults_{requestedFunc} method if defined.
         """
-        if state is not None and isinstance(state, State):
-            self.state = state
-            self.universal = True
+        if not isinstance(requestedFunc, str):
+            raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
 
-        super().__init__()
+        requestedFunc = '_defaults_' + requestedFunc
 
-        if VMClassInstance is not None:
-            self.setValuesMapper(VMClassInstance)
+        if hasattr(self, requestedFunc):
+            functionCall = getattr(self, requestedFunc)
+            if callable(functionCall):
+                return functionCall()
 
-    
-    def setValuesMapper(self, VMClassInstance):
-        """
-            Set's the self.values property
-        """
-        self.values = VMClassInstance()
-
-
-    def isCommonField(self, key, prefix = False):
-        """
-            Determine whether field is common among children tables.
-        """
-        k = key[4:] if prefix else key  # grab correct key to compare
-
-        if k in self.commonFields():
-            return True
-        return False
-
-
-    def generateO2OFields(self):
-        """
-            Generates a completed dict of fields with tbl-abbrv (where necessary).
-            This dictionary is used to fetch full records of current module.
-            
-            Many-to-Many & Many-to-One records like tasks.watchers and 
-            tasks.comments are not included in the 'full record'
-        """
-        o2oTables = self.tablesForRelationType('o2o')  # fetch all o2o tables
-        commonFields = self.commonFields()
-
-        recordKeys = {}  # open returned dictionary
-
-        for tbl in o2oTables:
-            tblName = self.tables(tbl)
-            fields = self.tableFields(tblName)
-
-            if not isinstance(fields, list):
-                continue
-
-            for field in fields:
-                if field in self.ignoreOnRetrieval():
-                    continue
-
-                if field in commonFields:
-                    key = tbl + field
-                else:
-                    key = field
-
-                recordKeys[key] = tbl
-
-        return recordKeys
-
-
-    def generateRelationTypeIds(self, relationType):
-        """
-            Returns [list] of id column names with tbl prefix prepended.
-            You can fetch 'o2o', 'm2m', 'rlc' columns with this.
-            Defaults to 'o2o'
-        """
-        abbrvs = self.tablesForRelationType(relationType)
-        ids = []
-
-        for abbrv in abbrvs:
-            ids.append(abbrv + 'id')
-
-        return ids
-
-
-    def abbreviations(self):
-        """
-            returns list of table abbreviations for App/Space/Module
-        """
-        tables = self.tables()
-        return tables.keys()
-
-
-    def getAbbreviationForTable(self, tableName):
-        """
-            returns specific table's abbreviation.
-        """
-        if not tableName:
-            return None
-
-        tables = self.tables()
-
-        for abbrv, name in tables.items():
-            if tableName == name:
-                return abbrv
         return None
 
+    def commonFields(self):
+        return self._commonFields()
 
-    def columnName(self, key):
-        """
-            In the future: if certain columns change name, this intermediary function
-            can be used to translate them in legacy code.
+    def tablesForRelationType(self, relationType = 'o2o'):
+        return self._tablesForRelationType(relationType)
 
-            All columns should be referenced through this function.
+    def ignoreOnRetrieval(self):
+        return self._ignoreOnRetrieval()
+
+    def ignoreOnUpdates(self, key = 'all'):
+        info = self._ignoreOnUpdates()
+        if key not in schema:
+            key = self.tableAbbreviation(key)  # ignoreOnUpdates() changed from ful-name-keys to abbreviations name
+        return self.returnValue(info, key)
+
+    def m2mFields(self, tbl = 'all'):
+        relationships = self._m2mFields()
+        return self.returnValue(relationships, tbl)
+
+    def returnValue(self, info, key):
         """
-        return key
+            Helper function. Used internally.
+        """
+        if key is not None and key in info:
+            return info[key]
+
+        if key == 'all':
+            return info
+
+        return None
+

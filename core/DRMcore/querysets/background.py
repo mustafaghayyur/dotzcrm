@@ -136,7 +136,7 @@ class QuerySetManager(models.QuerySet):
             providedConditions = {}
 
         actualConditions = self.mergeArgumentDictionaries(defaultConditions, providedConditions)
-        latestKey = self.mapper.columnName('latest')
+        latestKey = self.mapper.column('latest')
 
         if latestKey in actualConditions:
             self.latest = True
@@ -148,7 +148,7 @@ class QuerySetManager(models.QuerySet):
 
     def assembleParams(self, params):
         if self.latest:
-            latestField = self.mapper.columnName('latest')
+            latestField = self.mapper.column('latest')
             params[latestField] = self.mapper.values.latest('latest')
 
         keys = list(params.keys())
@@ -277,7 +277,7 @@ class QuerySetManager(models.QuerySet):
         mt = self.mapper.master('abbreviation')
         mtId = self.mapper.master('foreignKeyName')
         joins = []
-        latestKey = self.mapper.columnName('latest')
+        latestKey = self.mapper.column('latest')
 
         for tbl in self.tablesUsed:
             if tbl == mt or tbl == '':

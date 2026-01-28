@@ -4,6 +4,10 @@
 """
 
 project = {
+    'mapper': {
+        'tbl_code_size': 4,
+    },
+
     # Number of days a task stays in the database system post completion or fail
     'tasksLifeSpan': '1095',
     # Number of days a ticket stays in the database system post completion or fail

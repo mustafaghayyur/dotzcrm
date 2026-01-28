@@ -1,8 +1,7 @@
-
 class State:
     """
-        This class's instance will serve as a state holder, carrying all
-        formulated data for fast repeat-retrieval within mapper instance's call.
+        This class's instance will serve as a state holder.
+        You can pass it between operations to maintain data-integrity.
     """
 
     # state container [dict]

@@ -5,10 +5,11 @@ class UsersMapper(RelationshipMappers):
         All calls should be made to following method names without the '_' prefix.
         RelationshipMappers() has proper wrapper functions.
     """
-    tablesList = ['usus', 'uspr', 'usre', 'usse', 'used']
+    def startUpCode(self):
+        tables = ['usus', 'uspr', 'usre', 'usse', 'used']
+        additions = self.addTables(tables)
 
-    def __init__(self, VMClassInstance = None):
-        super().__init__(VMClassInstance)
+        self.state.set('tablesUsed', additions)
 
     def _master(self):
         return {
@@ -97,9 +98,6 @@ class DepartmentsMapper(RelationshipMappers):
         RelationshipMappers() has proper wrapper functions.
     """
     tablesList = ['dede', 'dehe', 'deus']
-
-    def __init__(self, VMClassInstance = None):
-        super().__init__(VMClassInstance)
 
     def _master(self):
         return {
