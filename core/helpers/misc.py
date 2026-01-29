@@ -65,8 +65,16 @@ Variable type: {varType}
     with open(logger_file, "at") as f:
         f.write(msg)
 
+
+
 def getInfo(name = None, type = 'class', getDunders = True):
-    
+    """
+        List out attributes of class.
+        
+        :param name: [str]
+        :param type: [str]
+        :param getDunders: [bool]
+    """
     pref = '&*&' if getDunders else '__'
 
     if type == 'class':
@@ -75,3 +83,17 @@ def getInfo(name = None, type = 'class', getDunders = True):
     if type == 'instance':
         return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith('__')]
 
+
+
+def mergeDictionaries(self, leftDictionary, rightDictionary):
+        """
+            Simply merges left dictionary with right dictionary.
+            The right dictionary over-writes the left.
+        """
+        if isinstance(leftDictionary, dict) and isinstance(rightDictionary, dict):
+            meerged = leftDictionary | rightDictionary  # merge provided conditions into the defaults        
+
+            if isinstance(meerged, dict):
+                return meerged
+            
+        return None

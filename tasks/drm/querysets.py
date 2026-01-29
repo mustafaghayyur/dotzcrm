@@ -1,20 +1,18 @@
-from core.DRMcore.querysets import master, child
+from core.DRMcore.querysets import QuerySet, child
 from .mappers import *
 
 """
     We are now removing MT/CT distinction from QuerySets.
 """
-class TaskQuerySet(master.MTQuerySet):
+class TaskQuerySet(QuerySet.QuerySetManager):
     """
         TaskQuerySet allows for highly versatile Select queries to DB.
         For O2O, M2M and RLC data models (i.e. records).
     """
-    def __init__(self, model=None, query=None, using=None, hints=None):
-        self.app = 'tasks'
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
         self.mapper = TasksMapper()
-        self.columnsMatrix = self.mapper.generateO2OFields()
 
-        super().__init__(model, query, using, hints)
         
 
 class DetailQuerySet(child.CTQuerySet):
