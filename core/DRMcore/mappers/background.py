@@ -1,6 +1,7 @@
 from ...lib.state import State
 from .modifiers import Manipulate
 from .schema.main import schema
+from .ValuesMapper import ValuesMapperGeneric
 
 class Background():
     """
@@ -13,10 +14,14 @@ class Background():
         if self.state is None:
             self.state = State()
 
+        # extract all values from schema needed by mapper.
         self.state.set('tables', Manipulate.makeTablesList(schema))
         self.state.set('models', Manipulate.makeModelsList(schema))
         self.state.set('paths', Manipulate.makeModelPathsList(schema))
         self.state.set('cols', Manipulate.makeTableColsList(schema))
+        self.state.set('types', Manipulate.makeTableTypesList(schema))
+
+        self.values = ValuesMapperGeneric()  # incase app-level mapper has no VM of their own.
 
         self.startUpCode()
 
@@ -27,17 +32,22 @@ class Background():
         """
         pass
 
-    def buildMapper(self, tableKeys):
+    def rebuildMapper(self, tablesToAdd = []):
         """
-            builds the mapper for crud operations            
+            Called in QuerySets, where non-mapper tables may be invoked in search queries.
+            Builds the mapper for crud operations.
+            
+            :param tablesToAdd: [list] list of tbl-keys additionally needed in current operation.
         """
-        Manipulate.updateTablesUsed(self.state, tableKeys)
+        Manipulate.updateTablesUsed(self.state, tablesToAdd)
 
         mapperTables = self.state.get('tablesUsed')
         addedTables = self.state.get('addedTables')
         if isinstance(mapperTables, list) and isinstance(addedTables, list):
             mapperTables.extend(addedTables)
-        self.state.set('tablesUsed', mapperTables)
+
+        array = list(set(mapperTables))  # make list full of unique tbl-keys
+        self.state.set('tablesUsed', array)
         
 
     def setNewStateObject(self, stateObj):
@@ -48,23 +58,8 @@ class Background():
         """
             Set's the self.values property
         """
+        self.values = None  # reset values attribute
         self.values = VMClassInstance()
-    
-    def defaults(self, requestedFunc):
-        """
-            Returns a self._defaults_{requestedFunc} method if defined (in app-level mapper definition).
-        """
-        if not isinstance(requestedFunc, str):
-            raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
-
-        requestedFunc = '_defaults_' + requestedFunc
-
-        if hasattr(self, requestedFunc):
-            functionCall = getattr(self, requestedFunc)
-            if callable(functionCall):
-                return functionCall()
-
-        return None
 
     def returnValue(self, info, key):
         """

@@ -1,10 +1,20 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from .mapper_values import ValuesMapper
 
 class TasksMapper(RelationshipMappers):
-    tablesList = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'taco', 'tawa']
+    """
+        All calls should be made to following method names without the '_' prefix.
+        RelationshipMappers() has proper wrapper functions.
+    """
+    def startUpCode(self):
+        """
+            Used to insert operations in __init__()
+        """
+        # tables belonging to this mapper
+        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'taco', 'tawa']
+        self.state.set('tablesUsed', tables)
 
-    def __init__(self, VMClassInstance = None):
-        super().__init__(VMClassInstance)
+        self.setValuesMapper(ValuesMapper)
     
     def _master(self):
         return {
@@ -13,29 +23,16 @@ class TasksMapper(RelationshipMappers):
             'foreignKeyName': 'task_id',
         }
 
-    def _tablesForRelationType(self, relationType):
-        match relationType:
-            case 'o2o':
-                return ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas']
-            case 'm2m':
-                return ['tawa']
-            case 'rlc':
-                return ['taco']
-            case 'm2o':
-                return []
-            case _:
-                return []
-
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
             if not handled separately
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'task_id']
 
     def _ignoreOnUpdates(self):
         """
-            Can carry any fields within a table to ignore in a certain operation
+            Can carry any fields within a table to ignore in CRUD.update() operation.
         """
         return {
             'tasks_task': ['id'],
@@ -48,15 +45,12 @@ class TasksMapper(RelationshipMappers):
             'tasks_comment': ['id', 'task_id'],
         }
 
-    def _ignoreOnRetrieval(self):
-        return ['task_id']
-
     def _m2mFields(self):
         """
             Define first and second fields for M2M tables.
         """
         return {
-            'w': {
+            'tawa': {
                 'firstCol': 'task_id',
                 'secondCol': 'watcher_id',
             },
@@ -112,12 +106,17 @@ class TasksMapper(RelationshipMappers):
 
 class WorkSpacesMapper(RelationshipMappers):
     """
-        Maps all tables relating to WorkSpaces
+        All calls should be made to following method names without the '_' prefix.
+        RelationshipMappers() has proper wrapper functions.
     """
-    tablesList = ['wowo', 'wode', 'wous', 'wota']
-
-    def __init__(self, VMClassInstance = None):
-        super().__init__(VMClassInstance)
+    def startUpCode(self):
+        """
+            Used to insert operations in __init__()
+        """
+        # tables belonging to this mapper
+        tables = ['wowo', 'wode', 'wous', 'wota']
+        self.state.set('tablesUsed', tables)
+        
     
     def _master(self):
         return {
@@ -126,25 +125,12 @@ class WorkSpacesMapper(RelationshipMappers):
             'foreignKeyName': 'workspace_id',
         }
 
-    def _tablesForRelationType(self, relationType):
-        match relationType:
-            case 'o2o':
-                return ['wowo']
-            case 'm2m':
-                return ['wode', 'wous', 'wota']
-            case 'rlc':
-                return []
-            case 'm2o':
-                return []
-            case _:
-                return []
-
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
             if not handled separately
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'workspace_id']
 
     def _ignoreOnUpdates(self):
         """
@@ -156,9 +142,6 @@ class WorkSpacesMapper(RelationshipMappers):
             'wous': ['id', 'latest', 'workspace_id'],
             'wota': ['id', 'latest', 'workspace_id'],
         }
-
-    def _ignoreOnRetrieval(self):
-        return []
 
     def _m2mFields(self):
         """

@@ -1,28 +1,46 @@
+from enum import Enum
 from core.lib.Singleton import Singleton
 
 class ValuesMapperGeneric(Singleton):
     """
-        ValuesMapper() and its descendants should be static classes.
-        Primary modus operandi is static methods. Though state-based 
-        operations could be added in the future.
+        Parant class for all valuemappers.
     """
     
     def __init__(self):
+        self.startUpCode()
+    
+    def startUpCode(self):
+        """
+            Can be called in child classes for init setup
+        """
         pass
 
-    def static(self, methodName, key = None):
-        """
-            For places static methods can't be called.
-            We have the static method caller.
-        """
-        classToSummon = self.__class__
-        
-        if hasattr(classToSummon, methodName):
-            methodToSommon = getattr(classToSummon, methodName)
-            
-            if key:
-                return methodToSommon(key)
-            else:
-                return methodToSommon()
 
-        return None
+    def latest(self, key = 'all'):
+        """
+            Since latest column appears in all mappers, its handling has been defined here.
+            
+            :param key: [str] rerfernce to enum key indentifying valid 'latest' col key.
+        """
+        values = {}
+
+        for itm in Latest:
+            values[itm.name] = itm.value
+        
+        if key is not None and key in values:
+            return values[key]
+
+        return values
+
+
+"""
+    Inheriting from 'int' ensures the values are integers, 
+    making serialization to JSON straightforward.
+"""
+class Latest(int, Enum):
+    """
+        Latest enumused throughout the system to mark the most current version of
+        m2m and o2o records.
+    """
+    latest = 1
+    archive = 2

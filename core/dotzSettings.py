@@ -5,7 +5,7 @@
 
 project = {
     'mapper': {
-        'tbl_code_size': 4,
+        'tblKeySize': 4,
     },
 
     # Number of days a task stays in the database system post completion or fail

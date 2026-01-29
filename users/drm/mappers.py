@@ -7,6 +7,9 @@ class UsersMapper(RelationshipMappers):
         RelationshipMappers() has proper wrapper functions.
     """
     def startUpCode(self):
+        """
+            Used to insert operations in __init__()
+        """
         # tables belonging to this mapper
         tables = ['usus', 'uspr', 'usre', 'usse', 'used']
         self.state.set('tablesUsed', tables)
@@ -20,40 +23,22 @@ class UsersMapper(RelationshipMappers):
             'foreignKeyName': 'user_id',
         }
 
-    def _tablesForRelationType(self, relationType):
-        match relationType:
-            case 'o2o':
-                return ['usus', 'uspr']
-            case 'm2m':
-                return ['usre']
-            case 'rlc':
-                return ['usse', 'used']
-            case 'm2o':
-                return []
-            case _:
-                return []
-
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
             if not handled separately
-
-            Note: 'latest' is intentionally excluded.
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'user_id']
 
     def _ignoreOnUpdates(self):
         """
-            Can carry any fields within a table to ignore in a certain operation
+            Carries any fields within a table to ignore in CRUD.update() operations.
         """
         return {
             'usus': ['id'],
             'uspr': ['id', 'latest', 'user_id'],
         }
-
-    def _ignoreOnRetrieval(self):
-        return []
-
+    
     def _m2mFields(self):
         """
             Retrieves relational fields for specific M2M table.
@@ -99,7 +84,14 @@ class DepartmentsMapper(RelationshipMappers):
         All calls should be made to following method names without the '_' prefix.
         RelationshipMappers() has proper wrapper functions.
     """
-    tablesList = ['dede', 'dehe', 'deus']
+    def startUpCode(self):
+        """
+            Used to insert operations in __init__()
+        """
+        # tables belonging to this mapper
+        tables = ['dede', 'dehe', 'deus']
+        self.state.set('tablesUsed', tables)
+        
 
     def _master(self):
         return {
@@ -108,27 +100,13 @@ class DepartmentsMapper(RelationshipMappers):
             'foreignKeyName': 'department_id',
         }
 
-    def _tablesForRelationType(self, relationType):
-        match relationType:
-            case 'o2o':
-                return ['dede']
-            case 'm2m':
-                return ['dehe', 'deus']
-            case 'rlc':
-                return []
-            case 'm2o':
-                return []
-            case _:
-                return []
 
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
             if not handled separately
-
-            Note: 'latest' is intentionally excluded.
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'department_id']
 
     def _ignoreOnUpdates(self):
         """
@@ -140,9 +118,6 @@ class DepartmentsMapper(RelationshipMappers):
             'users_userreportsto': ['id', 'latest', 'department_id'],
             'users_usertodepartment': ['id', 'latest', 'department_id'],
         }
-
-    def _ignoreOnRetrieval(self):
-        return [] # @todo: inspect this for users and depts mappers
 
     def _m2mFields(self):
         """

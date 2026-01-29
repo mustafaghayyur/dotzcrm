@@ -1,5 +1,4 @@
 from .base import BaseOperations
-from .schema.main import schema
 
 class RelationshipMappers(BaseOperations):
     """
@@ -9,8 +8,6 @@ class RelationshipMappers(BaseOperations):
         References to _*() methods in the code point to data-definition functions defined
         in child classes on app-level.
     """
-    tableList = None
-
     def master(self, key = 'all'):
         info = self._master()
         return self.returnValue(info, key)
@@ -18,19 +15,32 @@ class RelationshipMappers(BaseOperations):
     def commonFields(self):
         return self._commonFields()
 
-    def tablesForRelationType(self, relationType = 'o2o'):
-        return self._tablesForRelationType(relationType)
-
-    def ignoreOnRetrieval(self):
-        return self._ignoreOnRetrieval()
-
     def ignoreOnUpdates(self, key = 'all'):
         info = self._ignoreOnUpdates()
-        if key not in schema:
-            key = self.tableAbbreviation(key)  # ignoreOnUpdates() changed from ful-name-keys to abbreviations name
+        allTables = self.state.get('tables')
+        if key not in allTables:
+            # legacy management: ignoreOnUpdates() changed from full-names to abbreviations
+            key = self.tableAbbreviation(key)
+
         return self.returnValue(info, key)
 
     def m2mFields(self, tbl = 'all'):
         relationships = self._m2mFields()
         return self.returnValue(relationships, tbl)
+    
+    def defaults(self, requestedFunc):
+        """
+            Returns a self._defaults_{requestedFunc} method if defined (in app-level mapper definition).
+        """
+        if not isinstance(requestedFunc, str):
+            raise Exception('Mapper.defaults() cannot execute provided function. Exiting.')
+
+        requestedFunc = '_defaults_' + requestedFunc
+
+        if hasattr(self, requestedFunc):
+            functionCall = getattr(self, requestedFunc)
+            if callable(functionCall):
+                return functionCall()
+
+        return None
 

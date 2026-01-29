@@ -6,17 +6,6 @@ class ValuesMapper(ValuesMapperGeneric):
         This class will help manage value expectations for certain enum fields.
         Enums will be managed in the application layer.
     """
-    
-    def latest(self, key = 'all'):
-        values = {}
-
-        for itm in Latest:
-            values[itm.name] = itm.value
-        
-        if key is not None and key in values:
-            return values[key]
-
-        return values
 
     def status(self, key = 'all'):
         values = {}
@@ -62,7 +51,3 @@ class Visibility(str, Enum):
     workspaces = 'workspaces'
     assigned = 'assigned' # @todo: future feature implementation
     stakeholders = 'stakeholders' # @todo: future feature implementation
-
-class Latest(int, Enum):
-    archive = 2
-    latest = 1

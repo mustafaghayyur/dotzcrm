@@ -1,7 +1,7 @@
 class State:
     """
         This class's instance will serve as a state holder.
-        You can pass it between operations to maintain data-integrity.
+        It can be passed it between operations to maintain data-integrity.
     """
 
     # state container [dict]
@@ -11,14 +11,14 @@ class State:
         """
             Set a key's value in state to provided value.
 
-            :param keyPath: [str] should be '.' seperated path to nested key
+            :param keyPath: [str] should be '.' seperated path to target, nested key
             :param value: [*] can be any legitimate value stored in dictionary keys.
         """
         path = self.validateKey(keyPath)
         length = len(path)
 
         if length > 5:
-            raise Exception('Mappers().state().set() cannot handle key paths deeper than 5 levels.')
+            raise Exception('state().set() cannot handle key paths deeper than 5 levels.')
         
         if length == 1:
             self.state[keyPath] = value
@@ -56,19 +56,27 @@ class State:
     def get(self, keyPath):
         """
             Get a key from state dictionary.
-            :param keyPath: [str] should be in the form of: 'key1.childNodeKey2.thirdChildNode', mapping out a path to the specific key you wish to retrieve.
+
+            :param keyPath: [str] should be in the form of: 'key1.childNodeKey2', mapping out a path to the specific key you wish to retrieve.
         """
         path = self.validateKey(keyPath)
 
-        value = None
+        value = self.state
         for key in path:
-            if key in self.state:
-                value = self.state[key]
+            if key in value:
+                value = value[key]
+                continue
             else:
                 return None
             
         return value
     
+
+    def all(self):
+        """
+            returns entire state
+        """
+        return self.state
 
     def validateKey(self, keyPath):
         """
@@ -76,11 +84,11 @@ class State:
             :param keyPath: [str]
         """
         if not isinstance(keyPath, str):
-            raise TypeError('Mappers().state().get() expects a string based key.')
+            raise TypeError('state().get() expects a string based key.')
         
         path = keyPath.split('.')
 
         if not isinstance(path, list):
-            raise Exception('Could not retrieve key path in Mappers().state().get().')
+            raise Exception('Could not retrieve key path in state().get().')
         
         return path
