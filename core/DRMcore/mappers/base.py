@@ -50,16 +50,21 @@ class BaseOperations(Background):
             info[tbl] = allColLists[tbl]
         return self.returnValue(info, name)
     
-    def tableTypes(self, name = 'all'):
+    def tableTypes(self, name: str):
         """
-            Grabs the list of all table's type from schema: ['o2o' | 'm2m' | 'rlc'].
+            Grabs the list of all table's type from schema: 
+            
+            :param name: [str] must be enum from: 'o2o' | 'm2m' | 'rlc'
+            
+            :returns [list]
         """
-        info = {}
+        info = []
         tablesUsed = self.state.get('tablesUsed')
         allTablesType = self.state.get('types')
         for tbl in tablesUsed:
-            info[tbl] = allTablesType[tbl]
-        return self.returnValue(info, name)
+            if allTablesType[tbl] == name:
+                info.append(tbl)
+        return info
 
     def tableAbbreviation(self, fullTableName = None):
         """

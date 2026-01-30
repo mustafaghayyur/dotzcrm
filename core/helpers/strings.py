@@ -1,3 +1,5 @@
+import re
+
 def concatenate(str_list = [], separator = "\n"):
     """
         helps concatenate strings (can be multi line)
@@ -34,3 +36,16 @@ def fieldIdentifier(tbl, col):
         return tbl + '_' + col
     
     return None
+
+def seperateTableKeyFromField(field):
+    """
+        Sperates table key prefixes from field name, returning a list of [tbl, col]
+        
+        :param field: [str] field to inspect for table key prefixes.
+    """
+    match = re.match(r'\[(\w{4})\]_([\w]+)', field)
+    if match:
+        return [match.group(1), match.group(2)]
+    else:
+        return [None, field]
+    

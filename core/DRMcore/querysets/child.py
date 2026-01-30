@@ -1,14 +1,14 @@
 from django.db import models
-from . import background
+from .QuerySet import QuerySetManager
 
 """
-    =======================================================================
+=======================================================================
     Children QuerySets will be based on the various data-models we use
     in DotzCRM...
-    =====================================================================
+=====================================================================
 """
 
-class CTQuerySet(background.QuerySetManager):
+class CTQuerySet(QuerySetManager):
     """
         Primarily for One-to-One types
 
@@ -20,10 +20,8 @@ class CTQuerySet(background.QuerySetManager):
     tbl = None  # Your table for this QuerySet
     master_col = None  # The foreign key of master table (i.e. Tasks)
 
-    def __init__(self, model=None, query=None, using=None, hints=None):
+    def startUpCode(self):
         self.master_col = self.mapper.master('foreignKeyName')
-
-        super().__init__(model, query, using, hints)
 
     def fetchById(self, cId):
         """
@@ -117,17 +115,18 @@ class M2MQuerySet(CTQuerySet):
         First and Second cols defined in space's Mappers
     """
 
-    def __init__(self, model=None, query=None, using=None, hints=None):
+    def startUpCode(self):
+        super().startUpCode()
+
         tbl = self.mapper.tableAbbreviation(self.tbl)
         cols = self.mapper.m2mFields(tbl)
 
         if cols is None:
-            raise Exception('Unable to fetch M2M Fields. Abort.')
+            raise Exception('Unable to fetch M2M Fields. Aborting.')
             
         self.firstColumn = cols['firstCol']
         self.secondColumn = cols['secondCol']
         
-        super().__init__(model, query, using, hints)
 
     def fetchAllCurrentBySecondId(self, secondId):
         """

@@ -69,8 +69,13 @@ class QuerySetManager(models.QuerySet):
         """
             Sets the joins for the fetch chain.
         """
-        self.state.set('tablesUsed', self.getValidTablesUsed(selectors, conditions))
-        self.state.set('joins', self.generateJoinStatements(selectors, conditions))
+        selectors = self.state.get('selectors')
+        conditions = self.state.get('conditions')
+
+        if selectors is not None and conditions is not None:
+            self.updateMapperAndState()
+            self.state.set('joins', self.generateJoinStatements(selectors, conditions))
+
         return self
     
     def translate(self, translations):
@@ -99,12 +104,12 @@ class QuerySetManager(models.QuerySet):
             self.orderby(ordering)
         if limit is not None:
             self.limit(limit)
-        if joins is not None:
+        if joins is not None or self.state.get('joins') is None:
             self.join(joins)
         if translations is not None:
             self.translate(translations)
 
-        assembledConditions = self.state.get('selectors')
+        self.state.get('selectors')
         queryParameters = self.state.get('parameters')
         whereStatements = self.state.get('whereStatements')
         selectStatement = self.state.get('selectors')
@@ -113,12 +118,12 @@ class QuerySetManager(models.QuerySet):
 
         joins = self.state.get('selectors')
 
-        # sub in any column names you wish to output differently in the ORM
-        translations = {}
+        masterTable = self.mapper.master('table')
+        mtAbbreviation = self.mapper.master('abbreviation')
         
         query = f"""
             SELECT {selectStatement}
-            FROM tasks_task AS t
+            FROM {masterTable} AS mtAbbreviation
             {joins}
             WHERE {whereStatements}
             ORDER BY {orderByStatement} LIMIT {limitStatement};
@@ -129,7 +134,7 @@ class QuerySetManager(models.QuerySet):
         return self.raw(query, queryParameters, translations)
 
 
-    def generateJoinStatements(self, selectors, conditions):
+    def generateJoinStatements(self, joins):
         """
             This method will need to be filled in app specific inheritor
         """
@@ -137,22 +142,22 @@ class QuerySetManager(models.QuerySet):
         mtId = self.mapper.master('foreignKeyName')
         joins = []
         latestKey = self.mapper.column('latest')
-        tablesUsed = self.getValidTablesUsed(selectors, conditions)
+        mapperTables = self.state.get('mapperTables')
 
-        for tbl in tablesUsed:
+        for tbl in mapperTables:
             if tbl == mt or tbl == '':
                 continue
 
             tableName = self.mapper.tables(tbl)
             joins.append(f' LEFT JOIN {tableName} AS {tbl} ON {mt}.id = {tbl}.{mtId}')
             
-            if self.state.get('latestFlag'):
+            if self.state.get('latestFlag') and tbl in self.state.get('revisionedTables'):
                 joins.append(f' AND {tbl}.{latestKey} = %(latest)s')
 
         return strings.concatenate(joins)
             
         
-    def getValidTablesUsed(self, selectors, conditions):
+    def updateMapperAndState(self, selectors, conditions):
         """
             Determines all tables used in this select operation.
             Used for generating appropriate JOINS.
@@ -163,9 +168,15 @@ class QuerySetManager(models.QuerySet):
         columnsUsed.extend(condKeys)
 
         self.mapper.rebuildMapper(columnsUsed)
-        o2oFields = self.mapper.generateO2OFields()
 
-        tablesUsed = self.mapper.state.get('tablesUsed')
+        # rebuild states wit updated fields & data
+        o2oFields = self.mapper.generateO2OFields()
         self.state.set('allO2OFields', o2oFields)
+        tablesUsed = self.mapper.state.get('tablesUsed')
         self.state.set('tablesUsed', tablesUsed)
+
+        # finally mark all tables with 'latest' flags enabled
+        revisioned = self.mapper.tableTypes('m2m')
+        o2os = self.mapper.tableTypes('o2o')
+        self.state.set('revisionedTables', revisioned.extend(o2os))
       

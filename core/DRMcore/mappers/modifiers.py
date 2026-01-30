@@ -1,3 +1,4 @@
+from core.helpers import strings
 
 class Manipulate():
     """
@@ -61,12 +62,31 @@ class Manipulate():
             if isinstance(additions['tablesList'], list):
                 tables.extend(additions['tablesList'])
 
+        if 'allM2MTables' in additions:
+            if isinstance(additions['allM2MTables'], list):
+                tables.extend(additions['allM2MTables'])
+
         if 'columnsList' in additions:
-            if isinstance(additions['tablesList'], list):
-                foundTbls = Manipulate.compileListOfTablesFromFields()
-                tables.extend(additions['tablesList'])
+            if isinstance(additions['columnsList'], list):
+                foundTbls = Manipulate.compileListOfTablesFromFields(state, additions['columnsList'])
+                tables.extend(foundTbls)
 
         tables
         state.set('addedTables', tables)
             
-    
+    @staticmethod
+    def compileListOfTablesFromFields(columns):
+        """
+            Extracts any mention of tables from columns collected in provided list.
+            
+            :param columns: [list] all columns to be used to build tables list
+        """
+        tables = []
+        for field in columns:
+            if isinstance(field, str):
+                [tbl, col] = strings.seperateTableKeyFromField(field)
+
+                if isinstance(tbl, str):
+                    tables.append(tbl)
+        
+        return tables
