@@ -32,14 +32,16 @@ class Background():
         """
         pass
 
-    def rebuildMapper(self, tablesToAdd = []):
+    def rebuildMapper(self, additions = {}):
         """
             Called in QuerySets, where non-mapper tables may be invoked in search queries.
             Builds the mapper for crud operations.
             
-            :param tablesToAdd: [list] list of tbl-keys additionally needed in current operation.
+            :param additions: [dict] dict with two possible keys ['tablesList' | 'columnsList'].
         """
-        Manipulate.updateTablesUsed(self.state, tablesToAdd)
+        if isinstance(additions, dict):
+            additions['allM2MTables'] = self.collectM2MTables()
+            Manipulate.updateTablesUsed(self.state, additions)
 
         mapperTables = self.state.get('tablesUsed')
         addedTables = self.state.get('addedTables')

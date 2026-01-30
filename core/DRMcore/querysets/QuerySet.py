@@ -1,8 +1,7 @@
 from django.db import models
 
 from core.lib.state import State
-from core.helpers import strings, crud
-from core import dotzSettings
+from core.helpers import strings, misc
 
 from .conditions import Conditions
 from .selectors import Selectors
@@ -23,6 +22,8 @@ class QuerySetManager(models.QuerySet):
 
         self.state = State()
         self.state.set('latestFlag', False)
+        # set current table in state
+        self.state.set('current', Selectors.getCurrentTbl(self.mapper, self.model.__name__))
         
         self.startUpCode()
         
@@ -33,141 +34,40 @@ class QuerySetManager(models.QuerySet):
         pass
 
 
-    def fetchInitOperations(self, tablesToAdd):
-        self.mapper.rebuildMapper(tablesToAdd)
-        self.state.set('allO2OFields', self.mapper.generateO2OFields())
-
-
-    def fetch(self, selectors, conditions, ordering, limit):
+    def fetch(self, selectors, conditions = None, ordering = None, limit = None, joins = None):
         """
         Dotz CRM + PM's very own versatile SelectQuery Generator.
         
         :param selectors: [list] list of O2O Fields desired in resultset.
         :param conditions: [dict] dictionary of key: value pairs for Where statement.
         :param ordering: [dict|str] ordering conditions
-        :param limit: [list] limit conditions
+        :param limit: [list|int|str] limit conditions
+        :param joins: [dict] join definitions
         """
-        
-        whereStatements = Conditions.parse(self.state, self.mapper, conditions)
+        assembledConditions = Conditions.assemble(self.state, self.mapper, conditions)
+        queryParameters = Params.parse(assembledConditions)
+        whereStatements = Conditions.parse(self.state, self.mapper, assembledConditions)
+        selectStatement = Selectors.parse(self.state, self.mapper, selectors)
+        orderByStatement = Ordering.parse(self.state, self.mapper, ordering)
+        limitStatement = Limits.parse(limit)
 
         self.tablesUsed = self.getValidTablesUsed(selectors, conditions)
+        joins = self.generateJoinStatements(selectors, assembledConditions)
 
-        selectString = self.generateProperSelectors(selectors)
+        # sub in any column names you wish to output differently in the ORM
+        translations = {}
         
-        joins = self.generateJoinStatements(selectors, actualConditions)
+        query = f"""
+            SELECT {selectStatement}
+            FROM tasks_task AS t
+            {joins}
+            WHERE {whereStatements}
+            ORDER BY {orderByStatement} LIMIT {limitStatement};
+            """
 
-        orderByList = self.generateOrderingList(ordering)
-
-        if not orderByList:
-            orderByList = self.mapper.defaults('order_by')  # use default order set in App's Mapper.
-
-        orderByString = self.generateOrderByString(orderByList)
-
-        limitString = self.generateLimitString(limit)
-
-        return {
-            'selectorString': selectString,
-            'whereString': whereElements['statements'],
-            'params': actualParameters,
-            'joinsString': joins,
-            'orderString': orderByString,
-            'limitString': limitString
-        }
-
-
-    
-
-    def generateOrderingList(self, ordering):
-        """
-            @todo - expand this operation to convert provided string orderby
-            arguments into desired list of dictionaries.
-        """
-        if not isinstance(ordering, list):
-            return None
-
-        for i in range(len(ordering)):
-
-            if not isinstance(ordering[i], dict):
-                ordering[i] = None
-                continue
-
-            if 'col' not in ordering[i]:
-                ordering[i] = None
-                continue
-
-            if 'tbl' not in ordering[i]:
-                ordering[i] = None
-                continue
-
-            if 'sort' not in ordering[i]:
-                ordering[i] = None
-                continue
-
-        return ordering
-
-    def generateOrderByString(self, ordering):
-        orderByString = ''
-
-        if not isinstance(ordering, list):
-            return orderByString
-
-        for item in ordering:
-            if item['tbl'] in self.tablesUsed:
-                orderByString += f' {item['tbl']}.{item['col']} {item['sort']}, '
-
-        return orderByString[:-2]
-
-    def generateLimitString(self, limit):
-        string = ''
-
-        if isinstance(limit, list):
-            for itm in limit:
-                string += itm + ', '
-
-            return string[:-2]
-        
-        if strings.isPrimitiveType(limit):
-            if limit is None:
-                return self.mapper.defaults('limit_value')
-            
-            if isinstance(limit, str) and limit.lower().strip() == 'all':
-                return '1000000'  # set a crazy large amount
-            
-            return str(limit)
-        
-        return self.mapper.defaults('limit_value')
-
-    
-
-    
-
-    def generateProperSelectors(self, selectors):
-        """
-            This helper function forms the SELECT statement in the query.
-        """
-        string = ''
-        
-        for key in selectors:
-            if key in self.columnsMatrix:
-                table = self.columnsMatrix[key]  # fetches the value which is the tbl abbreviation for column
-                
-                if self.mapper.isCommonField(key, True):
-                    # the table abbreviation is conjoined to key name. Separate:
-                    key = key[1:]  # slice off first character
-                    addition = ' AS ' + table + key
-                    
-                    if table + key == self.mapper.master('abbreviation') + 'id':
-                        addition = ', ' + table + '.' + key + ' AS ' + table + key
-                    
-                    string += ' ' + table + '.' + key + addition + ','
-                else:
-                    string += ' ' + table + '.' + key + ','
-
-        # chop off the last comma from returned string
-        return string[:-1]
-
-    
-    
+        misc.log(query, 'SEARCH QUERY STRING')
+        misc.log(queryParameters, 'SEARCH PARAMS')
+        return self.raw(query, queryParameters, translations)
 
 
     def generateJoinStatements(self, selectors, conditions):
@@ -197,16 +97,15 @@ class QuerySetManager(models.QuerySet):
             Determines all tables used in this select operation.
             Used for generating appropriate JOINS.
         """
-        tablesUsed = []  # will contain table abbreviations
+        # gather all the columns
+        columnsUsed = selectors
+        condKeys = conditions.keys()
+        columnsUsed.extend(condKeys)
 
-        for key in selectors:
-            if key in self.columnsMatrix:
-                tablesUsed.append(self.columnsMatrix[key])
+        self.mapper.rebuildMapper(columnsUsed)
+        o2oFields = self.mapper.generateO2OFields()
 
-        for key in conditions.keys():
-            if key in self.columnsMatrix:
-                tablesUsed.append(self.columnsMatrix[key])
-
-        # return unique table list
-        return list(set(tablesUsed))
+        tablesUsed = self.mapper.state.get('tablesUsed')
+        self.state.set('allO2OFields', o2oFields)
+        self.state.set('tablesUsed', tablesUsed)
       

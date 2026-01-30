@@ -24,3 +24,4 @@ class Params():
             params[latestField] = mapper.values.latest('latest')
 
         return params
+    

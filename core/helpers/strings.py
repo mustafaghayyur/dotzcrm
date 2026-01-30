@@ -1,4 +1,3 @@
-
 def concatenate(str_list = [], separator = "\n"):
     """
         helps concatenate strings (can be multi line)
@@ -23,3 +22,15 @@ def isPrimitiveType(item):
                             return False
     return True
     
+
+def fieldIdentifier(tbl, col):
+    """
+        Generates a string identifier for column name in question.
+        
+        :param tbl: table abbreviation
+        :param col: column name as seen in db table
+    """
+    if isinstance(tbl, str) and isinstance(col, str):
+        return tbl + '_' + col
+    
+    return None

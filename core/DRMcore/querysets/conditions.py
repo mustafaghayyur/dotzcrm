@@ -27,7 +27,7 @@ class Conditions():
         return Conditions.validate(mergedConditions)
     
     @staticmethod 
-    def parse(state, mapper, rawConditions):
+    def parse(state, mapper, conditions):
         """
         Returns generated where statements in list format.
         
@@ -35,7 +35,6 @@ class Conditions():
         :param mapper: Mapper() instance
         :param conditions: [dict] supplied to QuerySetManager()
         """
-        conditions = Conditions.assemble(state, mapper, rawConditions)
         o2oFields = state.get('allO2OFields')
         array = []
 

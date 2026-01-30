@@ -45,8 +45,9 @@ class UsersMapper(RelationshipMappers):
         """
         return {
             'usre': {
-                'firstCol': 'reports_to_id',
-                'secondCol': 'user_id',
+                'firstCol': 'user_id',
+                'secondCol': 'reports_to_id',
+                'tables': ['usus']
             },
         }
 
@@ -127,10 +128,12 @@ class DepartmentsMapper(RelationshipMappers):
             'dehe': {
                 'firstCol': 'department_id',
                 'secondCol': 'user_id',
+                'tables': ['dede', 'usus']
             },
             'deus': {
                 'firstCol': 'department_id',
                 'secondCol': 'user_id',
+                'tables': ['dede', 'usus']
             },
         }
 

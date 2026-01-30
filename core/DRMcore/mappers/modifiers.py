@@ -46,14 +46,27 @@ class Manipulate():
         return dictionary
     
     @staticmethod 
-    def updateTablesUsed(state, tables):
+    def updateTablesUsed(state, additions):
         """
             Adds a table to mapper for current crud operations.
 
             :param state: [dict] state from mapper
             :param tables: [list] table-keys found in QuerySet arguments
         """
-        if isinstance(tables, list):
-            state.set('addedTables', tables)
+        if not isinstance(additions, dict):
+            return None
+        
+        tables = []
+        if 'tablesList' in additions:
+            if isinstance(additions['tablesList'], list):
+                tables.extend(additions['tablesList'])
+
+        if 'columnsList' in additions:
+            if isinstance(additions['tablesList'], list):
+                foundTbls = Manipulate.compileListOfTablesFromFields()
+                tables.extend(additions['tablesList'])
+
+        tables
+        state.set('addedTables', tables)
             
     

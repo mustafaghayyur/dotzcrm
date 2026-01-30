@@ -53,6 +53,7 @@ class TasksMapper(RelationshipMappers):
             'tawa': {
                 'firstCol': 'task_id',
                 'secondCol': 'watcher_id',
+                'tables': ['tata', 'usus']
             },
         }
 
@@ -151,14 +152,17 @@ class WorkSpacesMapper(RelationshipMappers):
             'wode': {
                 'firstCol': 'workspace_id',
                 'secondCol': 'department_id',
+                'tables': ['wowo', 'dede']
             },
             'wous': {
                 'firstCol': 'workspace_id',
                 'secondCol': 'user_id',
+                'tables': ['wowo', 'usus']
             },
             'wota': {
                 'firstCol': 'workspace_id',
                 'secondCol': 'task_id',
+                'tables': ['wowo', 'tata']
             },
         }
 
