@@ -19,26 +19,7 @@ class Tasks(O2ORecords.CRUD):
         
         super().__init__()
 
-    def read(self, selectors, conditions = None, orderBy = None, limit = None):
-        """
-            See documentation on how to form selectors, conditions, etc.
-            @return: None | RawQuerySet
-        """
-        if not isinstance(selectors, list) or len(selectors) < 1:
-            raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
-
-        if 'all' in selectors:
-            recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
-            selectors = list(recordKeys.keys())
-
-        rawObjs = self.mtModel.objects.fetch(selectors, conditions, orderBy, limit)
-        
-        if rawObjs:
-            return rawObjs
-
-        return None
-
-    def fetchFullRecordForUpdate(self, task_id):
+    def fullRecord(self, task_id):
         """
             fetch full records with all CT records marked 'latest'
         """
@@ -51,7 +32,10 @@ class Tasks(O2ORecords.CRUD):
             "tid": task_id,
         }
 
-        rawObj = self.read(['all'], conditions)
+        recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
+        selectors = list(recordKeys.keys())
+
+        rawObj = self.read(selectors, conditions)
 
         if rawObj:
             return rawObj  # returns all records found.

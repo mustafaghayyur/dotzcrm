@@ -33,26 +33,85 @@ class QuerySetManager(models.QuerySet):
         """
         pass
 
-
-    def fetch(self, selectors, conditions = None, ordering = None, limit = None, joins = None):
+    def select(self, selectors):
         """
-        Dotz CRM + PM's very own versatile SelectQuery Generator.
-        
-        :param selectors: [list] list of O2O Fields desired in resultset.
-        :param conditions: [dict] dictionary of key: value pairs for Where statement.
-        :param ordering: [dict|str] ordering conditions
-        :param limit: [list|int|str] limit conditions
-        :param joins: [dict] join definitions
+            Initiates the method chaining for fetch operations.
+            Sets the select from satement.
         """
-        assembledConditions = Conditions.assemble(self.state, self.mapper, conditions)
-        queryParameters = Params.parse(assembledConditions)
-        whereStatements = Conditions.parse(self.state, self.mapper, assembledConditions)
-        selectStatement = Selectors.parse(self.state, self.mapper, selectors)
-        orderByStatement = Ordering.parse(self.state, self.mapper, ordering)
-        limitStatement = Limits.parse(limit)
+        self.state.set('selectors', Selectors.parse(self.state, self.mapper, selectors))
+        return self
 
-        self.tablesUsed = self.getValidTablesUsed(selectors, conditions)
-        joins = self.generateJoinStatements(selectors, assembledConditions)
+    def where(self, conditions):
+        """
+            Sets the conditions for the fetch chain.
+        """
+        assembled = Conditions.assemble(self.state, self.mapper, conditions)
+        self.state.set('conditions', assembled)
+        self.state.set('parameters', Params.parse(assembled))
+        self.state.set('whereStatements', Conditions.parse(self.state, self.mapper, assembled))
+        return self
+
+    def orderby(self, ordering):
+        """
+            Sets the ordering for the fetch chain.
+        """
+        self.state.set('ordering', Ordering.parse(self.state, self.mapper, ordering))
+        return self
+
+    def limit(self, limit):
+        """
+            Sets the limit for the fetch chain.
+        """
+        self.state.set('limit', Limits.parse(limit))
+        return self
+
+    def join(self, joins):
+        """
+            Sets the joins for the fetch chain.
+        """
+        self.state.set('tablesUsed', self.getValidTablesUsed(selectors, conditions))
+        self.state.set('joins', self.generateJoinStatements(selectors, conditions))
+        return self
+    
+    def translate(self, translations):
+        """
+            TBD @todo
+        """
+        self.state.set('translations', translations)
+        return self
+
+
+    def fetch(self, selectors = None, conditions = None, ordering = None, limit = None, joins = None, translations = None):
+        """
+            Dotz CRM + PM's very own versatile SelectQuery Generator.
+            
+            :param selectors: [list] list of O2O Fields desired in resultset.
+            :param conditions: [dict] dictionary of key: value pairs for Where statement.
+            :param ordering: [dict|str] ordering conditions
+            :param limit: [list|int|str] limit conditions
+            :param joins: [dict] join definitions
+        """
+        if selectors is not None:
+            self.select(selectors)
+        if conditions is not None:
+            self.where(conditions)
+        if ordering is not None:
+            self.orderby(ordering)
+        if limit is not None:
+            self.limit(limit)
+        if joins is not None:
+            self.join(joins)
+        if translations is not None:
+            self.translate(translations)
+
+        assembledConditions = self.state.get('selectors')
+        queryParameters = self.state.get('parameters')
+        whereStatements = self.state.get('whereStatements')
+        selectStatement = self.state.get('selectors')
+        orderByStatement = self.state.get('selectors')
+        limitStatement = self.state.get('selectors')
+
+        joins = self.state.get('selectors')
 
         # sub in any column names you wish to output differently in the ORM
         translations = {}
@@ -78,8 +137,9 @@ class QuerySetManager(models.QuerySet):
         mtId = self.mapper.master('foreignKeyName')
         joins = []
         latestKey = self.mapper.column('latest')
+        tablesUsed = self.getValidTablesUsed(selectors, conditions)
 
-        for tbl in self.tablesUsed:
+        for tbl in tablesUsed:
             if tbl == mt or tbl == '':
                 continue
 

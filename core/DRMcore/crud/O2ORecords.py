@@ -39,8 +39,16 @@ class CRUD(Background.CrudOperations):
         # return masterRecord.id
         return masterRecord
 
-    def read(self):
-        pass  # defined in individual Module's class extensions.
+    def read(self, selectors, conditions = None, orderBy = None, limit = None, joins = None, translations = None):
+        """
+            See documentation on how to form selectors, conditions, etc.
+            Chaining enabled when no arguments are provided.
+            @return: RawQuerySet | None
+        """
+        if selectors is None and conditions is None and orderBy is None and limit is None and joins is None and translations is None:
+            return self.mtModel.objects  # chaining method initiated
+        
+        return self.mtModel.objects.fetch(selectors, conditions, orderBy, limit, joins, translations)
 
     def update(self, dictionary):
         """
@@ -51,7 +59,7 @@ class CRUD(Background.CrudOperations):
 
         mId = self.mapper.master('abbreviation') + 'id'
 
-        records = self.fetchFullRecordForUpdate(self.submission[mId])
+        records = self.fullRecord(self.submission[mId])
 
         if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
@@ -130,7 +138,7 @@ class CRUD(Background.CrudOperations):
 
             self.checkChildForMultipleLatests(t['model'], tbl, t['table'], t['cols'], fetchedRecords)
 
-        records = self.fetchFullRecordForUpdate(mId)
+        records = self.fullRecord(mId)
 
         if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')

@@ -21,7 +21,7 @@ class OneToOnes():
 
             if result:
                 try:
-                    record = Tasks().fetchFullRecordForUpdate(result.id)
+                    record = Tasks().fullRecord(result.id)
                     retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
                     
@@ -44,7 +44,7 @@ class OneToOnes():
             # attempt to serialize the updated consolidated record
             if result:
                 try:
-                    record = Tasks().fetchFullRecordForUpdate(result['tid'])
+                    record = Tasks().fullRecord(result['tid'])
                     retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
                 except Exception as e:
@@ -70,7 +70,7 @@ class OneToOnes():
             Retrieve single task record (with all it's related child-tables).
         """
         if crud.isValidId({'id': id}, 'id'):
-            record = Tasks().fetchFullRecordForUpdate(id)
+            record = Tasks().fullRecord(id)
             if record:
                 serialized = TaskO2ORecordSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))
