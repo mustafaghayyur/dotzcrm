@@ -35,7 +35,7 @@ class Conditions():
         :param mapper: Mapper() instance
         :param conditions: [dict] supplied to QuerySetManager()
         """
-        o2oFields = state.get('allO2OFields')
+        o2oFields = state.get('allMapperFields')
         array = []
 
         for key, value in conditions.items():
@@ -91,12 +91,12 @@ class Conditions():
             Checks that all condition items should be primitive data types or lists.
             None values for conditions are ommitted.
         """
-        o2oFieldsDict = state.get('allO2OFields')
-        o2oFields = o2oFieldsDict.keys()  # retrieve all full-column-names required in o2o operations
+        o2oFieldsDict = state.get('allMapperFields')
+        usedFieldsDict = state.get('allUsedFields')
         keysUsed = list(conditions.keys())  # copy keys of conditions to loop over
 
         for key in keysUsed:
-            if key in o2oFields:
+            if key in FieldsDict:
                 if conditions[key] is None:
                     del conditions[key]
                     continue

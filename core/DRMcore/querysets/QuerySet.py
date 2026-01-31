@@ -159,19 +159,26 @@ class QuerySetManager(models.QuerySet):
         
     def updateMapperAndState(self, selectors, conditions):
         """
-            Determines all tables used in this select operation.
-            Used for generating appropriate JOINS.
+            Updates states in mapper and querysetmanager
         """
         # gather all the columns
         columnsUsed = selectors
         condKeys = conditions.keys()
         columnsUsed.extend(condKeys)
 
-        self.mapper.rebuildMapper(columnsUsed)
+        # first we save the original mapper fields to state...
+        mapperFields = self.mapper.generateAllFields()
+        self.state.set('allMapperFields', mapperFields)
 
-        # rebuild states wit updated fields & data
-        o2oFields = self.mapper.generateO2OFields()
-        self.state.set('allO2OFields', o2oFields)
+        # next we rebuild the mapper with collected tables...
+        usedTables = self.compileUsedFieldsDictionary()
+        self.mapper.rebuildMapper(usedTables)
+
+        # then we update states using Mapper functions
+        allFields = self.mapper.generateAllFields()
+        self.state.set('allUsedFields', allFields)
+
+        # copy mapper's tablesUsed to our own state
         tablesUsed = self.mapper.state.get('tablesUsed')
         self.state.set('tablesUsed', tablesUsed)
 
@@ -180,3 +187,52 @@ class QuerySetManager(models.QuerySet):
         o2os = self.mapper.tableTypes('o2o')
         self.state.set('revisionedTables', revisioned.extend(o2os))
       
+
+    def compileUsedFieldsDictionary(self, columnsUsed):
+        """
+            Takes list of columns supplied in fetch() arguments, and attempts to build a dictionary
+            mapping field to its table-key. Similar to the 'allMapperFields' dictionary.
+            
+            :param columsnUsed: [list] list of all columns supplied in arguments
+        """
+        tables = []
+        mapperFields = self.state.get('allMapperFields')
+        for field in columnsUsed:
+            if isinstance(field, str) and field not in mapperFields:
+                [tbl, col] = strings.seperateTableKeyFromField(field)
+
+                if isinstance(tbl, str) and isinstance(col, str):
+                    fullTableName = self.mapper.state.get(tbl)
+                    if fullTableName is not None and isinstance(fullTableName, str):
+                        tblCols = self.mapper.state.get('cols')
+                        if col in tblCols[tbl]:
+                            tables.append(tbl)
+        
+        return tables
+
+
+    def getValidTablesUsed(self):
+        """
+            Determines all tables used in this select operation.
+            Used for generating appropriate JOINS.
+        """
+        conditions = self.state.get('conditions')
+        selectors = self.state.get('selectors')
+        joins = self.state.get('joins')
+        orderby = self.state.get('ordering')
+        o2oFieldsMatrix = self.state.get('allO2OFields')
+
+        columns = []
+
+        columns.extend(selectors)
+        columns.extend(conditions.keys())
+
+        tablesUsed = []  # will contain table abbreviations
+
+        for field in columns:
+            if field in fieldsMatrix:
+                tablesUsed.append(fieldsMatrix[field])
+
+
+        # return unique table list
+        return list(set(tablesUsed))

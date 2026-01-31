@@ -15,15 +15,20 @@ class Background():
             self.state = State()
 
         # extract all values from schema needed by mapper.
-        self.state.set('tables', Manipulate.makeTablesList(schema))
-        self.state.set('models', Manipulate.makeModelsList(schema))
-        self.state.set('paths', Manipulate.makeModelPathsList(schema))
-        self.state.set('cols', Manipulate.makeTableColsList(schema))
-        self.state.set('types', Manipulate.makeTableTypesList(schema))
+        dictionary = Manipulate.makeStateLists(schema)
+        self.state.set('tables', dictionary['tables'])
+        self.state.set('models', dictionary['models'])
+        self.state.set('paths', dictionary['paths'])
+        self.state.set('cols', dictionary['cols'])
+        self.state.set('types', dictionary['types'])
 
         self.values = ValuesMapperGeneric()  # incase app-level mapper has no VM of their own.
 
         self.startUpCode()
+
+        # update tablesUsed with mapperTables
+        tables = self.state.get('mapperTables')
+        self.state.set('tablesUsed', tables)
 
     
     def startUpCode(self):
@@ -32,21 +37,14 @@ class Background():
         """
         pass
 
-    def rebuildMapper(self, additions = {}):
+    def rebuildMapper(self, additions: list):
         """
-            Called in QuerySets, where non-mapper tables may be invoked in search queries.
-            Builds the mapper for crud operations.
-            
-            :param additions: [dict] dict with two possible keys ['tablesList' | 'columnsList'].
-        """
-        if isinstance(additions, dict):
-            additions['allM2MTables'] = self.collectM2MTables()
-            Manipulate.updateTablesUsed(self.state, additions)
-
-        mapperTables = self.state.get('tablesUsed')
-        addedTables = self.state.get('addedTables')
-        if isinstance(mapperTables, list) and isinstance(addedTables, list):
-            mapperTables.extend(addedTables)
+            Essentially, updates 'tablesUsed' key in state, for mapper to function correctly.
+        """        
+        mapperTables = self.state.get('mapperTables')
+        
+        if isinstance(mapperTables, list) and isinstance(additions, list):
+            mapperTables.extend(additions)
 
         array = list(set(mapperTables))  # make list full of unique tbl-keys
         self.state.set('tablesUsed', array)

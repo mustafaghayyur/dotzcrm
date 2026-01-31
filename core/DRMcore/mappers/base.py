@@ -116,17 +116,29 @@ class BaseOperations(Background):
 
     def generateO2OFields(self):
         """
-            Generates a completed dict of databaseColumn => tbl-abbreviation pairs.
-            This dictionary can be used to manage Mapper's full records' validation.
-            
             Only One-to-One records-types are handled.
         """
         o2oTables = self.tablesForRelationType('o2o')  # fetch all o2o tables
+        return self.generateFieldsDict(o2oTables)
+    
+    def generateAllFields(self):
+        """
+            M2M, O2O and RLC tables are included.
+        """
+        tables = self.tables()  # fetch all tablesUsed
+        return self.generateFieldsDict(tables)
+
+    def generateFieldsDict(self, tablesList):
+        """
+        Generates a dictionary holding all 'FieldNames' => 'table-key' pairs.
+
+        :param tablesList: [list] provided tables list to process.
+        """
         commonFields = self.commonFields()
 
         dictionary = {}  # open returned dictionary
 
-        for tbl in o2oTables:
+        for tbl in tablesList:
             tblName = self.tables(tbl)
             fields = self.tableFields(tblName)
 

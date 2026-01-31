@@ -12,7 +12,7 @@ class TasksMapper(RelationshipMappers):
         """
         # tables belonging to this mapper
         tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'taco', 'tawa']
-        self.state.set('tablesUsed', tables)
+        self.state.set('mapperTables', tables)
 
         self.setValuesMapper(ValuesMapper)
     
