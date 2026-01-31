@@ -47,14 +47,3 @@ class Selectors():
         
         return string
 
-
-    @staticmethod
-    def getCurrentTbl(mapper, currentModel):
-        """
-            Determines current tbl (key) for model of QuerySet
-        """
-        models = mapper.models()
-        for tbl in models:
-            if models[tbl] == currentModel:
-                return tbl
-        return None
