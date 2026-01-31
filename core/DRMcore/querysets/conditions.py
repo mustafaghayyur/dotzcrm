@@ -8,10 +8,11 @@ class Conditions():
     """
 
     @staticmethod
-    def assemble(state, mapper, conditions):
+    def assemble(state, mapper):
         """
             Assembles workable conditions dictionary, from raw dictionary provided to QuerySetManager
         """
+        conditions = state.get('conditions')
         defaults = mapper.defaults('where_conditions')
 
         if conditions is None:
@@ -27,7 +28,7 @@ class Conditions():
         return Conditions.validate(mergedConditions)
     
     @staticmethod 
-    def parse(state, mapper, conditions):
+    def parse(state, mapper):
         """
         Returns generated where statements in list format.
         
@@ -35,6 +36,7 @@ class Conditions():
         :param mapper: Mapper() instance
         :param conditions: [dict] supplied to QuerySetManager()
         """
+        conditions = state.get('assembledConditions')
         o2oFields = state.get('allMapperFields')
         array = []
 

@@ -51,7 +51,7 @@ class ErrorHandling:
             You can fetch 'o2o', 'm2m', 'rlc' columns with this.
             Defaults to 'o2o'
         """
-        abbrvs = self.mapper.tablesForRelationType(relationType)
+        abbrvs = self.mapper.tableTypes(relationType)
         ids = []
 
         for abbrv in abbrvs:

@@ -8,10 +8,13 @@ class BaseOperations(Background):
     """
     def tables(self, key = 'all'):
         """
-            Grabs the table value(s) from schema.
+            Grabs the table's (or all tables in mapper)'s full name from schema.
         """
-        info = {}
         tablesUsed = self.state.get('tablesUsed')
+        if key is not None and key in tablesUsed:
+            return tablesUsed[key]
+
+        info = {}
         allTables = self.state.get('tables')
         for tbl in tablesUsed:
             info[tbl] = allTables[tbl]
@@ -19,8 +22,13 @@ class BaseOperations(Background):
 
     def models(self, key = 'all'):
         """
-            Grabs the model value(s) from schema.
+            Grabs the model value(s) from schema for mapper table(s).
         """
+        tablesUsed = self.state.get('tablesUsed')
+        if key is not None and key in tablesUsed:
+            allModels = self.state.get('models')
+            return allModels[key]
+        
         info = {}
         tablesUsed = self.state.get('tablesUsed')
         allModels = self.state.get('models')
@@ -30,8 +38,13 @@ class BaseOperations(Background):
     
     def modelPaths(self, key = 'all'):
         """
-            Grabs the model-path value(s) from schema.
+            Grabs the model-path value(s) from schema for mapper table(s).
         """
+        tablesUsed = self.state.get('tablesUsed')
+        if key is not None and key in tablesUsed:
+            allPaths = self.state.get('models')
+            return allPaths[key]
+        
         info = {}
         tablesUsed = self.state.get('tablesUsed')
         allPaths = self.state.get('paths')
@@ -41,8 +54,13 @@ class BaseOperations(Background):
 
     def tableFields(self, name = 'all'):
         """
-            Grabs the table-cols list(s) from schema.
+            Grabs the table-cols list(s) from schema for each table in mappers.
         """
+        tablesUsed = self.state.get('tablesUsed')
+        if name is not None and name in tablesUsed:
+            allColLists = self.state.get('models')
+            return allColLists[name]
+        
         info = {}
         tablesUsed = self.state.get('tablesUsed')
         allColLists = self.state.get('cols')
@@ -52,7 +70,7 @@ class BaseOperations(Background):
     
     def tableTypes(self, name: str):
         """
-            Grabs the list of all table's type from schema: 
+            Grabs the list of all tables with type 'name' from schema: 
             
             :param name: [str] must be enum from: 'o2o' | 'm2m' | 'rlc'
             
@@ -62,7 +80,7 @@ class BaseOperations(Background):
         tablesUsed = self.state.get('tablesUsed')
         allTablesType = self.state.get('types')
         for tbl in tablesUsed:
-            if allTablesType[tbl] == name:
+            if tbl in allTablesType and allTablesType[tbl] == name:
                 info.append(tbl)
         return info
 
@@ -89,36 +107,13 @@ class BaseOperations(Background):
         if field in self.commonFields():
             return True
         return False
-    
-
-
-    def tablesForRelationType(self, relationType = 'o2o'):
-        """
-            Returns list of all tables in use by mapper, with specific relationship type.
-            
-            :param relationType: [str] 'o2o' | 'm2m' | 'rlc' 
-        """
-        if not isinstance(relationType, str):
-            raise TypeError('Mapper().tablesForRelationType() requires string argument.')
-        
-        tablesUsed = self.state.get('tablesUsed')
-        tableTypes = self.state.get('types')
-        if not isinstance(tablesUsed, list):
-            return []
-        
-        array = []
-        for tbl in tablesUsed:
-            if tbl in tableTypes and tableTypes[tbl] == relationType:
-                array.append(tbl)
-
-        return array
 
 
     def generateO2OFields(self):
         """
             Only One-to-One records-types are handled.
         """
-        o2oTables = self.tablesForRelationType('o2o')  # fetch all o2o tables
+        o2oTables = self.tableTypes('o2o')  # fetch all o2o tables
         return self.generateFieldsDict(o2oTables)
     
     def generateAllFields(self):

@@ -39,15 +39,18 @@ class Background():
 
     def rebuildMapper(self, additions: list):
         """
-            Essentially, updates 'tablesUsed' key in state, for mapper to function correctly.
+            Essentially, updates 'tablesUsed' key in state so mapper functions correctly.
         """        
-        mapperTables = self.state.get('mapperTables')
+        array = []
+        tables = self.state.get('tables')
         
-        if isinstance(mapperTables, list) and isinstance(additions, list):
-            mapperTables.extend(additions)
-
-        array = list(set(mapperTables))  # make list full of unique tbl-keys
-        self.state.set('tablesUsed', array)
+        if isinstance(additions, list):
+            for tbl in additions:
+                if tbl in tables:
+                    array.append(tbl)
+        
+        tablesUsed = list(set(array))  # make list full of unique tbl-keys
+        self.state.set('tablesUsed', tablesUsed)
         
 
     def setNewStateObject(self, stateObj):

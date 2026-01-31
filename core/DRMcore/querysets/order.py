@@ -7,7 +7,7 @@ class Ordering():
     """
 
     @staticmethod 
-    def parse(state, mapper, ordering):
+    def parse(state, mapper):
         """
         Parse and make into valid OrderBy string.
         
@@ -15,6 +15,7 @@ class Ordering():
         :param mapper: Mapper object
         :param ordering: [list] array of dictionaries defining sort order.
         """
+        ordering = state.get('ordering')
         array = Ordering.makeList(ordering)
         if not array:
             array = mapper.defaults('order_by')  # use default order set in App's Mapper.

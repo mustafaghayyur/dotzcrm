@@ -7,10 +7,11 @@ class Selectors():
     """
 
     @staticmethod 
-    def parse(state, mapper, selectors):
+    def parse(state, mapper):
         """
             Forms the SELECT statement in the query.
         """
+        selectors = state.get('selectors')
         mapperFields = state.get('allMapperFields')
         allUsedFields = state.get('allUsedFields')
         string = ''

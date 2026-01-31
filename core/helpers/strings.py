@@ -39,7 +39,7 @@ def fieldIdentifier(tbl, col):
 
 def seperateTableKeyFromField(field):
     """
-        Sperates table key prefixes from field name, returning a list of [tbl, col]
+        Seperates table key, field name, returning a list of [tbl, col]
         
         :param field: [str] field to inspect for table key prefixes.
     """
@@ -49,3 +49,15 @@ def seperateTableKeyFromField(field):
     else:
         return [None, field]
     
+
+def seperateTableKeyFromJoinArgument(definition):
+    """
+        Seperates join-type (optional), table key, and column-name, returns a list. 
+        
+        :param definition: join() argument in QuerySetManger().fetch()
+    """
+    match = re.match(r'(\w+\|)?\[(\w{4})\]_([\w]+)', definition)
+    if match:
+        return [match.group(1), match.group(2), match.group(3)]
+    else:
+        return []

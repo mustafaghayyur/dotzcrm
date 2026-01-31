@@ -8,6 +8,11 @@ class Manipulate():
 
     @staticmethod 
     def makeStateLists(schema):
+        """
+            Creates useable dictionaries for Mapper().state to store and use.
+            
+            :param schema: schema module's object.
+        """
         dictionary = {
             'tables': {},
             'models': {},

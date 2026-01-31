@@ -2,7 +2,6 @@ from django.db import models
 
 from core.lib.state import State
 from core.helpers import strings
-from .selectors import Selectors
 
 class BackgroundOperations(models.QuerySet):
     """
@@ -17,7 +16,7 @@ class BackgroundOperations(models.QuerySet):
         self.state = State()
         self.state.set('latestFlag', False)
         
-        # set current table's model in state
+        # set current table-key in state
         self.state.set('current', self.getCurrentTbl())
         
         self.startUpCode()
@@ -40,43 +39,20 @@ class BackgroundOperations(models.QuerySet):
         if translations is not None:
             self.state.set('translations', translations)
 
-
-    def generateJoinStatements(self, joins):
-        """
-            This method will need to be filled in app specific inheritor
-        """
-        mt = self.mapper.master('abbreviation')
-        mtId = self.mapper.master('foreignKeyName')
-        joins = []
-        latestKey = self.mapper.column('latest')
-        mapperTables = self.state.get('mapperTables')
-
-        for tbl in mapperTables:
-            if tbl == mt or tbl == '':
-                continue
-
-            tableName = self.mapper.tables(tbl)
-            joins.append(f' LEFT JOIN {tableName} AS {tbl} ON {mt}.id = {tbl}.{mtId}')
-            
-            if self.state.get('latestFlag') and tbl in self.state.get('revisionedTables'):
-                joins.append(f' AND {tbl}.{latestKey} = %(latest)s')
-
-        return strings.concatenate(joins)
-            
         
-    def updateMapperAndState(self, selectors, conditions):
+    def updateMapperAndState(self):
         """
             Updates states in mapper and querysetmanager
         """
-        # gather all the columns
-        columnsUsed = self.getValidTablesUsed()
+        # gather all the columns 
+        columnsUsed = self.getColumnsUsed()
 
         # first we save the original mapper fields to state...
         mapperFields = self.mapper.generateAllFields()
         self.state.set('allMapperFields', mapperFields)
 
         # next we rebuild the mapper with collected tables...
-        usedTables = self.compileUsedFieldsDictionary(columnsUsed)
+        usedTables = self.compileUsedTablesList(columnsUsed)
         self.mapper.rebuildMapper(usedTables)
 
         # then we update states using Mapper functions
@@ -87,18 +63,18 @@ class BackgroundOperations(models.QuerySet):
         tablesUsed = self.mapper.state.get('tablesUsed')
         self.state.set('tablesUsed', tablesUsed)
 
-        # finally mark all tables with 'latest' flags enabled
+        # finally compile all tables with 'latest' flags enabled in 'revisionedTables'
         revisioned = self.mapper.tableTypes('m2m')
         o2os = self.mapper.tableTypes('o2o')
         self.state.set('revisionedTables', revisioned.extend(o2os))
       
 
-    def compileUsedFieldsDictionary(self, columnsUsed):
+    def compileUsedTablesList(self, columnsUsed):
         """
-            Takes list of columns supplied in fetch() arguments, and attempts to build a dictionary
-            mapping field to its table-key. Similar to the 'allMapperFields' dictionary.
+            Takes list of columns supplied in fetch() arguments, and attempts to build a list of 
+            table-keys.
             
-            :param columsnUsed: [list] list of all columns supplied in arguments
+            :param columnsUsed: [list] list of all columns supplied in arguments
         """
         tables = []
         mapperFields = self.state.get('allMapperFields')
@@ -107,16 +83,16 @@ class BackgroundOperations(models.QuerySet):
                 [tbl, col] = strings.seperateTableKeyFromField(field)
 
                 if isinstance(tbl, str) and isinstance(col, str):
-                    fullTableName = self.mapper.state.get(tbl)
+                    fullTableName = self.mapper.state.get('tables.' + tbl)
                     if fullTableName is not None and isinstance(fullTableName, str):
-                        tblCols = self.mapper.state.get('cols')
-                        if col in tblCols[tbl]:
+                        tblCols = self.mapper.state.get('cols.' + tbl)
+                        if tblCols is not None and isinstance(tblCols, list) and col in tblCols:
                             tables.append(tbl)
         
         return tables
 
 
-    def getValidTablesUsed(self):
+    def getColumnsUsed(self):
         """
             collects all table references in paramerters provided to fetch()
         """
@@ -126,8 +102,7 @@ class BackgroundOperations(models.QuerySet):
 
         joins = self.extractTablesFromJoinInputs()
 
-        columns = []
-        columns.extend(selectors)
+        columns = selectors
         columns.extend(list(conditions.keys()))
         columns.extend([ordr['tbl'] for ordr in ordering if 'tbl' in ordr])
         columns.extend(joins)
@@ -139,14 +114,20 @@ class BackgroundOperations(models.QuerySet):
         """
             Takes join argument's dictionary's inputs and extracts tables from it.
         """
-        joins = self.state.get('joins')
+        tables = []
 
+        joins = self.state.get('joins')
         array = []
         array.extend(list(joins.keys()))
         array.extend(list(joins.values()))
 
         for key in array:
-            pass
+            # 'left|[usus]_id': '[tawa]_watcher_id'
+            match = strings.seperateTableKeyFromJoinArgument(key)
+            if len(match) > 1 and match[1] is not None:
+                tables.append(match[1])
+
+        return tables
 
 
     def getCurrentTbl(self):

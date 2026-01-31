@@ -1,13 +1,12 @@
 from .background import BackgroundOperations
-
-from core.lib.state import State
-from core.helpers import strings, misc
+from core.helpers import misc
 
 from .conditions import Conditions
 from .selectors import Selectors
 from .params import Params
 from .order import Ordering
 from .limits import Limits
+from .joins import Joins
 
 class QuerySetManager(BackgroundOperations):
     """
@@ -37,14 +36,14 @@ class QuerySetManager(BackgroundOperations):
         self.setArgumentsInStates(selectors, conditions, ordering, limit, joins, translations)
         self.updateMapperAndState()
         
-        self.state.set('selectStatement', Selectors.parse(self.state, self.mapper, self.state.get('selectors')))
-        self.state.set('assembledConditions', Conditions.assemble(self.state, self.mapper, self.state.get('conditions')))
+        self.state.set('selectStatement', Selectors.parse(self.state, self.mapper))
+        self.state.set('assembledConditions', Conditions.assemble(self.state, self.mapper))
         self.state.set('parameters', Params.parse(self.state.get('assembledConditions')))
-        self.state.set('whereStatements', Conditions.parse(self.state, self.mapper, self.state.get('assembledConditions')))
-        self.state.set('orderByStatement', Ordering.parse(self.state, self.mapper, self.state.get('ordering')))
+        self.state.set('whereStatements', Conditions.parse(self.state, self.mapper))
+        self.state.set('orderByStatement', Ordering.parse(self.state, self.mapper))
         self.state.set('limitStatement', Limits.parse(self.state.get('limit')))
 
-        self.state.set('joinStatements', self.generateJoinStatements())
+        self.state.set('joinStatements', Joins.parse(self.state, self.mapper))
 
         query = f"""
             SELECT {self.state.get('selectStatement')}
