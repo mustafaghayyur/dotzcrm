@@ -48,3 +48,22 @@ class Selectors():
         
         return string
 
+
+    @staticmethod
+    def validate(state, selectors):
+        if not isinstance(selectors, list):
+            raise TypeError('Error 1020: selectors have to be list type.')
+        
+        if len(selectors) == 0:
+            raise TypeError('Error 1021: selectors missing.')
+        
+        if len(selectors) == 1 and selectors[0] == 'all':
+            dictionary = state.get('o2oMapperFields')
+            return list(dictionary.keys())
+        
+        array = []
+        for key in selectors:
+            if isinstance(key, str) and len(key) > 0:
+                array.append(key)
+            
+        return array

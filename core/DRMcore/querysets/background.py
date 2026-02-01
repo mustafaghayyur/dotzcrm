@@ -20,6 +20,16 @@ class BackgroundOperations(models.QuerySet):
         self.state.set('current', self.getCurrentTbl())
         
         self.startUpCode()
+
+        # get mapperTables and save them to QSM() state
+        mapperTables = self.mapper.state.get('mapperTables')
+        self.state.set('mapperTables', mapperTables)
+
+        # save the original mapper fields to state...
+        o2oMapperFields = self.mapper.generateO2OFields()
+        mapperFields = self.mapper.generateAllFields()
+        self.state.set('o2oMapperFields', mapperFields)
+        self.state.set('allMapperFields', mapperFields)
         
     
     def setArgumentsInStates(self, selectors, conditions, ordering, limit, joins, translations):
@@ -27,17 +37,17 @@ class BackgroundOperations(models.QuerySet):
             sets the provided arguments (if any) into state keys
         """
         if selectors is not None:
-            self.state.set('selectors', selectors)
+            self.select(selectors)
         if conditions is not None:
-            self.state.set('conditions', conditions)
+            self.where(conditions)
         if ordering is not None:
-            self.state.set('ordering', ordering)
+            self.orderby(ordering)
         if limit is not None:
-            self.state.set('limit', limit)
+            self.limit(limit)
         if joins is not None:
-            self.state.set('joins', joins)
+            self.join(joins)
         if translations is not None:
-            self.state.set('translations', translations)
+            self.translate(translations)
 
         
     def updateMapperAndState(self):
@@ -47,10 +57,6 @@ class BackgroundOperations(models.QuerySet):
         # gather all the columns 
         columnsUsed = self.getColumnsUsed()
 
-        # first we save the original mapper fields to state...
-        mapperFields = self.mapper.generateAllFields()
-        self.state.set('allMapperFields', mapperFields)
-
         # next we rebuild the mapper with collected tables...
         usedTables = self.compileUsedTablesList(columnsUsed)
         self.mapper.rebuildMapper(usedTables)
@@ -59,9 +65,8 @@ class BackgroundOperations(models.QuerySet):
         allFields = self.mapper.generateAllFields()
         self.state.set('allUsedFields', allFields)
 
-        # copy mapper's tablesUsed to our own state
-        tablesUsed = self.mapper.state.get('tablesUsed')
-        self.state.set('tablesUsed', tablesUsed)
+        # save the actual list of used tables (those being used in current query)
+        self.state.set('tablesUsed', usedTables)
 
         # finally compile all tables with 'latest' flags enabled in 'revisionedTables'
         revisioned = self.mapper.tableTypes('m2m')

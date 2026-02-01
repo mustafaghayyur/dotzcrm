@@ -113,7 +113,7 @@ class BaseOperations(Background):
         """
             Only One-to-One records-types are handled.
         """
-        o2oTables = self.tableTypes('o2o')  # fetch all o2o tables
+        o2oTables = self.tableTypes('o2o')  # fetch all o2o tables used
         return self.generateFieldsDict(o2oTables)
     
     def generateAllFields(self):

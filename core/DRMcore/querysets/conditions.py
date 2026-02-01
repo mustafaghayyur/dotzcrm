@@ -25,7 +25,7 @@ class Conditions():
             state.set('latestFlag', True)
             del mergedConditions[latestKey]
 
-        return Conditions.validate(mergedConditions)
+        return Conditions.validateAssembled(mergedConditions)
     
     @staticmethod 
     def parse(state, mapper):
@@ -88,7 +88,7 @@ class Conditions():
         
 
     @staticmethod
-    def validate(state, conditions):
+    def validateAssembled(state, conditions):
         """
             Checks that all condition items should be primitive data types or lists.
             None values for conditions are ommitted.
@@ -98,7 +98,7 @@ class Conditions():
         keysUsed = list(conditions.keys())  # copy keys of conditions to loop over
 
         for key in keysUsed:
-            if key in FieldsDict:
+            if key in usedFieldsDict:
                 if conditions[key] is None:
                     del conditions[key]
                     continue
@@ -127,3 +127,20 @@ class Conditions():
                 string += item
 
         return len(string)
+    
+    @staticmethod
+    def validate(conditions):
+        """
+            Validates the initial conditions dictionary.
+        """
+        if not isinstance(conditions, dict):
+            raise TypeError('Error 1030: conditions provided mut be in dict form.')
+        
+        for key, value in conditions.items():
+            if not isinstance(key, str):
+                raise TypeError("Error 1031: conditions' key not formed correctly.")
+            if not strings.isPrimitiveType(value):
+                if not isinstance(value, list):
+                    raise TypeError("Error 1032: conditions' velue must be primitive or list type.")
+            
+        return conditions

@@ -44,6 +44,8 @@ class CRUD(Background.CrudOperations):
             See documentation on how to form selectors, conditions, etc.
             Chaining enabled when no arguments are provided.
             @return: RawQuerySet | None
+
+            @todo: make read static
         """
         if selectors is None and conditions is None and orderBy is None and limit is None and joins is None and translations is None:
             return self.mtModel.objects  # chaining method initiated

@@ -62,21 +62,21 @@ class QuerySetManager(BackgroundOperations):
         """
             Sets the select from parameters.
         """
-        self.state.set('selectors', selectors)
+        self.state.set('selectors', Selectors.validate(self.state, selectors))
         return self
 
     def where(self, conditions):
         """
             Sets the conditions for the fetch chain.
         """
-        self.state.set('conditions', conditions)
+        self.state.set('conditions', Conditions.validate(conditions))
         return self
 
     def orderby(self, ordering):
         """
             Sets the ordering for the fetch chain.
         """
-        self.state.set('ordering', ordering)
+        self.state.set('ordering', Ordering.validate(ordering))
         return self
 
     def limit(self, limit):
