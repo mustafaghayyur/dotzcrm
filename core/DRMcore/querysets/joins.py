@@ -40,8 +40,8 @@ class Joins():
 
         # next we add any additional tables specified in the joins argument to Manager.fetch()
         for leftStmt, rightStmt in joinsDict.items():
-            left = strings.seperateTableKeyFromJoinArgument(leftStmt)
-            right = strings.seperateTableKeyFromJoinArgument(rightStmt)
+            left = strings.seperateTableKeyFromJoinArgument(leftStmt, state)
+            right = strings.seperateTableKeyFromJoinArgument(rightStmt, state)
 
             if not isinstance(left, list) or not isinstance(right, list) or len(left) < 2 or len(right) < 2:
                 raise KeyError('Error 1011: Join statements formed incorrectly.')

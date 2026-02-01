@@ -85,7 +85,7 @@ class BackgroundOperations(models.QuerySet):
         mapperFields = self.state.get('allMapperFields')
         for field in columnsUsed:
             if isinstance(field, str) and field not in mapperFields:
-                [tbl, col] = strings.seperateTableKeyFromField(field)
+                [tbl, col] = strings.seperateTableKeyFromField(field, self.state)
 
                 if isinstance(tbl, str) and isinstance(col, str):
                     fullTableName = self.mapper.state.get('tables.' + tbl)
@@ -127,8 +127,7 @@ class BackgroundOperations(models.QuerySet):
         array.extend(list(joins.values()))
 
         for key in array:
-            # 'left|[usus]_id': '[tawa]_watcher_id'
-            match = strings.seperateTableKeyFromJoinArgument(key)
+            match = strings.seperateTableKeyFromJoinArgument(key, self.state)
             if len(match) > 1 and match[1] is not None:
                 tables.append(match[1])
 

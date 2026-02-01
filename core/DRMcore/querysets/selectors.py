@@ -1,4 +1,5 @@
 from core.helpers import strings
+from core.dotzSettings import project
 
 class Selectors():
     """
@@ -17,37 +18,46 @@ class Selectors():
         string = ''
 
         for key in selectors:
-            if key in mapperFields:  # mapper fields belong to this mapper, need no special processing
-                string = Selectors.makeSelectString(state, mapper, mapperFields)
-
-            else:  #non-mapper field...
-                if key in allUsedFields:
-                    string = Selectors.makeSelectStringNonMapper(state, mapper, allUsedFields)
+            if key in allUsedFields:
+                if key in mapperFields:
+                    # mapper fields belong to this mapper, need no special processing
+                    string += Selectors.makeSelectString(state, mapper, key, mapperFields[key])
+                else:
+                    string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
 
         # chop off the last comma from returned string
         return string[:-1]
     
 
     @staticmethod
-    def makeSelectString(state, mapper, fieldsDict):
+    def makeSelectString(state, mapper, field, tbl, inMapper = True):
+        sz = project['mapper']['tblKeySize']
         current = state.get('current')
         string = ''
-        table = fieldsDict[key]  # fetches the value which is the tbl abbreviation for column
-                
-        if mapper.isCommonField(key, True):
-            # the table abbreviation is conjoined to key name. Separate:
-            key = key[1:]  # slice off first character
-            addition = ' AS ' + table + key
-            
-            if strings.fieldIdentifier(table, key) == current + '_id':
-                addition = ', ' + table + '.' + key + ' AS ' + table + key
-            
-            string += ' ' + table + '.' + key + addition + ','
-        else:
-            string += ' ' + table + '.' + key + ','
+        addition = ''
         
+        if inMapper:
+            if mapper.isCommonField(field, True):
+                # the table abbreviation is conjoined to key name. Separate:
+                field = field[sz:]
+                addition = f' AS {tbl}_{field}'
+                
+                if strings.fieldIdentifier(tbl, field) == current + '_id':
+                    # adds the current Model's key as 'id' and 'tblkey_id'
+                    addition = f', {tbl}.{field} AS {tbl}_{field}'
+                
+            string += f' {tbl}.{field} {addition},'
+        else:
+            if mapper.isCommonField(field, True):  # @todo: there is a bug here: common fields are those defined in current mapper, not the mapper of specific external field in question
+                # the table abbreviation is conjoined to key name. Separate:
+                field = field[sz:]  # slice off first character
+            
+            string += f' {tbl}.{field} AS {tbl}_{field},'        
         return string
 
+    @staticmethod
+    def makeSelectStringNonMapper(state, mapper, fieldsDict):
+        pass
 
     @staticmethod
     def validate(state, selectors):
