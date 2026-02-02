@@ -108,7 +108,6 @@ class BaseOperations(Background):
             return True
         return False
 
-
     def generateO2OFields(self):
         """
             Only One-to-One records-types are handled.
@@ -130,6 +129,7 @@ class BaseOperations(Background):
         :param tablesList: [list] provided tables list to process.
         """
         commonFields = self.commonFields()
+        mapperTables = self.state.get('mapperTables')
 
         dictionary = {}  # open returned dictionary
 
@@ -141,10 +141,11 @@ class BaseOperations(Background):
                 continue
 
             for field in fields:
+                fullName = field
                 if field in commonFields:
-                    fullName = f'{tbl}_{field}'
-                else:
-                    fullName = field
+                    fullName = f'[{tbl}]_{field}'
+                if tbl not in mapperTables:
+                    fullName = f'[{tbl}]_{field}'
 
                 dictionary[fullName] = tbl
 

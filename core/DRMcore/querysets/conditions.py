@@ -37,18 +37,24 @@ class Conditions():
         :param conditions: [dict] supplied to QuerySetManager()
         """
         conditions = state.get('assembledConditions')
-        o2oFields = state.get('allMapperFields')
+        mapperTables = state.get('mapperTables')
+        mapperFields = state.get('allMapperFields')
         array = []
 
         for key, value in conditions.items():
             length = Conditions.length(array)
-            statement = Conditions.makeWhereStatement(mapper, o2oFields[key], key, value, length)
+            [tbl, col] = strings.seperateTableKeyFromField(key, state)
+            if tbl is None and col is not None:
+                statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
+            if tbl is not None and col is not None:
+                key = f'{tbl}_{col}'
+                statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
             array.append(statement)
         
         return array
     
 
-    def makeWhereStatement(mapper, tbl, key, value, length):
+    def makeWhereStatement(state, mapper, tbl, key, value, length):
         """
             Generates a where statement element with given key/value pair.
         """
@@ -59,7 +65,7 @@ class Conditions():
         if length > 0:
             andPref = ' AND '
 
-        if mapper.isCommonField(key, True):
+        if mapper.isCommonField(key, True) or key not in state.get('allMapperFields'):
             keyDb = key[sz:]  # the table abbreviation is conjoined to key name.
 
         if keyDb in ['create_time', 'update_time', 'delete_time']:
@@ -81,7 +87,7 @@ class Conditions():
         if isinstance(value, list):
             return andPref + tbl + '.' + keyDb + ' IN %(' + key + ')s'
         
-        if isinstance(value, str):
+        if strings.isPrimitiveType(value):
             return andPref + tbl + '.' + keyDb + ' = %(' + key + ')s'
 
         return ''  # return has to be string
@@ -95,9 +101,9 @@ class Conditions():
         """
         o2oFieldsDict = state.get('allMapperFields')
         usedFieldsDict = state.get('allUsedFields')
-        keysUsed = list(conditions.keys())  # copy keys of conditions to loop over
+        conditionskeys = list(conditions.keys())  # copy keys of conditions to loop over
 
-        for key in keysUsed:
+        for key in conditionskeys:
             if key in usedFieldsDict:
                 if conditions[key] is None:
                     del conditions[key]

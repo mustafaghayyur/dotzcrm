@@ -23,7 +23,11 @@ class Selectors():
                     # mapper fields belong to this mapper, need no special processing
                     string += Selectors.makeSelectString(state, mapper, key, mapperFields[key])
                 else:
-                    string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
+                    [tbl, col] = strings.seperateTableKeyFromField(key, state)
+                    if tbl is not None and col is not None:
+                        string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
+                    else:
+                        raise KeyError('Error 1022: Some selector(s) are mal-formed. "[tbl]_field" format missing.')
 
         # chop off the last comma from returned string
         return string[:-1]

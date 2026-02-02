@@ -2,6 +2,7 @@ from django.db import models
 
 from core.lib.state import State
 from core.helpers import strings
+from core.dotzSettings import project
 
 class BackgroundOperations(models.QuerySet):
     """
@@ -143,3 +144,4 @@ class BackgroundOperations(models.QuerySet):
             if models[tbl] == self.model.__name__:
                 return tbl
         return None
+    

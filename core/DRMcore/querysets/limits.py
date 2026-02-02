@@ -19,7 +19,8 @@ class Limits():
 
         if isinstance(limit, list):
             if len(limit) > 2:
-                raise Exception('QuerySet Error: limit provided can be a list of maximum two items (limir, offset)')
+                raise Exception('Error 1040: limit provided can be a list of maximum two items (limit, offset)')
+            
             for itm in limit:
                 string += itm + ', '
 

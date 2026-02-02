@@ -26,12 +26,14 @@ class Joins():
         joinsDict = state.get('joins')
 
         # first we add Mapper tables.
-        for tbl in allTablesUsed:
+        for tbl in mapperTables:
+            if tbl not in allTablesUsed:
+                continue
+
             if tbl == mt or tbl == '':
                 continue
 
             tableName = mapper.tables(tbl)
-            
             joins.append(f' LEFT JOIN {tableName} AS {tbl} ON {mt}.id = {tbl}.{mtId}')
             tblsJoined.append(tbl)
 
