@@ -143,9 +143,9 @@ class BaseOperations(Background):
             for field in fields:
                 fullName = field
                 if field in commonFields:
-                    fullName = f'[{tbl}]_{field}'
+                    fullName = f'{tbl}_{field}'
                 if tbl not in mapperTables:
-                    fullName = f'[{tbl}]_{field}'
+                    fullName = f'{tbl}_{field}'
 
                 dictionary[fullName] = tbl
 

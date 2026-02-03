@@ -39,6 +39,7 @@ class Conditions():
         conditions = state.get('assembledConditions')
         mapperTables = state.get('mapperTables')
         mapperFields = state.get('allMapperFields')
+        usedFields = state.get('allUsedFields')
         array = []
 
         for key, value in conditions.items():
@@ -48,7 +49,7 @@ class Conditions():
                 statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
             if tbl is not None and col is not None:
                 key = f'{tbl}_{col}'
-                statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
+                statement = Conditions.makeWhereStatement(state, mapper, usedFields[key], key, value, length)
             array.append(statement)
         
         return array
@@ -65,8 +66,11 @@ class Conditions():
         if length > 0:
             andPref = ' AND '
 
-        if mapper.isCommonField(key, True) or key not in state.get('allMapperFields'):
+        if mapper.isCommonField(key, True):
             keyDb = key[sz:]  # the table abbreviation is conjoined to key name.
+
+        if key not in state.get('allMapperFields') and key in state.get('allUsedFields'):
+            keyDb = key[sz:]
 
         if keyDb in ['create_time', 'update_time', 'delete_time']:
             itemType = crud.determineDateArgumentType(value)

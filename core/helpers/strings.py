@@ -50,7 +50,7 @@ def seperateTableKeyFromField(field, state = None):
     
     if comiledRegex is None:
         # 'left|[usus]_id': '[tawa]_watcher_id'
-        comiledRegex = re.compile(r"\[(\w{4})\]_([\w]+)")
+        comiledRegex = re.compile(r"(\w{4})_([\w]+)")
         if state:
             state.set('regexDrmFieldKeys', comiledRegex)
 
@@ -73,7 +73,8 @@ def seperateTableKeyFromJoinArgument(definition, state = None):
         comiledRegex = state.get('regexDrmJoins')
     
     if comiledRegex is None:
-        comiledRegex = re.compile(r"(\w+\|)?\[(\w{4})\]_([\w]+)")
+        # 'left|[usus]_id': '[tawa]_watcher_id'
+        comiledRegex = re.compile(r"(\w+\|)?(\w{4})_([\w]+)")
         if state:
             state.set('regexDrmJoins', comiledRegex)
 
