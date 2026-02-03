@@ -11,7 +11,7 @@ class Users(O2ORecords.CRUD):
     """
     
     def __init__(self):
-        self.space = 'tasks'  # holds the name of current module/space
+        self.space = 'users'  # holds the name of current module/space
         self.mtModel = User  # holds the class reference for Master Table's model
 
         self.mapper = UsersMapper()

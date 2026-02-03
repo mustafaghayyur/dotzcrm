@@ -121,6 +121,7 @@ class Department(models.Model):
     """
         Departments, can be nested. 
         Master table for Department Mapper.
+        O2O Model
     """
     name = models.CharField(max_length=70)
     description = models.CharField(max_length=1000)

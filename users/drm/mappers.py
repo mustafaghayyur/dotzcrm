@@ -12,7 +12,7 @@ class UsersMapper(RelationshipMappers):
         """
         # tables belonging to this mapper
         tables = ['usus', 'uspr', 'usre', 'usse', 'used']
-        self.state.set('tablesUsed', tables)
+        self.state.set('mapperTables', tables)
         
         self.setValuesMapper(ValuesMapper)
 
@@ -37,6 +37,9 @@ class UsersMapper(RelationshipMappers):
         return {
             'usus': ['id'],
             'uspr': ['id', 'latest', 'user_id'],
+            'usre': ['id', 'latest'],
+            'usse': ['id'],
+            'used': ['id'],
         }
     
     def _m2mFields(self):
@@ -60,7 +63,7 @@ class UsersMapper(RelationshipMappers):
             },
             {
                 'tbl': 'uspr',
-                'col': 'update_time',
+                'col': 'create_time',
                 'sort': 'DESC',
             }
         ]
@@ -91,7 +94,7 @@ class DepartmentsMapper(RelationshipMappers):
         """
         # tables belonging to this mapper
         tables = ['dede', 'dehe', 'deus']
-        self.state.set('tablesUsed', tables)
+        self.state.set('mapperTables', tables)
         
 
     def _master(self):
@@ -114,10 +117,9 @@ class DepartmentsMapper(RelationshipMappers):
             Can carry any fields within a table to ignore in a certain operation
         """
         return {
-            'users_department': ['id', 'latest', 'department_id'],  # @todo: confirm mt_fk_id should be in the ignore list in our crud logic
-            'users_departmenthead': ['id', 'latest', 'department_id'],
-            'users_userreportsto': ['id', 'latest', 'department_id'],
-            'users_usertodepartment': ['id', 'latest', 'department_id'],
+            'dede': ['id', 'latest', 'department_id'],
+            'dehe': ['id', 'latest', 'department_id'],
+            'deus': ['id', 'latest', 'department_id'],
         }
 
     def _m2mFields(self):

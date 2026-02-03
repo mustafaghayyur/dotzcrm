@@ -1,10 +1,8 @@
-from core.DRMcore.querysets import QuerySet, child
+from core.DRMcore.querysets import master, child
 from .mappers import *
 
-"""
-    We are now removing MT/CT distinction from QuerySets.
-"""
-class TaskQuerySet(QuerySet.QuerySetManager):
+
+class TaskQuerySet(master.MTQuerySet):
     """
         TaskQuerySet allows for highly versatile Select queries to DB.
         For O2O, M2M and RLC data models (i.e. records).
@@ -13,7 +11,6 @@ class TaskQuerySet(QuerySet.QuerySetManager):
         self.state.set('app', 'tasks')
         self.mapper = TasksMapper()
 
-        
 
 class DetailQuerySet(child.CTQuerySet):
     tbl = 'tasks_details'

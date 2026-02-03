@@ -2,7 +2,6 @@ from core.DRMcore.crud import O2ORecords, RevisionlessChildren, M2MChildren
 
 from tasks.models import *
 from .mappers import TasksMapper
-from .mapper_values import ValuesMapper
 
 class Tasks(O2ORecords.CRUD):
     """
@@ -13,15 +12,13 @@ class Tasks(O2ORecords.CRUD):
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
-
         self.mapper = TasksMapper()
-        self.mapper.setValuesMapper(ValuesMapper)
         
         super().__init__()
 
     def fullRecord(self, task_id):
         """
-            fetch full records with all CT records marked 'latest'
+            fetch full O2O record with all CT records marked 'latest'
         """
         conditions = {
             # "assignee_id": None,
@@ -32,8 +29,8 @@ class Tasks(O2ORecords.CRUD):
             "tid": task_id,
         }
 
-        recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
-        selectors = list(recordKeys.keys())
+        recordKeysDict = self.mapper.generateO2OFields()  # returns a dictionary
+        selectors = list(recordKeysDict.keys())
 
         rawObj = self.read(selectors, conditions)
 

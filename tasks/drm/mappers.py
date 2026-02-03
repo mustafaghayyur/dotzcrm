@@ -35,14 +35,14 @@ class TasksMapper(RelationshipMappers):
             Can carry any fields within a table to ignore in CRUD.update() operation.
         """
         return {
-            'tasks_task': ['id'],
-            'tasks_details': ['id', 'latest', 'task_id'],
-            'tasks_deadline': ['id', 'latest', 'task_id'],
-            'tasks_status': ['id', 'latest', 'task_id'],
-            'tasks_visibility': ['id', 'latest', 'task_id'],
-            'tasks_assignment': ['id', 'latest', 'task_id'],
-            'tasks_watcher': ['id', 'latest', 'task_id'],
-            'tasks_comment': ['id', 'task_id'],
+            'tata': ['id'],
+            'tade': ['id', 'latest', 'task_id'],
+            'tadl': ['id', 'latest', 'task_id'],
+            'tast': ['id', 'latest', 'task_id'],
+            'tavi': ['id', 'latest', 'task_id'],
+            'taas': ['id', 'latest', 'task_id'],
+            'tawa': ['id', 'latest'],
+            'taco': ['id'], # @todo: confirm ids should be ignored on rlc & m2ms
         }
 
     def _m2mFields(self):
@@ -116,7 +116,7 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         # tables belonging to this mapper
         tables = ['wowo', 'wode', 'wous', 'wota']
-        self.state.set('tablesUsed', tables)
+        self.state.set('mapperTables', tables)
         
     
     def _master(self):
