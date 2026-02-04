@@ -139,6 +139,8 @@ class WorkSpaceDepartment(models.Model):
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
 
 class WorkSpaceUser(models.Model):
     """
@@ -148,6 +150,8 @@ class WorkSpaceUser(models.Model):
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
 
 class WorkSpaceTasks(models.Model):
     """
@@ -157,4 +161,5 @@ class WorkSpaceTasks(models.Model):
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 

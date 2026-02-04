@@ -12,15 +12,14 @@ class BackgroundOperations(models.QuerySet):
     mapper = None  # mapper object that handles schema decisions
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.state = State()
         self.state.set('latestFlag', False)
+        self.startUpCode()
         
         # set current table-key in state
         self.state.set('current', self.getCurrentTbl())
-        
-        self.startUpCode()
 
         # get mapperTables and save them to QSM() state
         mapperTables = self.mapper.state.get('mapperTables')

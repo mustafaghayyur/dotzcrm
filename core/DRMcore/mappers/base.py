@@ -10,12 +10,12 @@ class BaseOperations(Background):
         """
             Grabs the table's (or all tables in mapper)'s full name from schema.
         """
-        tablesUsed = self.state.get('tablesUsed')
-        if key is not None and key in tablesUsed:
-            return tablesUsed[key]
-
         info = {}
+        tablesUsed = self.state.get('tablesUsed')
         allTables = self.state.get('tables')
+        if key is not None and key in tablesUsed:
+            return allTables[key]
+
         for tbl in tablesUsed:
             info[tbl] = allTables[tbl]
         return self.returnValue(info, key)
@@ -24,14 +24,12 @@ class BaseOperations(Background):
         """
             Grabs the model value(s) from schema for mapper table(s).
         """
-        tablesUsed = self.state.get('tablesUsed')
-        if key is not None and key in tablesUsed:
-            allModels = self.state.get('models')
-            return allModels[key]
-        
         info = {}
         tablesUsed = self.state.get('tablesUsed')
         allModels = self.state.get('models')
+        if key is not None and key in tablesUsed:
+            return allModels[key]
+        
         for tbl in tablesUsed:
             info[tbl] = allModels[tbl]
         return self.returnValue(info, key)
@@ -40,14 +38,12 @@ class BaseOperations(Background):
         """
             Grabs the model-path value(s) from schema for mapper table(s).
         """
-        tablesUsed = self.state.get('tablesUsed')
-        if key is not None and key in tablesUsed:
-            allPaths = self.state.get('models')
-            return allPaths[key]
-        
         info = {}
         tablesUsed = self.state.get('tablesUsed')
         allPaths = self.state.get('paths')
+        if key is not None and key in tablesUsed:
+            return allPaths[key]
+        
         for tbl in tablesUsed:
             info[tbl] = allPaths[tbl]
         return self.returnValue(info, key)
@@ -56,14 +52,12 @@ class BaseOperations(Background):
         """
             Grabs the table-cols list(s) from schema for each table in mappers.
         """
-        tablesUsed = self.state.get('tablesUsed')
-        if name is not None and name in tablesUsed:
-            allColLists = self.state.get('models')
-            return allColLists[name]
-        
         info = {}
         tablesUsed = self.state.get('tablesUsed')
         allColLists = self.state.get('cols')
+        if name is not None and name in tablesUsed:
+            return allColLists[name]
+        
         for tbl in tablesUsed:
             info[tbl] = allColLists[tbl]
         return self.returnValue(info, name)

@@ -107,7 +107,7 @@ class EditLog(models.Model):
     """
         RLC Model
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_default=1)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     change_log = models.JSONField(null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)

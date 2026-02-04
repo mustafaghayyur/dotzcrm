@@ -52,14 +52,14 @@ class UserLevel(str, Enum):
     seniorMngr = 25
     sysadmin = 99
 
-class IsActive(bool, Enum):
-    true = True
-    false = False
+class IsActive(int, Enum):
+    true = 1
+    false = 0
 
-class IsStaff(bool, Enum):
-    true = True
-    false = False
+class IsStaff(int, Enum):
+    true = 1
+    false = 0
 
-class IsSuper(bool, Enum):
-    true = True
-    false = False
+class IsSuper(int, Enum):
+    true = 1
+    false = 0

@@ -36,11 +36,11 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     taas_latest = ChoiceField(**latestChoiceOpts)
     tavi_latest = ChoiceField(**latestChoiceOpts)
 
-    tade_task_id = ChoiceField(**intNullableOpts)
-    tadl_task_id = ChoiceField(**intNullableOpts)
-    tast_task_id = ChoiceField(**intNullableOpts)
-    taas_task_id = ChoiceField(**intNullableOpts)
-    tavi_task_id = ChoiceField(**intNullableOpts)
+    tade_task_id = IntegerField(**intNullableOpts)
+    tadl_task_id = IntegerField(**intNullableOpts)
+    tast_task_id = IntegerField(**intNullableOpts)
+    taas_task_id = IntegerField(**intNullableOpts)
+    tavi_task_id = IntegerField(**intNullableOpts)
 
     tata_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
