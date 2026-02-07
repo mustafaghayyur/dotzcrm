@@ -28,7 +28,7 @@ class TasksMapper(RelationshipMappers):
             These keys tend to be found in every table and cause problems 
             if not handled separately
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'task_id']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
@@ -131,7 +131,7 @@ class WorkSpacesMapper(RelationshipMappers):
             These keys tend to be found in every table and cause problems 
             if not handled separately
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'workspace_id']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """

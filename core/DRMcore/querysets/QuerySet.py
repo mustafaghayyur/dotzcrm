@@ -44,7 +44,7 @@ class QuerySetManager(BackgroundOperations):
         self.state.set('limitStatement', Limits.parse(self.state, self.mapper))
 
         self.state.set('joinStatements', Joins.parse(self.state, self.mapper))
-        misc.log(self.state.get('allMapperFields'), 'inspection of allMapperFields...')
+        # misc.log(self.state, 'inspection of self.state...')
 
         query = f"""
             SELECT {self.state.get('selectStatement')}

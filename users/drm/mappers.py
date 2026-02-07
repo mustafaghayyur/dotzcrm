@@ -28,7 +28,7 @@ class UsersMapper(RelationshipMappers):
             These keys tend to be found in every table and cause problems 
             if not handled separately
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'user_id']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
@@ -110,7 +110,7 @@ class DepartmentsMapper(RelationshipMappers):
             These keys tend to be found in every table and cause problems 
             if not handled separately
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'department_id']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """

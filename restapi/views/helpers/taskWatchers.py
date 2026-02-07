@@ -18,14 +18,14 @@ class WatchersMethods():
         if crud.isValidId({'id': taskId}, 'id'):
             dictinary = {
                 'task_id': taskId,
-                'watcher_id': 1 #request.user.id @todo: remove 1 and add user id.
+                'watcher_id': request.user.id #@todo: remove 1 and add user id.
             }
             result = Watchers().create(dictinary)
             if result:
                 return Response(crud.generateResponse({'wid': result.id}), status=status.HTTP_201_CREATED) # @todo: can 201 responses carry payloads?
             return Response(crud.generateError('Created record could not be fetched.'), status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(crud.generateError(serializer.errors, 'Request could not be processed due to validation errors.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateError(None, 'Request could not be processed due to invalid task ID.'), status=status.HTTP_400_BAD_REQUEST)
     
     @staticmethod
     def edit(request, format=None):

@@ -49,7 +49,7 @@ class Departments(M2MChildren.CRUD):
 
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.pk[0])
+        cols = self.mapper.m2mFields(self.tbl)
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super().__init__()
@@ -66,7 +66,7 @@ class Hierarchy(M2MChildren.CRUD):
         
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.pk[0])
+        cols = self.mapper.m2mFields(self.tbl)
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super().__init__()

@@ -21,12 +21,11 @@ class Tasks(O2ORecords.CRUD):
             fetch full O2O record with all CT records marked 'latest'
         """
         conditions = {
-            # "assignee_id": None,
-            "update_time": None,
+            "tata_update_time": None,
             "latest": self.mapper.values.latest('latest'),
             "visibility": None,
             "status": None,
-            "tid": task_id,
+            "tata_id": task_id,
         }
 
         recordKeysDict = self.mapper.generateO2OFields()  # returns a dictionary
@@ -48,8 +47,8 @@ class Comments(RevisionlessChildren.CRUD):
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
-        self.tbl = 'c'
-        self.pk = 'cid'
+        self.tbl = 'taco'
+        self.pk = 'taco_id'
         self.mapper = TasksMapper()
         
         self.setMasterCrudClass(Tasks)
@@ -82,13 +81,13 @@ class Watchers(M2MChildren.CRUD):
     """
 
     def __init__(self):
-        self.pk = 'wid'  # set table_abbrv for use in queries.
+        self.pk = 'tawa_id'  # set table_abbrv for use in queries.
         self.space = 'tasks'  # holds the name of current module/space
-        self.tbl = 'w'
+        self.tbl = 'tawa'
         
         self.mapper = TasksMapper()
 
-        cols = self.mapper.m2mFields(self.pk[0])
+        cols = self.mapper.m2mFields(self.tbl)
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super().__init__()

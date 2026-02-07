@@ -6,11 +6,11 @@ export default function () {
     const editTaskSaveBtn = document.getElementById('taskEditFormSaveBtn');
     editTaskSaveBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const tid = document.querySelector('#taskEditForm input[name="tid"]');
-        if (!(tid instanceof HTMLElement)) {
-            throw Error('Cannot find `tid` field, unable to perform edit/create operation.');
+        const tata_id = document.querySelector('#taskEditForm input[name="tata_id"]');
+        if (!(tata_id instanceof HTMLElement)) {
+            throw Error('Cannot find `tata_id` field, unable to perform edit/create operation.');
         }
-        if(tid.value){
+        if(tata_id.value){
             UpdateTask('taskEditForm');
         }else{
             CreateTask('taskEditForm');

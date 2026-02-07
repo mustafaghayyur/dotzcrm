@@ -1,5 +1,6 @@
 from . import Background
 from core.helpers import crud
+from ...dotzSettings import project
 
 """
     Generic CRUD Operations that can be used through out the system.
@@ -11,6 +12,7 @@ class CRUD(Background.CrudOperations):
 
     def __init__(self):
         super().__init__()
+        self.abrvSize = project['mapper']['tblKeySize'] - 1
 
     def create(self, dictionary):
         """
@@ -31,7 +33,7 @@ class CRUD(Background.CrudOperations):
             if pk == self.mapper.master('abbreviation') + 'id':
                 continue
 
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[:self.abrvSize]  # table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
 
             self.createChildTable(t['model'], tbl, t['table'], t['cols'])
@@ -73,7 +75,7 @@ class CRUD(Background.CrudOperations):
 
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
-            tbl = pk[0]  # child table abbreviation
+            tbl = pk[:self.abrvSize]  # child table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
 
             if pk == mId:
@@ -106,7 +108,7 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         for pk in self.idCols:
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[:self.abrvSize]  # table abbreviation
 
             if pk == mtId:
                 continue  # skip, we delete master table at the end.
@@ -131,7 +133,7 @@ class CRUD(Background.CrudOperations):
         pass
 
         for pk in self.idCols:
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[:self.abrvSize]  # table abbreviation
 
             if pk == self.mapper.master('abbreviation') + 'id':
                 continue  # can't prune MT duplicates...

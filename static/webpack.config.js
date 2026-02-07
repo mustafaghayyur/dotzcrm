@@ -6,6 +6,8 @@ const path = require('path');
  */
 const appConfig = {
     mode: 'development', // on prod change to: 'production',
+    devtool: 'source-map', // Generate source maps for debugging
+    cache: false, // Disable webpack cache to pick up file changes immediately
     entry: {
         // Defines two separate entry points and their output names
         'users-bundle': path.resolve(__dirname, './users/js/main.js'),
@@ -43,6 +45,8 @@ module.exports = (env = {}) => {
     if (entry === 'users') {
         return {
             mode: 'development',
+            devtool: 'source-map',
+            cache: false,
             entry: path.resolve(__dirname, './users/js/main.js'),
             output: {
                 filename: 'users-bundle.js',
@@ -61,6 +65,8 @@ module.exports = (env = {}) => {
     if (entry === 'tasks') {
         return {
             mode: 'development',
+            devtool: 'source-map',
+            cache: false,
             entry: path.resolve(__dirname, './tasks/js/main.js'),
             output: {
                 filename: 'tasks-bundle.js',
