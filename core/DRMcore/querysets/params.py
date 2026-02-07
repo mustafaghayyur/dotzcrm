@@ -1,4 +1,4 @@
-
+from core.helpers import misc
 
 class Params():
     """
@@ -8,8 +8,9 @@ class Params():
     """
 
     @staticmethod 
-    def parse(state, mapper, conditions):
+    def parse(state, mapper):
         params = {}
+        conditions = state.get('assembledConditions', {})
 
         for key, item in conditions.items():
             if isinstance(item, list):

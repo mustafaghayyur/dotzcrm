@@ -1,5 +1,6 @@
 from core.dotzSettings import project
 from .background import Background
+from ...helpers import misc
 
 class BaseOperations(Background):
     """
@@ -114,24 +115,27 @@ class BaseOperations(Background):
             M2M, O2O and RLC tables are included.
         """
         tables = self.tables()  # fetch all tablesUsed
-        return self.generateFieldsDict(tables)
+        tablesList = list(tables.keys())
+        return self.generateFieldsDict(tablesList)
 
     def generateFieldsDict(self, tablesList):
         """
-        Generates a dictionary holding all 'FieldNames' => 'table-key' pairs.
+            Generates a dictionary holding all 'FieldNames' => 'table-key' pairs.
 
-        :param tablesList: [list] provided tables list to process.
+            :param tablesList: [list] provided tables list to process.
         """
+        if not isinstance(tablesList, list):
+            raise Exception('Error 1061: Mapper.generateFieldsDict() requires a list of table keys.')
+        
         commonFields = self.commonFields()
         mapperTables = self.state.get('mapperTables')
-
         dictionary = {}  # open returned dictionary
 
         for tbl in tablesList:
-            tblName = self.tables(tbl)
-            fields = self.tableFields(tblName)
+            fields = self.tableFields(tbl)
 
             if not isinstance(fields, list):
+                misc.log(fields, 'ERROR: fields is not a list')
                 continue
 
             for field in fields:

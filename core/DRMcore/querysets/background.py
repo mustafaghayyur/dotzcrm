@@ -1,7 +1,7 @@
 from django.db import models
 
 from core.lib.state import State
-from core.helpers import strings
+from core.helpers import strings, misc
 from core.dotzSettings import project
 
 class BackgroundOperations(models.QuerySet):
@@ -28,7 +28,7 @@ class BackgroundOperations(models.QuerySet):
         # save the original mapper fields to state...
         o2oMapperFields = self.mapper.generateO2OFields()
         mapperFields = self.mapper.generateAllFields()
-        self.state.set('o2oMapperFields', mapperFields)
+        self.state.set('o2oMapperFields', o2oMapperFields)
         self.state.set('allMapperFields', mapperFields)
         
     
@@ -71,7 +71,8 @@ class BackgroundOperations(models.QuerySet):
         # finally compile all tables with 'latest' flags enabled in 'revisionedTables'
         revisioned = self.mapper.tableTypes('m2m')
         o2os = self.mapper.tableTypes('o2o')
-        self.state.set('revisionedTables', revisioned.extend(o2os))
+        revisioned.extend(o2os)
+        self.state.set('revisionedTables', revisioned)
       
 
     def compileUsedTablesList(self, columnsUsed):
@@ -84,6 +85,9 @@ class BackgroundOperations(models.QuerySet):
         tables = []
         mapperFields = self.state.get('allMapperFields')
         for field in columnsUsed:
+            if isinstance(field, str) and field in mapperFields:
+                tables.append(mapperFields[field])
+                continue
             if isinstance(field, str) and field not in mapperFields:
                 [tbl, col] = strings.seperateTableKeyFromField(field, self.state)
 
@@ -94,16 +98,16 @@ class BackgroundOperations(models.QuerySet):
                         if tblCols is not None and isinstance(tblCols, list) and col in tblCols:
                             tables.append(tbl)
         
-        return tables
+        return list(set(tables))  # only return uniques
 
 
     def getColumnsUsed(self):
         """
             collects all table references in paramerters provided to fetch()
         """
-        conditions = self.state.get('conditions')
-        selectors = self.state.get('selectors')
-        ordering = self.state.get('ordering')
+        conditions = self.state.get('conditions', {})
+        selectors = self.state.get('selectors', [])
+        ordering = self.state.get('ordering', [])
 
         joins = self.extractTablesFromJoinInputs()
 
@@ -120,8 +124,8 @@ class BackgroundOperations(models.QuerySet):
             Takes join argument's dictionary's inputs and extracts tables from it.
         """
         tables = []
-
-        joins = self.state.get('joins')
+        joins = self.state.get('joins', {})
+        
         array = []
         array.extend(list(joins.keys()))
         array.extend(list(joins.values()))

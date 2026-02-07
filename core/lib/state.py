@@ -5,7 +5,10 @@ class State:
     """
 
     # state container [dict]
-    state = {}
+    state = None
+
+    def __init__(self):
+        self.state = {}
 
     def set(self, keyPath, value):
         """
@@ -53,11 +56,12 @@ class State:
             return
 
 
-    def get(self, keyPath):
+    def get(self, keyPath, default = None):
         """
             Get a key from state dictionary.
 
             :param keyPath: [str] should be in the form of: 'key1.childNodeKey2', mapping out a path to the specific key you wish to retrieve.
+            :param default: [*] allows for custom default return value setting upon key match failiure.
         """
         path = self.validateKey(keyPath)
 
@@ -67,7 +71,7 @@ class State:
                 value = value[key]
                 continue
             else:
-                return None
+                return default
             
         return value
     

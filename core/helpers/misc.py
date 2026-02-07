@@ -85,7 +85,7 @@ def getInfo(name = None, type = 'class', getDunders = True):
 
 
 
-def mergeDictionaries(self, leftDictionary, rightDictionary):
+def mergeDictionaries(leftDictionary, rightDictionary):
         """
             Simply merges left dictionary with right dictionary.
             The right dictionary over-writes the left.
@@ -96,4 +96,4 @@ def mergeDictionaries(self, leftDictionary, rightDictionary):
             if isinstance(meerged, dict):
                 return meerged
             
-        return None
+        return {}

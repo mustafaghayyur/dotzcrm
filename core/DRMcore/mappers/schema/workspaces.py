@@ -24,7 +24,8 @@ workspaces = {
 			'create_time',
 			'delete_time',
 			'department_id',
-			'workspace_id'
+			'workspace_id',
+            'latest'
         ],
     },
     'wous': {
@@ -37,7 +38,8 @@ workspaces = {
 			'create_time',
 			'delete_time',
 			'user_id',
-			'workspace_id'
+			'workspace_id',
+            'latest'
         ],
     },
     'wota': {
@@ -50,7 +52,8 @@ workspaces = {
 			'create_time',
 			'delete_time',
 			'task_id',
-			'workspace_id'
+			'workspace_id',
+            'latest'
         ],
     },
 

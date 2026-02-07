@@ -35,26 +35,26 @@ class QuerySetManager(BackgroundOperations):
         """
         self.setArgumentsInStates(selectors, conditions, ordering, limit, joins, translations)
         self.updateMapperAndState()
-        
+
         self.state.set('selectStatement', Selectors.parse(self.state, self.mapper))
         self.state.set('assembledConditions', Conditions.assemble(self.state, self.mapper))
-        self.state.set('parameters', Params.parse(self.state.get('assembledConditions')))
+        self.state.set('parameters', Params.parse(self.state, self.mapper))
         self.state.set('whereStatements', Conditions.parse(self.state, self.mapper))
         self.state.set('orderByStatement', Ordering.parse(self.state, self.mapper))
-        self.state.set('limitStatement', Limits.parse(self.state.get('limit')))
+        self.state.set('limitStatement', Limits.parse(self.state, self.mapper))
 
         self.state.set('joinStatements', Joins.parse(self.state, self.mapper))
+        misc.log(self.state.get('allMapperFields'), 'inspection of allMapperFields...')
 
         query = f"""
             SELECT {self.state.get('selectStatement')}
-            FROM {self.mapper.master('table')} AS mtAbbreviation
+            FROM {self.mapper.master('table')} AS {self.mapper.master('abbreviation')}
             {self.state.get('joinStatements')}
             WHERE {self.state.get('whereStatements')}
             ORDER BY {self.state.get('orderByStatement')} LIMIT {self.state.get('limitStatement')};
             """
 
-        misc.log(query, 'SEARCH QUERY STRING')
-        misc.log(self.state.get('parameters'), 'SEARCH PARAMS')
+        misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
         return self.raw(query, self.state.get('parameters'), self.state.get('translations'))
 
 
@@ -90,7 +90,7 @@ class QuerySetManager(BackgroundOperations):
         """
             Sets the joins for the fetch chain.
         """
-        self.state.set('joins', joins)
+        self.state.set('joins', Joins.validate(joins))
         return self
     
     def translate(self, translations):

@@ -7,7 +7,7 @@ class Limits():
     """
 
     @staticmethod 
-    def parse(mapper, limit):
+    def parse(state, mapper):
         """
             Parses Limit argument for SELECT Query.
             Note: 'all' = 1 milllion max limit.
@@ -16,6 +16,7 @@ class Limits():
             :param limit: [string|int|list] defines how many to retrieve.
         """
         string = ''
+        limit = state.get('limit')
 
         if isinstance(limit, list):
             if len(limit) > 2:

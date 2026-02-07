@@ -1,4 +1,4 @@
-from core.helpers import strings
+from core.helpers import strings, misc
 
 class Joins():
     """
@@ -20,10 +20,10 @@ class Joins():
         joins = []
         tblsJoined = []  # bucket to keep track of added tables
         latestKey = mapper.column('latest')
-        mapperTables = state.get('mapperTables')
-        allTablesUsed = state.get('tablesUsed')
-        revisionedTables = state.get('revisionedTables')
-        joinsDict = state.get('joins')
+        mapperTables = state.get('mapperTables', [])
+        allTablesUsed = state.get('tablesUsed', [])
+        revisionedTables = state.get('revisionedTables', [])
+        joinsDict = state.get('joins', {})
 
         # first we add Mapper tables.
         for tbl in mapperTables:
@@ -62,5 +62,11 @@ class Joins():
 
         return strings.concatenate(joins)
     
-    
+    @staticmethod
+    def validate(joins):
+        if joins is None:
+            return {}
+        
+        if not isinstance(joins, dict):
+            raise TypeError('Error 1012: Joins argument supplied, buts be a valid dictionary.')
     

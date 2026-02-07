@@ -14,14 +14,11 @@ class CommentMethods():
         """
             Create single comment record (with all it's related child-tables).
         """
-        misc.log(request.data, 'Peaking into comment dictionary')
-
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             dictionary = serializer.validated_data
             dictionary['creator_user_id'] = 1 # @todo: replace with current user id
             result = Comments().create(dictionary)
-            misc.log(result, 'Peaking into comment create result')
             if result:
                 try:
                     record = Comments().read({'cid': result.id})
@@ -44,7 +41,6 @@ class CommentMethods():
             dictionary['creator_user_id'] = 1  # @todo: replace with current user id
             result = Comments().update(dictionary)
             if result:
-                misc.log(result, 'Peaking into comment update result')
                 try:
                     record = Comments().read({'cid': result.id})
                     retrievedSerialized = CommentSerializerGeneric(record[0])

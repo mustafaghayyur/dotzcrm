@@ -1,4 +1,5 @@
 from ...lib.state import State
+from ...helpers import misc
 from .modifiers import Manipulate
 from .schema.main import schema
 from .ValuesMapper import ValuesMapperGeneric
@@ -11,8 +12,7 @@ class Background():
     values = None  # holds the ValuesMapper instance
 
     def __init__(self):
-        if self.state is None:
-            self.state = State()
+        self.state = State()
 
         # extract all values from schema needed by mapper.
         dictionary = Manipulate.makeStateLists(schema)
@@ -43,7 +43,7 @@ class Background():
         """        
         array = []
         tables = self.state.get('tables')
-        
+
         if isinstance(additions, list):
             for tbl in additions:
                 if tbl in tables:

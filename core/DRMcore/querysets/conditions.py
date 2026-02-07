@@ -25,7 +25,8 @@ class Conditions():
             state.set('latestFlag', True)
             del mergedConditions[latestKey]
 
-        return Conditions.validateAssembled(mergedConditions)
+        return Conditions.validateAssembled(state, mergedConditions)
+        
     
     @staticmethod 
     def parse(state, mapper):
@@ -52,7 +53,7 @@ class Conditions():
                 statement = Conditions.makeWhereStatement(state, mapper, usedFields[key], key, value, length)
             array.append(statement)
         
-        return array
+        return strings.concatenate(array)
     
 
     def makeWhereStatement(state, mapper, tbl, key, value, length):
@@ -61,7 +62,7 @@ class Conditions():
         """
         andPref = ''
         keyDb = key  # keyDb refers to the column name recognized by the database
-        sz = project.mapper['tblKeySize']
+        sz = project['mapper']['tblKeySize']
 
         if length > 0:
             andPref = ' AND '
@@ -103,7 +104,6 @@ class Conditions():
             Checks that all condition items should be primitive data types or lists.
             None values for conditions are ommitted.
         """
-        o2oFieldsDict = state.get('allMapperFields')
         usedFieldsDict = state.get('allUsedFields')
         conditionskeys = list(conditions.keys())  # copy keys of conditions to loop over
 
