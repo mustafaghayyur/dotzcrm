@@ -17,7 +17,7 @@ class CommentMethods():
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             dictionary = serializer.validated_data
-            dictionary['creator_user_id'] = 1 # @todo: replace with current user id
+            dictionary['creator_user_id'] = request.user.id
             result = Comments().create(dictionary)
             if result:
                 try:
@@ -38,7 +38,7 @@ class CommentMethods():
         serializer = CommentSerializerGeneric(data=request.data)
         if serializer.is_valid():
             dictionary = serializer.validated_data
-            dictionary['creator_user_id'] = 1  # @todo: replace with current user id
+            dictionary['creator_user_id'] = request.user.id
             result = Comments().update(dictionary)
             if result:
                 try:
@@ -68,7 +68,7 @@ class CommentMethods():
             Retrieve single comment record (with all it's related child-tables).
         """
         if crud.isValidId({'id': id}, 'id'):
-            record = Comments().read(['all'], {'tid': id, 'tdelete_time': 'is NULL'})
+            record = Comments().read(['all'], {'task_id': id, 'delete_time': 'is NULL'})
             if record:
                 serialized = CommentSerializerGeneric(record[0])
                 return Response(crud.generateResponse(serialized.data))

@@ -22,7 +22,7 @@ class TasksEditForm(Forms):
             ['id', 'description'], 
             {
                 'visibility': 'workspaces', 
-                'kid': self.getParam('workspace'),
+                'wowo_id': self.getParam('workspace'),
             }
         )
 

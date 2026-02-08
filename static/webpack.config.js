@@ -1,13 +1,9 @@
 const path = require('path');
 
 /**
- * Configs for front-end CRM + PM UI/UX
- * Future node.js configurations should be defined in a seperate variable
+ * Common configurations set in appConfig.
  */
 const appConfig = {
-    mode: 'development', // on prod change to: 'production',
-    devtool: 'source-map', // Generate source maps for debugging
-    cache: false, // Disable webpack cache to pick up file changes immediately
     entry: {
         // Defines two separate entry points and their output names
         'users-bundle': path.resolve(__dirname, './users/js/main.js'),
@@ -15,8 +11,13 @@ const appConfig = {
     },
     output: {
         filename: '[name].js', // The output ES5 bundle, [name] is replaced by the entry key
+        chunkFilename: '[name].[contenthash].js', 
         path: path.resolve(__dirname, 'dist'),
+        //publicPath: '/', @todo: lookinto publicpath meaning
     },
+    mode: 'development', // on prod change to: 'production',
+    devtool: 'source-map', // Generate source maps for debugging
+    cache: false, // Disable webpack cache to pick up file changes immediately
     module: {
         rules: [
             {
@@ -38,47 +39,36 @@ const appConfig = {
     },
 };
 
-// Export a function so we can select a single entry with `--env entry=core|tasks`
+/**
+ * Webpack export definitions
+ * Export a function so we can select a single entry 
+ * with `--env entry=core|tasks`\
+ */
 module.exports = (env = {}) => {
     const entry = env.entry;
-
     if (entry === 'users') {
         return {
-            mode: 'development',
-            devtool: 'source-map',
-            cache: false,
-            entry: path.resolve(__dirname, './users/js/main.js'),
-            output: {
-                filename: 'users-bundle.js',
-                path: path.resolve(__dirname, 'dist'),
-            },
+            mode: appConfig.mode,
+            devtool: appConfig.devtool,
+            cache: appConfig.cache,
+            entry: appConfig.entry['users-bundle'],
+            output: appConfig.output,
             module: appConfig.module,
             stats: appConfig.stats,
-            resolve: {
-                fallback: {
-                "path": require.resolve("path-browserify")
-                }
-            },
+            resolve: appConfig.resolve,
         };
     }
 
     if (entry === 'tasks') {
         return {
-            mode: 'development',
-            devtool: 'source-map',
-            cache: false,
-            entry: path.resolve(__dirname, './tasks/js/main.js'),
-            output: {
-                filename: 'tasks-bundle.js',
-                path: path.resolve(__dirname, 'dist'),
-            },
+            mode: appConfig.mode,
+            devtool: appConfig.devtool,
+            cache: appConfig.cache,
+            entry: appConfig.entry['tasks-bundle'],
+            output: appConfig.output,
             module: appConfig.module,
             stats: appConfig.stats,
-            resolve: {
-                fallback: {
-                "path": require.resolve("path-browserify")
-                }
-            },
+            resolve: appConfig.resolve,
         };
     }
 

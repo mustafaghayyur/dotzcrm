@@ -61,8 +61,10 @@ export default function (resultSet, containerId) {
             (data, id) => {
                 if ($A.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
+                    unwatchbtn.classList.add('d-none');
                 } else {
                     unwatchbtn.classList.remove('d-none');
+                    watchbtn.classList.add('d-none');
                 }
             }
         );

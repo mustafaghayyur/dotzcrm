@@ -43,7 +43,7 @@ class WatchersMethods():
         if crud.isValidId({'id': taskId}, 'id'):
             dictinary = {
                 'task_id': taskId,
-                'watcher_id': 1 #request.user.id @todo: remove 1 and add user id.
+                'watcher_id': request.user.id
             }
             Watchers().delete(dictinary)
             # @todo: confirm if crud is showing deletion
@@ -60,7 +60,7 @@ class WatchersMethods():
         if crud.isValidId({'id': taskId}, 'id'):
             dictinary = {
                 'task_id': taskId,
-                'watcher_id': 1 #request.user.id @todo: remove 1 and add user id.
+                'watcher_id': request.user.id 
             }
             record = Watchers().read(dictinary)
             if record:

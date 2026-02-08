@@ -54,7 +54,9 @@ class QuerySetManager(BackgroundOperations):
             ORDER BY {self.state.get('orderByStatement')} LIMIT {self.state.get('limitStatement')};
             """
 
-        misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
+        if self.state.get('translations.debug') == True:
+            misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
+
         return self.raw(query, self.state.get('parameters'), self.state.get('translations'))
 
 
