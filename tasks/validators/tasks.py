@@ -10,12 +10,12 @@ class TaskO2ORecordSerializerGeneric(Serializer):
         All fields must be non-mandatory.
     """
     id = IntegerField(**intNullableOpts)  # id = tid; but different places require different terms.
-    tid = IntegerField(**intNullableOpts)
-    did = IntegerField(**intNullableOpts)
-    lid = IntegerField(**intNullableOpts)
-    sid = IntegerField(**intNullableOpts)
-    aid = IntegerField(**intNullableOpts)
-    vid = IntegerField(**intNullableOpts)
+    tata_id = IntegerField(**intNullableOpts)
+    tade_id = IntegerField(**intNullableOpts)
+    tadl_id = IntegerField(**intNullableOpts)
+    tast_id = IntegerField(**intNullableOpts)
+    taas_id = IntegerField(**intNullableOpts)
+    tavi_id = IntegerField(**intNullableOpts)
 
     description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
     details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
@@ -30,27 +30,33 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     assignor_id = IntegerField(**intNullableOpts)
     assignee_id = IntegerField(**intNullableOpts)
 
-    dlatest = ChoiceField(**latestChoiceOpts)
-    llatest = ChoiceField(**latestChoiceOpts)
-    slatest = ChoiceField(**latestChoiceOpts)
-    alatest = ChoiceField(**latestChoiceOpts)
-    vlatest = ChoiceField(**latestChoiceOpts)
+    tade_latest = ChoiceField(**latestChoiceOpts)
+    tadl_latest = ChoiceField(**latestChoiceOpts)
+    tast_latest = ChoiceField(**latestChoiceOpts)
+    taas_latest = ChoiceField(**latestChoiceOpts)
+    tavi_latest = ChoiceField(**latestChoiceOpts)
 
-    tcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    dcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    lcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    screate_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    acreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    vcreate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tade_task_id = IntegerField(**intNullableOpts)
+    tadl_task_id = IntegerField(**intNullableOpts)
+    tast_task_id = IntegerField(**intNullableOpts)
+    taas_task_id = IntegerField(**intNullableOpts)
+    tavi_task_id = IntegerField(**intNullableOpts)
 
-    tdelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    ddelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    ldelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    sdelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    adelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    vdelete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tata_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tade_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tadl_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tast_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    taas_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tavi_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
-    tupdate_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tata_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tade_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tadl_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tast_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    taas_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tavi_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+
+    tata_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     """
     def validate(self, data):

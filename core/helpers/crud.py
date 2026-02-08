@@ -8,9 +8,9 @@ def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     tableName = mapper.tables(tbl)
     module = importlib.import_module(mapper.modelPaths(tbl))
     return {
-        'model': getattr(module, mapper.models(tbl)),  # instantiate model class using importlib
+        'model': getattr(module, mapper.models(tbl)),  # retrieve model class using importlib
         'table': tableName,  # identify table
-        'cols': mapper.tableFields(tableName),  # grab column names
+        'cols': mapper.tableFields(tbl),  # grab column names
     }
     
 def isValidId(dictionary, idKey):

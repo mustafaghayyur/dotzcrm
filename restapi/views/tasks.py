@@ -32,9 +32,9 @@ def task_list(request, type, format=None):
     """
         List all tasks for type of request.
     """
-    selectors = ['tid', 'sid', 'description', 'tupdate_time', 'status']
+    selectors = ['tata_id', 'tast_id', 'description', 'tata_update_time', 'status']
     conditions = {
-        'tdelete_time': 'is Null',
+        'tata_delete_time': 'is Null',
         'assignee_id': request.user.id
     }
 
@@ -127,7 +127,6 @@ def comments_list(request, taskId, format=None):
         pgntn = pagination.assembleParamsForView(request.query_params)
         # limit=[str(pgntn['offset']), str(pgntn['page_size']
         records = Comments().read(conditions)
-        misc.log(records, 'hello from comment lists')
         serialized = CommentSerializerGeneric(records, many=True)
         hasMore = pagination.determineHasMore(records, pgntn['page_size'])
         return Response(crud.generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))

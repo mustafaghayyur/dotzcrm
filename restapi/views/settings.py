@@ -64,9 +64,7 @@ def retrieveAppSettings(request):
         
         return Response(crud.generateResponse(userSettings))
         
-    except (InvalidToken, Exception) as e:
-        misc.log(crud.generateError(e, 'There seems to be an issue with the token check.'))
-        
+    except (InvalidToken, Exception) as e:        
         # User is not authenticated or token is invalid - return anonymous settings
         return Response(crud.generateResponse({
             'messages': "Authentication failed. If this seems to be an error, please contact support.",

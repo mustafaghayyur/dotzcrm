@@ -37,7 +37,7 @@ class CRUD(Background.CrudOperations):
             See documentation on definitions formulation.
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
-            raise Exception(f'Record fetch request for Comments failed. Improper definitions for query, in {self.space}.CRUD.read()')
+            raise Exception(f'Fetch request for {self.firstCol} and {self.secondCol} failed. Improper definitions for query, in {self.space}.CRUD.read()')
 
         if 'latest' not in definitions:
             definitions['latest'] = self.mapper.values.latest('latest')

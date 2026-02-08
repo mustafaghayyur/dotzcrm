@@ -1,5 +1,6 @@
 from . import Background
 from core.helpers import crud
+from ...dotzSettings import project
 
 """
     Generic CRUD Operations that can be used through out the system.
@@ -11,6 +12,7 @@ class CRUD(Background.CrudOperations):
 
     def __init__(self):
         super().__init__()
+        self.abrvSize = project['mapper']['tblKeySize'] - 1
 
     def create(self, dictionary):
         """
@@ -31,7 +33,7 @@ class CRUD(Background.CrudOperations):
             if pk == self.mapper.master('abbreviation') + 'id':
                 continue
 
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[:self.abrvSize]  # table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
 
             self.createChildTable(t['model'], tbl, t['table'], t['cols'])
@@ -39,8 +41,18 @@ class CRUD(Background.CrudOperations):
         # return masterRecord.id
         return masterRecord
 
-    def read(self):
-        pass  # defined in individual Module's class extensions.
+    def read(self, selectors, conditions = None, orderBy = None, limit = None, joins = None, translations = None):
+        """
+            See documentation on how to form selectors, conditions, etc.
+            Chaining enabled when no arguments are provided.
+            @return: RawQuerySet | None
+
+            @todo: make read static
+        """
+        if selectors is None and conditions is None and orderBy is None and limit is None and joins is None and translations is None:
+            return self.mtModel.objects  # chaining method initiated
+        
+        return self.mtModel.objects.fetch(selectors, conditions, orderBy, limit, joins, translations)
 
     def update(self, dictionary):
         """
@@ -51,7 +63,7 @@ class CRUD(Background.CrudOperations):
 
         mId = self.mapper.master('abbreviation') + 'id'
 
-        records = self.fetchFullRecordForUpdate(self.submission[mId])
+        records = self.fullRecord(self.submission[mId])
 
         if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
@@ -63,7 +75,7 @@ class CRUD(Background.CrudOperations):
 
         # Loop through each defined Primary Key to see if its table needs an update
         for pk in self.idCols:
-            tbl = pk[0]  # child table abbreviation
+            tbl = pk[:self.abrvSize]  # child table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
 
             if pk == mId:
@@ -96,7 +108,7 @@ class CRUD(Background.CrudOperations):
             raise Exception(f'{self.space} Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
 
         for pk in self.idCols:
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[:self.abrvSize]  # table abbreviation
 
             if pk == mtId:
                 continue  # skip, we delete master table at the end.
@@ -121,7 +133,7 @@ class CRUD(Background.CrudOperations):
         pass
 
         for pk in self.idCols:
-            tbl = pk[0]  # table abbreviation
+            tbl = pk[:self.abrvSize]  # table abbreviation
 
             if pk == self.mapper.master('abbreviation') + 'id':
                 continue  # can't prune MT duplicates...
@@ -130,7 +142,7 @@ class CRUD(Background.CrudOperations):
 
             self.checkChildForMultipleLatests(t['model'], tbl, t['table'], t['cols'], fetchedRecords)
 
-        records = self.fetchFullRecordForUpdate(mId)
+        records = self.fullRecord(mId)
 
         if not records:
             raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')

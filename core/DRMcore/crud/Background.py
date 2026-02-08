@@ -2,7 +2,7 @@ from django.utils import timezone
 from . import Validation
 from core import dotzSettings
 from .staticHelpers import ValuesHandler
-from core.helpers import crud, strings
+from core.helpers import crud, strings, misc
 
 
 """
@@ -20,8 +20,7 @@ class CrudOperations(Validation.ErrorHandling):
         self.module = getattr(dotzSettings, self.space)
 
         # holds all O2O primary keys for given space/module
-        self.idCols = self.mapper.generateRelationTypeIds('o2o')
-        self.rlcIdCols = self.mapper.generateRelationTypeIds('rlcIds')
+        self.idCols = self.generateRelationTypeIds('o2o')
 
         super().__init__()
 
@@ -70,7 +69,7 @@ class CrudOperations(Validation.ErrorHandling):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         fields = {}
-        ignored = self.mapper.ignoreOnUpdates(tableName)
+        ignored = self.mapper.ignoreOnUpdates(self.mapper.master('abbreviation'))
 
         for col in columnsList:
             if col in ignored:
@@ -104,7 +103,7 @@ class CrudOperations(Validation.ErrorHandling):
             raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
 
         updateRequired = False
-        ignored = self.mapper.ignoreOnUpdates(tableName)
+        ignored = self.mapper.ignoreOnUpdates(tbl)
         rlcFields = {}  # fields for RLC update
 
         for col in columnsList:

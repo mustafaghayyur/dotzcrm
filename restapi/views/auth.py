@@ -65,7 +65,7 @@ class ObtainTokenView(TokenObtainPairView):
                         'refresh_token': refresh_token,
                     }
                 }
-                misc.log(formattedData, "The returned data? token gen")
+
                 response.data = formattedData
             
             return response

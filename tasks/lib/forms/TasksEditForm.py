@@ -22,17 +22,17 @@ class TasksEditForm(Forms):
             ['id', 'description'], 
             {
                 'visibility': 'workspaces', 
-                'workspace_id': self.getParam('workspace'),
+                'wowo_id': self.getParam('workspace'),
             }
         )
 
         if taskToFetch:
             self.setQuerySet('tasks', taskToFetch)
 
-        usersToFetch = Users.read(
+        usersToFetch = Tasks.read(
             ['id', 'first_name', 'last_name'],
             {
-                'workspace_id': self.getParam('workspace'),
+                'kid': self.getParam('workspace'),
                 'is_active': True
             }
         )

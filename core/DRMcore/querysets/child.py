@@ -1,29 +1,27 @@
-from django.db import models
-from . import background
+from .QuerySet import QuerySetManager
+from core.helpers import misc
 
 """
-    =======================================================================
+=======================================================================
     Children QuerySets will be based on the various data-models we use
     in DotzCRM...
-    =====================================================================
+=====================================================================
 """
 
-class CTQuerySet(background.QuerySetManager):
+class CTQuerySet(QuerySetManager):
     """
         Primarily for One-to-One types
 
         Though this class carries some common functions needed by all 
         child tables of Master Table (M2M, RLC).
     """
-
-    # These are to be set in inherited class:
-    tbl = None  # Your table for this QuerySet
-    master_col = None  # The foreign key of master table (i.e. Tasks)
-
-    def __init__(self, model=None, query=None, using=None, hints=None):
-        self.master_col = self.mapper.master('foreignKeyName')
-
-        super().__init__(model, query, using, hints)
+    def __init__(self, *args, **kwargs):
+        """
+            Be sure to inherit parent startUpCode() in child classes
+        """
+        super().__init__(*args, **kwargs)
+        self.state.set('mtForeignKeyName', self.mapper.master('foreignKeyName'))
+        self.state.set('currentTableFullName', self.mapper.tables(self.state.get('current')))
 
     def fetchById(self, cId):
         """
@@ -31,7 +29,7 @@ class CTQuerySet(background.QuerySetManager):
             Applies to O2O, M2M, M2M and RLC Records
         """
         query = f"""
-            SELECT * FROM {self.tbl}
+            SELECT * FROM {self.state.get('currentTableFullName')}
                 WHERE id = %s;
             """
         return self.raw(query, [cId])
@@ -42,8 +40,8 @@ class CTQuerySet(background.QuerySetManager):
             One to One records
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.master_col} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('mtForeignKeyName')} = %s
                 AND latest = %s
                 ORDER BY create_time DESC
                 LIMIT 1;
@@ -64,8 +62,8 @@ class CTQuerySet(background.QuerySetManager):
             For One to One records
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.master_col} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('mtForeignKeyName')} = %s
                 ORDER BY create_time DESC
                 LIMIT 1 OFFSET (%s);
             """
@@ -78,8 +76,8 @@ class CTQuerySet(background.QuerySetManager):
             One to One records
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.master_col} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('mtForeignKeyName')} = %s
                 ORDER BY create_time DESC
             """
 
@@ -100,8 +98,8 @@ class RLCQuerySet(CTQuerySet):
             I.e. they don't have revisions.
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.master_col} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('mtForeignKeyName')} = %s
                 ORDER BY create_time DESC
             """
 
@@ -117,25 +115,27 @@ class M2MQuerySet(CTQuerySet):
         First and Second cols defined in space's Mappers
     """
 
-    def __init__(self, model=None, query=None, using=None, hints=None):
-        tbl = self.mapper.getAbbreviationForTable(self.tbl)
-        cols = self.mapper.m2mFields(tbl)
+    def __init__(self, *args, **kwargs):
+        """
+            Be sure to inherit parent startUpCode() in child classes
+        """
+        super().__init__(*args, **kwargs)
+        cols = self.mapper.m2mFields(self.state.get('current'))
 
         if cols is None:
-            raise Exception('Unable to fetch M2M Fields. Abort.')
-            
-        self.firstColumn = cols['firstCol']
-        self.secondColumn = cols['secondCol']
+            raise Exception('Unable to fetch M2M Fields. Aborting.')
         
-        super().__init__(model, query, using, hints)
+        self.state.set('firstColumn', cols['firstCol'])
+        self.state.set('secondColumn', cols['secondCol'])
+        
 
     def fetchAllCurrentBySecondId(self, secondId):
         """
             Fetch all the latest of child table records referencing secondId.
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.secondColumn} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('secondColumn')} = %s
                 AND latest = %s
             """
 
@@ -147,8 +147,8 @@ class M2MQuerySet(CTQuerySet):
             Fetch all the latest of child table records referencing firstId.
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.firstColumn} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('firstColumn')} = %s
                 AND latest = %s
             """
 
@@ -161,9 +161,9 @@ class M2MQuerySet(CTQuerySet):
             Overwrites CTQuerySet.fetchLatest()
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.firstColumn} = %s
-                AND {self.secondColumn} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('firstColumn')} = %s
+                AND {self.state.get('secondColumn')} = %s
                 AND latest = %s
                 ORDER BY create_time DESC
             """
@@ -175,9 +175,9 @@ class M2MQuerySet(CTQuerySet):
             Fetch revision history of CT records for First & Second Ids.
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.firstColumn} = %s
-                AND {self.secondColumn} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('firstColumn')} = %s
+                AND {self.state.get('secondColumn')} = %s
                 ORDER BY create_time DESC
             """
 
@@ -189,9 +189,9 @@ class M2MQuerySet(CTQuerySet):
             for One Id.
         """
         query = f"""
-            SELECT * FROM {self.tbl}
-                WHERE {self.firstColumn} = %s
-                AND {self.secondColumn} = %s
+            SELECT * FROM {self.state.get('currentTableFullName')}
+                WHERE {self.state.get('firstColumn')} = %s
+                AND {self.state.get('secondColumn')} = %s
                 ORDER BY create_time DESC
                 LIMIT 1 OFFSET (%s);
             """

@@ -11,33 +11,15 @@ class Users(O2ORecords.CRUD):
     """
     
     def __init__(self):
-        self.space = 'tasks'  # holds the name of current module/space
+        self.space = 'users'  # holds the name of current module/space
         self.mtModel = User  # holds the class reference for Master Table's model
 
-        self.mapper = UsersMapper(ValuesMapper)
+        self.mapper = UsersMapper()
+        self.mapper.setValuesMapper(ValuesMapper)
         
         super().__init__()
 
-    def read(self, selectors, conditions = None, orderBy = None, limit = None):
-        """
-            See documentation on how to form selectors, conditions, etc.
-            @return: None | RawQuerySet
-        """
-        if not isinstance(selectors, list) or len(selectors) < 1:
-            raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
-
-        if 'all' in selectors:
-            recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
-            selectors = list(recordKeys.keys())
-
-        rawObjs = self.mtModel.objects.fetch(selectors, conditions, orderBy, limit)
-        
-        if rawObjs:
-            return rawObjs
-
-        return None
-
-    def fetchFullRecordForUpdate(self, task_id):
+    def fullRecord(self, task_id):
         """
             fetch full records with all CT records marked 'latest'
         """
@@ -67,7 +49,7 @@ class Departments(M2MChildren.CRUD):
 
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.pk[0])
+        cols = self.mapper.m2mFields(self.tbl)
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super().__init__()
@@ -84,7 +66,7 @@ class Hierarchy(M2MChildren.CRUD):
         
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.pk[0])
+        cols = self.mapper.m2mFields(self.tbl)
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super().__init__()

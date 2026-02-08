@@ -48,7 +48,7 @@ export default function (resultSet, containerId) {
         const deleteBtn = document.getElementById('deleteTaskBtn');
         deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            DeleteTask(resultSet['tid']);
+            DeleteTask(resultSet['tata_id']);
         });
 
         // add (un)watcher button(s)
@@ -56,24 +56,26 @@ export default function (resultSet, containerId) {
         let unwatchbtn = document.getElementById('removeWatcher');
         
         $A.fetch.body(
-            $A.fetch.route('api.tasks.watchers_crud', String(resultSet['tid'])), 
+            $A.fetch.route('api.tasks.watchers_crud', String(resultSet['tata_id'])), 
             'taskDetailsModalResponse', {}, 
             (data, id) => {
                 if ($A.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
+                    unwatchbtn.classList.add('d-none');
                 } else {
                     unwatchbtn.classList.remove('d-none');
+                    watchbtn.classList.add('d-none');
                 }
             }
         );
 
         watchbtn.addEventListener('click', (e) => {
             e.preventDefault();
-            createWatcher(resultSet['tid'], 'addWatcher', 'removeWatcher');
+            createWatcher(resultSet['tata_id'], 'addWatcher', 'removeWatcher');
         });
         unwatchbtn.addEventListener('click', (e) => {
             e.preventDefault();
-            removeWatcher(resultSet['tid'], 'addWatcher', 'removeWatcher');
+            removeWatcher(resultSet['tata_id'], 'addWatcher', 'removeWatcher');
         });
 
         // next, implement rich-text editor and comments form.
@@ -85,14 +87,14 @@ export default function (resultSet, containerId) {
             let hiddenCommentInput = document.querySelector('#newCommentForm #' + editor.dataset.fieldId);
             hiddenCommentInput.value = editor.innerHTML;
             let taskIdField = document.querySelector('#newCommentForm #task_id');
-            taskIdField.value = resultSet['tid'];
+            taskIdField.value = resultSet['tata_id'];
             createCommentForTask('newCommentForm');
         });
 
         // finally, retrieve task-level-comments..
         const callback = await $A.tasks.load('commentsList');
         $A.fetch.body(
-            $A.fetch.route('api.tasks.comments_list', String(resultSet['tid'])), 
+            $A.fetch.route('api.tasks.comments_list', String(resultSet['tata_id'])), 
             "commentsResponse", {}, 
             callback
         );
