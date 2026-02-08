@@ -1,4 +1,5 @@
 // This is WIP.
+// Using Factory Functions and Closures
 
 //import $A from "../helpers/main";
 

@@ -2,6 +2,8 @@ class Singleton:
     """
         A base class that uses a class attribute to manage a single instance.
         All classes inheriting from Singleton will themselves be singletons.
+        
+        @todo: confirm this class works as a singleton
     """
     _instances = {}
 

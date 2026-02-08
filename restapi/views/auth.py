@@ -5,8 +5,8 @@ from rest_framework.decorators import permission_classes
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.conf import settings
-from core.helpers import crud
-from core.lib.authentication import CustomTokenObtainPairSerializer
+from core.helpers import crud, misc
+from core.authorization.authentication import CustomTokenObtainPairSerializer
 from restapi.lib.helpers import *
 
 
@@ -14,6 +14,7 @@ class ObtainTokenView(TokenObtainPairView):
     """
         Token issuance view.
         Uses custom serializer to include additional user claims in the token.
+        @todo: find out why the tokens aren't being returned in the response.
     """
     permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
@@ -64,6 +65,7 @@ class ObtainTokenView(TokenObtainPairView):
                         'refresh_token': refresh_token,
                     }
                 }
+
                 response.data = formattedData
             
             return response
@@ -113,10 +115,6 @@ class RefreshTokenView(TokenRefreshView):
             
             return response
         except Exception as e:
-            return Response(crud.generateError(e, "Token refresh failure."), status=status.HTTP_400_BAD_REQUEST)
-            
-            return response
-        except Exception as e:
-            return Response(crud.generateError(e, "Token refresh failiure."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(crud.generateError(e, "Token refresh failure."), status=status.HTTP_400_BAD_REQUEST)            
 
 

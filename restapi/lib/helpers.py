@@ -2,7 +2,7 @@
     This file will hold functions necessary for api views operations.
 """
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from core.lib.authentication import JWTAuthenticationCookies
+from core.authorization.authentication import JWTAuthenticationCookies
 
 def isUserAuthenticated(request):
     """

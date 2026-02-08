@@ -4,6 +4,10 @@
 """
 
 project = {
+    'mapper': {
+        'tblKeySize': 5, # 4 + _ = 5 characters for table-key-size
+    },
+
     # Number of days a task stays in the database system post completion or fail
     'tasksLifeSpan': '1095',
     # Number of days a ticket stays in the database system post completion or fail

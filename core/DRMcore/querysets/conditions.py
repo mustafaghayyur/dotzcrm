@@ -1,0 +1,156 @@
+from core.dotzSettings import project
+from core.helpers import crud, misc, strings
+
+class Conditions():
+    """
+        This is a static class.
+        Helps parse and manage where arguments.
+    """
+
+    @staticmethod
+    def assemble(state, mapper):
+        """
+            Assembles workable conditions dictionary, from raw dictionary provided to QuerySetManager
+        """
+        conditions = state.get('conditions')
+        defaults = mapper.defaults('where_conditions')
+
+        if conditions is None:
+            conditions = {}
+
+        mergedConditions = misc.mergeDictionaries(defaults, conditions)
+        latestKey = mapper.column('latest')
+
+        if latestKey in mergedConditions:
+            state.set('latestFlag', True)
+            del mergedConditions[latestKey]
+
+        return Conditions.validateAssembled(state, mergedConditions)
+        
+    
+    @staticmethod 
+    def parse(state, mapper):
+        """
+        Returns generated where statements in list format.
+        
+        :param state: State() instance
+        :param mapper: Mapper() instance
+        :param conditions: [dict] supplied to QuerySetManager()
+        """
+        conditions = state.get('assembledConditions')
+        mapperTables = state.get('mapperTables')
+        mapperFields = state.get('allMapperFields')
+        usedFields = state.get('allUsedFields')
+        array = []
+
+        for key, value in conditions.items():
+            length = Conditions.length(array)
+            [tbl, col] = strings.seperateTableKeyFromField(key, state)
+            if tbl is None and col is not None:
+                statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
+            if tbl is not None and col is not None:
+                key = f'{tbl}_{col}'
+                statement = Conditions.makeWhereStatement(state, mapper, usedFields[key], key, value, length)
+            array.append(statement)
+        
+        return strings.concatenate(array)
+    
+
+    def makeWhereStatement(state, mapper, tbl, key, value, length):
+        """
+            Generates a where statement element with given key/value pair.
+        """
+        andPref = ''
+        keyDb = key  # keyDb refers to the column name recognized by the database
+        sz = project['mapper']['tblKeySize']
+
+        if length > 0:
+            andPref = ' AND '
+
+        if mapper.isCommonField(key, True):
+            keyDb = key[sz:]  # the table abbreviation is conjoined to key name.
+
+        if key not in state.get('allMapperFields') and key in state.get('allUsedFields'):
+            keyDb = key[sz:]
+
+        if keyDb in ['create_time', 'update_time', 'delete_time']:
+            itemType = crud.determineDateArgumentType(value)
+            
+            if itemType is None:
+                return ''
+            
+            match itemType[0]:
+                case 'lastXDays':
+                    return andPref + '(' + tbl + '.' + keyDb + ' >= NOW() - INTERVAL %(' + key + ')s DAY)'
+                case 'range':
+                    start = crud.formulateProperDate(itemType[1]['start'])
+                    end = crud.formulateProperDate(itemType[1]['end'])
+                    return andPref + '(' + tbl + '.' + keyDb + ' BETWEEN ' + start + ' AND ' + end + ')'
+                case 'nullType':
+                    return andPref + tbl + '.' + keyDb + ' ' + itemType[1]
+
+        if isinstance(value, list):
+            return andPref + tbl + '.' + keyDb + ' IN %(' + key + ')s'
+        
+        if strings.isPrimitiveType(value):
+            return andPref + tbl + '.' + keyDb + ' = %(' + key + ')s'
+
+        return ''  # return has to be string
+        
+
+    @staticmethod
+    def validateAssembled(state, conditions):
+        """
+            Checks that all condition items should be primitive data types or lists.
+            None values for conditions are ommitted.
+        """
+        usedFieldsDict = state.get('allUsedFields')
+        conditionskeys = list(conditions.keys())  # copy keys of conditions to loop over
+
+        for key in conditionskeys:
+            if key in usedFieldsDict:
+                if conditions[key] is None:
+                    del conditions[key]
+                    continue
+                
+                if strings.isPrimitiveType(conditions[key]) or isinstance(conditions[key], list):
+                    continue  # todo: confirm behaviour. Should non-string primitives be stringi-fied?
+            
+            del conditions[key]  # delete the key from dictionary
+
+        return conditions
+
+
+    @staticmethod
+    def length(array: list):
+        """
+            Calculates the string length of combined list (str) items.
+            
+            param: array [list] list of where statement strings
+        """
+        string = ''
+        if not isinstance(array, list):
+            return 0
+        
+        for item in array:
+            if isinstance(item, str): 
+                string += item
+
+        return len(string)
+    
+    @staticmethod
+    def validate(conditions):
+        """
+            Validates the initial conditions dictionary.
+        """
+        if not isinstance(conditions, dict):
+            raise TypeError('Error 1030: conditions provided mut be in dict form.')
+        
+        for key, value in conditions.items():
+            if not isinstance(key, str):
+                raise TypeError("Error 1031: conditions' key not formed correctly.")
+            if not strings.isPrimitiveType(value):
+                if not isinstance(value, list):
+                    raise TypeError("Error 1032: conditions' velue must be primitive or list type.")
+            
+        return conditions

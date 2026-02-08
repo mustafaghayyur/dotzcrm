@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from core.lib.TasksEditForm import *
+from tasks.lib.forms.TasksEditForm import *
 
 def dashboard(request):
     """

@@ -11,14 +11,14 @@ export default function (data, containerId) {
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';
     let li = null;
-    
+    console.log('MG - I have been updated.');
     if (Array.isArray(data)) {
         data.forEach(item => {
             li = originalLiItem.cloneNode(true);
-            li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tid);
+            li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tata_id);
             li.querySelector('.description').textContent = item.description || JSON.stringify(item);
             li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);
-            li.querySelector('.tupdate_time').textContent = $A.dates.convertToDisplayLocal(item.tupdate_time);
+            li.querySelector('.tata_update_time').textContent = $A.dates.convertToDisplayLocal(item.tata_update_time);
             li.querySelector('.deadline').textContent = $A.dates.convertToDisplayLocal(item.deadline);
             ul.appendChild(li);
         });

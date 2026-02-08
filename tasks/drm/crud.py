@@ -2,9 +2,8 @@ from core.DRMcore.crud import O2ORecords, RevisionlessChildren, M2MChildren
 
 from tasks.models import *
 from .mappers import TasksMapper
-from .mapper_values import ValuesMapper
 
-class CRUD(O2ORecords.CRUD):
+class Tasks(O2ORecords.CRUD):
     """
         Handles all O2O crud operations for Tasks Module of DotzCRM.
         Please read the README.md in this folder before using.
@@ -13,44 +12,26 @@ class CRUD(O2ORecords.CRUD):
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
-
-        self.mapper = TasksMapper(ValuesMapper)
+        self.mapper = TasksMapper()
         
         super().__init__()
 
-    def read(self, selectors, conditions = None, orderBy = None, limit = None):
+    def fullRecord(self, task_id):
         """
-            See documentation on how to form selectors, conditions, etc.
-            @return: None | RawQuerySet
-        """
-        if not isinstance(selectors, list) or len(selectors) < 1:
-            raise Exception(f'Record fetch request for {self.space} failed. Improper selectors, in {self.space}.CRUD.read()')
-
-        if 'all' in selectors:
-            recordKeys = self.mapper.generateO2OFields()  # returns a dictionary
-            selectors = list(recordKeys.keys())
-
-        rawObjs = self.mtModel.objects.fetch(selectors, conditions, orderBy, limit)
-        
-        if rawObjs:
-            return rawObjs
-
-        return None
-
-    def fetchFullRecordForUpdate(self, task_id):
-        """
-            fetch full records with all CT records marked 'latest'
+            fetch full O2O record with all CT records marked 'latest'
         """
         conditions = {
-            # "assignee_id": None,
-            "update_time": None,
+            "tata_update_time": None,
             "latest": self.mapper.values.latest('latest'),
             "visibility": None,
             "status": None,
-            "tid": task_id,
+            "tata_id": task_id,
         }
 
-        rawObj = self.read(['all'], conditions)
+        recordKeysDict = self.mapper.generateO2OFields()  # returns a dictionary
+        selectors = list(recordKeysDict.keys())
+
+        rawObj = self.read(selectors, conditions)
 
         if rawObj:
             return rawObj  # returns all records found.
@@ -66,11 +47,11 @@ class Comments(RevisionlessChildren.CRUD):
     def __init__(self):
         self.space = 'tasks'  # holds the name of current module/space
         self.mtModel = Task  # holds the class reference for Master Table's model
-        self.tbl = 'c'
-        self.pk = 'cid'
-
+        self.tbl = 'taco'
+        self.pk = 'taco_id'
         self.mapper = TasksMapper()
-        super().__init__(CRUD)  # satisfy parent class' requirement for MasterCRUDClass
+        
+        self.setMasterCrudClass(Tasks)
 
     def read(self, definitions):
         """
@@ -100,13 +81,13 @@ class Watchers(M2MChildren.CRUD):
     """
 
     def __init__(self):
-        self.pk = 'wid'  # set table_abbrv for use in queries.
+        self.pk = 'tawa_id'  # set table_abbrv for use in queries.
         self.space = 'tasks'  # holds the name of current module/space
-        self.tbl = 'w'
+        self.tbl = 'tawa'
         
         self.mapper = TasksMapper()
 
-        cols = self.mapper.m2mFields(self.pk[0])
+        cols = self.mapper.m2mFields(self.tbl)
         self.firstCol = cols['firstCol']
         self.secondCol = cols['secondCol']
         super().__init__()

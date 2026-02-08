@@ -21,7 +21,7 @@ export default {
     parent_id: $A.app.makeDomElement('span', 'rec-itm'),
     sid: $A.app.makeDomElement('span', 'rec-itm'),
     status: $A.app.makeDomElement('span', 'rec-itm'),
-    tid: $A.app.makeDomElement('span', 'rec-itm'),
+    tata_id: $A.app.makeDomElement('span', 'rec-itm'),
     vid: $A.app.makeDomElement('span', 'rec-itm'),
     visibility: $A.app.makeDomElement('span', 'rec-itm'),
     error: $A.app.makeDomElement('span', 'rec-itm'),

@@ -51,70 +51,12 @@ Key Tools Needed
 
 
 ### Step-by-Step Setup using Babel and Webpack
-This process assumes you have Node.js and npm installed. 
 
- 1) Initialize your project: open your terminal and cd into current static folder:
-  > npm init -y
+In your commandline utility, cd into static/ directory.
 
-  This creates a package.json file.
+run:
+ > npm run build
+Builds all jd bundle files: 
+ - static/dist/users-bundle.js 
+ - static/dist/tasks-bundle.js , etc...
 
- 2) Install development dependencies: Babel core, Webpack.
-  > npm install --save-dev @babel/core @babel/cli @babel/preset-env webpack webpack-cli babel-loader
-
-    - @babel/core is the main Babel functionality.
-    - @babel/preset-env tells Babel which transformations and polyfills are needed based on your target environments.
-    - babel-loader integrates Babel into Webpack.
-
- 3) Configure Babel: create a configuration file (e.g., .babelrc or babel.config.json) in your project root to tell Babel to use the env preset:
-
-    ```
-    {
-        "presets": ["@babel/preset-env"]
-    }
-    ```
-
- 4) Configure Webpack: create a webpack.config.js file to define how your code should be processed and bundled:
-
-    ```
-    const path = require('path');
-
-    const clientConfig = {
-        entry: {
-            core: './core/js/custom.js',
-            tasks: './tasks/js/custom.js',
-        }, // Your main ES6 entry files
-        output: {
-            filename: '[name].bundle.js', // The output ES5 bundle, [name] is replaced by the entry key
-            path: path.resolve(__dirname, 'dist'),
-        },
-        module: {
-            rules: [
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: {
-                loader: 'babel-loader',
-                },
-            },
-            ],
-        },
-    };
-
-    module.exports [clientConfig];
-    ```
-
- 5) Add a build script: in your package.json file, add a script to run Webpack:
-
-    ```
-    "scripts": {
-        "build": "webpack"
-    },
-    ```
-
- 6) Our JS source code will be found in the main_project_directory/static/ folder. In specfic, we have tried to organize all project-wide JS code under 'core' sub-folder; and app-specific libraries/code under the app's specific directory (i.e. static/tasks/ for example). 
-
- 7) Compile your code. You can run the build script in your terminal:
-  
-  > npm run build
-
- This will create a dist/bundle.js file containing the ES5-compatible code. You can now open your index.html file in any browser, and it will run the compatible JavaScript. 
