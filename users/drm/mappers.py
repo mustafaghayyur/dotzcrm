@@ -53,6 +53,12 @@ class UsersMapper(RelationshipMappers):
                 'tables': ['usus']
             },
         }
+    
+    def _dateFields(self):
+        """
+            Add all columns found in this mapper, that are date fields.
+        """
+        return ['create_time', 'update_time', 'delete_time', 'date_joined']
 
     def _defaults_order_by(self):
         return [
@@ -138,6 +144,12 @@ class DepartmentsMapper(RelationshipMappers):
                 'tables': ['dede', 'usus']
             },
         }
+    
+    def _dateFields(self):
+        """
+            Add all columns found in this mapper, that are date fields.
+        """
+        return ['create_time', 'update_time', 'delete_time']
 
     def _defaults_order_by(self):
         return [

@@ -28,6 +28,13 @@ class RelationshipMappers(BaseOperations):
         relationships = self._m2mFields()
         return self.returnValue(relationships, tbl)
     
+    def dateFields(self):
+        """
+            Returns all date fields defined in Mapper
+        """
+        return self._dateFields()
+    
+    
     def defaults(self, requestedFunc):
         """
             Returns a self._defaults_{requestedFunc} method if defined (in app-level mapper definition).

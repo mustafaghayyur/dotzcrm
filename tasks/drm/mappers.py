@@ -56,6 +56,12 @@ class TasksMapper(RelationshipMappers):
                 'tables': ['tata', 'usus']
             },
         }
+    
+    def _dateFields(self):
+        """
+            Add all columns found in this mapper, that are date fields.
+        """
+        return ['create_time', 'update_time', 'delete_time', 'deadline']
 
     def _defaults_order_by(self):
         return [
@@ -165,6 +171,12 @@ class WorkSpacesMapper(RelationshipMappers):
                 'tables': ['wowo', 'tata']
             },
         }
+    
+    def _dateFields(self):
+        """
+            Add all columns found in this mapper, that are date fields.
+        """
+        return ['create_time', 'update_time', 'delete_time']
 
     def _defaults_order_by(self):
         return [

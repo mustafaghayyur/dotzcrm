@@ -73,8 +73,8 @@ class Conditions():
         if key not in state.get('allMapperFields') and key in state.get('allUsedFields'):
             keyDb = key[sz:]
 
-        if keyDb in ['create_time', 'update_time', 'delete_time']:
-            itemType = crud.determineDateArgumentType(value)
+        if keyDb in mapper.dateFields():
+            itemType = Conditions.determineDateArgumentType(value)
             
             if itemType is None:
                 return ''
@@ -83,8 +83,8 @@ class Conditions():
                 case 'lastXDays':
                     return andPref + '(' + tbl + '.' + keyDb + ' >= NOW() - INTERVAL %(' + key + ')s DAY)'
                 case 'range':
-                    start = crud.formulateProperDate(itemType[1]['start'])
-                    end = crud.formulateProperDate(itemType[1]['end'])
+                    start = strings.formulateProperDate(itemType[1]['start'])
+                    end = strings.formulateProperDate(itemType[1]['end'])
                     return andPref + '(' + tbl + '.' + keyDb + ' BETWEEN ' + start + ' AND ' + end + ')'
                 case 'nullType':
                     return andPref + tbl + '.' + keyDb + ' ' + itemType[1]
@@ -154,3 +154,36 @@ class Conditions():
                     raise TypeError("Error 1032: conditions' velue must be primitive or list type.")
             
         return conditions
+    
+    @staticmethod
+    def determineDateArgumentType(state, dateArgument, dateOnly = False):
+        """
+            Returns None on failed analysis.
+            Or a List with [0] index holding flag of argument type; and [1] index
+            holding parsed argument value to sub into query formation.
+        
+            :param state: State() instance
+            :param dateArgument: [str|int] defining acceptable date-field conditions
+            :param dateOnly: [bool] weather field is date only (as opposed to datetime)
+        """
+        if dateOnly:
+            pass # for future implmentation, incase date-only fileds need special handling
+        
+        argTmp = dateArgument.lower().strip()
+
+        if argTmp == 'is null' or argTmp == 'is not null':
+            return ['nullType', argTmp]
+        
+        if int(dateArgument) > 0:
+            return ['lastXDays', dateArgument]
+        
+        if isinstance(dateArgument, str):
+            # dates should be in format: 'YYYY-MM-DD hh:mm:ss'
+            matches = strings.extractDateRangeFromString(dateArgument, state)
+            
+            if matches is not None:
+                if isinstance(matches[1], str) and isinstance(matches[2], str):
+                    return ['range', {'start': matches[1], 'end': matches[2]}]
+            return None
+            
+        return None

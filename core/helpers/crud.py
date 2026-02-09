@@ -1,11 +1,21 @@
 import importlib
-import re
 from django.conf import settings as ds 
 from django.forms import DateTimeInput
 from . import misc
 
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
+    """
+        Takes a valid Mapper() insatance and valid table-key, and returns a dictionary
+        of 'model', 'table' and 'cols' values. 
+        
+        :param mapper: Mapper() instance
+        :param tbl: [str] table-key
+    """
     tableName = mapper.tables(tbl)
+
+    if tableName is None:
+        raise Exception('Error 301: generateModelInfo() failed to identify table-key.')
+    
     module = importlib.import_module(mapper.modelPaths(tbl))
     return {
         'model': getattr(module, mapper.models(tbl)),  # retrieve model class using importlib
@@ -14,6 +24,12 @@ def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     }
     
 def isValidId(dictionary, idKey):
+    """
+        Takes a dictionary and its key; determines if key's value is a valid ID value.
+        
+        :param dictionary: [dict] dictionary to handle
+        :param idKey: [str|int] key from dict to use for valuation
+    """
     if idKey in dictionary and dictionary[idKey] is not None:
         if isinstance(dictionary[idKey], int) and dictionary[idKey] > 0:
             return True
@@ -24,47 +40,16 @@ def isValidId(dictionary, idKey):
                 return True
     return False
 
-def determineDateArgumentType(dateArgument, dateOnly = False):
-    """
-        Returns None on failed analysis.
-        Or a List with [0] index holding flag of argument type; and [1] index
-        holding parsed argument value to sub into query formation.
-    """
-    if dateOnly:
-        pass # for future implmentation, incase date-only fileds need special handling
-    
-    argTmp = dateArgument.lower().strip()
 
-    if argTmp == 'is null' or argTmp == 'is not null':
-        return ['nullType', argTmp]
-    
-    if int(dateArgument) > 0:
-        return ['lastXDays', dateArgument]
-    
-    if isinstance(dateArgument, str):
-        # dates should be in format: 'YYYY-MM-DD hh:mm:ss'
-        matches = re.search(r'\s?from\s(\d:\d:\d)\sto\s(\d:\d:\d)\s?', dateArgument, flags=re.I)
+def convertRecordsToDictionary(rawQuerySet, selectors):
+    """
+        Convert RawQuerySet / DB row objects into list of plain dicts keyed by list of selectors
         
-        if matches is not None:
-            if isinstance(matches[1], str) and isinstance(matches[2], str):
-                return ['range', {'start': matches[1], 'end': matches[2]}]
-        return None
-        
-    return None
-
-def formulateProperDate(date):
-    matches = re.search(r'(\d):(\d):(\d)', date, flags=re.I)
-
-    if matches is None:
-        return None
-
-    return matches[1] + '-' + matches[2] + '-' + matches[3] + ' ' + '00:00:00'
-
-def recordsToDictionary(rawQuerySet, selectors):
+        :param rawQuerySet: RawQuerySet object
+        :param selectors: [list] array of valid selectors
     """
-    Convert RawQuerySet / DB row objects into plain dicts keyed by selectors
-    """
-    recordsToDict = []
+    records = []
+
     for rec in (rawQuerySet or []):
         row = {}
         for key in selectors:
@@ -75,9 +60,10 @@ def recordsToDictionary(rawQuerySet, selectors):
         if 'id' not in row or row['id'] is None:
             row['id'] = id
 
-        recordsToDict.append(row)
+        records.append(row)
 
-    return recordsToDict
+    return records
+
 
 def generateError(object, additionalMsg = None):
     """
@@ -94,6 +80,7 @@ def generateError(object, additionalMsg = None):
         misc.log(object, 'Error Trace:', 3) # logs the error with full trace in debug-mode only
 
     return dictionary
+
 
 def generateResponse(results, page = 1, pageSize = 1, hasMore = False, additionalMsg = None):
     """

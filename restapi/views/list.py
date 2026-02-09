@@ -9,16 +9,25 @@ from tasks.drm.crud import *
 from tasks.drm.mapper_values import ValuesMapper
 from tasks.validators.tasks import TaskO2ORecordSerializerGeneric
 
-@api_view(['GET'])
+@api_view(['POST'])
 def list(request, type, format=None):
     """
-        List all tasks for type of request.
+        List all records based on paramerters in POST request's body.
     """
-    selectors = ['tata_id', 'tast_id', 'description', 'tata_update_time', 'status']
-    conditions = {
-        'tata_delete_time': 'is Null',
-        'assignee_id': request.user.id
-    }
+    postData = request.data
+
+    """
+        postData could look like:
+        {
+            tbl: 'tata',
+            selectors: ['tata_id', 'tata_update_time', 'visibility']
+            conditions: {
+                'tata_delete_time': 'is null',
+                'deadline': '<2026-02-26'
+            }
+
+        }
+    """
 
     match type:
         case 'private':

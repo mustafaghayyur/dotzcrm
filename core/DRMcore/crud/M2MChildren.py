@@ -2,10 +2,14 @@ from django.utils import timezone
 from . import Background
 from core.helpers import crud, misc
 
+from .create import Create
+from .update import Update
+from .delete import Delete
+
 """
     Many-to-Many CRUD Operations that can be used through out the system.
 """
-class CRUD(Background.CrudOperations):
+class CRUD(Background.Operations):
 
     firstCol = None  # defined in inheritor
     secondCol = None  # defined in inheritor
@@ -17,7 +21,7 @@ class CRUD(Background.CrudOperations):
         """
             Creation of a single record per M2M CT.
         """
-        self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
+        self.saveSubmission('create', dictionary)  # save to state
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
 
@@ -27,10 +31,10 @@ class CRUD(Background.CrudOperations):
             return None
         
         # first, we attempt o update any existing records matching first & second M2M cols...
-        self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'])
+        Update.childTableM2M(t['model'], self.tbl, t['table'], t['cols'])
 
-        # next, we will create a new record for first andsecond columns.
-        return self.createChildTable(t['model'], self.tbl, t['table'], t['cols'])
+        # next, we will create a new record for first and second columns.
+        return Create.childTable(t['model'], self.tbl, t['table'], t['cols'])
         
     def read(self, definitions):
         """
@@ -79,14 +83,14 @@ class CRUD(Background.CrudOperations):
         """
             Attempts to delete all records matching firstCol and SecondCol. 
         """
-        self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
+        self.saveSubmission('create', dictionary)  # save to state
 
         if not crud.isValidId(self.submission, self.firstCol) or not crud.isValidId(self.submission, self.secondCol):
             raise Exception(f'M2M Record could not be deleted. Invalid IDs supplied in {self.space}.CRUD.deleteM2M()')
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
 
-        return self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'])
+        return Update.childTableM2M(t['model'], self.tbl, t['table'], t['cols'])
 
     def deleteAllForFirstCol(self, firstColId):
         """
@@ -98,38 +102,4 @@ class CRUD(Background.CrudOperations):
 
         t = crud.generateModelInfo(self.mapper, self.tbl)
 
-        return self.deleteAllM2M(t['model'], self.tbl, t['table'], t['cols'], firstColId)
-
-    def updateChildTable(self, modelClass, tbl, tableName, columnsList):
-        """
-            updateChildTable() will be overwritten in M2MChildren for special handling.
-            We will simply archive any existing records matching firstCal & secondCol
-        """
-        self.log(None, f'ENTERING update for childtable [{tbl}]')
-
-        fieldsF = {}
-        fieldsF[self.firstCol] = self.submission[self.firstCol]
-        fieldsF[self.secondCol] = self.submission[self.secondCol]
-
-        fieldsU = {}
-        fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.mapper.values.latest('archive')        
-
-        modelClass.objects.filter(**fieldsF).update(**fieldsU)
-        self.log({'fields': fieldsU}, f'Attempted update For: [{tbl}]')
-
-    def deleteAllM2M(self, modelClass, tbl, tableName, columnsList, firstColId):
-        """
-            Helper function for deleteAllForFirstCol(). M2M nodes only.
-        """
-        self.log(None, f'ENTERING deleteAllForFirstCol for CT [{self.tbl}]')
-        
-        fieldsF = {}  # fields to find records with
-        fieldsF[self.firstCol] = firstColId
-        
-        fieldsU = {}  # fields to update in found records
-        fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.mapper.values.latest('archive')
-
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
-        return modelClass.objects.filter(**fieldsF).update(**fieldsU)
+        return Delete.allM2Ms(t['model'], self.tbl, t['table'], t['cols'], firstColId)

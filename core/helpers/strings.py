@@ -1,12 +1,16 @@
 import re
 
-def concatenate(str_list = [], separator = "\n"):
+def concatenate(arrayStrings = [], separator = "\n"):
     """
-        helps concatenate strings (can be multi line)
+        Concatenates (i.e. joins) list of strings with provided seperator.
+        
+        :param arrayStrings: [list]
+        :param separator: [str] seperator stting to us efor joining
     """
-    if isinstance(str_list, list):
-        return separator.join(str_list)
+    if isinstance(arrayStrings, list):
+        return separator.join(arrayStrings)
     return None
+
 
 def isPrimitiveType(item):
     """
@@ -44,17 +48,17 @@ def seperateTableKeyFromField(field, state = None):
         :param field: [str] field to inspect for table key prefixes.
         :param state: [State insatance | None] if supllied, compiled regex is stored in key 'regexDrmFieldKeys'
     """
-    comiledRegex = None
+    compiledRegex = None
     if state:
-        comiledRegex = state.get('regexDrmFieldKeys')
+        compiledRegex = state.get('regexDrmFieldKeys')
     
-    if comiledRegex is None:
+    if compiledRegex is None:
         # 'left|[usus]_id': '[tawa]_watcher_id'
-        comiledRegex = re.compile(r"(\w{4})_([\w]+)")
+        compiledRegex = re.compile(r"(\w{4})_([\w]+)")
         if state:
-            state.set('regexDrmFieldKeys', comiledRegex)
+            state.set('regexDrmFieldKeys', compiledRegex)
 
-    match = comiledRegex.match(field)
+    match = compiledRegex.match(field)
     if match:
         return [match.group(1), match.group(2)]
     else:
@@ -68,18 +72,68 @@ def seperateTableKeyFromJoinArgument(definition, state = None):
         :param definition: join() argument in QuerySetManger().fetch()
         :param state: [State insatance | None] if supllied, compiled regex is stored in key 'regexDrmJoins'
     """
-    comiledRegex = None
+    compiledRegex = None
     if state:
-        comiledRegex = state.get('regexDrmJoins')
+        compiledRegex = state.get('regexDrmJoins')
     
-    if comiledRegex is None:
+    if compiledRegex is None:
         # 'left|[usus]_id': '[tawa]_watcher_id'
-        comiledRegex = re.compile(r"(\w+\|)?(\w{4})_([\w]+)")
+        compiledRegex = re.compile(r"(\w+\|)?(\w{4})_([\w]+)")
         if state:
-            state.set('regexDrmJoins', comiledRegex)
+            state.set('regexDrmJoins', compiledRegex)
 
-    match = comiledRegex.match(definition)
+    match = compiledRegex.match(definition)
     if match:
         return [match.group(1), match.group(2), match.group(3)]
     else:
         return []
+
+
+def formulateProperDate(dateString, state = None):
+    """
+        Takes string for date, and attempts to extract and form valid datetime string.
+        
+        :param dateString: [str] datetime string provided
+        :param state: State() instance (optional)
+    """
+    compiledRegex = None
+    if state:
+        compiledRegex = state.get('regexDrmDateValue')
+    
+    if compiledRegex is None:
+        # '2026/02-29 12:29:29'
+        compiledRegex = re.compile(r'\s?(\d{4})[\:\/\-]{1}(\d{2})[\:\/\-]{1}(\d{2})(\s\d{2}:\d{2}:\d{2})?', flags=re.I)
+        if state:
+            state.set('regexDrmDateValue', compiledRegex)
+    
+    match = compiledRegex.match(dateString)
+    if match:
+        time = '00:00:00' if match.group(4) is None else match.group(4)
+        return match.group(1) + '-' + match.group(2) + '-' + match.group(3) + ' ' + time
+    else:
+        return None
+
+
+def extractDateRangeFromString(string, state):
+    """
+        Regex function to extract from and to dates (range) and return a list.
+        
+        :param string: [str] string carrying date values to be parsed
+        :param state: State() instance (optional). Can store compiled regex
+    """
+    compiledRegex = None
+    if state:
+        compiledRegex = state.get('regexDrmDatesRange')
+    
+    if compiledRegex is None:
+        # 'from 2026-02-29 to 2028/05/06'
+        compiledRegex = re.compile(r'\s?from\s(\d{4}[\:\/\-]{1}\d{2}[\:\/\-]{1}\d{2})\sto\s(\d{4}[\:\/\-]{1}\d{2}[\:\/\-]{1}\d{2})\s?', flags=re.I)
+        if state:
+            state.set('regexDrmDatesRange', compiledRegex)
+    
+    match = compiledRegex.match(string)
+    if match:
+        return [match.group(1), match.group(2)]
+    else:
+        return []
+    
