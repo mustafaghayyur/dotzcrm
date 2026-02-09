@@ -1,3 +1,6 @@
+from django.utils import timezone
+from core.helpers import crud, strings
+from .values import Values
 
 class Create:
     """
@@ -7,26 +10,26 @@ class Create:
 
     @staticmethod
     def childTable(state, mapper, modelClass, tbl, tableName, columnsList, rlc = False):
-        self.log(None, f'Entering create operation for childtable: [{tbl}]')
+        state.get('log').record(None, f'Entering create operation for childtable: [{tbl}]')
         
         fields = {}
         for col in columnsList:
-            if self.mapper.isCommonField(col):
-                key = tbl + col  # add on a prefix to match self.submission keys
+            if mapper.isCommonField(col):
+                key = tbl + col  # add on a prefix to match state.get('submission') keys
             else:
                 key = col
 
-            if key in self.submission:
+            if key in state.get('submission'):
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    if isinstance(self.submission[key], object):
-                        if hasattr(self.submission[key], 'id'):
-                            self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
+                    if isinstance(state.get('submission')[key], object):
+                        if hasattr(state.get('submission')[key], 'id'):
+                            state.get('submission')[key] = state.get('submission')[key].id  # must be a foreignkey Model instance, grab only the id.
                     
-                    fields[col] = self.submission[key]
-                    self.log([key, self.submission[key]], 'Field added')
+                    fields[col] = state.get('submission')[key]
+                    state.get('log').record([key, state.get('submission')[key]], 'Field added')
 
         if len(fields) <= 1:  # if record is empty, abort insertion...
-            if self.mapper.master('foreignKeyName') in fields:
+            if mapper.master('foreignKeyName') in fields:
                 return None  # only the master ID is added, no need need to insert
 
         fields['create_time'] = timezone.now()
@@ -38,32 +41,32 @@ class Create:
         record = modelClass(**fields)
         record.save()
         designation = '[RLC]' if rlc else ''
-        self.log({'fields': fields}, f'Create For: [{tbl}] | {designation}')
+        state.get('log').record({'fields': fields}, f'Create For: [{tbl}] | {designation}')
         return record
 
 
     @staticmethod
     def masterTable(state, mapper, tbl, modelClass, rlc = False):
-        self.log(None, f'Entering create operation for MT: [{tbl}]')
+        state.get('log').record(None, f'Entering create operation for MT: [{tbl}]')
         
-        t = crud.generateModelInfo(self.mapper, tbl)
+        t = crud.generateModelInfo(mapper, tbl)
         fields = {}
 
         for col in t['cols']:
-            # get the correct key reference for column in self.submission...
-            if self.mapper.isCommonField(col):
-                key = tbl + col  # add on a prefix to match self.submission keys
+            # get the correct key reference for column in state.get('submission')...
+            if mapper.isCommonField(col):
+                key = tbl + col  # add on a prefix to match state.get('submission') keys
             else:
                 key = col
 
-            if key in self.submission:
+            if key in state.get('submission'):
                 if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    if isinstance(self.submission[key], object):
-                        if hasattr(self.submission[key], 'id'):
-                            self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
+                    if isinstance(state.get('submission')[key], object):
+                        if hasattr(state.get('submission')[key], 'id'):
+                            state.get('submission')[key] = state.get('submission')[key].id  # must be a foreignkey Model instance, grab only the id.
                     
-                    fields[col] = self.submission[key]
-                    self.log(key, self.submission[key], 'Field added')
+                    fields[col] = state.get('submission')[key]
+                    state.get('log').record(key, state.get('submission')[key], 'Field added')
 
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
@@ -74,18 +77,18 @@ class Create:
 
         record = modelClass(**fields)
         record.save()
-        self.log({'fields': fields}, f'Create For: [{tbl}]')
+        state.get('log').record({'fields': fields}, f'Create For: [{tbl}]')
         return record
     
 
     @staticmethod
     def generateCreatorId(state,  mapper):
-        if 'assignor_id' in self.submission:
-            if self.submission['assignor_id'] is not None:
+        if 'assignor_id' in state.get('submission'):
+            if state.get('submission')['assignor_id'] is not None:
 
-                if strings.isPrimitiveType(self.submission['assignor_id']):
-                    return self.submission['assignor_id']
-                if hasattr(self.submission['assignor_id'], 'id'):
-                    return self.submission['assignor_id'].id
+                if strings.isPrimitiveType(state.get('submission')['assignor_id']):
+                    return state.get('submission')['assignor_id']
+                if hasattr(state.get('submission')['assignor_id'], 'id'):
+                    return state.get('submission')['assignor_id'].id
                 
         return None

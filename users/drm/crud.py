@@ -10,9 +10,9 @@ class Users(O2ORecords.CRUD):
         Please read the README.md in this folder before using.
     """
     
-    def __init__(self):
-        self.space = 'users'  # holds the name of current module/space
-        self.mtModel = User  # holds the class reference for Master Table's model
+    def startUpCode(self):
+        self.state.set('app', 'users')  # holds the name of current module/space
+        self.state.set('mtModel', User)  # holds the class reference for Master Table's model
 
         self.mapper = UsersMapper()
         self.mapper.setValuesMapper(ValuesMapper)
@@ -42,16 +42,16 @@ class Departments(M2MChildren.CRUD):
     """
     """
 
-    def __init__(self):
-        self.pk = 'wid'  # set table_abbrv for use in queries.
-        self.space = 'tasks'  # holds the name of current module/space
-        self.tbl = 'w'
+    def startUpCode(self):
+        self.state.set('pk', 'wid')  # set table_abbrv for use in queries.
+        self.state.set('app', 'users')  # holds the name of current module/space
+        self.state.set('tbl', 'w')
 
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.tbl)
-        self.firstCol = cols['firstCol']
-        self.secondCol = cols['secondCol']
+        cols = self.mapper.m2mFields(self.state.get('tbl'))
+        self.state.get('firstCol', cols['firstCol'])
+        self.state.get('secondCol', cols['secondCol'])
         super().__init__()
 
 
@@ -59,15 +59,15 @@ class Hierarchy(M2MChildren.CRUD):
     """
     """
 
-    def __init__(self):
-        self.pk = 'wid'  # set table_abbrv for use in queries.
-        self.space = 'tasks'  # holds the name of current module/space
-        self.tbl = 'w'
+    def startUpCode(self):
+        self.state.set('pk', 'wid')  # set table_abbrv for use in queries.
+        self.state.set('app', 'users')  # holds the name of current module/space
+        self.state.set('tbl', 'w')
         
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.tbl)
-        self.firstCol = cols['firstCol']
-        self.secondCol = cols['secondCol']
+        cols = self.mapper.m2mFields(self.state.get('tbl'))
+        self.state.get('firstCol', cols['firstCol'])
+        self.state.get('secondCol', cols['secondCol'])
         super().__init__()
         

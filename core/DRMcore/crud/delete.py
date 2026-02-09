@@ -1,4 +1,4 @@
-
+from django.utils import timezone
 
 class Delete:
     """
@@ -8,42 +8,42 @@ class Delete:
     
     @staticmethod
     def childTable(state, mapper, modelClass, tbl, tableName, columnsList, masterId, rlc = False):
-        self.log(None, f'ENTERING delete for CT [{tbl}]')
+        state.get('log').record(None, f'ENTERING delete for CT [{tbl}]')
         
         fieldsF = {}  # fields to find records with
-        fieldsF[self.mapper.master('foreignKeyName')] = masterId
+        fieldsF[mapper.master('foreignKeyName')] = masterId
         if not rlc:
-            fieldsF['latest'] = self.mapper.values.latest('latest')
+            fieldsF['latest'] = mapper.values.latest('latest')
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
         if not rlc:
-            fieldsU['latest'] = self.mapper.values.latest('archive')
+            fieldsU['latest'] = mapper.values.latest('archive')
 
         designation = '[RLC]' if rlc else ''
 
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}] | {designation}')
+        state.get('log').record({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}] | {designation}')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
 
     
     @staticmethod
     def masterTable(state, mapper, modelClass, tbl, tableName, columnsList, masterId):
-        self.log(None, f'ENTERING delete for MT [{tbl}]')
+        state.get('log').record(None, f'ENTERING delete for MT [{tbl}]')
         fieldsU = {}
         fieldsU['update_time'] = timezone.now()
         fieldsU['delete_time'] = fieldsU['update_time']
 
-        self.log({'id': masterId, 'update': fieldsU}, f'ID for deletion find | Fields for deletion update [{tbl}]')        
+        state.get('log').record({'id': masterId, 'update': fieldsU}, f'ID for deletion find | Fields for deletion update [{tbl}]')        
         return modelClass.objects.filter(id=masterId).update(**fieldsU)
 
     
     @staticmethod
-    def childTableById(self, modelClass, tbl, tableName, columnsList, childId):
+    def childTableById(state, mapper, modelClass, tbl, tableName, columnsList, childId):
         """
             Helper function for deleteById()
             For RLC type nodes only
         """
-        self.log(None, f'ENTERING deleteById for CT [{self.tbl}]')
+        state.get('log').record(None, f'ENTERING deleteById for CT [{state.get('tbl')}]')
         
         fieldsF = {}  # fields to find records with
         fieldsF['id'] = childId
@@ -51,22 +51,44 @@ class Delete:
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
 
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
+        state.get('log').record({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{state.get('tbl')}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
     
     @staticmethod
-    def allM2Ms(self, modelClass, tbl, tableName, columnsList, firstColId):
+    def allChildTableFirstCol(state, mapper, modelClass, tbl, tableName, columnsList, firstColId):
         """
-            Helper function for deleteAllForFirstCol(). M2M nodes only.
+            Archive all matching first-column. 
+            M2M nodes only.
         """
-        self.log(None, f'ENTERING deleteAllForFirstCol for CT [{self.tbl}]')
+        state.get('log').record(None, f'ENTERING deleteAllForFirstCol for CT [{state.get('tbl')}]')
         
         fieldsF = {}  # fields to find records with
-        fieldsF[self.firstCol] = firstColId
+        fieldsF[state.get('firstCol')] = firstColId
         
         fieldsU = {}  # fields to update in found records
         fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.mapper.values.latest('archive')
+        fieldsU['latest'] = mapper.values.latest('archive')
 
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
+        state.get('log').record({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{state.get('tbl')}]')
         return modelClass.objects.filter(**fieldsF).update(**fieldsU)
+
+
+    def allChildTableM2ms(state, mapper, modelClass, tbl, tableName, columnsList):
+        """
+            Archive any existing records matching both firstCol & secondCol
+            M2M nodes only.
+        """
+        state.get('log').record(None, f'ENTERING update for childtable [{tbl}]')
+
+        fieldsF = {}
+        fieldsF[state.get('firstCol')] = state.get('submission')[state.get('firstCol')]
+        fieldsF[state.get('secondCol')] = state.get('submission')[state.get('secondCol')]
+
+        fieldsU = {}
+        fieldsU['delete_time'] = timezone.now()
+        fieldsU['latest'] = mapper.values.latest('archive')        
+
+        modelClass.objects.filter(**fieldsF).update(**fieldsU)
+        state.get('log').record({'fields': fieldsU}, f'Attempted update For: [{tbl}]')
+
+    

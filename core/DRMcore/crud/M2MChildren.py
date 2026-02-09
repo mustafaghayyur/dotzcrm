@@ -3,19 +3,20 @@ from . import Background
 from core.helpers import crud, misc
 
 from .create import Create
-from .update import Update
 from .delete import Delete
 
-"""
-    Many-to-Many CRUD Operations that can be used through out the system.
-"""
-class CRUD(Background.Operations):
 
-    firstCol = None  # defined in inheritor
-    secondCol = None  # defined in inheritor
-    
-    def __init__(self):
-        super().__init__()
+class CRUD(Background.Operations):
+    """
+        Many-to-Many CRUD Operations that can be used through out the system.
+    """
+
+    def startUpCode(self):
+        self.state.set('firstCol', None)
+        self.state.set('secondCol', None)
+        self.state.set('tbl', None)
+        self.state.set('pk', None)
+        
 
     def create(self, dictionary):
         """
@@ -23,7 +24,7 @@ class CRUD(Background.Operations):
         """
         self.saveSubmission('create', dictionary)  # save to state
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
         if not crud.isValidId(self.submission, self.firstCol):
             return None
@@ -31,28 +32,28 @@ class CRUD(Background.Operations):
             return None
         
         # first, we attempt o update any existing records matching first & second M2M cols...
-        Update.childTableM2M(t['model'], self.tbl, t['table'], t['cols'])
+        Delete.allChildTableM2ms(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
 
         # next, we will create a new record for first and second columns.
-        return Create.childTable(t['model'], self.tbl, t['table'], t['cols'])
+        return Create.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
         
     def read(self, definitions):
         """
             See documentation on definitions formulation.
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
-            raise Exception(f'Fetch request for {self.firstCol} and {self.secondCol} failed. Improper definitions for query, in {self.space}.CRUD.read()')
+            raise Exception(f'Error 2032: Fetch request for {self.firstCol} and {self.secondCol} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
 
         if 'latest' not in definitions:
             definitions['latest'] = self.mapper.values.latest('latest')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
         rawObjs = None
 
-        if self.pk in definitions:
-            if crud.isValidId(definitions, self.pk):
+        if self.state.get('pk') in definitions:
+            if crud.isValidId(definitions, self.state.get('pk')):
                 # specific record being sought:
-                rawObjs = t['model'].objects.fetchById(definitions[self.pk])
+                rawObjs = t['model'].objects.fetchById(definitions[self.state.get('pk')])
             
         if self.firstCol in definitions and self.secondCol not in definitions:        
             if crud.isValidId(definitions, self.firstCol):
@@ -86,20 +87,19 @@ class CRUD(Background.Operations):
         self.saveSubmission('create', dictionary)  # save to state
 
         if not crud.isValidId(self.submission, self.firstCol) or not crud.isValidId(self.submission, self.secondCol):
-            raise Exception(f'M2M Record could not be deleted. Invalid IDs supplied in {self.space}.CRUD.deleteM2M()')
+            raise Exception(f'Error 2031: M2M Record could not be deleted. Invalid IDs supplied in {self.state.get('app')}.CRUD.deleteM2M()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return Update.childTableM2M(t['model'], self.tbl, t['table'], t['cols'])
+        return Delete.allChildTableM2ms(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
 
     def deleteAllForFirstCol(self, firstColId):
         """
-            Attempts to delete all M2M-type children records for a firstCol ID
-            provided.
+            Deletes all M2M-type children records for provided firstCol ID.
         """
         if not isinstance(firstColId, int) or firstColId < 1:
-            raise Exception(f'M2M Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2M()')
+            raise Exception(f'Error 2030: M2M Records could not be deleted. Invalid single column ID supplied in {self.state.get('app')}.CRUD.deleteM2M()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return Delete.allM2Ms(t['model'], self.tbl, t['table'], t['cols'], firstColId)
+        return Delete.allChildTableFirstCol(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], firstColId)

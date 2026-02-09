@@ -1,13 +1,10 @@
-from django.utils import timezone
-from django.db import models
 from django.conf import settings as ds  # stands for django-settings
 
 from core.lib.state import State
-from . import Validation
 from core import dotzSettings
 from .validation import Validate
-from core.helpers import misc
-
+from .logger import Logger
+from core.helpers import crud
 
 class Operations():
     """
@@ -16,17 +13,23 @@ class Operations():
     state = None
     mapper = None
 
-
     def __init__(self):
         self.state = State()
-        # loads configs related to the module (defined in self.space)
-        self.state.set('module', getattr(dotzSettings, self.space))
+        # loads configs related to the module (defined in self.state.get('app'))
+        self.state.set('module', getattr(dotzSettings, self.state.get('app')))
 
         # holds all O2O primary keys for given space/module
         self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
+        
+        self.state.set('abrvSize', dotzSettings.project['mapper']['tblKeySize'] - 1)
+        self.state.set('mtModel', None) 
 
         # submission will hold dictionary of submitted data to use for crud operation in question
         self.state.set('submission', None)
+        
+        # setup logger
+        self.state.set('log', Logger())
+        self.state.get('log').settings(self.state.get('app'), self.state.get('module')['crud_logger_file'])
 
         self.startUpCode()
 
@@ -36,6 +39,10 @@ class Operations():
             Used by app-level inheritor classes to run init processes.
         """
         pass
+
+
+    def setMasterCrudClass(self, classReference):
+        self.state.set('masterCrudObj', classReference())
 
 
     def saveSubmission(self, operation, submission):
@@ -69,9 +76,9 @@ class Operations():
         pass
 
         for pk in self.idCols:
-            tbl = pk[:self.abrvSize]  # table abbreviation
+            tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
 
-            if pk == self.mapper.master('abbreviation') + 'id':
+            if pk == self.mapper.master('abbreviation') + '_id':
                 continue  # can't prune MT duplicates...
 
             t = crud.generateModelInfo(self.mapper, tbl)
@@ -81,21 +88,10 @@ class Operations():
         records = self.fullRecord(mId)
 
         if not records:
-            raise Exception(f'No valid record found for provided {self.space} ID, in: {self.space}.CRUD.update().')
+            raise Exception(f'Error 2090: No valid record found for provided {self.state.get('app')} ID, in: {self.state.get('app')}.CRUD.update().')
 
         if len(records) > 1:
             return self.pruneLatestRecords(records, mId)  # bit if recursion
 
         return records[0]
     
-    
-    def log(self, subject, log_message, level = 1):
-        """
-            Logs all C.U.D. operations in CRUD.log
-            
-            :param subject: [*] any variable to inspect in logs
-            :param log_message: string message for log
-            :param level: 1 = minimal details | 2 = deep dive into subject
-        """
-        if ds.DEBUG:
-            misc.log(subject, {'space': self.state.get('app'), 'msg': log_message}, level, self.module['crud_logger_file'], crud=True)
