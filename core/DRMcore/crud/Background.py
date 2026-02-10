@@ -1,4 +1,5 @@
 from django.conf import settings as ds  # stands for django-settings
+from django.utils import timezone
 
 from core.lib.state import State
 from core import dotzSettings
@@ -61,19 +62,59 @@ class Operations():
     def checkChildForMultipleLatests(self, modelClass, tbl, tableName, columnsList, fetchedRecords):
         """
             For given CT, see if fetched records have multiple entries 
-            marked as 'latest' in the DB.
-            @todo
+            marked as 'latest' in the DB. If found, archives all but the most recent.
         """
-        pass
+        tblIdField = f'{tbl}_{self.mapper.column('latest')}'
+        createTimeField = f'{tbl}_{self.mapper.column('create_time')}'
+        latestField = f'{tbl}_{self.mapper.column('latest')}'
+        latestValue = self.mapper.values.latest('latest')
+        archiveValue = self.mapper.values.latest('archive')
+        logger = self.state.get('log')
+        logger.record(f'Commencing checkChildForMultipleLatests() for {tableName}')
+        
+        # Group records by child table ID
+        recordsByCtId = {}
+        for record in fetchedRecords:
+            ctId = getattr(record, tblIdField, None)
+            if ctId is not None and ctId not in recordsByCtId:
+                recordsByCtId[ctId] = record
+                logger.record(None, f'[ctId: {ctId}] - record added to recordsByCtId')
+        
+        logger.record(recordsByCtId, f'Final recordsByCtId dictionary.')
+        
+        # For each child table ID, check if there are multiple 'latest' records
+        latestRecords = [rec for rec in recordsByCtId if getattr(rec, latestField, None) == latestValue]
+        logger.record(latestRecords, f'Dict-to-List conversion of recs: latestRecords')
 
-    def pruneLatestRecords(self, fetchedRecords, mId):
+        if len(latestRecords) > 1:
+            # Multiple records marked as latest, need to prune
+            # Sort by create_time (most recent first)
+            latestRecords.sort(
+                key=lambda rec: getattr(rec, createTimeField, None) or '',
+                reverse=True
+            )
+
+            logger.record(latestRecords, f'Sorted list of recs (by create-time): latestRecords')
+            
+            # Keep the first (most recent), archive the rest (mark as latest=2)
+            for record in latestRecords[1:]:
+                recordId = getattr(record, tblIdField, None)
+                modelClass.objects.filter(id=recordId).update(latest=archiveValue, delete_time=timezone.now())
+
+        logger.record(latestRecords, f'End of checkChildForMultipleLatests() for {tableName}')
+
+    def pruneLatestRecords(self, fetchedRecords, mId, iter = 1):
         """
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
             for each CT.
-            @todo: implement the whole operation!
+
+            fetchedRecords holds a Left Join query between one master-table and several child-tables.
+            Child tables can only have one active (i.e. 'latest' = 1) record for each MT.
+            If fetchedRecords has more than one RawQuerySet result rows, then multiple CT entries incorrectly-marked '1' exist.
+            In such a case, we need to ensure the child table entry wit the most recent 'create_time' value is kept, and all others are marked '2' (i.e. archived).
         """
-        pass
+        self.state.get('log').record(fetchedRecords, 'Error: Full Record Retrieval Found multiple CT records. Commencing pruneLatestRecords()')
 
         for pk in self.idCols:
             tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
@@ -88,10 +129,17 @@ class Operations():
         records = self.fullRecord(mId)
 
         if not records:
-            raise Exception(f'Error 2090: No valid record found for provided {self.state.get('app')} ID, in: {self.state.get('app')}.CRUD.update().')
+            self.state.get('log').record(records, f'Error 2090: No valid record found for provided ID, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
+            raise Exception(f'Error 2090: No valid record found for provided ID, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
 
         if len(records) > 1:
-            return self.pruneLatestRecords(records, mId)  # bit if recursion
+            if iter > 5:
+                self.state.get('log').record(records, f'Error 2091: Maximum pruneLatestRecords() iterations reached. Unable to prune Latest Records. Proceeding with [0] index record.')
+                return records[0]
+            
+            self.state.get('log').record(records, 'Running pruneLatestRecords() again, multiple records remain.')
+            return self.pruneLatestRecords(records, mId, iter + 1)  # bit if recursion
 
+        self.state.get('log').record(records, 'Records found at end of pruneLatestRecords()')
         return records[0]
     

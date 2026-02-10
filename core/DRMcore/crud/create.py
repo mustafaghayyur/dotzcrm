@@ -47,11 +47,11 @@ class Create:
             if mapper.master('foreignKeyName') in fields:
                 return None  # only the master ID is added, no need need to insert
 
-        fields['create_time'] = timezone.now()
+        fields[mapper.column('create_time')] = timezone.now()
         if rlc:
-            fields['update_time'] = fields['create_time']
+            fields[mapper.column('update_time')] = fields[mapper.column('create_time')]
         else:
-            fields['latest'] = 1
+            fields[mapper.column('latest')] = 1
 
         record = modelClass(**fields)
         record.save()
@@ -96,11 +96,11 @@ class Create:
         if len(fields) == 0:  # if fields is empty, abort insertion...
             return None
 
-        fields['create_time'] = timezone.now()
-        fields['update_time'] = fields['create_time']
+        fields[mapper.column('create_time')] = timezone.now()
+        fields[mapper.column('update_time')] = fields[mapper.column('create_time')]
 
-        if 'creator_id' in t['cols']:
-            fields = Create.generateCreatorId(state, fields)
+        if mapper.column('creator_id') in t['cols']:
+            fields = Create.generateCreatorId(state, mapper, fields)
 
         record = modelClass(**fields)
         record.save()
@@ -109,7 +109,7 @@ class Create:
     
 
     @staticmethod
-    def generateCreatorId(state, fields):
+    def generateCreatorId(state, mapper, fields):
         """
             Attempts to assign creator_id using current-user object.
             Else, a field 'assignor_id', if available.
@@ -119,22 +119,25 @@ class Create:
             :param fields: [dict]
         """
         submission = state.get('submission')
+        userKey = mapper.column('current_user')
+        assignorKey = mapper.column('assignor_id')
+        creatorKey = mapper.column('creator_id')
 
         if not isinstance(fields, dict):
             raise Exception('Error 2080: generateCreatorId() requires a dictionary for fields.')
         
-        if 'current_user' in submission:
-            if submission['current_user'] is not None:
-                if strings.isPrimitiveType(submission['current_user']):
-                    fields['creator_id'] = submission['current_user']
-                if isinstance(submission['current_user'], object) and  hasattr(submission['current_user'], 'id'):
-                    fields['creator_id'] = submission['assignor_id'].id
+        if userKey in submission:
+            if submission[userKey] is not None:
+                if strings.isPrimitiveType(submission[userKey]):
+                    fields[creatorKey] = submission[userKey]
+                if isinstance(submission[userKey], object) and  hasattr(submission[userKey], mapper.column('id')):
+                    fields[creatorKey] = submission[userKey].id
         
-        if 'assignor_id' in submission:
-            if submission['assignor_id'] is not None:
-                if strings.isPrimitiveType(submission['assignor_id']):
-                    fields['creator_id'] = submission['assignor_id']
-                if hasattr(submission['assignor_id'], 'id'):
-                    fields['creator_id'] = submission['assignor_id'].id
+        if assignorKey in submission:
+            if submission[assignorKey] is not None:
+                if strings.isPrimitiveType(submission[assignorKey]):
+                    fields[creatorKey] = submission[assignorKey]
+                if hasattr(submission[assignorKey], 'id'):
+                    fields[creatorKey] = submission[assignorKey].id
                 
         return fields

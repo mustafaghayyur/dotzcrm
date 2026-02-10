@@ -8,7 +8,6 @@ class Update:
     """
         Static class
         Handles all update operations for CRUD
-        @todo: reconcile create and update operation checks. Should be the same
     """
 
     @staticmethod

@@ -20,14 +20,14 @@ class CRUD(Background.Operations):
         
         masterRecord = Create.masterTable(self.state, self.mapper, self.mapper.master('abbreviation'), self.state.get('mtModel'))
 
-        if not hasattr(masterRecord, 'id') or not isinstance(masterRecord, models.Model):
+        if not hasattr(masterRecord, self.mapper.column('id')) or not isinstance(masterRecord, models.Model):
             raise Exception(f'Error 2042: Something went wrong. {self.state.get('app')} record could not be created in: {self.state.get('app')}.CRUD.create().')
 
         self.submission[self.mapper.master('foreignKeyName')] = masterRecord.id  # add master table ID to dictionary
 
         # Time to create child records, loop through each child table:
         for pk in self.idCols:
-            if pk == self.mapper.master('abbreviation') + '_id':
+            if pk == self.mapper.master('abbreviation') + '_' + self.mapper.column('id'):
                 continue
 
             tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
@@ -58,7 +58,7 @@ class CRUD(Background.Operations):
         """
         self.saveSubmission('update', dictionary)  # save to state
 
-        mId = self.mapper.master('abbreviation') + '_id'
+        mId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
 
         records = self.fullRecord(self.submission[mId])
 
@@ -66,7 +66,8 @@ class CRUD(Background.Operations):
             raise Exception(f'Error 2041: No valid record found for provided {self.state.get('app')} ID, in: {self.state.get('app')}.CRUD.update().')
 
         if len(records) > 1:
-            completeRecord = records[0] # self.pruneLatestRecords(records, mId) @todo: implement pruneLatestRecords()
+            # completeRecord = records[0] 
+            self.pruneLatestRecords(records, mId)
         else:
             completeRecord = records[0]
 
@@ -100,7 +101,7 @@ class CRUD(Background.Operations):
             Validates a given record ID. If valid, attempts to  mark record
             as deleted in DB. Else, throws an exception.
         """
-        mtId = self.mapper.master('abbreviation') + '_id'
+        mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         if not crud.isValidId({mtId: masterId}, masterId):
             raise Exception(f'Error 2040: {self.state.get('app')} Record could not be deleted. Invalid id supplied in {self.state.get('app')}.CRUD.delete()')
 

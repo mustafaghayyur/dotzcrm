@@ -22,7 +22,7 @@ class CRUD(Background.Operations):
             attempts to save to DB. Else, throws an exception.
         """
         self.saveSubmission('create', dictionary)  # save to state
-        mtId = self.mapper.master('abbreviation') + '_id'
+        mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         masterId = self.mapper.master('foreignKeyName')
 
         masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[masterId]})
@@ -45,7 +45,7 @@ class CRUD(Background.Operations):
         """
         self.saveSubmission('update', dictionary)  # save to state
 
-        mtId = self.mapper.master('abbreviation') + '_id'
+        mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         mtForeignKey = self.mapper.master('foreignKeyName')
 
         # masterRecords gets the parent record id, to which this RLC belongs
