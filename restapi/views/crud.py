@@ -23,7 +23,7 @@ def crud(request, id, format=None):
                 return OneToOnes.create(request, format)
             case 'PUT':
                 return OneToOnes.edit(request, format)
-            case 'DELETE':
+            case 'DELETE': # @todo: add response message on success
                 return OneToOnes.delete(request, id, format)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)

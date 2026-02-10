@@ -12,10 +12,13 @@ class CRUD(Background.Operations):
     """
 
     def startUpCode(self):
-        self.state.set('firstCol', None)
-        self.state.set('secondCol', None)
-        self.state.set('tbl', None)
-        self.state.set('pk', None)
+        """
+            Overwite in app-level inheritor. Be sure to define these values.
+        """
+        self.state.set('firstCol', None)  # as defined in mapper
+        self.state.set('secondCol', None)  # as defined in mapper
+        self.state.set('tbl', None)  # table key recognized by mapper
+        self.state.set('pk', None)  # primary-key or "tbl_id" for this RLC table.
         
 
     def create(self, dictionary):
@@ -26,9 +29,9 @@ class CRUD(Background.Operations):
 
         t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        if not crud.isValidId(self.submission, self.firstCol):
+        if not crud.isValidId(self.state.get('submission'), self.state.get('firstCol')):
             return None
-        if not crud.isValidId(self.submission, self.secondCol):
+        if not crud.isValidId(self.state.get('submission'), self.state.get('secondCol')):
             return None
         
         # first, we attempt o update any existing records matching first & second M2M cols...
@@ -42,7 +45,7 @@ class CRUD(Background.Operations):
             See documentation on definitions formulation.
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
-            raise Exception(f'Error 2032: Fetch request for {self.firstCol} and {self.secondCol} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
+            raise Exception(f'Error 2032: Fetch request for {self.state.get('firstCol')} and {self.state.get('secondCol')} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
 
         if 'latest' not in definitions:
             definitions['latest'] = self.mapper.values.latest('latest')
@@ -55,19 +58,19 @@ class CRUD(Background.Operations):
                 # specific record being sought:
                 rawObjs = t['model'].objects.fetchById(definitions[self.state.get('pk')])
             
-        if self.firstCol in definitions and self.secondCol not in definitions:        
-            if crud.isValidId(definitions, self.firstCol):
+        if self.state.get('firstCol') in definitions and self.state.get('secondCol') not in definitions:        
+            if crud.isValidId(definitions, self.state.get('firstCol')):
                 if definitions['latest']:
-                    rawObjs = t['model'].objects.fetchAllCurrentByFirstId(definitions[self.firstCol])
+                    rawObjs = t['model'].objects.fetchAllCurrentByFirstId(definitions[self.state.get('firstCol')])
         
-        if self.secondCol in definitions and self.firstCol not in definitions:
-            if crud.isValidId(definitions, self.secondCol):
+        if self.state.get('secondCol') in definitions and self.state.get('firstCol') not in definitions:
+            if crud.isValidId(definitions, self.state.get('secondCol')):
                 if definitions['latest']:
-                    rawObjs = t['model'].objects.fetchAllCurrentBySecondId(definitions[self.secondCol])
+                    rawObjs = t['model'].objects.fetchAllCurrentBySecondId(definitions[self.state.get('secondCol')])
         
-        if self.firstCol in definitions and self.secondCol in definitions:        
-            if crud.isValidId(definitions, self.firstCol) and crud.isValidId(definitions, self.secondCol):
-                rawObjs = t['model'].objects.fetchLatest(definitions[self.firstCol], definitions[self.secondCol], definitions['latest'])
+        if self.state.get('firstCol') in definitions and self.state.get('secondCol') in definitions:        
+            if crud.isValidId(definitions, self.state.get('firstCol')) and crud.isValidId(definitions, self.state.get('secondCol')):
+                rawObjs = t['model'].objects.fetchLatest(definitions[self.state.get('firstCol')], definitions[self.state.get('secondCol')], definitions['latest'])
 
         if rawObjs:
             return rawObjs
@@ -86,7 +89,7 @@ class CRUD(Background.Operations):
         """
         self.saveSubmission('create', dictionary)  # save to state
 
-        if not crud.isValidId(self.submission, self.firstCol) or not crud.isValidId(self.submission, self.secondCol):
+        if not crud.isValidId(self.state.get('submission'), self.state.get('firstCol')) or not crud.isValidId(self.state.get('submission'), self.state.get('secondCol')):
             raise Exception(f'Error 2031: M2M Record could not be deleted. Invalid IDs supplied in {self.state.get('app')}.CRUD.deleteM2M()')
 
         t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))

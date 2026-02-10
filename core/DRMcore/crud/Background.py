@@ -16,24 +16,24 @@ class Operations():
 
     def __init__(self):
         self.state = State()
+        self.state.set('mtModel', None) 
+        
+        # submission will hold dictionary of submitted data to use for crud operation in question
+        self.state.set('submission', None)
+        self.state.set('abrvSize', dotzSettings.project['mapper']['tblKeySize'] - 1)
+
+        self.startUpCode()
+
         # loads configs related to the module (defined in self.state.get('app'))
         self.state.set('module', getattr(dotzSettings, self.state.get('app')))
 
-        # holds all O2O primary keys for given space/module
-        self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
-        
-        self.state.set('abrvSize', dotzSettings.project['mapper']['tblKeySize'] - 1)
-        self.state.set('mtModel', None) 
-
-        # submission will hold dictionary of submitted data to use for crud operation in question
-        self.state.set('submission', None)
-        
         # setup logger
         self.state.set('log', Logger())
         self.state.get('log').settings(self.state.get('app'), self.state.get('module')['crud_logger_file'])
 
-        self.startUpCode()
-
+        # holds all O2O primary keys for given space/module
+        self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
+        
 
     def startUpCode(self):
         """
@@ -108,18 +108,13 @@ class Operations():
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
             for each CT.
-
-            fetchedRecords holds a Left Join query between one master-table and several child-tables.
-            Child tables can only have one active (i.e. 'latest' = 1) record for each MT.
-            If fetchedRecords has more than one RawQuerySet result rows, then multiple CT entries incorrectly-marked '1' exist.
-            In such a case, we need to ensure the child table entry wit the most recent 'create_time' value is kept, and all others are marked '2' (i.e. archived).
         """
         self.state.get('log').record(fetchedRecords, 'Error: Full Record Retrieval Found multiple CT records. Commencing pruneLatestRecords()')
 
-        for pk in self.idCols:
+        for pk in self.state.get('idCols'):
             tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
 
-            if pk == self.mapper.master('abbreviation') + '_id':
+            if pk == self.mapper.master('abbreviation') + '_' + self.mapper.column('id'):
                 continue  # can't prune MT duplicates...
 
             t = crud.generateModelInfo(self.mapper, tbl)

@@ -74,7 +74,7 @@ class Conditions():
             keyDb = key[sz:]
 
         if keyDb in mapper.dateFields():
-            itemType = Conditions.determineDateArgumentType(value)
+            itemType = Conditions.determineDateArgumentType(state, value)
             
             if itemType is None:
                 return ''

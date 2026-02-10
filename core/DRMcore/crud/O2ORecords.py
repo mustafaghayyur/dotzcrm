@@ -23,10 +23,10 @@ class CRUD(Background.Operations):
         if not hasattr(masterRecord, self.mapper.column('id')) or not isinstance(masterRecord, models.Model):
             raise Exception(f'Error 2042: Something went wrong. {self.state.get('app')} record could not be created in: {self.state.get('app')}.CRUD.create().')
 
-        self.submission[self.mapper.master('foreignKeyName')] = masterRecord.id  # add master table ID to dictionary
+        self.state.get('submission')[self.mapper.master('foreignKeyName')] = masterRecord.id  # add master table ID to dictionary
 
         # Time to create child records, loop through each child table:
-        for pk in self.idCols:
+        for pk in self.state.get('idCols'):
             if pk == self.mapper.master('abbreviation') + '_' + self.mapper.column('id'):
                 continue
 
@@ -60,7 +60,7 @@ class CRUD(Background.Operations):
 
         mId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
 
-        records = self.fullRecord(self.submission[mId])
+        records = self.fullRecord(self.state.get('submission')[mId])
 
         if not records:
             raise Exception(f'Error 2041: No valid record found for provided {self.state.get('app')} ID, in: {self.state.get('app')}.CRUD.update().')
@@ -72,21 +72,21 @@ class CRUD(Background.Operations):
             completeRecord = records[0]
 
         # Loop through each defined Primary Key to see if its table needs an update
-        for pk in self.idCols:
+        for pk in self.state.get('idCols'):
             tbl = pk[:self.state.get('abrvSize')]  # child table abbreviation
             t = crud.generateModelInfo(self.mapper, tbl)
 
             if pk == mId:
-                if crud.isValidId(self.submission, pk):
+                if crud.isValidId(self.state.get('submission'), pk):
                     Update.masterTable(self.state, self.mapper, t['model'], t['table'], t['cols'], completeRecord)
                     continue
             
             # @todo: we could remove the need for child-ids from updates, making front-end dev easier. Not very important.
-            if pk not in self.submission:
+            if pk not in self.state.get('submission'):
                 Create.childTable(self.state, self.mapper, t['model'], tbl, t['table'], t['cols'])
                 continue
                 
-            if not crud.isValidId(self.submission, pk):
+            if not crud.isValidId(self.state.get('submission'), pk):
                 # create a new record for child table if pk is invalid
                 Create.childTable(self.state, self.mapper, t['model'], tbl, t['table'], t['cols'])
                 continue
@@ -94,7 +94,7 @@ class CRUD(Background.Operations):
             # determine if an update is necessary and carry out update operations...
             Update.childTable(self.state, self.mapper, t['model'], tbl, t['table'], t['cols'], completeRecord)
 
-        return { mId: self.submission[mId] } # since .update() operation only returns # of rows affected, not the updated record.
+        return { mId: self.state.get('submission')[mId] } # since .update() operation only returns # of rows affected, not the updated record.
 
     def delete(self, masterId):
         """
@@ -102,10 +102,10 @@ class CRUD(Background.Operations):
             as deleted in DB. Else, throws an exception.
         """
         mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
-        if not crud.isValidId({mtId: masterId}, masterId):
+        if not crud.isValidId({mtId: masterId}, mtId):
             raise Exception(f'Error 2040: {self.state.get('app')} Record could not be deleted. Invalid id supplied in {self.state.get('app')}.CRUD.delete()')
 
-        for pk in self.idCols:
+        for pk in self.state.get('idCols'):
             tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
 
             if pk == mtId:

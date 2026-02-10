@@ -12,8 +12,11 @@ class CRUD(Background.Operations):
         Handles all crud operations for Revision-less Children (RLC) tables.
     """
     def startUpCode(self):
-        self.state.set('tbl', None)
-        self.state.set('pk', None)
+        """
+            Overwite in app-level inheritor. Be sure to define these values.
+        """
+        self.state.set('tbl', None)  # table key recognized by mapper
+        self.state.set('pk', None)  # primary-key or "tbl_id" for this RLC table.
 
     def create(self, dictionary):
         """
@@ -25,7 +28,7 @@ class CRUD(Background.Operations):
         mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         masterId = self.mapper.master('foreignKeyName')
 
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[masterId]})
+        masterRecord = self.state.get('masterCrudObj').read([mtId], {mtId: self.state.get('submission')[masterId]})
 
         if not masterRecord:
             raise Exception(f'Error 2064: Master Record could not be found. RLC cannot be created in {self.state.get('app')}.CRUD.create()')
@@ -49,13 +52,13 @@ class CRUD(Background.Operations):
         mtForeignKey = self.mapper.master('foreignKeyName')
 
         # masterRecords gets the parent record id, to which this RLC belongs
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
+        masterRecord = self.state.get('masterCrudObj').read([mtId], {mtId: self.state.get('submission')[mtId]})
 
         if not masterRecord:
             raise Exception(f'Error 2063: No valid record found for provided {self.state.get('app')} ID for RLC update, in: {self.state.get('app')}.CRUD.update().')
 
         pk = self.state.get('pk')
-        originalRLC = self.read({pk: self.submission[pk], mtForeignKey: self.submission[mtForeignKey]})
+        originalRLC = self.read({pk: self.state.get('submission')[pk], mtForeignKey: self.state.get('submission')[mtForeignKey]})
 
         if not originalRLC:
             raise Exception(f'Error 2062: No valid RLC record found for provided ID, in: {self.state.get('app')}.CRUD.update().')

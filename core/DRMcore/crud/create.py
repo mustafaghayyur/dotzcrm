@@ -13,7 +13,7 @@ class Create:
     @staticmethod
     def childTable(state, mapper, modelClass, tbl, tableName, columnsList, rlc = False):
         """
-            Creates specific child table record.
+            Creates specific child table's record.
         
             :param state: State() instance
             :param mapper: Mapper() instance

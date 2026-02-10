@@ -14,7 +14,6 @@ class Tasks(O2ORecords.CRUD):
         self.state.set('mtModel', Task)  # holds the class reference for Master Table's model
         self.mapper = TasksMapper()
         
-        super().__init__()
 
     def fullRecord(self, task_id):
         """
@@ -90,5 +89,4 @@ class Watchers(M2MChildren.CRUD):
         cols = self.mapper.m2mFields(self.state.get('tbl'))
         self.state.set('firstCol', cols['firstCol'])
         self.state.set('secondCol', cols['secondCol'])
-        super().__init__()
         

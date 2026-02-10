@@ -17,7 +17,6 @@ class Users(O2ORecords.CRUD):
         self.mapper = UsersMapper()
         self.mapper.setValuesMapper(ValuesMapper)
         
-        super().__init__()
 
     def fullRecord(self, task_id):
         """
@@ -52,7 +51,6 @@ class Departments(M2MChildren.CRUD):
         cols = self.mapper.m2mFields(self.state.get('tbl'))
         self.state.get('firstCol', cols['firstCol'])
         self.state.get('secondCol', cols['secondCol'])
-        super().__init__()
 
 
 class Hierarchy(M2MChildren.CRUD):
@@ -69,5 +67,4 @@ class Hierarchy(M2MChildren.CRUD):
         cols = self.mapper.m2mFields(self.state.get('tbl'))
         self.state.get('firstCol', cols['firstCol'])
         self.state.get('secondCol', cols['secondCol'])
-        super().__init__()
         
