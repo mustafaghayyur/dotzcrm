@@ -39,6 +39,15 @@ class RelationshipMappers(BaseOperations):
         """
         return self._dateFields()
     
+    def serializers(self, tblKey):
+        """
+            returns serizler(s) relevent to mapper/table-key
+            
+            :param tblKey: [str] key for table
+        """
+        info = self._serializers()
+        return self.returnValue(info, tblKey)
+    
     
     def defaults(self, requestedFunc):
         """

@@ -3,17 +3,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.helpers import crud, misc
-from restapi.lib.helpers import *
-from tasks.drm.crud import *
+from core.helpers import crud
 from .helpers.tasksO2Os import OneToOnes
 
 
 @api_view(['POST', 'PUT', 'GET', 'DELETE'])
 def crud(request, id, format=None):
-    """
-        Tasks operations for individual Task O2O records.
-    """
     method = request.method
     try:
         match method:

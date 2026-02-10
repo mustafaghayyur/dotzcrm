@@ -74,6 +74,13 @@ class TasksMapper(RelationshipMappers):
             Add all columns found in this mapper, that are date fields.
         """
         return ['create_time', 'update_time', 'delete_time', 'deadline']
+    
+    def _serializers(self):
+        return {
+            'tata': 'TaskO2ORecordSerializerGeneric',
+            'taco': 'CommentSerializerGeneric',
+            'tawa': 'WatcherSerializerGeneric',
+        }
 
     def _defaults_order_by(self):
         return [
