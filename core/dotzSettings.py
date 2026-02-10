@@ -1,6 +1,6 @@
 """
     These settings can be imported to anywhere in the project with:
-     > from core.settings import * (asterisk representing name of dictionary)
+     > from core.dotzSettings import * (asterisk representing name of dictionary)
 """
 
 project = {
@@ -22,6 +22,25 @@ project = {
 
 tasks = {
     'recentInterval': '30',  # what is recent in generic query terms? Number of days.
-    # CRUD operations are logged properly when Django's DEBUG setting is True:
-    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'
+    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
+}
+
+users = {
+    'recentInterval': '30',  # what is recent in generic query terms? Number of days.
+    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
+}
+
+tickets = {
+    'recentInterval': '30',  # what is recent in generic query terms? Number of days.
+    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
+}
+
+documents = {
+    'recentInterval': '30',  # what is recent in generic query terms? Number of days.
+    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
+}
+
+customers = {
+    'recentInterval': '30',  # what is recent in generic query terms? Number of days.
+    'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
 }

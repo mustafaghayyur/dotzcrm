@@ -93,7 +93,7 @@ class CRUD(Background.Operations):
 
         return Delete.allChildTableM2ms(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
 
-    def deleteAllForFirstCol(self, firstColId):
+    def deleteByFirstCol(self, firstColId):
         """
             Deletes all M2M-type children records for provided firstCol ID.
         """

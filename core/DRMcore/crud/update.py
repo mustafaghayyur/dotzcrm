@@ -12,33 +12,46 @@ class Update:
     """
 
     @staticmethod
-    def masterTable(state, mapper, mtModel, tableName, columnsList, completeRecord, rlc = False):
+    def masterTable(state, mapper, mtModel, tableName, columnsList, completeRecord):
+        """
+            Updates master table.
+            
+            :param state: State() instance
+            :param mapper: Mapper() instance
+            :param mtModel: MT Model class reference
+            :param tableName: [str] full table name
+            :param columnsList: [list] columns of table in question
+            :param completeRecord: QuerySet result Model insatnce
+        """
         state.get('log').record(None, f'ENTERING update for MT [{tableName}]')
 
         if not completeRecord.id or completeRecord.id is None:
             raise Exception(f'Something went wrong. Update record not found in system. {state.get('app')}.CRUD.update()')
 
         fields = {}
+        submission = state.get('submission')
         ignored = mapper.ignoreOnUpdates(mapper.master('abbreviation'))
 
         for col in columnsList:
-            if col in ignored:
-                continue  # ignore columns don't need a comparison in update operations
-
             if mapper.isCommonField(col):
                 key = mapper.master('abbreviation') + '_' + col  # need tbl_abbrv prefix for comparison
             else:
                 key = col
 
-            if key in state.get('submission'):
-                state.get('submission')[key] = Values.convertModelToId(getattr(completeRecord, col), state.get('submission')[key])
-                dbVal = Values.amendDatabaseValue(getattr(completeRecord, col), state.get('submission')[key])
+            if col not in ignored and key in submission:
+                if isinstance(submission[key], models.Model):
+                    submission[key] = Values.convertModelToId(submission[key])
+                
+                if col in mapper.dateFields():
+                    dbVal = Values.fixTimeZones(getattr(completeRecord, col))
+                else:
+                    dbVal = getattr(completeRecord, col)
                 
                 state.get('log').record([key, col], 'comparing in MT Update')
 
-                if state.get('submission')[key] != dbVal:
-                    fields[col] = state.get('submission')[key]
-                    state.get('log').record([key, state.get('submission')[key], col, dbVal], 'MISMATCH')
+                if submission[key] != dbVal:
+                    fields[col] = submission[key]
+                    state.get('log').record([key, submission[key], col, dbVal], 'MISMATCH')
 
         fields['update_time'] = timezone.now()
 
@@ -46,9 +59,22 @@ class Update:
         state.get('log').record({'fields': fields}, f'Update For: [{tableName}]')
         return None
 
+
     @staticmethod
     def childTable(state, mapper, modelClass, tbl, tableName, columnsList, completeRecord, rlc = False):
-        state.get('log').record(None, f'ENTERING update for childtable [{tbl}]')
+        """
+            Updates specific child table
+            
+            :param state: State() instance
+            :param mapper: Mapper() instance
+            :param modelClass: table's Model class reference
+            :param tbl: [str] table key/identifier
+            :param tableName: [str] table full name
+            :param columnsList: [list] columns of specified table
+            :param completeRecord: Queryset result Model obj
+            :param rlc: [bool] is RevisionLess Children record
+        """
+        state.get('log').record(None, f'ENTERING update for childtable [{tableName}]')
 
         if not hasattr(completeRecord, tbl + 'id') or getattr(completeRecord, tbl + 'id') is None:
             raise Exception(f'Something went wrong. Update record not found in system. {state.get('app')}.CRUD.update()')
@@ -56,29 +82,27 @@ class Update:
         updateRequired = False
         ignored = mapper.ignoreOnUpdates(tbl)
         rlcFields = {}  # fields for RLC update
+        submission = state.get('submission')
 
         for col in columnsList:
-            if col in ignored:
-                continue  # ignore columns don't need a comparison in update operations
-
             if mapper.isCommonField(col):
                 key = tbl + col  # need tbl-abbrv prefix for comparison
             else:
                 key = col
 
-            if key in state.get('submission'):
-                if isinstance(state.get('submission')[key], models.Model):
-                    state.get('submission')[key] = Values.convertModelToId(state.get('submission')[key])
+            if col not in ignored and key in submission:
+                if isinstance(submission[key], models.Model):
+                    submission[key] = Values.convertModelToId(submission[key])
                 
                 if col in mapper.dateFields():
-                    dbVal = Values.amendDatabaseValue(getattr(completeRecord, col))
+                    dbVal = Values.fixTimeZones(getattr(completeRecord, col))
                 else:
                     dbVal = getattr(completeRecord, col)
 
                 state.get('log').record([key, col], 'comparing in CT Update')
 
-                if state.get('submission')[key] != dbVal:
-                    state.get('log').record([key, state.get('submission')[key], col, dbVal], f'MISMATCH -  update needed')
+                if submission[key] != dbVal:
+                    state.get('log').record([key, submission[key], col, dbVal], f'MISMATCH -  update needed')
                     rlcFields[col] = dbVal
                     updateRequired = True  # changes found in dictionary record
 
@@ -86,7 +110,7 @@ class Update:
             if rlc:
                 rlcFields['update_time'] = timezone.now()
                 modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**rlcFields)
-                state.get('log').record({'fields': rlcFields}, f'Update For: [{tbl}] | [RLC]')
+                state.get('log').record({'fields': rlcFields}, f'Update For: [{tableName}] | [RLC]')
             else:
                 fields = {}
                 fields['delete_time'] = timezone.now()
@@ -94,7 +118,7 @@ class Update:
                 
                 # update old record, create new one...
                 modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
-                state.get('log').record({'fields': fields}, f'Update For: [{tbl}]')
+                state.get('log').record({'fields': fields}, f'Update For: [{tableName}]')
                 Create.childTable(state, mapper, modelClass, tbl, tableName, columnsList)
 
         return None

@@ -44,6 +44,18 @@ class TasksMapper(RelationshipMappers):
             'tawa': ['id', 'latest'],
             'taco': ['id'], # @todo: confirm ids should be ignored on rlc & m2ms
         }
+    
+    def _ignoreOnCreate(self):
+        return {
+            'tata': ['delete_time', 'create_time', 'update_time', 'id'],
+            'tade': ['delete_time', 'create_time', 'latest', 'id'],
+            'tadl': ['delete_time', 'create_time', 'latest', 'id'],
+            'tast': ['delete_time', 'create_time', 'latest', 'id'],
+            'tavi': ['delete_time', 'create_time', 'latest', 'id'],
+            'taas': ['delete_time', 'create_time', 'latest', 'id'],
+            'tawa': ['delete_time', 'create_time', 'latest', 'id'],
+            'taco': ['delete_time', 'create_time', 'update_time', 'id'],
+        }
 
     def _m2mFields(self):
         """
@@ -148,6 +160,14 @@ class WorkSpacesMapper(RelationshipMappers):
             'wode': ['id', 'latest', 'workspace_id'],
             'wous': ['id', 'latest', 'workspace_id'],
             'wota': ['id', 'latest', 'workspace_id'],
+        }
+    
+    def _ignoreOnCreate(self):
+        return {
+            'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
+            'wode': ['delete_time', 'create_time', 'latest', 'id'],
+            'wous': ['delete_time', 'create_time', 'latest', 'id'],
+            'wota': ['delete_time', 'create_time', 'latest', 'id'],
         }
 
     def _m2mFields(self):

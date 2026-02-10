@@ -23,6 +23,11 @@ class RelationshipMappers(BaseOperations):
             key = self.tableAbbreviation(key)
 
         return self.returnValue(info, key)
+    
+    def ignoreOnCreate(self, key = 'all'):
+        info = self._ignoreOnCreate()
+        return self.returnValue(info, key)
+
 
     def m2mFields(self, tbl = 'all'):
         relationships = self._m2mFields()

@@ -125,6 +125,7 @@ class Department(models.Model):
     """
     name = models.CharField(max_length=70)
     description = models.CharField(max_length=1000)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)

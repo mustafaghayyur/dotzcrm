@@ -8,6 +8,7 @@ departments = {
             'id',
             'name',
             'description',
+            'creator_id',
             'create_time',
             'update_time',
             'delete_time',

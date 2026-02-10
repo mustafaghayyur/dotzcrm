@@ -65,11 +65,9 @@ class CRUD(Background.Operations):
         # determine if an update is necessary and carry out update operations...
         return Update.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], originalRLC, True)
 
-    def deleteById(self, rlcId):
+    def delete(self, rlcId):
         """
-            Deletion for specific RLC child record by its ID.
-            Validates a given dictionary of key: value pairs. If valid, 
-            attempts to save deletion update to DB. Else, throws an exception.
+            Delete specific RLC child record by its ID.
         """
         if not crud.isValidId({'id': rlcId}, 'id'):
             raise Exception(f'Error 2061: RLC Record could not be deleted. Invalid id supplied in {self.state.get('app')}.CRUD.delete()')
@@ -78,11 +76,9 @@ class CRUD(Background.Operations):
 
         return Delete.childTableById(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], rlcId)
 
-    def deleteAllForMT(self, masterId):
+    def deleteAll(self, masterId):
         """
-            Deletion for all child RLC records for master-table record.
-            Validates a given dictionary of key: value pairs. If valid, 
-            attempts to save deletion update to DB. Else, throws an exception.
+            Delete all child RLC records for master-table record Id.
         """
         if not crud.isValidId({'id': masterId}, 'id'):
             raise Exception(f'Error 2060: RLC Records could not be deleted. Invalid Master-ID supplied in {self.state.get('app')}.CRUD.delete()')

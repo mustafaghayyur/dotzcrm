@@ -42,6 +42,15 @@ class UsersMapper(RelationshipMappers):
             'used': ['id'],
         }
     
+    def _ignoreOnCreate(self):
+        return {
+            'usus': ['delete_time', 'create_time', 'update_time', 'id'],
+            'uspr': ['delete_time', 'create_time', 'latest', 'id'],
+            'usre': ['delete_time', 'create_time', 'latest', 'id'],
+            'usse': ['delete_time', 'create_time', 'update_time', 'id'],
+            'used': ['delete_time', 'create_time', 'update_time', 'id'],
+        }
+    
     def _m2mFields(self):
         """
             Retrieves relational fields for specific M2M table.
@@ -126,6 +135,13 @@ class DepartmentsMapper(RelationshipMappers):
             'dede': ['id', 'latest', 'department_id'],
             'dehe': ['id', 'latest', 'department_id'],
             'deus': ['id', 'latest', 'department_id'],
+        }
+    
+    def _ignoreOnCreate(self):
+        return {
+            'dede': ['delete_time', 'create_time', 'update_time', 'id'],
+            'dehe': ['delete_time', 'create_time', 'latest', 'id'],
+            'deus': ['delete_time', 'create_time', 'latest', 'id'],
         }
 
     def _m2mFields(self):
