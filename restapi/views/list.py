@@ -8,7 +8,7 @@ from core.helpers import pagination, crud
 from core.DRMcore.mappers.schema.main import schema
 
 @api_view(['POST'])
-def list(request, type, format=None):
+def list(request, format=None):
     """
         Generic list endpoint for all models using QuerySetManager.
         

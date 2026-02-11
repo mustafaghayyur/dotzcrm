@@ -1,25 +1,27 @@
+import importlib
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
 from core.helpers import crud
-from .helpers.tasksO2Os import OneToOnes
+from core.lib.crud import Operations
+from core.DRMcore.mappers.schema.main import schema
 
-
-@api_view(['POST', 'PUT', 'GET', 'DELETE'])
-def crud(request, id, format=None):
+@api_view(['POST', 'PUT'])
+def crud(request, format=None):
     method = request.method
+    operations = Operations()
     try:
         match method:
-            case 'GET':
-                return OneToOnes.detail(request, id, format)
             case 'POST':
-                return OneToOnes.create(request, format)
+                if request.data.get('reqType', None) == 'read':
+                    return operations.read(request)
+                if request.data.get('reqType', None) == 'delete':
+                    return operations.delete(request)
+                return operations.create(request)
             case 'PUT':
-                return OneToOnes.edit(request, format)
-            case 'DELETE': # @todo: add response message on success
-                return OneToOnes.delete(request, id, format)
+                return operations.update(request)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
@@ -27,3 +29,7 @@ def crud(request, id, format=None):
         return Response(crud.generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(crud.generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
+
+
+
+

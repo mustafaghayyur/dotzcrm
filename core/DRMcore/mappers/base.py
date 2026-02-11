@@ -65,7 +65,7 @@ class BaseOperations(Background):
     
     def tableTypes(self, name: str):
         """
-            Grabs the list of all tables with type 'name' from schema: 
+            Grabs the list of all tables' type (in mapper) or "name's" type from schema: 
             
             :param name: [str] must be enum from: 'o2o' | 'm2m' | 'rlc'
             
