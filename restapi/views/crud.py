@@ -6,7 +6,7 @@ from rest_framework import status
 from core.helpers import crud
 from restapi.lib.crud import Operations
 
-@api_view(['POST', 'PUT'])
+@api_view(['POST'])
 def crud(request, format=None):
     method = request.method
     operations = Operations()
@@ -17,9 +17,10 @@ def crud(request, format=None):
                     return operations.read(request)
                 if request.data.get('reqType', None) == 'delete':
                     return operations.delete(request)
-                return operations.create(request)
-            case 'PUT':
-                return operations.update(request)
+                if request.data.get('reqType', None) == 'create':
+                    return operations.create(request)
+                if request.data.get('reqType', None) == 'update':
+                    return operations.update(request)
             case _:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     

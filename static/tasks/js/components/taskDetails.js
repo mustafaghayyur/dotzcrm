@@ -10,7 +10,7 @@ import $A from "../helper.js";
  * containerId is irrelevent in this mapper. This is a callback function passed to Fetcher()
  * 
  * @param {object} resultSet - retrieved from Fetcher() internal function fetchResource()
- * @param {string} containerId - html id for DOM element in which this mapper's rendered HTML will be plugged into
+ * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (resultSet, containerId) {
     const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
@@ -31,14 +31,19 @@ export default function (resultSet, containerId) {
             fieldContainer.textContent = $A.forms.escapeHtml(item);
         }
     });
-    addOptionsFunctionalityOnTaskDetailsPane(resultSet);
 
-
+    // add functionality on task-details modal...
+    editAndDeleteFunction(resultSet);
+    assignmentsFunction(resultSet);
+    newCommentsFunction(resultSet);
+    viewCommentsFunction(resultSet);
+    
+    
     /**
-     * Adds all the fancy buttons and widgets on the task-details modal.
+     * add edit button
+     * @param {obj} resultSet 
      */
-    async function addOptionsFunctionalityOnTaskDetailsPane(resultSet) {
-        // add edit button
+    function editAndDeleteFunction(resultSet) {
         let editBtn = document.getElementById('editTaskBtn');
         editBtn.addEventListener('click', () => {
             $A.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
@@ -50,8 +55,13 @@ export default function (resultSet, containerId) {
             e.preventDefault();
             DeleteTask(resultSet['tata_id']);
         });
+    }
 
-        // add (un)watcher button(s)
+    /**
+     * add (un)watcher button(s)
+     * @param {obj} resultSet 
+     */
+    function assignmentsFunction(resultSet) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
         
@@ -77,8 +87,13 @@ export default function (resultSet, containerId) {
             e.preventDefault();
             removeWatcher(resultSet['tata_id'], 'addWatcher', 'removeWatcher');
         });
+    }
 
-        // next, implement rich-text editor and comments form.
+    /**
+     * implement rich-text editor and comments form.
+     * @param {obj} resultSet 
+     */
+    function newCommentsFunction(resultSet) {
         $A.editor.make('commentEditor');
         let saveCommentBtn = document.getElementById('saveComment');
         saveCommentBtn.addEventListener('click', (e) => {
@@ -90,8 +105,13 @@ export default function (resultSet, containerId) {
             taskIdField.value = resultSet['tata_id'];
             createCommentForTask('newCommentForm');
         });
+    }
 
-        // finally, retrieve task-level-comments..
+    /**
+     * retrieves task-level-comments..
+     * @param {obj} resultSet 
+     */
+    async function viewCommentsFunction(resultSet) {
         const callback = await $A.tasks.load('commentsList');
         $A.fetch.body(
             $A.fetch.route('api.tasks.comments_list', String(resultSet['tata_id'])), 

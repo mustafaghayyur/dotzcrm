@@ -39,7 +39,7 @@ class RelationshipMappers(BaseOperations):
         """
         return self._dateFields()
     
-    def serializers(self, tblKey):
+    def serializers(self, tblKey = 'default'):
         """
             returns serializer(s) relevent to mapper/table-key
             
@@ -54,7 +54,7 @@ class RelationshipMappers(BaseOperations):
 
         return None
     
-    def crudClasses(self, tblKey):
+    def crudClasses(self, tblKey = 'default'):
         """
             returns CRUD class(es) relevent to mapper/table-key
             

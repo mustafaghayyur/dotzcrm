@@ -67,11 +67,11 @@ class State:
 
         value = self.state
         for key in path:
-            if key in value:
-                value = value[key]
-                continue
-            else:
-                return default
+            if isinstance(value, dict):
+                if key in value:
+                    value = value[key]
+                    continue
+            return default  # @todo: is this the right logic?
             
         return value
     

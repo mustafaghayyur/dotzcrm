@@ -49,6 +49,14 @@ def retrieveAppSettings(request):
                         'watchers_crud': '/rest/tasks/watcher/{input1}/',
                         'watchers_list': '/rest/tasks/watchers/{input1}/',
                     },
+                    'terminal': {
+                        'crud': '/rest/all/crud/',
+                        'list': '/rest/all/',
+                        'crudrlc': '/rest/all/rlc/crud/',
+                        'listrlc': '/rest/all/rlc/',
+                        'crudm2m': '/rest/all/m2m/crud/',
+                        'listm2m': '/rest/all/m2m/',
+                    },
                 },
                 'ui': {
                     'auth': {
