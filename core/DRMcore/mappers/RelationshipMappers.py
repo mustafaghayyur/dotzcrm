@@ -41,12 +41,33 @@ class RelationshipMappers(BaseOperations):
     
     def serializers(self, tblKey):
         """
-            returns serizler(s) relevent to mapper/table-key
+            returns serializer(s) relevent to mapper/table-key
             
             :param tblKey: [str] key for table
         """
         info = self._serializers()
-        return self.returnValue(info, tblKey)
+        if tblKey is not None and tblKey in info:
+            return info[tblKey]
+
+        if tblKey == self.tables():
+            return info['default']
+
+        return None
+    
+    def crudClasses(self, tblKey):
+        """
+            returns CRUD class(es) relevent to mapper/table-key
+            
+            :param tblKey: [str] key for table
+        """
+        info = self._serializers()
+        if tblKey is not None and tblKey in info:
+            return info[tblKey]
+
+        if tblKey == self.tables():
+            return info['default']
+
+        return None
     
     
     def defaults(self, requestedFunc):

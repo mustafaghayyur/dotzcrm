@@ -83,3 +83,12 @@ class TaskO2ORecordSerializerGeneric(Serializer):
             data['id'] = data['tid']
             return super().to_internal_value(data)
     """
+
+
+
+class TaskO2ORecordSerializerLax(TaskO2ORecordSerializerGeneric):
+    pass
+
+
+class TaskO2ORecordSerializerStrict(TaskO2ORecordSerializerLax):
+    pass

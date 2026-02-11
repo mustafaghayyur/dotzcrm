@@ -13,3 +13,11 @@ class WatcherSerializerGeneric(Serializer):
     latest = ChoiceField(**latestChoiceOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+
+
+class WatcherSerializerLax(WatcherSerializerGeneric):
+    pass
+
+
+class WatcherSerializerStrict(WatcherSerializerLax):
+    pass

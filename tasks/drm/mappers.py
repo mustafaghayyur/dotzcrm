@@ -76,10 +76,47 @@ class TasksMapper(RelationshipMappers):
         return ['create_time', 'update_time', 'delete_time', 'deadline']
     
     def _serializers(self):
+        """
+            returns serializers relevent to mapper
+        """
         return {
-            'tata': 'TaskO2ORecordSerializerGeneric',
-            'taco': 'CommentSerializerGeneric',
-            'tawa': 'WatcherSerializerGeneric',
+            'default': {
+                'path': 'tasks.validators.tasks',
+                'generic': 'TaskO2ORecordSerializerGeneric',
+                'lax': 'TaskO2ORecordSerializerLax',
+                'strict': 'TaskO2ORecordSerializerStrict',
+            },
+            'taco': {
+                'path': 'tasks.validators.comments',
+                'generic': 'CommentSerializerGeneric',
+                'lax': 'CommentSerializerLax',
+                'strict': 'CommentSerializerStrict',
+            },
+            'tawa': {
+                'path': 'tasks.validators.watchers',
+                'generic': 'WatcherSerializerGeneric',
+                'lax': 'WatcherSerializerLax',
+                'strict': 'WatcherSerializerStrict',
+            },
+        }
+    
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'tasks.drm.crud',
+                'name': 'Tasks',
+            },
+            'taco': {
+                'path': 'tasks.drm.crud',
+                'name': 'Comments',
+            },
+            'tawa': {
+                'path': 'tasks.drm.crud',
+                'name': 'Watchers',
+            },
         }
 
     def _defaults_order_by(self):
