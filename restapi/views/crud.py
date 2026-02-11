@@ -1,12 +1,10 @@
-import importlib
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
 from core.helpers import crud
-from core.lib.crud import Operations
-from core.DRMcore.mappers.schema.main import schema
+from restapi.lib.crud import Operations
 
 @api_view(['POST', 'PUT'])
 def crud(request, format=None):

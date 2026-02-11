@@ -9,7 +9,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
         Generic Serializer for O2O Task records.
         All fields must be non-mandatory.
     """
-    id = IntegerField(**intNullableOpts)  # id = tid; but different places require different terms.
+    id = IntegerField(**intNullableOpts)  # id = tata_id; but different places require different terms.
     tata_id = IntegerField(**intNullableOpts)
     tade_id = IntegerField(**intNullableOpts)
     tadl_id = IntegerField(**intNullableOpts)

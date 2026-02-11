@@ -26,7 +26,7 @@ class Validate:
         """
             Ensures master-record-id is present in submitted-dictionary.
         """        
-        keys = ['id', mapper.master('abbreviation') + 'id', mapper.master('foreignKeyName')]
+        keys = ['id', mapper.master('abbreviation') + '_' + mapper.column('id'), mapper.master('foreignKeyName')]
         id = None
 
         for key in keys:

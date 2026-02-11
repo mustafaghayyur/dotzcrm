@@ -44,7 +44,7 @@ class OneToOnes():
             # attempt to serialize the updated consolidated record
             if result:
                 try:
-                    record = Tasks().fullRecord(result['tid'])
+                    record = Tasks().fullRecord(result['tata_id'])
                     retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
                 except Exception as e:

@@ -20,7 +20,7 @@ export default function (data, containerId) {
             li = originalLiItem.cloneNode(true);
             let status = li.querySelector('.status').querySelector('.' + item.status);
             let desc = li.querySelector('.description');
-            desc.dataset.taskId = $A.forms.escapeHtml(item.tid);
+            desc.dataset.taskId = $A.forms.escapeHtml(item.tata_id);
             desc.textContent = $A.forms.escapeHtml(item.description) || $A.forms.escapeHtml(JSON.stringify(item));
             
             if (item.status === 'completed') {
@@ -31,7 +31,7 @@ export default function (data, containerId) {
             }
             
             li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item); });
-            li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tid, item.description); });
+            li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tata_id, item.description); });
 
             ul.appendChild(li);
         });

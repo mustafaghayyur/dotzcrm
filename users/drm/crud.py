@@ -28,7 +28,7 @@ class Users(O2ORecords.CRUD):
             "latest": self.mapper.values.latest('latest'),
             "visibility": None,
             "status": None,
-            "tid": task_id,
+            "tata_id": task_id,
         }
 
         rawObj = self.read(['all'], conditions)

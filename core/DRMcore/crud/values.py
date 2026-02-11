@@ -19,13 +19,13 @@ class Values:
         return value
 
     @staticmethod
-    def fixTimeZones(dbValue):
+    def fixTimeZones(value):
         """
-            attempts to convert datetime value into correct timezone.
+            attempts to convert datetime value (if naive) into correct timezone.
             
-            :param dbValue: [datetime] dataabase datetime field value
+            :param value: [datetime] dataabase datetime field value
         """
-        if dbValue is not None and isinstance(dbValue, datetime.datetime):
-            dbValue = timezone.make_aware(dbValue, timezone.get_current_timezone())
+        if value is not None and isinstance(value, datetime.datetime) and value.tzinfo is None:
+            value = timezone.make_aware(value, timezone.get_current_timezone())
 
-        return dbValue
+        return value

@@ -25,7 +25,7 @@ class Update:
         state.get('log').record(None, f'ENTERING update for MT [{tableName}]')
 
         if not completeRecord.id or completeRecord.id is None:
-            raise Exception(f'Something went wrong. Update record not found in system. {state.get('app')}.CRUD.update()')
+            raise Exception(f'Error 2011: Error Something went wrong. Update record not found in system. {state.get('app')}.CRUD.update()')
 
         fields = {}
         submission = state.get('submission')
@@ -75,8 +75,8 @@ class Update:
         """
         state.get('log').record(None, f'ENTERING update for childtable [{tableName}]')
 
-        if not hasattr(completeRecord, tbl + 'id') or getattr(completeRecord, tbl + 'id') is None:
-            raise Exception(f'Something went wrong. Update record not found in system. {state.get('app')}.CRUD.update()')
+        if not hasattr(completeRecord, tbl + '_' + mapper.column('id')) or getattr(completeRecord, tbl + '_' + mapper.column('id')) is None:
+            raise Exception(f'Error 2010: Something went wrong. Update record not found in system. {state.get('app')}.CRUD.update()')
 
         updateRequired = False
         ignored = mapper.ignoreOnUpdates(tbl)
@@ -108,7 +108,7 @@ class Update:
         if updateRequired:
             if rlc:
                 rlcFields['update_time'] = timezone.now()
-                modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**rlcFields)
+                modelClass.objects.filter(id=getattr(completeRecord, tbl + '_' + mapper.column('id'))).update(**rlcFields)
                 state.get('log').record({'fields': rlcFields}, f'Update For: [{tableName}] | [RLC]')
             else:
                 fields = {}
@@ -116,7 +116,7 @@ class Update:
                 fields['latest'] = mapper.values.latest('archive')
                 
                 # update old record, create new one...
-                modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
+                modelClass.objects.filter(id=getattr(completeRecord, tbl + '_' + mapper.column('id'))).update(**fields)
                 state.get('log').record({'fields': fields}, f'Update For: [{tableName}]')
                 Create.childTable(state, mapper, modelClass, tbl, tableName, columnsList)
 

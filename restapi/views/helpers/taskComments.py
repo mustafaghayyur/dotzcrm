@@ -21,7 +21,7 @@ class CommentMethods():
             result = Comments().create(dictionary)
             if result:
                 try:
-                    record = Comments().read({'cid': result.id})
+                    record = Comments().read({'taco_id': result.id})
                     retrievedSerialized = CommentSerializerGeneric(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
                 except Exception as e:
