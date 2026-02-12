@@ -1,6 +1,13 @@
 import $A from "../helper.js";
 
-
+/**
+ * Query Module allows direct server-data queries via chain-calling functions.
+ * Response is handled with $A.query().execute(responseContainer, callbackFunction) paramerters.
+ * 
+ * Example usage:
+ * $A.query().search('tata').fields('tata_id', 'description').where({status: 'created'}).order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1, 20).execute('TasksListResponseContainer', customCallbackFunction); 
+ * @returns chain-calling object
+ */
 export default function () {
     let tbl = null;
     let selectors = [];
@@ -9,65 +16,152 @@ export default function () {
     let ordering = [];
     let count = null;
     let page = null;
-    const routes = {
-        'list-o2o': 'api.terminal.list',
-        'list-rlc': 'api.terminal.listrlc',
-        'list-m2m': 'api.terminal.listm2m',
-        'crud-o2o': 'api.terminal.crud',
-        'crud-rlc': 'api.terminal.crudrlc',
-        'crud-m2m': 'api.terminal.crudm2m',
-    };
+    let translations = {};
+
+    let reqType = null;
+    let body = null;
     let params = null;
     let chosenRoute = null;
-    let errors = [];
 
-    
+    const routes = {
+        'list': 'api.terminal.list',
+        'crud': 'api.terminal.crud',
+    };
 
     const kernel = {
-        search: (tblKey, type = 'list-o2o') => {
+        /**
+         * Create a new record in specified table with supplied data.
+         * @param {str} tblKey: system key for table to perform crud operation on
+         * @param {obj} data: data to create record with. Can be supplied as a form element or as a dictionary object. 
+         * @param {bool} purified: specify whether data is supplied as a form element or as a dictionary object. Defaults to false (data is supplied as form element).
+         * @returns 
+         */
+        create: (tblKey, data, purified = false) => {
+            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+                throw Error('create() requires table-key argument.');
+            }
+
+            if (purified) {
+                body = data;
+            } else {
+                body = $A.forms.formToDictionary(data);
+            }
+
+            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+                throw Error('create() requires a dictionary of data to create.');
+            }
+
+            tbl = tblKey;
+            reqType = 'create';
+            chosenRoute = 'crud';
+            return kernel;
+        },
+
+        /**
+         * Update an existing record in specified table with supplied data.
+         * @param {str} tblKey: system key for table to perform crud operation on
+         * @param {obj} data: data to update record with. Can be supplied as a form element or as a dictionary object. 
+         * @param {bool} purified: specify whether data is supplied as a form element or as a dictionary object. Defaults to false (data is supplied as form element).
+         * @returns 
+         */
+        edit: (tblKey, data, purified = false) => {
+            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+                throw Error('edit() requires table-key argument.');
+            }
+
+            if (purified) {
+                body = data;
+            } else {
+                body = $A.forms.formToDictionary(data);
+            }
+
+            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+                throw Error('edit() requires a dictionary of data to edit.');
+            }
+
+            tbl = tblKey;
+            reqType = 'update';
+            chosenRoute = 'crud';
+            return kernel;
+        },
+
+        /**
+         * Remove an existing record in specified table with supplied data.
+         * @param {str} tblKey: system key for table to perform crud operation on
+         * @param {obj} data: conditions to remove record(s) with. 
+         * @param {bool} purified: specify whether data is supplied as a form element or as a dictionary object. Defaults to true (data is supplied as dictionary).
+         * @returns 
+         */
+        delete: (tblKey, data, purified = true) => {
+            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+                throw Error('delete() requires table-key argument.');
+            }
+
+            if (purified) {
+                body = data;
+            } else {
+                body = $A.forms.formToDictionary(data);
+            }
+
+            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+                throw Error('delete() requires a dictionary of data to delete.');
+            }
+            tbl = tblKey;
+            reqType = 'delete';
+            chosenRoute = 'crud';
+            return kernel;
+        },
+
+        /**
+         * Retrieve an existing record in specified table with supplied data.
+         * @param {str} tblKey: system key for table to perform crud operation on
+         * @param {obj} data: conditions to retrieve record(s) with. 
+         * @param {bool} purified: specify whether data is supplied as a form element or as a dictionary object. Defaults to true (data is supplied as dictionary).
+         * @returns 
+         */
+        single: (tblKey, data, purified = true) => {
+            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+                throw Error('single() requires table-key argument.');
+            }
+
+            if (purified) {
+                body = data;
+            } else {
+                body = $A.forms.formToDictionary(data);
+            }
+
+            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+                throw Error('single() requires a dictionary of data to retrieve record.');
+            }
+
+            tbl = tblKey;
+            reqType = 'read';
+            chosenRoute = 'crud';
+            return kernel;
+        },
+
+
+        /**
+         * Search collective data from table(s) based on conditions, joins, and ordering specified in chain-calling functions. 
+         * Response is a list of records matching search criteria.
+         * @param {str} tblKey 
+         * @returns chain-calling object
+         */
+        search: (tblKey) => {
             if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
                 throw Error('search() requires table-key argument.');
             }
-            if ($A.generic.checkVariableType(type) !== 'string' || $A.generic.isVariableEmpty(type) || !(type in routes)) {
-                throw Error('search() requires type argument to be string enum of ["list-o2o" | "list-m2m" | "list-rlc"].');
-            }
             tbl = tblKey;
-            chosenRoute = type
+            reqType = 'search';
+            chosenRoute = 'list';
             return kernel;
         },
 
-        create: (type = 'crud-o2o') => {
-            
-            if ($A.generic.checkVariableType(type) !== 'string' || $A.generic.isVariableEmpty(type) || !(type in routes)) {
-                throw Error('search() requires type argument to be string enum of ["crud-o2o" | "crud-m2m" | "crud-rlc"].');
-            }
-            return kernel;
-        },
-
-        edit: (type = 'crud-o2o') => {
-            
-            if ($A.generic.checkVariableType(type) !== 'string' || $A.generic.isVariableEmpty(type) || !(type in routes)) {
-                throw Error('search() requires type argument to be string enum of ["crud-o2o" | "crud-m2m" | "crud-rlc"].');
-            }
-            return kernel;
-        },
-
-        delete: (type = 'crud-o2o') => {
-            
-            if ($A.generic.checkVariableType(type) !== 'string' || $A.generic.isVariableEmpty(type) || !(type in routes)) {
-                throw Error('search() requires type argument to be string enum of ["crud-o2o" | "crud-m2m" | "crud-rlc"].');
-            }
-            return kernel;
-        },
-
-        single: (type = 'crud-o2o') => {
-           
-            if ($A.generic.checkVariableType(type) !== 'string' || $A.generic.isVariableEmpty(type) || !(type in routes)) {
-                throw Error('search() requires type argument to be string enum of ["crud-o2o" | "crud-m2m" | "crud-rlc"].');
-            }
-            return kernel;
-        },
-
+        /**
+         * From search(): Specify fields/columns to be retrieved in search results.
+         * @param  {...any} args Comma serpated list of values, will be auto-converted to array.
+         * @returns chain-calling object
+         */
         fields: (...args) => {
             if ($A.generic.checkVariableType(args) !== 'list' || $A.generic.isVariableEmpty(args)) {
                 throw Error('search().fields() requires atleast one argument.');
@@ -76,6 +170,11 @@ export default function () {
             return kernel;
         },
 
+        /**
+         * From search(): Specify conditions for Where elements of SQL query. 
+         * @param {obj} dictionary: conditions setting out where elements of SQL.
+         * @returns chain-calling object
+         */
         where: (dictionary) => {
             if ($A.generic.checkVariableType(dictionary) !== 'dictionary') {
                 throw Error('search().where() requires a dictionary of values.');
@@ -84,6 +183,11 @@ export default function () {
             return kernel;
         },
 
+        /**
+         * From search(): Specify join conditions for SQL query.
+         * @param {obj} dictionary: key should carry join-type seperated by pipe, along with field_name => value should carry existing table_field to join on. Example: {'inner|usus_id': 'tata_id'} where usus is the table being added, and tata is the existing table in search.
+         * @returns chain-calling object
+         */
         join: (dictionary) => {
             if ($A.generic.checkVariableType(dictionary) !== 'dictionary') {
                 throw Error('search().join() requires a dictionary of values.');
@@ -92,6 +196,11 @@ export default function () {
             return kernel;
         },
 
+        /**
+         * From search(): Specify ordering conditions for SQL query.
+         * @param {arrayOfObjs} orderByList: array of objects containing ordering conditions. Each object should have tbl, col, and sort keys. 
+         * @returns chain-calling object
+         */
         order: (orderByList) => {
             if ($A.generic.checkVariableType(orderByList) !== 'list') {
                 throw Error('search().order() requires a list of dictionaries containing "tbl", "col", "sort" keys.');
@@ -100,6 +209,12 @@ export default function () {
             return kernel;
         },
 
+        /**
+         * From search(): Specify pagination conditions for SQL query.
+         * @param {number} pageNumber: page number to retrieve in search results. 
+         * @param {number} perPage: number of records per page in search results. Defaults to 20.
+         * @returns chain-calling object
+         */
         page: (pageNumber, perPage = 20) => {
             if ($A.generic.checkVariableType(pageNumber) !== 'number' || $A.generic.checkVariableType(perPage) !== 'number') {
                 throw Error('search().page() requires pageNumber and perPage to both be numerical (integer) values.');
@@ -113,7 +228,20 @@ export default function () {
         },
 
         /**
-         * Internal function.
+         * From search(): Specify translations conditions for SQL query.
+         * @param {arrayOfObjs} translation: object with keys and values according to Django ORM translation specs. 
+         * @returns chain-calling object
+         */
+        translate: (translation) => {
+            if ($A.generic.checkVariableType(translation) !== 'dictionary') {
+                throw Error('search().translate() requires a list of dictionaries containing "tbl", "col", "sort" keys.');
+            }
+            translations = translation;
+            return kernel;
+        },
+
+        /**
+         * Internal function. Cleans memory after request is made.
          */
         cleanMemory: () => {
             tbl = null;
@@ -123,12 +251,38 @@ export default function () {
             ordering = [];
             count = null;
             page = null;
+            translations = {};
+            reqType = null;
+            body = null;
+            params = null;
+            chosenRoute = null;
         },
 
-        execute: () => {
-            // error check inputs... then:
+        execute: (responseContainer, callbackFunction, mapper = {}) => {
+            if (tbl === null || reqType === null || chosenRoute === null) {
+                throw Error('execute() requires a properly formed request. Please ensure you have specified the table and type of request.');
+            }
+
+            if (reqType === 'search') {
+                body = assembleSearchParams();
+            }
+
+            if ($A.generic.checkVariableType(responseContainer) !== 'string' || $A.generic.isVariableEmpty(responseContainer)) {
+                throw Error('execute() requires responseContainer argument to be a non-empty string corresponding to the id attribute of a DOM element.');
+            }
+
+            if ($A.generic.checkVariableType(callbackFunction) !== 'function') {
+                throw Error('execute() requires callbackFunction argument to be a function that will handle the response from the server.');
+            }
+
+            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+                throw Error('execute() requires a dictionary of data to send with the request.');
+            }
+
+            body['tbl'] = tbl;
+            body['reqType'] = reqType;
             
-            $A.fetch.route(routes[chosenRoute], params, { method: 'POST', body: JSON.stringify(dictionary) });
+            const request = $A.fetch.route(routes[chosenRoute], params, { method: 'POST', body: JSON.stringify(body) });
             $A.fetch.body(request, responseContainer, mapper, callbackFunction);
             kernel.cleanMemory();
         }
@@ -141,9 +295,11 @@ export default function () {
             conditions: conditions,
             ordering: ordering,
             joins: joins,
-            limit: [count, page]
+            limit: [page, count],
+            translations: translations
         }
     }
+
     //return the kernal...
     return kernel;
 }

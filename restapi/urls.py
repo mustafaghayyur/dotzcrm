@@ -6,10 +6,6 @@ from .views import tasks, settings, list, crud
 urlpatterns = [
     path('all/', list.list),
     path('all/crud/', crud.crud),
-    path('all/rlc/', list.list),
-    path('all/rlc/crud/', crud.crud),
-    path('all/m2m/', list.list),
-    path('all/m2m/crud/', crud.crud),
     
     path('tasks/<str:type>/', tasks.task_list),
     path('tasks/crud/<int:id>/', tasks.task_crud),

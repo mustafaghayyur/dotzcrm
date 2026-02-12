@@ -64,41 +64,41 @@ class QuerySetManager(BackgroundOperations):
         """
             Sets the select from parameters.
         """
-        self.state.set('selectors', Selectors.validate(self.state, selectors))
+        self.state.set('selectors', Selectors.validate(self.state, selectors), [])
         return self
 
     def where(self, conditions):
         """
             Sets the conditions for the fetch chain.
         """
-        self.state.set('conditions', Conditions.validate(conditions))
+        self.state.set('conditions', Conditions.validate(conditions), {})
         return self
 
     def orderby(self, ordering):
         """
             Sets the ordering for the fetch chain.
         """
-        self.state.set('ordering', Ordering.validate(ordering))
+        self.state.set('ordering', Ordering.validate(ordering), [])
         return self
 
     def limit(self, limit):
         """
             Sets the limit(s) for the fetch chain.
         """
-        self.state.set('limit', limit)
+        self.state.set('limit', limit, [])
         return self
 
     def join(self, joins):
         """
             Sets the joins for the fetch chain.
         """
-        self.state.set('joins', Joins.validate(joins))
+        self.state.set('joins', Joins.validate(joins), {})
         return self
     
     def translate(self, translations):
         """
             TBD @todo
         """
-        self.state.set('translations', translations)
+        self.state.set('translations', translations, {})
         return self
 

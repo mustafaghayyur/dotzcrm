@@ -29,7 +29,7 @@ class Operations():
         serMeta = Model.objects.mapper.serializers(tbl)
         serModule = importlib.import_module(serMeta['path'])
 
-        self.mapper = Model.objects.mapper
+        self.mapper = Model.objects.getMapper()
         self.state.set('operation', operation)
         self.state.set('crudClass', self.mapper.crudClass(tbl))
         self.state.set('serializerClass', getattr(serModule, serMeta['generic']))

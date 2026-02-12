@@ -52,10 +52,6 @@ def retrieveAppSettings(request):
                     'terminal': {
                         'crud': '/rest/all/crud/',
                         'list': '/rest/all/',
-                        'crudrlc': '/rest/all/rlc/crud/',
-                        'listrlc': '/rest/all/rlc/',
-                        'crudm2m': '/rest/all/m2m/crud/',
-                        'listm2m': '/rest/all/m2m/',
                     },
                 },
                 'ui': {

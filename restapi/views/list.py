@@ -20,6 +20,7 @@ def list(request, format=None):
             'ordering': [{'tbl': 'tata', 'col': 'name', 'sort': 'DESC'}],  # ordering (optional)
             'joins': {'inner|tbl1_col': 'tbl2_col'},  # join definitions (optional)
             'limit': {'page': 1, 'page_size': 20}  # pagination (optional)
+            'translations': {'id': 'tata_id'}  # translations as specified by Django ORM (optional)
         }
     """
     try:
@@ -41,18 +42,17 @@ def list(request, format=None):
         modelModule = importlib.import_module(schemaEntry['path'])
         Model = getattr(modelModule, schemaEntry['model'])
         
-        # Handle pagination
-        pgntn = pagination.assembleParamsForView(postData.get('limit', {}))
-        
-        # Prepare limit parameter for fetch (format: [offset, page_size])
-        paginatedLimit = [str(pgntn['offset']), str(pgntn['page_size'])]
-        
         # Get serializer from DRM mappers based on table key
         # Dynamically get the appropriate mapper for serialization
         serMeta = Model.objects.getMapper().serializers()
-        misc.log(tblKey, "SerMeta being inspected")
         serModule = importlib.import_module(serMeta['path'])
         Serializer = getattr(serModule, serMeta['generic'])
+
+
+        # Handle pagination
+        pgntn = pagination.assembleParamsForView(postData.get('limit', []), Model.objects.getMapper().defaults('limit_value'))
+        # Prepare limit parameter for fetch (format: [offset, page_size])
+        paginatedLimit = [str(pgntn['offset']), str(pgntn['page_size'])]
 
         # Execute fetch using QuerySetManager
         records = Model.objects.select(postData.get('selectors', None)).where(postData.get('conditions', None)).orderby(postData.get('ordering', None)).join(postData.get('joins', None)).limit(paginatedLimit).translate(postData.get('translations', None)).fetch()
