@@ -1,28 +1,25 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from tasks.validators.tasks import *
-from tasks.drm.crud import Tasks
-from core.helpers import crud, misc
+from core.helpers import crud
+from core.lib.state import State
 
-"""
-    These Static Classes are meant to help views with Tasks operations
-"""
 
-class OneToOnes():
-    @staticmethod
-    def create(request, format=None):
-        """
-            Create single task record (with all it's related child-tables).
-        """
-        serializer = TaskO2ORecordSerializerGeneric(data=request.data)
+class O2OOperations():
+    def __init__(self, state: State):
+        self.state = state
+
+    def create(self):
+        GenericSerializer = self.state.get('serializerClass')
+        CrudClass = self.state.get('crudClass')
+        serializer = GenericSerializer(data=self.state.get('data'))
         if serializer.is_valid():
-            result = Tasks().create(serializer.validated_data)
+            result = CrudClass().create(serializer.validated_data)
 
             if result:
                 try:
-                    record = Tasks().fullRecord(result.id)
-                    retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
+                    record = CrudClass().fullRecord(result.id)
+                    retrievedSerialized = GenericSerializer(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
                     
                 except Exception as e:
@@ -32,48 +29,48 @@ class OneToOnes():
         else:
             return Response(crud.generateError(serializer.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)
     
-    @staticmethod
-    def edit(request, format=None):
-        """
-            Edit single task record (with all it's related child-tables).
-        """
-        serializer = TaskO2ORecordSerializerGeneric(data=request.data)
+
+    def update(self):
+        GenericSerializer = self.state.get('serializerClass')
+        CrudClass = self.state.get('crudClass')
+        serializer = GenericSerializer(data=self.state.get('data'))
 
         if serializer.is_valid():
-            result = Tasks().update(serializer.validated_data)
+            result = CrudClass().update(serializer.validated_data)
             # attempt to serialize the updated consolidated record
             if result:
                 try:
-                    record = Tasks().fullRecord(result['tata_id'])
-                    retrievedSerialized = TaskO2ORecordSerializerGeneric(record[0])
+                    record = CrudClass().fullRecord(result['tid'])
+                    retrievedSerialized = GenericSerializer(record[0])
                     return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
                 except Exception as e:
                     return Response(crud.generateError(e, "Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
             return Response(crud.generateError("Could not determine update response."), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
-                
-    @staticmethod
-    def delete(request, id, format=None):
-        """
-            Delete single task record (with all it's related child-tables).
-        """
+
+
+    def delete(self):
+        GenericSerializer = self.state.get('serializerClass')
+        CrudClass = self.state.get('crudClass')
+        
         if crud.isValidId({'id': id}, 'id'):
-            rec = Tasks().delete(id)
+            rec = CrudClass().delete(id)
             return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
         
         return Response(crud.generateError('Task id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
-    @staticmethod
-    def detail(request, id, format=None):
-        """
-            Retrieve single task record (with all it's related child-tables).
-        """
+
+    def read(self):
+        GenericSerializer = self.state.get('serializerClass')
+        CrudClass = self.state.get('crudClass')
+
+        self.state.set('operation', 'read')
         if crud.isValidId({'id': id}, 'id'):
-            record = Tasks().fullRecord(id)
+            record = CrudClass().fullRecord(id)
             if record:
-                serialized = TaskO2ORecordSerializerGeneric(record[0])
+                serialized = GenericSerializer(record[0])
                 return Response(crud.generateResponse(serialized.data))
             return Response(crud.generateResponse([]), status=status.HTTP_400_BAD_REQUEST)
         return Response(crud.generateError('Task Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
-        
+     

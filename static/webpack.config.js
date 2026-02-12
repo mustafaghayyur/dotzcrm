@@ -5,7 +5,7 @@ const path = require('path');
  */
 const appConfig = {
     entry: {
-        // Defines two separate entry points and their output names
+        // Defines separate entry points and their output names
         'users-bundle': path.resolve(__dirname, './users/js/main.js'),
         'tasks-bundle': path.resolve(__dirname, './tasks/js/main.js')
     },
@@ -72,6 +72,6 @@ module.exports = (env = {}) => {
         };
     }
 
-    // Default: build both bundles
+    // Default: build all bundles
     return appConfig;
 };

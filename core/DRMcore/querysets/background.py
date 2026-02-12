@@ -31,7 +31,9 @@ class BackgroundOperations(models.QuerySet):
         self.state.set('o2oMapperFields', o2oMapperFields)
         self.state.set('allMapperFields', mapperFields)
         
-    
+    def getMapper(self):
+        return self.mapper
+
     def setArgumentsInStates(self, selectors, conditions, ordering, limit, joins, translations):
         """
             sets the provided arguments (if any) into state keys
@@ -113,7 +115,8 @@ class BackgroundOperations(models.QuerySet):
 
         columns = selectors
         columns.extend(list(conditions.keys()))
-        columns.extend([ordr['tbl'] for ordr in ordering if 'tbl' in ordr])
+        if isinstance(ordering, list) and len(ordering) > 0:
+            columns.extend([ordr['tbl'] for ordr in ordering if 'tbl' in ordr])
         columns.extend(joins)
 
         # return unique table list

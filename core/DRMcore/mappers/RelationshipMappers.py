@@ -23,10 +23,52 @@ class RelationshipMappers(BaseOperations):
             key = self.tableAbbreviation(key)
 
         return self.returnValue(info, key)
+    
+    def ignoreOnCreate(self, key = 'all'):
+        info = self._ignoreOnCreate()
+        return self.returnValue(info, key)
+
 
     def m2mFields(self, tbl = 'all'):
         relationships = self._m2mFields()
         return self.returnValue(relationships, tbl)
+    
+    def dateFields(self):
+        """
+            Returns all date fields defined in Mapper
+        """
+        return self._dateFields()
+    
+    def serializers(self, tblKey = 'default'):
+        """
+            returns serializer(s) relevent to mapper/table-key
+            
+            :param tblKey: [str] key for table
+        """
+        info = self._serializers()
+        if tblKey is not None and tblKey in info:
+            return info[tblKey]
+
+        if tblKey == self.tables():
+            return info['default']
+
+        return None
+    
+    def crudClasses(self, tblKey = 'default'):
+        """
+            returns CRUD class(es) relevent to mapper/table-key
+            
+            :param tblKey: [str] key for table
+        """
+        info = self._serializers()
+        if tblKey is not None and tblKey in info:
+            return info[tblKey]
+
+        if tblKey == self.tables():
+            return info['default']
+
+        return None
+    
     
     def defaults(self, requestedFunc):
         """

@@ -1,14 +1,14 @@
 from core.helpers import misc
 
 class Params():
-    """
-        Filter and organize params to be passed to raw-query.
-        
-        :returns [dict]
-    """
-
+    
     @staticmethod 
     def parse(state, mapper):
+        """
+            Filter and organize params to be passed to raw-query.
+            
+            :returns [dict]
+        """
         params = {}
         conditions = state.get('assembledConditions', {})
 

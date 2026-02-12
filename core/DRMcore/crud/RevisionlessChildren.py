@@ -2,18 +2,21 @@ from django.utils import timezone
 from . import Background
 from core.helpers import crud, misc
 
-"""
-    Handles all crud operations for Revision-less Children (RLC) tables.
-"""
-class CRUD(Background.CrudOperations):
-    tbl = None
-    pk = None  # primary-key of RLC table in question
+from .create import Create
+from .update import Update
+from .delete import Delete
 
-    def __init__(self):
-        super().__init__()
 
-    def setMasterCrudClass(self, classReference):
-        self.masterCrudObj = classReference()
+class CRUD(Background.Operations):
+    """
+        Handles all crud operations for Revision-less Children (RLC) tables.
+    """
+    def startUpCode(self):
+        """
+            Overwite in app-level inheritor. Be sure to define these values.
+        """
+        self.state.set('tbl', None)  # table key recognized by mapper
+        self.state.set('pk', None)  # primary-key or "tbl_id" for this RLC table.
 
     def create(self, dictionary):
         """
@@ -21,19 +24,18 @@ class CRUD(Background.CrudOperations):
             Validates a given dictionary of key: value pairs. If valid, 
             attempts to save to DB. Else, throws an exception.
         """
-        self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
-        mtId = self.mapper.master('abbreviation') + 'id'
-        masterId = self.mapper.master('foreignKeyName');
+        self.saveSubmission('create', dictionary)  # save to state
+        mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
+        masterId = self.mapper.master('foreignKeyName')
 
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[masterId]})
-        self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in createRLC()')
+        masterRecord = self.state.get('masterCrudObj').read([mtId], {mtId: self.state.get('submission')[masterId]})
 
         if not masterRecord:
-            raise Exception('Master Record could not be found. RLC cannot be created in {self.space}.CRUD.create()')
+            raise Exception(f'Error 2064: Master Record could not be found. RLC cannot be created in {self.state.get('app')}.CRUD.create()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return self.createChildTable(t['model'], self.tbl, t['table'], t['cols'], True)
+        return Create.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], True)
         
     def read(self):
         pass  # defined in individual Module's class extensions.
@@ -44,68 +46,47 @@ class CRUD(Background.CrudOperations):
             Validates a given dictionary of key: value pairs. If valid, 
             attempts to save to DB. Else, throws an exception.
         """
-        self.saveSubmission('update', dictionary)  # hence forth dictionary => self.submission
+        self.saveSubmission('update', dictionary)  # save to state
 
-        mtId = self.mapper.master('abbreviation') + 'id'
+        mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         mtForeignKey = self.mapper.master('foreignKeyName')
 
         # masterRecords gets the parent record id, to which this RLC belongs
-        masterRecord = self.masterCrudObj.read([mtId], {mtId: self.submission[mtId]})
-        self.log(masterRecord, 'JUST CONFIRMING if master record is being fetched correctly in updateRLC()')
+        masterRecord = self.state.get('masterCrudObj').read([mtId], {mtId: self.state.get('submission')[mtId]})
 
         if not masterRecord:
-            raise Exception(f'No valid record found for provided {self.space} ID for RLC update, in: {self.space}.CRUD.update().')
+            raise Exception(f'Error 2063: No valid record found for provided {self.state.get('app')} ID for RLC update, in: {self.state.get('app')}.CRUD.update().')
 
-        
-        originalRLC = self.read({self.pk: self.submission[self.pk], mtForeignKey: self.submission[mtForeignKey]})
-        self.log(originalRLC, 'JUST CONFIRMING if originalRLC record is being fetched correctly in updateRLC()')
+        pk = self.state.get('pk')
+        originalRLC = self.read({pk: self.state.get('submission')[pk], mtForeignKey: self.state.get('submission')[mtForeignKey]})
 
         if not originalRLC:
-            raise Exception(f'No valid RLC record found for provided ID, in: {self.space}.CRUD.update().')
+            raise Exception(f'Error 2062: No valid RLC record found for provided ID, in: {self.state.get('app')}.CRUD.update().')
         
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
             
         # determine if an update is necessary and carry out update operations...
-        return self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'], originalRLC, True)
+        return Update.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], originalRLC, True)
 
-    def deleteById(self, rlcId):
+    def delete(self, rlcId):
         """
-            Deletion for specific RLC child record by its ID.
-            Validates a given dictionary of key: value pairs. If valid, 
-            attempts to save deletion update to DB. Else, throws an exception.
+            Delete specific RLC child record by its ID.
         """
         if not crud.isValidId({'id': rlcId}, 'id'):
-            raise Exception(f'RLC Record could not be deleted. Invalid id supplied in {self.space}.CRUD.delete()')
+            raise Exception(f'Error 2061: RLC Record could not be deleted. Invalid id supplied in {self.state.get('app')}.CRUD.delete()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return self.deleteChildTableById(t['model'], self.tbl, t['table'], t['cols'], rlcId)
+        return Delete.childTableById(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], rlcId)
 
-    def deleteAllForMT(self, masterId):
+    def deleteAll(self, masterId):
         """
-            Deletion for all child RLC records for master-table record.
-            Validates a given dictionary of key: value pairs. If valid, 
-            attempts to save deletion update to DB. Else, throws an exception.
+            Delete all child RLC records for master-table record Id.
         """
         if not crud.isValidId({'id': masterId}, 'id'):
-            raise Exception(f'RLC Records could not be deleted. Invalid Master-ID supplied in {self.space}.CRUD.delete()')
+            raise Exception(f'Error 2060: RLC Records could not be deleted. Invalid Master-ID supplied in {self.state.get('app')}.CRUD.delete()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return self.deleteChildTable(t['model'], self.tbl, t['table'], t['cols'], masterId, True)
+        return Delete.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], masterId, True)
 
-    def deleteChildTableById(self, modelClass, tbl, tableName, columnsList, childId):
-        """
-            Helper function for deleteById()
-            For RLC type nodes only
-        """
-        self.log(None, f'ENTERING deleteById for CT [{self.tbl}]')
-        
-        fieldsF = {}  # fields to find records with
-        fieldsF['id'] = childId
-        
-        fieldsU = {}  # fields to update in found records
-        fieldsU['delete_time'] = timezone.now()
-
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
-        return modelClass.objects.filter(**fieldsF).update(**fieldsU)

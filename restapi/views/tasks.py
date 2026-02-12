@@ -117,7 +117,7 @@ def comments_list(request, taskId, format=None):
     """
         List all  tasks for type of request
     """
-    selectors = ['tid', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
+    selectors = ['tata_id', 'description', 'creator_id', 'tupdate_time', 'status', 'visibility', 'assignor_id']
     conditions = {
         #'delete_time': 'is Null',
         'task_id': taskId, # old: request.query_params.get('task_id', 0),

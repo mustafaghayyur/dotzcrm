@@ -10,15 +10,19 @@ class State:
     def __init__(self):
         self.state = {}
 
-    def set(self, keyPath, value):
+    def set(self, keyPath, value, default = None):
         """
             Set a key's value in state to provided value.
 
             :param keyPath: [str] should be '.' seperated path to target, nested key
             :param value: [*] can be any legitimate value stored in dictionary keys.
+            :param default: [*] If value is None, default will be used instead.
         """
         path = self.validateKey(keyPath)
         length = len(path)
+
+        if value is None:
+            value = default
 
         if length > 5:
             raise Exception('state().set() cannot handle key paths deeper than 5 levels.')
@@ -67,11 +71,11 @@ class State:
 
         value = self.state
         for key in path:
-            if key in value:
-                value = value[key]
-                continue
-            else:
-                return default
+            if isinstance(value, dict):
+                if key in value:
+                    value = value[key]
+                    continue
+            return default  # @todo: is this the right logic?
             
         return value
     

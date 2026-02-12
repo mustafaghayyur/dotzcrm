@@ -15,8 +15,18 @@ Main(async () => {
             request = $A.fetch.route('api.tasks.list', 'private');
             $A.fetch.body(request, 'personalTabResponse', {}, dashboardTodoList);
 
-            request = $A.fetch.route('api.tasks.list', 'workspaces');
-            $A.fetch.body(request, 'workspacesTabResponse', {}, dashboardTaskList);
+            $A.query().search('tata')
+                .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
+                .where({
+                    tata_delete_time: 'is Null',
+                    assignee_id: $A.app.memFetch('user_id'),
+                    workspace: null,
+                    visibility: 'workspaces',
+                    status: ['assigned', 'queued', 'started']
+                })
+                .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
+                .translate({debug: true})
+                .execute('workspacesTabResponse', dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
         workspaces: () => {},

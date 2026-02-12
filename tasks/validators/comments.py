@@ -15,3 +15,11 @@ class CommentSerializerGeneric(Serializer):
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     update_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+
+
+class CommentSerializerLax(CommentSerializerGeneric):
+    pass
+
+
+class CommentSerializerStrict(CommentSerializerLax):
+    pass

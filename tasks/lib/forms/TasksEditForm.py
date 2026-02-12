@@ -18,40 +18,13 @@ class TasksEditForm(Forms):
     def performSetup(self, matrix = {}):
         self.setParams(matrix)
         
-        taskToFetch = Tasks.read(
-            ['id', 'description'], 
-            {
-                'visibility': 'workspaces', 
-                'wowo_id': self.getParam('workspace'),
-            }
-        )
 
-        if taskToFetch:
-            self.setQuerySet('tasks', taskToFetch)
-
-        usersToFetch = Tasks.read(
-            ['id', 'first_name', 'last_name'],
-            {
-                'kid': self.getParam('workspace'),
-                'is_active': True
-            }
-        )
-
-        if usersToFetch:
-            self.setQuerySet('users', usersToFetch)
-
-        # finally, set the queryset paremeter of each ModelChoiceField in this form:
-        self.fields['parent_id'].queryset = self.getQuerySet('tasks')
-        self.fields['assignor_id'].queryset = self.getQuerySet('users')
-        self.fields['assignee_id'].queryset = self.getQuerySet('users')
-        
-
-    tid = forms.CharField(widget=forms.HiddenInput(), required=False)
-    did = forms.CharField(widget=forms.HiddenInput(), required=False)
-    lid = forms.CharField(widget=forms.HiddenInput(), required=False)
-    sid = forms.CharField(widget=forms.HiddenInput(), required=False)
-    vid = forms.CharField(widget=forms.HiddenInput(), required=False)
-    aid = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tata_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tade_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tadl_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tast_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tavi_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    taas_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     
     description = forms.CharField(max_length=255, empty_value="What's your task?")
     

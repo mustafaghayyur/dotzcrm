@@ -1,234 +1,140 @@
+from django.conf import settings as ds  # stands for django-settings
 from django.utils import timezone
-from . import Validation
+
+from core.lib.state import State
 from core import dotzSettings
-from .staticHelpers import ValuesHandler
-from core.helpers import crud, strings, misc
+from .validation import Validate
+from .logger import Logger
+from core.helpers import crud
 
-
-"""
-    This class holds the background crud operations.
-    Primary focus: One-to-One relationship CRUD types
-"""
-class CrudOperations(Validation.ErrorHandling):
-    space = None  # set in inheritor class
-    module = None  # settings for 'app' or module in system (e.g. Tasks, Tickets, etc)
-    submission = None  # will hold dictionary of submitted data by user
-
+class Operations():
+    """
+        This class holds the background operations.
+    """
+    state = None
+    mapper = None
 
     def __init__(self):
-        # loads configs related to the module (defined in self.space)
-        self.module = getattr(dotzSettings, self.space)
+        self.state = State()
+        self.state.set('mtModel', None) 
+        
+        # submission will hold dictionary of submitted data to use for crud operation in question
+        self.state.set('submission', None)
+        self.state.set('abrvSize', dotzSettings.project['mapper']['tblKeySize'] - 1)
+
+        self.startUpCode()
+
+        # loads configs related to the module (defined in self.state.get('app'))
+        self.state.set('module', getattr(dotzSettings, self.state.get('app')))
+
+        # setup logger
+        self.state.set('log', Logger())
+        self.state.get('log').settings(self.state.get('app'), self.state.get('module')['crud_logger_file'])
 
         # holds all O2O primary keys for given space/module
-        self.idCols = self.generateRelationTypeIds('o2o')
+        self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
+        
 
-        super().__init__()
+    def startUpCode(self):
+        """
+            Used by app-level inheritor classes to run init processes.
+        """
+        pass
+
+
+    def setMasterCrudClass(self, classReference):
+        self.state.set('masterCrudObj', classReference())
+
 
     def saveSubmission(self, operation, submission):
         # First, we do some error checking on the dictionary supplied:
-        self.dictValidation(self.space, operation, submission)
+        Validate.dictValidation(self.state.get('app'), operation, submission)
         
         if operation != 'create':
             # Second, we make sure the master-table-id is included in record:
-            submission = self.mtIdValidation(operation, submission)
+            submission = Validate.mtIdValidation(self.mapper, self.state.get('app'), operation, submission)
             
-        # Finally, we save the submitted form into self.submission
-        self.submission = submission
+        # Finally, we save the submitted form into state
+        self.state.set('submission', submission)
 
-    def deleteChildTable(self, modelClass, tbl, tableName, columnsList, masterId, rlc = False):
-        self.log(None, f'ENTERING delete for CT [{tbl}]')
-        
-        fieldsF = {}  # fields to find records with
-        fieldsF[self.mapper.master('foreignKeyName')] = masterId
-        if not rlc:
-            fieldsF['latest'] = self.mapper.values.latest('latest')
-        
-        fieldsU = {}  # fields to update in found records
-        fieldsU['delete_time'] = timezone.now()
-        if not rlc:
-            fieldsU['latest'] = self.mapper.values.latest('archive')
 
-        designation = '[RLC]' if rlc else ''
-
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{tbl}] | {designation}')
-        return modelClass.objects.filter(**fieldsF).update(**fieldsU)
-
-    def deleteMasterTable(self, modelClass, tbl, tableName, columnsList, masterId):
-        self.log(None, f'ENTERING delete for MT [{tbl}]')
-        fieldsU = {}
-        fieldsU['update_time'] = timezone.now()
-        fieldsU['delete_time'] = fieldsU['update_time']
-
-        self.log({'id': masterId, 'update': fieldsU}, f'ID for deletion find | Fields for deletion update [{tbl}]')        
-        return modelClass.objects.filter(id=masterId).update(**fieldsU)
-
-    def updateMasterTable(self, mtModel, tableName, columnsList, completeRecord, rlc = False):
-        self.log(None, f'ENTERING update for MT [{tableName}]')
-
-        if not completeRecord.id or completeRecord.id is None:
-            raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
-
-        fields = {}
-        ignored = self.mapper.ignoreOnUpdates(self.mapper.master('abbreviation'))
-
-        for col in columnsList:
-            if col in ignored:
-                continue  # ignore columns don't need a comparison in update operations
-
-            if self.mapper.isCommonField(col):
-                key = self.mapper.master('abbreviation') + col  # need tbl_abbrv prefix for comparison
-            else:
-                key = col
-
-            if key in self.submission:
-                self.submission[key] = ValuesHandler.amendFormValue(getattr(completeRecord, col), self.submission[key])
-                dbVal = ValuesHandler.amendDatabaseValue(getattr(completeRecord, col), self.submission[key])
-                
-                self.log([key, col], 'comparing in MT Update')
-
-                if self.submission[key] != dbVal:
-                    fields[col] = self.submission[key]
-                    self.log([key, self.submission[key], col, dbVal], 'MISMATCH')
-
-        fields['update_time'] = timezone.now()
-
-        mtModel.objects.filter(id=completeRecord.id).update(**fields)
-        self.log({'fields': fields}, f'Update For: [{tableName}]')
-        return None
-
-    def updateChildTable(self, modelClass, tbl, tableName, columnsList, completeRecord, rlc = False):
-        self.log(None, f'ENTERING update for childtable [{tbl}]')
-
-        if not hasattr(completeRecord, tbl + 'id') or getattr(completeRecord, tbl + 'id') is None:
-            raise Exception(f'Something went wrong. Update record not found in system. {self.space}.CRUD.update()')
-
-        updateRequired = False
-        ignored = self.mapper.ignoreOnUpdates(tbl)
-        rlcFields = {}  # fields for RLC update
-
-        for col in columnsList:
-            if col in ignored:
-                continue  # ignore columns don't need a comparison in update operations
-
-            if self.mapper.isCommonField(col):
-                key = tbl + col  # need tbl-abbrv prefix for comparison
-            else:
-                key = col
-
-            if key in self.submission:
-                self.submission[key] = ValuesHandler.amendFormValue(getattr(completeRecord, col), self.submission[key])
-                dbVal = ValuesHandler.amendDatabaseValue(getattr(completeRecord, col), self.submission[key])
-                
-                self.log([key, col], 'comparing in CT Update')
-
-                if self.submission[key] != dbVal:
-                    self.log([key, self.submission[key], col, dbVal], f'MISMATCH -  update needed')
-                    rlcFields[col] = dbVal
-                    updateRequired = True  # changes found in dictionary record
-
-        if updateRequired:
-            if rlc:
-                rlcFields['update_time'] = timezone.now()
-                modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**rlcFields)
-                self.log({'fields': rlcFields}, f'Update For: [{tbl}] | [RLC]')
-            else:
-                fields = {}
-                fields['delete_time'] = timezone.now()
-                fields['latest'] = self.mapper.values.latest('archive')
-                
-                # update old record, create new one...
-                modelClass.objects.filter(id=getattr(completeRecord, tbl + 'id')).update(**fields)
-                self.log({'fields': fields}, f'Update For: [{tbl}]')
-                self.createChildTable(modelClass, tbl, tableName, columnsList)
-
-        return None
-
-    def createChildTable(self, modelClass, tbl, tableName, columnsList, rlc = False):
-        self.log(None, f'Entering create operation for childtable: [{tbl}]')
-        
-        fields = {}
-        for col in columnsList:
-            if self.mapper.isCommonField(col):
-                key = tbl + col  # add on a prefix to match self.submission keys
-            else:
-                key = col
-
-            if key in self.submission:
-                if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    if isinstance(self.submission[key], object):
-                        if hasattr(self.submission[key], 'id'):
-                            self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
-                    
-                    fields[col] = self.submission[key]
-                    self.log([key, self.submission[key]], 'Field added')
-
-        if len(fields) <= 1:  # if record is empty, abort insertion...
-            if self.mapper.master('foreignKeyName') in fields:
-                return None  # only the master ID is added, no need need to insert
-
-        fields['create_time'] = timezone.now()
-        if rlc:
-            fields['update_time'] = fields['create_time']
-        else:
-            fields['latest'] = 1
-
-        record = modelClass(**fields)
-        record.save()
-        designation = '[RLC]' if rlc else ''
-        self.log({'fields': fields}, f'Create For: [{tbl}] | {designation}')
-        return record
-
-    def createMasterTable(self, tbl, modelClass, rlc = False):
-        self.log(None, f'Entering create operation for MT: [{tbl}]')
-        
-        t = crud.generateModelInfo(self.mapper, tbl)
-        fields = {}
-
-        for col in t['cols']:
-            # get the correct key reference for column in self.submission...
-            if self.mapper.isCommonField(col):
-                key = tbl + col  # add on a prefix to match self.submission keys
-            else:
-                key = col
-
-            if key in self.submission:
-                if col not in ['delete_time', 'create_time', 'update_time', 'id']:
-                    if isinstance(self.submission[key], object):
-                        if hasattr(self.submission[key], 'id'):
-                            self.submission[key] = self.submission[key].id  # must be a foreignkey Model instance, grab only the id.
-                    
-                    fields[col] = self.submission[key]
-                    self.log(key, self.submission[key], 'Field added')
-
-        if len(fields) == 0:  # if fields is empty, abort insertion...
-            return None
-
-        fields['creator_id'] = self._generateCreatorId()
-        fields['create_time'] = timezone.now()
-        fields['update_time'] = fields['create_time']
-
-        record = modelClass(**fields)
-        record.save()
-        self.log({'fields': fields}, f'Create For: [{tbl}]')
-        return record
 
     def checkChildForMultipleLatests(self, modelClass, tbl, tableName, columnsList, fetchedRecords):
         """
             For given CT, see if fetched records have multiple entries 
-            marked as 'latest' in the DB.
-            @todo
+            marked as 'latest' in the DB. If found, archives all but the most recent.
         """
-        pass
+        tblIdField = f'{tbl}_{self.mapper.column('latest')}'
+        createTimeField = f'{tbl}_{self.mapper.column('create_time')}'
+        latestField = f'{tbl}_{self.mapper.column('latest')}'
+        latestValue = self.mapper.values.latest('latest')
+        archiveValue = self.mapper.values.latest('archive')
+        logger = self.state.get('log')
+        logger.record(f'Commencing checkChildForMultipleLatests() for {tableName}')
+        
+        # Group records by child table ID
+        recordsByCtId = {}
+        for record in fetchedRecords:
+            ctId = getattr(record, tblIdField, None)
+            if ctId is not None and ctId not in recordsByCtId:
+                recordsByCtId[ctId] = record
+                logger.record(None, f'[ctId: {ctId}] - record added to recordsByCtId')
+        
+        logger.record(recordsByCtId, f'Final recordsByCtId dictionary.')
+        
+        # For each child table ID, check if there are multiple 'latest' records
+        latestRecords = [rec for rec in recordsByCtId if getattr(rec, latestField, None) == latestValue]
+        logger.record(latestRecords, f'Dict-to-List conversion of recs: latestRecords')
 
-    def _generateCreatorId(self):
-        if 'assignor_id' in self.submission:
-            if self.submission['assignor_id'] is not None:
+        if len(latestRecords) > 1:
+            # Multiple records marked as latest, need to prune
+            # Sort by create_time (most recent first)
+            latestRecords.sort(
+                key=lambda rec: getattr(rec, createTimeField, None) or '',
+                reverse=True
+            )
 
-                if strings.isPrimitiveType(self.submission['assignor_id']):
-                    return self.submission['assignor_id']
-                if hasattr(self.submission['assignor_id'], 'id'):
-                    return self.submission['assignor_id'].id
-                
-        return None
+            logger.record(latestRecords, f'Sorted list of recs (by create-time): latestRecords')
+            
+            # Keep the first (most recent), archive the rest (mark as latest=2)
+            for record in latestRecords[1:]:
+                recordId = getattr(record, tblIdField, None)
+                modelClass.objects.filter(id=recordId).update(latest=archiveValue, delete_time=timezone.now())
 
+        logger.record(latestRecords, f'End of checkChildForMultipleLatests() for {tableName}')
+
+    def pruneLatestRecords(self, fetchedRecords, mId, iter = 1):
+        """
+            Handles scenario where multiple CT records are found to be marked 
+            'latest' in DB. These multiples need to be pruned to a single record 
+            for each CT.
+        """
+        self.state.get('log').record(fetchedRecords, 'Error: Full Record Retrieval Found multiple CT records. Commencing pruneLatestRecords()')
+
+        for pk in self.state.get('idCols'):
+            tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
+
+            if pk == self.mapper.master('abbreviation') + '_' + self.mapper.column('id'):
+                continue  # can't prune MT duplicates...
+
+            t = crud.generateModelInfo(self.mapper, tbl)
+
+            self.checkChildForMultipleLatests(t['model'], tbl, t['table'], t['cols'], fetchedRecords)
+
+        records = self.fullRecord(mId)
+
+        if not records:
+            self.state.get('log').record(records, f'Error 2090: No valid record found for provided ID, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
+            raise Exception(f'Error 2090: No valid record found for provided ID, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
+
+        if len(records) > 1:
+            if iter > 5:
+                self.state.get('log').record(records, f'Error 2091: Maximum pruneLatestRecords() iterations reached. Unable to prune Latest Records. Proceeding with [0] index record.')
+                return records[0]
+            
+            self.state.get('log').record(records, 'Running pruneLatestRecords() again, multiple records remain.')
+            return self.pruneLatestRecords(records, mId, iter + 1)  # bit if recursion
+
+        self.state.get('log').record(records, 'Records found at end of pruneLatestRecords()')
+        return records[0]
     

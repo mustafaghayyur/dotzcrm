@@ -62,8 +62,8 @@ export function toggleTodoStatus(record) {
     const newStatus = allStatuses.replace(record.status, '');
 
     const dictionary = {
-        tid: record.tid,
-        sid: record.sid,
+        tata_id: record.tata_id,
+        tast_id: record.tast_id,
         status: newStatus
     };
 

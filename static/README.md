@@ -8,7 +8,9 @@ While we may not do much in customization of vanilla bootstrap styles, you shoul
 
 1) in your terminal console, cd into this static directory.
 
-2) run: npm install bootstrap@v5.3.8
+2) run: npm install 
+
+This will install all packages listed in static/package.json file.
 
 3) Install a Sass compiler, like so:
  > npm install -g sass
@@ -38,25 +40,53 @@ https://getbootstrap.com/docs/5.3/customize/sass/
 
 
 
- # JS Code-base Development Evironment setup:
-#### (following was taken from Google AI's anwers):
+ # JS Code-base Development Evironment:
+
+Our Dotz CRM + PM Software has turned into a JS quasi-SPA application. What started out as a Django + Bootstrap stack, has been shifting to more JS centered, interms of end-user functionality.
+
+Thus we are missing ReactJS, and have developed our own mini-framework, the $A library. All throughout the Javascript code you will find references to $A.someModule.function(). 
+
+The $A library largely resides in the static/core/js directory. Though each app has the liberty of adding modules to it in their own domain (using the static/{app}/js/helper.js definition file).
+
+We have tried to keep the static/core/js/ codebase well documented with comments, so feel free to browse the code.
+
+To enable our JS code in your environment:
+
+In your commandline utility: 
+
+ > cd into static/ directory.
+
+(incase you have not run npm install, run:)
+
+ > npm install 
+
+Then run:
+
+ > npm run build
+
+This builds all js bundle files: 
+
+ - static/dist/users-bundle.js 
+ - static/dist/tasks-bundle.js
+ - etc...
+
+This should have the front-end functionality (interms of JS) up and running.
+
+
+### Why Webpack/Babel? (side note)
 
 To run a web app using ES6 code across a wide range of browsers, you need to use a transpiler (like Babel or SWC) to convert your modern JavaScript into a backward-compatible version (typically ES5). This process is essential because older browsers may not support all ES6+ features. 
 
 Here is a general guide on how to set up your workflow:
 Key Tools Needed
+
  - Babel: The most widely used JavaScript transpiler for converting ES6+ syntax (like arrow functions, const/let, classes) into ES5.
+
  - A Module Bundler: Tools like Webpack, Rollup, or Parcel.
+
  - Polyfills: These are code snippets that provide the functionality for newer APIs (like Promise or Array.from) that Babel can't simply "transpile".
 
+ (-- taken from Google AI's anwers)
 
-### Step-by-Step Setup using Babel and Webpack
 
-In your commandline utility, cd into static/ directory.
-
-run:
- > npm run build
-Builds all jd bundle files: 
- - static/dist/users-bundle.js 
- - static/dist/tasks-bundle.js , etc...
 

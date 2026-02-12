@@ -9,6 +9,7 @@ workspaces = {
 			'name',
 			'description',
 			'type',
+            'creator_id',
 			'create_time',
 			'update_time',
 			'delete_time'

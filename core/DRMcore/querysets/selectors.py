@@ -46,7 +46,7 @@ class Selectors():
                 field = field[sz:]
                 addition = f' AS {tbl}_{field}'
                 
-                if strings.fieldIdentifier(tbl, field) == current + '_id':
+                if strings.fieldIdentifier(tbl, field) == current + '_' + mapper.column('id'):
                     # adds the current Model's key as 'id' and 'tblkey_id'
                     addition = f', {tbl}.{field} AS {tbl}_{field}'
                 

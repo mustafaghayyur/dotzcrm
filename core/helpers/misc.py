@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.conf import settings
 from .strings import isPrimitiveType
 import pprint
 import inspect
@@ -13,6 +14,9 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
             - log_message: additional meta data you wish to tack on
             - level [int]: 1 = simple parse of object. 2 = More introspection. 3 = trace from provided subject (error object)
     """
+    if not settings.DEBUG:
+        return None  # exit on prod
+    
     varType = type(subject)
     now = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
     log = ''

@@ -8,6 +8,7 @@ import { showModal, updateUrlParam } from './lib/router.js';
 import { Fetcher, defineRequest } from './lib/async.js';
 import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
+import query from './lib/query.js';
 
 /**
  * Assembles all core libraries into one callable helper object.
@@ -31,4 +32,5 @@ export default {
         make: Editor
     },
     dashboard: TabbedDashBoard,
+    query: query
 };

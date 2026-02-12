@@ -2,67 +2,75 @@ from django.utils import timezone
 from . import Background
 from core.helpers import crud, misc
 
-"""
-    Many-to-Many CRUD Operations that can be used through out the system.
-"""
-class CRUD(Background.CrudOperations):
+from .create import Create
+from .delete import Delete
 
-    firstCol = None  # defined in inheritor
-    secondCol = None  # defined in inheritor
-    
-    def __init__(self):
-        super().__init__()
+
+class CRUD(Background.Operations):
+    """
+        Many-to-Many CRUD Operations that can be used through out the system.
+    """
+
+    def startUpCode(self):
+        """
+            Overwite in app-level inheritor. Be sure to define these values.
+        """
+        self.state.set('firstCol', None)  # as defined in mapper
+        self.state.set('secondCol', None)  # as defined in mapper
+        self.state.set('tbl', None)  # table key recognized by mapper
+        self.state.set('pk', None)  # primary-key or "tbl_id" for this RLC table.
+        
 
     def create(self, dictionary):
         """
             Creation of a single record per M2M CT.
         """
-        self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
+        self.saveSubmission('create', dictionary)  # save to state
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        if not crud.isValidId(self.submission, self.firstCol):
+        if not crud.isValidId(self.state.get('submission'), self.state.get('firstCol')):
             return None
-        if not crud.isValidId(self.submission, self.secondCol):
+        if not crud.isValidId(self.state.get('submission'), self.state.get('secondCol')):
             return None
         
         # first, we attempt o update any existing records matching first & second M2M cols...
-        self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'])
+        Delete.allChildTableM2ms(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
 
-        # next, we will create a new record for first andsecond columns.
-        return self.createChildTable(t['model'], self.tbl, t['table'], t['cols'])
+        # next, we will create a new record for first and second columns.
+        return Create.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
         
     def read(self, definitions):
         """
             See documentation on definitions formulation.
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
-            raise Exception(f'Fetch request for {self.firstCol} and {self.secondCol} failed. Improper definitions for query, in {self.space}.CRUD.read()')
+            raise Exception(f'Error 2032: Fetch request for {self.state.get('firstCol')} and {self.state.get('secondCol')} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
 
         if 'latest' not in definitions:
             definitions['latest'] = self.mapper.values.latest('latest')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
         rawObjs = None
 
-        if self.pk in definitions:
-            if crud.isValidId(definitions, self.pk):
+        if self.state.get('pk') in definitions:
+            if crud.isValidId(definitions, self.state.get('pk')):
                 # specific record being sought:
-                rawObjs = t['model'].objects.fetchById(definitions[self.pk])
+                rawObjs = t['model'].objects.fetchById(definitions[self.state.get('pk')])
             
-        if self.firstCol in definitions and self.secondCol not in definitions:        
-            if crud.isValidId(definitions, self.firstCol):
+        if self.state.get('firstCol') in definitions and self.state.get('secondCol') not in definitions:        
+            if crud.isValidId(definitions, self.state.get('firstCol')):
                 if definitions['latest']:
-                    rawObjs = t['model'].objects.fetchAllCurrentByFirstId(definitions[self.firstCol])
+                    rawObjs = t['model'].objects.fetchAllCurrentByFirstId(definitions[self.state.get('firstCol')])
         
-        if self.secondCol in definitions and self.firstCol not in definitions:
-            if crud.isValidId(definitions, self.secondCol):
+        if self.state.get('secondCol') in definitions and self.state.get('firstCol') not in definitions:
+            if crud.isValidId(definitions, self.state.get('secondCol')):
                 if definitions['latest']:
-                    rawObjs = t['model'].objects.fetchAllCurrentBySecondId(definitions[self.secondCol])
+                    rawObjs = t['model'].objects.fetchAllCurrentBySecondId(definitions[self.state.get('secondCol')])
         
-        if self.firstCol in definitions and self.secondCol in definitions:        
-            if crud.isValidId(definitions, self.firstCol) and crud.isValidId(definitions, self.secondCol):
-                rawObjs = t['model'].objects.fetchLatest(definitions[self.firstCol], definitions[self.secondCol], definitions['latest'])
+        if self.state.get('firstCol') in definitions and self.state.get('secondCol') in definitions:        
+            if crud.isValidId(definitions, self.state.get('firstCol')) and crud.isValidId(definitions, self.state.get('secondCol')):
+                rawObjs = t['model'].objects.fetchLatest(definitions[self.state.get('firstCol')], definitions[self.state.get('secondCol')], definitions['latest'])
 
         if rawObjs:
             return rawObjs
@@ -79,57 +87,22 @@ class CRUD(Background.CrudOperations):
         """
             Attempts to delete all records matching firstCol and SecondCol. 
         """
-        self.saveSubmission('create', dictionary)  # hence forth dictionary => self.submission
+        self.saveSubmission('create', dictionary)  # save to state
 
-        if not crud.isValidId(self.submission, self.firstCol) or not crud.isValidId(self.submission, self.secondCol):
-            raise Exception(f'M2M Record could not be deleted. Invalid IDs supplied in {self.space}.CRUD.deleteM2M()')
+        if not crud.isValidId(self.state.get('submission'), self.state.get('firstCol')) or not crud.isValidId(self.state.get('submission'), self.state.get('secondCol')):
+            raise Exception(f'Error 2031: M2M Record could not be deleted. Invalid IDs supplied in {self.state.get('app')}.CRUD.deleteM2M()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return self.updateChildTable(t['model'], self.tbl, t['table'], t['cols'])
+        return Delete.allChildTableM2ms(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'])
 
-    def deleteAllForFirstCol(self, firstColId):
+    def deleteByFirstCol(self, firstColId):
         """
-            Attempts to delete all M2M-type children records for a firstCol ID
-            provided.
+            Deletes all M2M-type children records for provided firstCol ID.
         """
         if not isinstance(firstColId, int) or firstColId < 1:
-            raise Exception(f'M2M Records could not be deleted. Invalid single column ID supplied in {self.space}.CRUD.deleteM2M()')
+            raise Exception(f'Error 2030: M2M Records could not be deleted. Invalid single column ID supplied in {self.state.get('app')}.CRUD.deleteM2M()')
 
-        t = crud.generateModelInfo(self.mapper, self.tbl)
+        t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
 
-        return self.deleteAllM2M(t['model'], self.tbl, t['table'], t['cols'], firstColId)
-
-    def updateChildTable(self, modelClass, tbl, tableName, columnsList):
-        """
-            updateChildTable() will be overwritten in M2MChildren for special handling.
-            We will simply archive any existing records matching firstCal & secondCol
-        """
-        self.log(None, f'ENTERING update for childtable [{tbl}]')
-
-        fieldsF = {}
-        fieldsF[self.firstCol] = self.submission[self.firstCol]
-        fieldsF[self.secondCol] = self.submission[self.secondCol]
-
-        fieldsU = {}
-        fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.mapper.values.latest('archive')        
-
-        modelClass.objects.filter(**fieldsF).update(**fieldsU)
-        self.log({'fields': fieldsU}, f'Attempted update For: [{tbl}]')
-
-    def deleteAllM2M(self, modelClass, tbl, tableName, columnsList, firstColId):
-        """
-            Helper function for deleteAllForFirstCol(). M2M nodes only.
-        """
-        self.log(None, f'ENTERING deleteAllForFirstCol for CT [{self.tbl}]')
-        
-        fieldsF = {}  # fields to find records with
-        fieldsF[self.firstCol] = firstColId
-        
-        fieldsU = {}  # fields to update in found records
-        fieldsU['delete_time'] = timezone.now()
-        fieldsU['latest'] = self.mapper.values.latest('archive')
-
-        self.log({'find': fieldsF, 'update': fieldsU}, f'Fields for deletion find | Fields for deletion update [{self.tbl}]')
-        return modelClass.objects.filter(**fieldsF).update(**fieldsU)
+        return Delete.allChildTableFirstCol(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], firstColId)
