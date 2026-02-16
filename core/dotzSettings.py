@@ -2,8 +2,11 @@
     These settings can be imported to anywhere in the project with:
      > from core.dotzSettings import * (asterisk representing name of dictionary)
 """
+from core.lib.state import State
 
-project = {
+settings = State()
+
+settings.set('project', {
     'mapper': {
         'tblKeySize': 5, # 4 + _ = 5 characters for table-key-size
     },
@@ -18,29 +21,30 @@ project = {
     'ticketsGarbageBin': '90',
     'documentsGarbageBin': '30',
     'customersGarbageBin': '90',
-}
+})
 
-tasks = {
+settings.set('tasks', {
     'recentInterval': '30',  # what is recent in generic query terms? Number of days.
     'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
-}
+})
 
-users = {
+settings.set('users', {
     'recentInterval': '30',  # what is recent in generic query terms? Number of days.
     'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
-}
+})
 
-tickets = {
+settings.set('tickets', {
     'recentInterval': '30',  # what is recent in generic query terms? Number of days.
     'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
-}
+})
 
-documents = {
+settings.set('documents', {
     'recentInterval': '30',  # what is recent in generic query terms? Number of days.
     'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
-}
+})
 
-customers = {
+settings.set('customers', {
     'recentInterval': '30',  # what is recent in generic query terms? Number of days.
     'crud_logger_file': '/Users/mustafa/Sites/python/server1/CRUD.log'  # CRUD operations are logged properly when Django's DEBUG setting is True:
-}
+})
+

@@ -13,6 +13,7 @@ class O2OOperations():
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
         serializer = GenericSerializer(data=self.state.get('data'))
+
         if serializer.is_valid():
             result = CrudClass().create(serializer.validated_data)
 
@@ -53,10 +54,11 @@ class O2OOperations():
     def delete(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
+        data = self.state.get('data')
         
-        if crud.isValidId({'id': id}, 'id'):
+        if crud.isValidId(data, 'tata_id'):
             rec = CrudClass().delete(id)
-            return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
+            return Response(crud.generateResponse({'messages': f'All records with id matching {data.get('tata_id', None)} have been archived in system.'}), status=status.HTTP_200_OK)
         
         return Response(crud.generateError('Task id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
 
@@ -64,6 +66,7 @@ class O2OOperations():
     def read(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
+        data = self.satte.get('data')
 
         self.state.set('operation', 'read')
         if crud.isValidId({'id': id}, 'id'):

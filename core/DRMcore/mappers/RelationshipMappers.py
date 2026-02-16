@@ -69,6 +69,13 @@ class RelationshipMappers(BaseOperations):
 
         return None
     
+    def currentUserFields(self):
+        """
+            Retrieves list of all columns in mapper that carry current user's ID.
+            These fields can only be set by current user, to them selves.
+        """
+        return self._commonFields()
+    
     
     def defaults(self, requestedFunc):
         """

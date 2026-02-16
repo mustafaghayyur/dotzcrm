@@ -35,8 +35,10 @@ class Operations():
         self.state.set('serializerClass', getattr(serModule, serMeta['generic']))
         self.state.set('dataModel', self.mapper.tableTypes(tbl))
 
+        self.state.set('request', request)
         self.state.set('data', request.data)
         self.state.set('user', request.user)
+        self.state.set('tbl', tbl)
 
     def initiateOperation(self):
         if self.state.get('dataModel') == 'o2o':

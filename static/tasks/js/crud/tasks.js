@@ -45,11 +45,9 @@ export function DeleteTask(taskId, identifyer) {
         return null;
     }
 
-    const request = $A.fetch.route('api.tasks.crud', String(taskId), {
-        method: 'DELETE',
-    });
-
-    $A.fetch.body(request, 'taskDetailsModalResponse', callback);
+    $A.query().delete('tata', {
+        tata_id: taskId
+    }).execute('taskDetailsModalResponse', callback);
 }
 
 /**

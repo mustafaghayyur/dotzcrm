@@ -1,4 +1,4 @@
-from core.dotzSettings import project
+from core.dotzSettings import settings
 from core.helpers import crud, misc, strings
 
 class Conditions():
@@ -62,7 +62,7 @@ class Conditions():
         """
         andPref = ''
         keyDb = key  # keyDb refers to the column name recognized by the database
-        sz = project['mapper']['tblKeySize']
+        sz = settings.get('project.mapper.tblKeySize')
 
         if length > 0:
             andPref = ' AND '

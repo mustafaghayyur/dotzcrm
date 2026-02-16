@@ -1,8 +1,7 @@
 from django.db import models
 
 from core.lib.state import State
-from core.helpers import strings, misc
-from core.dotzSettings import project
+from core.helpers import strings
 
 class BackgroundOperations(models.QuerySet):
     """

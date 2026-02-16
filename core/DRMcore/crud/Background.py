@@ -2,7 +2,7 @@ from django.conf import settings as ds  # stands for django-settings
 from django.utils import timezone
 
 from core.lib.state import State
-from core import dotzSettings
+from core.dotzSettings import settings
 from .validation import Validate
 from .logger import Logger
 from core.helpers import crud
@@ -20,12 +20,12 @@ class Operations():
         
         # submission will hold dictionary of submitted data to use for crud operation in question
         self.state.set('submission', None)
-        self.state.set('abrvSize', dotzSettings.project['mapper']['tblKeySize'] - 1)
+        self.state.set('abrvSize', settings.get('project.mapper.tblKeySize') - 1)
 
         self.startUpCode()
 
         # loads configs related to the module (defined in self.state.get('app'))
-        self.state.set('module', getattr(dotzSettings, self.state.get('app')))
+        self.state.set('module', settings.get(self.state.get('app')))
 
         # setup logger
         self.state.set('log', Logger())

@@ -1,4 +1,4 @@
-from core.dotzSettings import project
+from core.dotzSettings import settings
 from .background import Background
 from ...helpers import misc
 
@@ -96,7 +96,7 @@ class BaseOperations(Background):
         """
             Determine whether field is common among children tables.
         """
-        sz = project['mapper']['tblKeySize']
+        sz = settings.get('project.mapper.tblKeySize')
         field = key[sz:] if prefix else key  # grab correct fieldName to compare
 
         if field in self.commonFields():

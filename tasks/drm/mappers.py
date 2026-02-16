@@ -119,6 +119,13 @@ class TasksMapper(RelationshipMappers):
             },
         }
 
+    def _currentUserFields(self):
+        """
+            Retrieves list of all columns in mapper that carry current user's ID.
+            These fields can only be set by current user, to them selves.
+        """
+        return ['creator_id', 'watcher_id']
+
     def _defaults_order_by(self):
         return [
             {
@@ -241,6 +248,14 @@ class WorkSpacesMapper(RelationshipMappers):
             Add all columns found in this mapper, that are date fields.
         """
         return ['create_time', 'update_time', 'delete_time']
+    
+
+    def _currentUserFields(self):
+        """
+            Retrieves list of all columns in mapper that carry current user's ID.
+            These fields can only be set by current user, to them selves.
+        """
+        return ['creator_id', 'watcher_id']
 
     def _defaults_order_by(self):
         return [

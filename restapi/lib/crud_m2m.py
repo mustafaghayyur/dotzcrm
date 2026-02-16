@@ -12,16 +12,18 @@ class M2MOperations():
     def create(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        itemId = self.state.get('data').get('item_id', None)
+        cruder = CrudClass()
+        idKey = self.state.get('tbl') + '_' + cruder.getMapper().column('id')
+        mtIdKey = cruder.getMapper().master('foreignKeyName')
+        data = self.satte.get('data')
 
-        if crud.isValidId({'id': itemId}, 'id'):
+        if crud.isValidId({'id': data.get(mtIdKey, None)}, 'id'):
             dictinary = {
-                'task_id': itemId,
-                'watcher_id': self.state.get('user').id #@todo: remove 1 and add user id.
+                mtIdKey: data.get(mtIdKey, None),  # @todo: crud system should add current users to relevent fields defined in mapper.
             }
             result = CrudClass().create(dictinary)
             if result:
-                return Response(crud.generateResponse({'wid': result.id}), status=status.HTTP_201_CREATED) # @todo: can 201 responses carry payloads?
+                return Response(crud.generateResponse({idKey: result.id}), status=status.HTTP_201_CREATED) # @todo: can 201 responses carry payloads?
             return Response(crud.generateError('Created record could not be fetched.'), status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(crud.generateError(None, 'Request could not be processed due to invalid task ID.'), status=status.HTTP_400_BAD_REQUEST)
@@ -35,6 +37,10 @@ class M2MOperations():
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
         itemId = self.state.get('data').get('item_id', None)
+        cruder = CrudClass()
+        mtIdKey = cruder.getMapper().master('foreignKeyName')
+        idKey = self.state.get('tbl') + '_' + cruder.getMapper().column('id')
+        data = self.satte.get('data')
         
         if crud.isValidId({'id': itemId}, 'id'):
             dictinary = {
