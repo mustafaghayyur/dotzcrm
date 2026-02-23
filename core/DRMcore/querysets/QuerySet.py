@@ -57,7 +57,11 @@ class QuerySetManager(BackgroundOperations):
         if self.state.get('translations.debug') == True:
             misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
 
-        return self.raw(query, self.state.get('parameters'), self.state.get('translations'))
+        translationsObj = self.state.get('translations.debug')
+        if 'debug' in translationsObj:
+            del translationsObj['debug']
+
+        return self.raw(query, self.state.get('parameters'), translationsObj)
 
 
     def select(self, selectors):

@@ -2,7 +2,7 @@ from core.dotzSettings import settings
 from .background import Background
 from ...helpers import misc
 
-class BaseOperations(Background):
+class BaseMapper(Background):
     """
         This class and its inheritors will help map tables to data in 
         meaningful ways.
@@ -11,72 +11,62 @@ class BaseOperations(Background):
         """
             Grabs the table's (or all tables in mapper)'s full name from schema.
         """
-        info = {}
         tablesUsed = self.state.get('tablesUsed')
         allTables = self.state.get('tables')
         if key is not None and key in tablesUsed:
             return allTables[key]
-
-        for tbl in tablesUsed:
-            info[tbl] = allTables[tbl]
+        
+        info = { tbl: allTables[tbl] for tbl in tablesUsed }
         return self.returnValue(info, key)
 
     def models(self, key = 'all'):
         """
             Grabs the model value(s) from schema for mapper table(s).
         """
-        info = {}
         tablesUsed = self.state.get('tablesUsed')
         allModels = self.state.get('models')
         if key is not None and key in tablesUsed:
             return allModels[key]
         
-        for tbl in tablesUsed:
-            info[tbl] = allModels[tbl]
+        info = { tbl: allModels[tbl] for tbl in tablesUsed }
         return self.returnValue(info, key)
     
     def modelPaths(self, key = 'all'):
         """
             Grabs the model-path value(s) from schema for mapper table(s).
         """
-        info = {}
         tablesUsed = self.state.get('tablesUsed')
         allPaths = self.state.get('paths')
         if key is not None and key in tablesUsed:
             return allPaths[key]
         
-        for tbl in tablesUsed:
-            info[tbl] = allPaths[tbl]
+        info = { tbl: allPaths[tbl] for tbl in tablesUsed }
         return self.returnValue(info, key)
 
     def tableFields(self, name = 'all'):
         """
             Grabs the table-cols list(s) from schema for each table in mappers.
         """
-        info = {}
         tablesUsed = self.state.get('tablesUsed')
         allColLists = self.state.get('cols')
         if name is not None and name in tablesUsed:
             return allColLists[name]
         
-        for tbl in tablesUsed:
-            info[tbl] = allColLists[tbl]
+        info = { tbl: allColLists[tbl] for tbl in tablesUsed }
         return self.returnValue(info, name)
     
-    def tableTypes(self, name: str):
+    def tableTypes(self, tblType: str):
         """
-            Grabs the list of all tables' type (in mapper) or "name's" type from schema: 
+            Grabs the list of all tables in mapper with "type" relation-type from schema: 
             
-            :param name: [str] must be enum from: 'o2o' | 'm2m' | 'rlc'
+            :param tblType: [str] must be enum from: 'o2o' | 'm2m' | 'rlc'
             
-            :returns [list]
+            :returns [list] @todo: confirm this returns correct list of tables...
         """
-        info = []
         tablesUsed = self.state.get('tablesUsed')
         allTablesType = self.state.get('types')
-        for tbl in tablesUsed:
-            if tbl in allTablesType and allTablesType[tbl] == name:
-                info.append(tbl)
+        
+        info = [tbl for tbl in tablesUsed if tbl in allTablesType and allTablesType[tbl] == tblType]
         return info
 
     def tableAbbreviation(self, fullTableName = None):
@@ -98,8 +88,9 @@ class BaseOperations(Background):
         """
         sz = settings.get('project.mapper.tblKeySize')
         field = key[sz:] if prefix else key  # grab correct fieldName to compare
-
-        if field in self.commonFields():
+        commons = self.commonFields()
+        
+        if field in commons:
             return True
         return False
 
@@ -120,7 +111,7 @@ class BaseOperations(Background):
 
     def generateFieldsDict(self, tablesList):
         """
-            Generates a dictionary holding all 'FieldNames' => 'table-key' pairs.
+            Generates a dictionary holding all 'FieldNames' => 'table-key' pairs for given list of tables.
 
             :param tablesList: [list] provided tables list to process.
         """

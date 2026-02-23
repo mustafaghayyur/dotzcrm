@@ -110,8 +110,9 @@ class Operations():
             for each CT.
         """
         self.state.get('log').record(fetchedRecords, 'Error: Full Record Retrieval Found multiple CT records. Commencing pruneLatestRecords()')
-
-        for pk in self.state.get('idCols'):
+        idColumns = self.state.get('idCols')
+        
+        for pk in idColumns:
             tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
 
             if pk == self.mapper.master('abbreviation') + '_' + self.mapper.column('id'):

@@ -1,12 +1,12 @@
-from .base import BaseOperations
+from .base import BaseMapper
 
-class RelationshipMappers(BaseOperations):
+class RelationshipMappers(BaseMapper):
     """
         Along with BaseOperations(), RelationshipMappers() defines meaningful methods to
         access vital schema related info for all your database crud operations.
 
         References to _*() methods in the code point to data-definition functions defined
-        in child classes on app-level.
+        in child classes in app-level.
     """
     def master(self, key = 'all'):
         info = self._master()
