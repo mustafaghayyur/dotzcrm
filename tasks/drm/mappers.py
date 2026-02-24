@@ -163,7 +163,7 @@ class TasksMapper(RelationshipMappers):
     def _defaults_where_conditions(self):
         return {
             "latest": self.values.latest('latest'), # left without table prefix for reasons.
-            "tata_delete_time": 'IS NULL',  # @todo needs to be handled
+            "tata_delete_time": 'IS NULL',
         }
     
     def _defaults_limit_value(self):
@@ -269,7 +269,7 @@ class WorkSpacesMapper(RelationshipMappers):
     def _defaults_where_conditions(self):
         return {
             "latest": self.values.latest('latest'), # left without table prefix for reasons.
-            "wowo_delete_time": 'IS NULL',  # @todo needs to be handled
+            "wowo_delete_time": 'IS NULL',
         }
     
     def _defaults_limit_value(self):

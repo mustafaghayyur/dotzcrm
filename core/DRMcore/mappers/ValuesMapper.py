@@ -22,10 +22,7 @@ class ValuesMapperGeneric(Singleton):
             
             :param key: [str] rerfernce to enum key indentifying valid 'latest' col key.
         """
-        values = {}
-
-        for itm in Latest:
-            values[itm.name] = itm.value
+        values = {itm.name: itm.value for itm in Latest}
         
         if key is not None and key in values:
             return values[key]

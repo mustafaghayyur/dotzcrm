@@ -8,10 +8,7 @@ class ValuesMapper(ValuesMapperGeneric):
     """
 
     def status(self, key = 'all'):
-        values = {}
-
-        for itm in Status:
-            values[itm.name] = itm.value
+        values = {itm.name: itm.value for itm in Status}
 
         if key is not None and key in values:
             return values[key]
@@ -19,10 +16,7 @@ class ValuesMapper(ValuesMapperGeneric):
         return values
 
     def visibility(self, key = 'all'):
-        values = {}
-
-        for itm in Visibility:
-            values[itm.name] = itm.value
+        values = {itm.name: itm.value for itm in Visibility}
 
         if key is not None and key in values:
             return values[key]

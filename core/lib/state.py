@@ -3,10 +3,6 @@ class State:
         This class's instance will serve as a state holder.
         It can be passed it between operations to maintain data-integrity.
     """
-
-    # state container [dict]
-    state = None
-
     def __init__(self):
         self.state = {}
 
@@ -25,7 +21,7 @@ class State:
             value = default
 
         if length > 5:
-            raise Exception('state().set() cannot handle key paths deeper than 5 levels.')
+            raise Exception('Error 362: state().set() cannot handle key paths deeper than 5 levels.')
         
         if length == 1:
             self.state[keyPath] = value
@@ -67,6 +63,11 @@ class State:
             :param keyPath: [str] should be in the form of: 'key1.childNodeKey2', mapping out a path to the specific key you wish to retrieve.
             :param default: [*] allows for custom default return value setting upon key match failiure.
         """
+        # first we check for top-level key-matches:
+        if isinstance(keyPath, str) and keyPath in self.state:
+            return self.state[keyPath]
+
+        # if no luck, we attempt proper key-path matching...
         path = self.validateKey(keyPath)
 
         value = self.state
@@ -92,11 +93,11 @@ class State:
             :param keyPath: [str]
         """
         if not isinstance(keyPath, str):
-            raise TypeError('state().get() expects a string based key.')
+            raise TypeError('Error 360: state().get() expects a string based key.')
         
         path = keyPath.split('.')
 
         if not isinstance(path, list):
-            raise Exception('Could not retrieve key path in state().get().')
+            raise Exception('Error 361: Could not retrieve key path in state().get().')
         
         return path
