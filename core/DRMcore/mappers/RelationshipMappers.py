@@ -72,12 +72,28 @@ class RelationshipMappers(BaseMapper):
 
         return None
     
-    def bannedFromInput(self):
+    def currentUserFields(self):
         """
-            Returns list of tbl_fieldNames (with tbl-key prefixes attached) of table
-            columns found in current mapper, that cannot take inputs from user-supplied data.
+            Returns list of fields which hold current user's id.
+            Should allow limiting of external entries in these fields.
         """
-        return self._bannedFromInput()
+        return self._currentUserFields()
+    
+    def bannedFromOpenAccess(self, operation = 'all'):
+        """
+            Carries dictionary of rules on which CRUD operations are permitted
+            on the universal API nodes (restapi.views.list|crud).
+        """
+        rules = self._bannedFromOpenAccess()
+        if rules is None:
+            rules = {
+                'read': {},
+                'create': {},
+                'update': {},
+                'delete': {},
+            }
+
+        return self.returnValue(rules, operation)
     
     def defaults(self, requestedFunc):
         """

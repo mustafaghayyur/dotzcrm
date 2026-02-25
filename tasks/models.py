@@ -116,7 +116,7 @@ class Comment(models.Model):
 
 
 
-### WorkSpace Mapper Models ###
+### WorkSpace Models ###
 
 
 class WorkSpace(models.Model):
@@ -131,6 +131,8 @@ class WorkSpace(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = WorkSpaceQuerySet.as_manager()
+
 
 class WorkSpaceDepartment(models.Model):
     """
@@ -141,6 +143,8 @@ class WorkSpaceDepartment(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
+    objects = WorkSpaceM2MQuerySet.as_manager()
 
 
 class WorkSpaceUser(models.Model):
@@ -153,6 +157,8 @@ class WorkSpaceUser(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
+    objects = WorkSpaceM2MQuerySet.as_manager()
+
 
 class WorkSpaceTasks(models.Model):
     """
@@ -163,4 +169,6 @@ class WorkSpaceTasks(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
+    objects = WorkSpaceM2MQuerySet.as_manager()
 

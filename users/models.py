@@ -5,6 +5,8 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils import timezone
 from django.contrib.auth.models import UserManager, PermissionsMixin
 
+from .drm.querysets import *
+
 #### User Mapper Models ####
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -55,6 +57,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
 
+    objects = UserQuerySet.as_manager()
+
     class Meta:
         db_table = 'auth_user'
         verbose_name = _("user")
@@ -77,6 +81,8 @@ class UserProfile(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
+    objects = UserCTQuerySet.as_manager()
+
     def __str__(self):
         return f'{self.legal_first_name} {self.legal_last_name} [{self.user.username}]'
 
@@ -90,6 +96,8 @@ class UserSettings(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = UserRLCQuerySet.as_manager()
+
 
 class UserReportsTo(models.Model):
     """
@@ -102,6 +110,8 @@ class UserReportsTo(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = UserM2MQuerySet.as_manager()
+
 
 class EditLog(models.Model):
     """
@@ -112,6 +122,8 @@ class EditLog(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = UserRLCQuerySet.as_manager()
 
 
 
@@ -131,6 +143,8 @@ class Department(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = DepartmentQuerySet.as_manager()
+
 
 class DepartmentUser(models.Model):
     """
@@ -143,6 +157,8 @@ class DepartmentUser(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = DepartmentM2MQuerySet.as_manager()
+
 class DepartmentHead(models.Model):
     """
         Assigns head(s) to departments. 
@@ -153,4 +169,6 @@ class DepartmentHead(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = DepartmentM2MQuerySet.as_manager()
     

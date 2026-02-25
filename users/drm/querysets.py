@@ -1,42 +1,79 @@
 from core.DRMcore.querysets import master, child
-from .mappers import *
+from .users_mapper import UsersMapper
+from .dept_mapper import DepartmentsMapper
 
-"""
-    We are now removing MT/CT distinction from QuerySets.
-"""
+
 class UserQuerySet(master.MTQuerySet):
     """
         UserQuerySet allows for highly versatile Select queries to DB.
         For O2O, M2M and RLC data models (i.e. records).
     """
-    def __init__(self, model=None, query=None, using=None, hints=None):
-        self.app = 'users'
+    def startUpCode(self):
+        self.state.set('app', 'users')
         self.mapper = UsersMapper()
-        self.columnsMatrix = self.mapper.generateO2OFields()
-
-        super().__init__(model, query, using, hints)
 
 
-class DetailQuerySet(child.CTQuerySet):
-    tbl = 'tasks_details'
-    app = 'tasks'
-    mapper = UsersMapper()
+class UserCTQuerySet(child.CTQuerySet):
+    """
+        Generic for all O2O CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = UsersMapper()
+
+class UserM2MQuerySet(child.M2MQuerySet):
+    """
+        Generic for all M2M CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = UsersMapper()
+
+class UserRLCQuerySet(child.RLCQuerySet):
+    """
+        Generic for all RLC CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = UsersMapper()
 
 
-class DeadlineQuerySet(child.CTQuerySet):
-    tbl = 'tasks_deadline'
-    app = 'tasks'
-    mapper = UsersMapper()
 
 
-class StatusQuerySet(child.CTQuerySet):
-    tbl = 'tasks_status'
-    app = 'tasks'
-    mapper = UsersMapper()
+#### Departments QuerySets #####
+
+class DepartmentQuerySet(master.MTQuerySet):
+    """
+        DepartmentQuerySet allows for highly versatile Select queries to DB.
+        For O2O, M2M and RLC data models (i.e. records).
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = DepartmentsMapper()
 
 
-class VisibilityQuerySet(child.CTQuerySet):
-    tbl = 'tasks_assignment'
-    app = 'tasks'
-    mapper = UsersMapper()
+class DepartmentCTQuerySet(child.CTQuerySet):
+    """
+        Generic for all O2O CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = DepartmentsMapper()
 
+class DepartmentM2MQuerySet(child.M2MQuerySet):
+    """
+        Generic for all M2M CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = DepartmentsMapper()
+
+class DepartmentRLCQuerySet(child.RLCQuerySet):
+    """
+        Generic for all RLC CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.mapper = DepartmentsMapper()
+
+        
