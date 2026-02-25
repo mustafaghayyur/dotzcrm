@@ -16,6 +16,9 @@ class RelationshipMappers(BaseMapper):
         return self._commonFields()
 
     def ignoreOnUpdates(self, key = 'all'):
+        """
+            @todo: confirm ids should be ignored on rlc & m2ms tables
+        """
         info = self._ignoreOnUpdates()
         allTables = self.state.get('tables')
         if key not in allTables:
@@ -69,13 +72,12 @@ class RelationshipMappers(BaseMapper):
 
         return None
     
-    def currentUserFields(self):
+    def bannedFromInput(self):
         """
-            Retrieves list of all columns in mapper that carry current user's ID.
-            These fields can only be set by current user, to them selves.
+            Returns list of tbl_fieldNames (with tbl-key prefixes attached) of table
+            columns found in current mapper, that cannot take inputs from user-supplied data.
         """
-        return self._commonFields()
-    
+        return self._bannedFromInput()
     
     def defaults(self, requestedFunc):
         """

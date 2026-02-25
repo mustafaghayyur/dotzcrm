@@ -14,7 +14,7 @@ export default function (data, containerId) {
             newComment = comment.cloneNode(true);    
             newComment.classList.remove('d-none');
 
-            newComment.querySelector('.creator_id').textContent = '' + item.creator_user_id + 'wrote...';
+            newComment.querySelector('.user_id').textContent = '' + item.user_id + 'wrote...';
             newComment.querySelector('.create_time').textContent = $A.dates.convertToDisplayLocal(item.create_time);
             newComment.querySelector('.update_time').textContent = $A.dates.convertToDisplayLocal(item.update_time);
             newComment.querySelector('.comment_text').innerHTML = $A.forms.escapeHtml(item.comment);

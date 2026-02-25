@@ -25,7 +25,7 @@ departments = {
             'create_time',
             'delete_time',
             'department_id',
-            'user_id',
+            'head_id',
             'latest'
         ],
     },

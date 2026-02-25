@@ -26,23 +26,28 @@ class UsersMapper(RelationshipMappers):
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
-            if not handled separately
+            if not handled separately. Master().foreignKeyName is not included.
         """
         return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
             Carries any fields within a table to ignore in CRUD.update() operations.
+            Master().foreignKeyName is NOT included.
         """
         return {
             'usus': ['id'],
-            'uspr': ['id', 'latest', 'user_id'],
+            'uspr': ['id', 'latest'],
             'usre': ['id', 'latest'],
             'usse': ['id'],
             'used': ['id'],
         }
     
     def _ignoreOnCreate(self):
+        """
+            Sets fields we can ignore in crud.create() proceses.
+            Master().foreignKeyName is NOT included.
+        """
         return {
             'usus': ['delete_time', 'create_time', 'update_time', 'id'],
             'uspr': ['delete_time', 'create_time', 'latest', 'id'],
@@ -57,8 +62,8 @@ class UsersMapper(RelationshipMappers):
         """
         return {
             'usre': {
-                'firstCol': 'user_id',
-                'secondCol': 'reports_to_id',
+                'firstCol': 'reporter_id',
+                'secondCol': 'reportsTo_id',
                 'tables': ['usus']
             },
         }
@@ -68,6 +73,27 @@ class UsersMapper(RelationshipMappers):
             Add all columns found in this mapper, that are date fields.
         """
         return ['create_time', 'update_time', 'delete_time', 'date_joined']
+
+    
+    def _bannedFromInput(self):
+        """
+            Carries Mapper fields that cannot take user input directly.
+            Need special handling while carrying out C.U.(D.) operations
+        """
+        return ['reporter_id', 'reportsTo_id', 'owner_id', 'log_user_id']
+    
+    def _bannedFromOpenAccess(self):
+        """
+            Carries dictionary of definitions on which CRUD operations are permitted
+            on the universal API nodes (restapi.views.list|crud).
+        """
+        return {
+            'read': {
+                'usus': ['password', 'last_login', 'is_superuser', 'is_staff', 'date_joined'],
+                'usse': ['settings'],
+                'used': ['change_log']
+            }
+        }
 
     def _defaults_order_by(self):
         return [
@@ -123,7 +149,7 @@ class DepartmentsMapper(RelationshipMappers):
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
-            if not handled separately
+            if not handled separately. Master().foreignKeyName is not included.
         """
         return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
@@ -132,12 +158,16 @@ class DepartmentsMapper(RelationshipMappers):
             Can carry any fields within a table to ignore in a certain operation
         """
         return {
-            'dede': ['id', 'latest', 'department_id'],
-            'dehe': ['id', 'latest', 'department_id'],
-            'deus': ['id', 'latest', 'department_id'],
+            'dede': ['id', 'latest'],
+            'dehe': ['id', 'latest'],
+            'deus': ['id', 'latest'],
         }
     
     def _ignoreOnCreate(self):
+        """
+            Sets fields we can ignore in crud.create() proceses.
+            Master().foreignKeyName is NOT included.
+        """
         return {
             'dede': ['delete_time', 'create_time', 'update_time', 'id'],
             'dehe': ['delete_time', 'create_time', 'latest', 'id'],
@@ -151,7 +181,7 @@ class DepartmentsMapper(RelationshipMappers):
         return {
             'dehe': {
                 'firstCol': 'department_id',
-                'secondCol': 'user_id',
+                'secondCol': 'head_id',
                 'tables': ['dede', 'usus']
             },
             'deus': {
@@ -166,6 +196,13 @@ class DepartmentsMapper(RelationshipMappers):
             Add all columns found in this mapper, that are date fields.
         """
         return ['create_time', 'update_time', 'delete_time']
+    
+    def _bannedFromInput(self):
+        """
+            Carries Mapper fields that cannot take user input directly.
+            Need special handling while carrying out C.U.(D.) operations
+        """
+        return ['creator_id', 'user_id', 'head_id']
 
     def _defaults_order_by(self):
         return [

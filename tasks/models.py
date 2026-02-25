@@ -107,7 +107,7 @@ class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='parent_comment')
-    creator_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)

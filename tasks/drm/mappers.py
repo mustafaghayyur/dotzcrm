@@ -26,26 +26,30 @@ class TasksMapper(RelationshipMappers):
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
-            if not handled separately
+            if not handled separately. Master().foreignKeyName is not included.
         """
         return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
             Can carry any fields within a table to ignore in CRUD.update() operation.
+            Master().foreignKeyName is NOT included.
         """
         return {
-            'tata': ['id'],
-            'tade': ['id', 'latest', 'task_id'],
-            'tadl': ['id', 'latest', 'task_id'],
-            'tast': ['id', 'latest', 'task_id'],
-            'tavi': ['id', 'latest', 'task_id'],
-            'taas': ['id', 'latest', 'task_id'],
-            'tawa': ['id', 'latest'],
-            'taco': ['id'], # @todo: confirm ids should be ignored on rlc & m2ms
+            'tata': ['id', 'create_time', 'creator_id'],
+            'tade': ['id', 'latest', 'create_time'],
+            'tadl': ['id', 'latest', 'create_time'],
+            'tast': ['id', 'latest', 'create_time'],
+            'tavi': ['id', 'latest', 'create_time'],
+            'taas': ['id', 'latest', 'create_time'],
+            'taco': ['id'],
         }
     
     def _ignoreOnCreate(self):
+        """
+            Sets fields we can ignore in crud.create() proceses.
+            Master().foreignKeyName is NOT included.
+        """
         return {
             'tata': ['delete_time', 'create_time', 'update_time', 'id'],
             'tade': ['delete_time', 'create_time', 'latest', 'id'],
@@ -118,13 +122,15 @@ class TasksMapper(RelationshipMappers):
                 'name': 'Watchers',
             },
         }
+    
 
-    def _currentUserFields(self):
+    def _bannedFromInput(self):
         """
-            Retrieves list of all columns in mapper that carry current user's ID.
-            These fields can only be set by current user, to them selves.
+            Carries Mapper fields that cannot take user input directly.
+            Need special handling while carrying out C.U.(D.) operations
         """
         return ['creator_id', 'watcher_id']
+
 
     def _defaults_order_by(self):
         return [
@@ -198,22 +204,27 @@ class WorkSpacesMapper(RelationshipMappers):
     def _commonFields(self):
         """
             These keys tend to be found in every table and cause problems 
-            if not handled separately
+            if not handled separately. Master().foreignKeyName is not included.
         """
         return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
 
     def _ignoreOnUpdates(self):
         """
-            Can carry any fields within a table to ignore in a certain operation
+            Can carry any fields within a table to ignore in a crud.update() operation
+            Master().foreignKeyName is NOT included.
         """
         return {
-            'wowo': ['id'],
-            'wode': ['id', 'latest', 'workspace_id'],
-            'wous': ['id', 'latest', 'workspace_id'],
-            'wota': ['id', 'latest', 'workspace_id'],
+            'wowo': ['id', 'creator_id'],
+            'wode': ['id', 'latest'],
+            'wous': ['id', 'latest'],
+            'wota': ['id', 'latest'],
         }
     
     def _ignoreOnCreate(self):
+        """
+            Sets fields we can ignore in crud.create() proceses.
+            Master().foreignKeyName is NOT included.
+        """
         return {
             'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
             'wode': ['delete_time', 'create_time', 'latest', 'id'],
@@ -249,11 +260,11 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time']
     
-
-    def _currentUserFields(self):
+    
+    def _bannedFromInput(self):
         """
-            Retrieves list of all columns in mapper that carry current user's ID.
-            These fields can only be set by current user, to them selves.
+            Carries Mapper fields that cannot take user input directly.
+            Need special handling while carrying out C.U.(D.) operations
         """
         return ['creator_id']
 

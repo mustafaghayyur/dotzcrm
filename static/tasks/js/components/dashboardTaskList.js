@@ -41,10 +41,12 @@ export default function (data, containerId) {
             let tasks = container.querySelectorAll('.task-details-link');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
-                let request = $A.fetch.route('api.tasks.crud', String(id));
                 task.addEventListener('click', async ()=>{
                     const callback = await $A.tasks.load('taskDetails');
-                    $A.fetch.body(request, 'taskDetailsModalResponse', {}, callback);
+
+                    $A.query().single('tata', {
+                        tata_id: id
+                    }).execute('taskDetailsModalResponse', callback);
                     $A.router.update('task_id', id);
                 });
             });
