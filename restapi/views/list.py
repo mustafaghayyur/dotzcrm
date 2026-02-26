@@ -55,7 +55,13 @@ def list(request, format=None):
         paginatedLimit = [str(pgntn['offset']), str(pgntn['page_size'])]
 
         # Execute fetch using QuerySetManager
-        records = Model.objects.select(postData.get('selectors', None)).where(postData.get('conditions', None)).orderby(postData.get('ordering', None)).join(postData.get('joins', None)).limit(paginatedLimit).translate(postData.get('translations', None)).fetch()
+        records = (Model.objects.select(postData.get('selectors', None))
+                   .where(postData.get('conditions', None))
+                   .orderby(postData.get('ordering', None))
+                   .join(postData.get('joins', None))
+                   .limit(paginatedLimit)
+                   .translate(postData.get('translations', None))
+                   .enableCurrentUserRestrictions(request.user).fetch())
         
         # Serialize the results
         serialized = Serializer(records, many=True)

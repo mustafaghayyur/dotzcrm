@@ -25,7 +25,7 @@ class Validate:
     def mtIdValidation(mapper, space, operation, dictionary):
         """
             Ensures master-record-id is present in submitted-dictionary.
-        """        
+        """
         keys = ['id', mapper.master('abbreviation') + '_' + mapper.column('id'), mapper.master('foreignKeyName')]
         id = None
 
@@ -63,4 +63,12 @@ class Validate:
         return ids
 
 
-    
+    @staticmethod
+    def fillCurrentUserIdFields(state, mapper, submission):
+        fields = mapper.currentUserFields()
+        user = state.get('current_user')
+
+        for field in fields:
+            submission[field] = user.id
+
+        return submission

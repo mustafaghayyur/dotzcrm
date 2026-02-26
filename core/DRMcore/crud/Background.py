@@ -14,7 +14,7 @@ class Operations():
     state = None
     mapper = None
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.state = State()
         self.state.set('mtModel', None) 
         
@@ -34,6 +34,10 @@ class Operations():
         # holds all O2O primary keys for given space/module
         self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
         
+        self.state.set('current_user', kwargs.get('current_user', None))
+
+        if self.state.get('current_user') is None:
+            raise Exception('Error 2020: User information could not be parsed.')
 
     def startUpCode(self):
         """
@@ -47,16 +51,14 @@ class Operations():
 
 
     def saveSubmission(self, operation, submission):
-        # First, we do some error checking on the dictionary supplied:
         Validate.dictValidation(self.state.get('app'), operation, submission)
-        
+        submission = Validate.fillCurrentUserIdFields(self.state, self.mapper, submission)
+
         if operation != 'create':
-            # Second, we make sure the master-table-id is included in record:
             submission = Validate.mtIdValidation(self.mapper, self.state.get('app'), operation, submission)
             
-        # Finally, we save the submitted form into state
+        # save the submitted form into state
         self.state.set('submission', submission)
-
 
 
     def checkChildForMultipleLatests(self, modelClass, tbl, tableName, columnsList, fetchedRecords):

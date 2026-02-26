@@ -54,6 +54,7 @@ class RLCOperations():
     def delete(self):
         """
             Delete RLC record bet its ID.
+            @todo: add delateAll end-point as well, for all MT children
         """
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass()

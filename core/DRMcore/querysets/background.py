@@ -27,7 +27,7 @@ class BackgroundOperations(models.QuerySet):
         # save the original mapper fields to state...
         self.state.set('o2oMapperFields', self.mapper.generateO2OFields())
         self.state.set('allMapperFields', self.mapper.generateAllFields())
-        
+
     def getMapper(self):
         return self.mapper
 

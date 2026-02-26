@@ -105,4 +105,17 @@ class QuerySetManager(BackgroundOperations):
         """
         self.state.set('translations', translations, {})
         return self
+    
+    def enableCurrentUserRestrictions(self, currentUser):
+        """
+            Enables current user restrictions on where condition fields.
+            Needs appropriate definitions in Mapper().currentUserIdFields() setting
+        """
+        if currentUser is None:
+            raise Exception('Error 1190: User information could not be parsed.')
+        
+        self.state.set('current_user', currentUser)
+        return self
+
+
 

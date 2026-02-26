@@ -101,6 +101,8 @@ class CRUD(Background.Operations):
         """
             Validates a given record ID. If valid, attempts to  mark record
             as deleted in DB. Else, throws an exception.
+            
+            @todo: handle M2M and RLC children as well. !important
         """
         mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         idColumns = self.state.get('idCols')
