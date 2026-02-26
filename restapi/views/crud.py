@@ -25,9 +25,9 @@ def crud(request, format=None):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
     
     except ValidationError as e:
-        return Response(generateError(e, "Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(generateError(e, "Error 840: Validation errors have been caught."), status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response(generateError(e, "Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
+        return Response(generateError(e, "Error 841: Some errors have occured."), status=status.HTTP_400_BAD_REQUEST)
 
 
 

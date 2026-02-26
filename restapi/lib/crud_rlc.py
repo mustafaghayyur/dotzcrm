@@ -9,27 +9,26 @@ from core.lib.state import State
 class RLCOperations():
     def __init__(self, state: State):
         self.state = state
+        self.mapper = self.state.get('mapper')
 
     def create(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass()
-        data = self.satte.get('data')
-        idKey = self.state.get('tbl') + '_' + cruder.getMapper().column('id')
+        data = self.state.get('data')
+        idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
         
         serialized = GenericSerializer(data=data)
         if serialized.is_valid():
             dictionary = serialized.validated_data
-            dictionary['creator_user_id'] = self.state.get('user').id
+            dictionary['user_id'] = self.state.get('user').id
             result = cruder.create(dictionary)
             if result:
-                try:
-                    record = cruder.read({idKey: result.id})
-                    retrievedSerialized = GenericSerializer(record[0])
-                    return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
-                except Exception as e:
-                    return Response(generateError(e, "Could not retrieve created record."), status=status.HTTP_400_BAD_REQUEST)
-            return Response(generateError("Could not determine create response."), status=status.HTTP_400_BAD_REQUEST)
+                record = cruder.read({idKey: result.id})
+                retrievedSerialized = GenericSerializer(record[0])
+                return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
+                
+            raise Exception("Error 834: Could not determine create response.")
         else:
             return Response(generateError(serialized.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)
         
@@ -38,19 +37,17 @@ class RLCOperations():
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass()
         data = self.satte.get('data')
-        idKey = self.state.get('tbl') + '_' + cruder.getMapper().column('id')
+        idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
 
         serialized = GenericSerializer(data=data)
         if serialized.is_valid():
             result = cruder.update(serialized.validated_data)
             if result:
-                try:
-                    record = cruder.read({idKey: result.id})
-                    retrievedSerialized = GenericSerializer(record[0])
-                    return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
-                except Exception as e:
-                    return Response(generateError(e, "Could not retrieve updated record."), status=status.HTTP_400_BAD_REQUEST)
-            return Response(generateError("Could not determine update response."), status=status.HTTP_400_BAD_REQUEST)
+                record = cruder.read({idKey: result.id})
+                retrievedSerialized = GenericSerializer(record[0])
+                return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
+                
+            raise Exception("Error 833: Could not determine update response.")
         else:
             return Response(generateError(serialized.errors), status=status.HTTP_400_BAD_REQUEST)
     
@@ -58,35 +55,50 @@ class RLCOperations():
         """
             Delete RLC record bet its ID.
         """
-        GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass()
-        data = self.satte.get('data')
-        idKey = self.state.get('tbl') + '_' + cruder.getMapper().column('id')
+        data = self.state.get('data')
+        idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
 
-        if isValidId({idKey: id}, idKey):
-            results = cruder.delete(data.get(idKey))
-            return Response(generateResponse({
-                'results': results,
-                'messages': 'Rows affected shown in results.'
-            }), status=status.HTTP_200_OK)
+        if isValidId(dict(data), idKey):
+            cruder.delete(data.get(idKey))
+            return Response(generateResponse({'messages': f'Record(s) with id matching {data.get(idKey, None)} have been archived in system.'}), status=status.HTTP_200_OK)
         
-        return Response(generateError('Comment id not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
+        raise Exception(f'Error 832: Record id not valid: [{data.get(idKey, None)}]. Delete aborted.')
 
     def read(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass()
-        data = self.satte.get('data')
-        fk_name = cruder.getMapper().master('foreignKeyName')
+        data = self.state.get('data')
+        fk_name = cruder.mapper.master('foreignKeyName')
+        idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
         request = self.state.get('request')
+        requestType = None
 
-        pgntn = assembleParamsForView(request.query_params)
+        if data.get(idKey, None) is None and data.get(fk_name, None) is not None:
+            requestType = 'byMtId'
+            records = cruder.read({
+                fk_name: data.get(fk_name),
+            })
+            serialized = GenericSerializer(records, many=True)
+        
+        if data.get(idKey, None) is not None and data.get(fk_name, None) is None:
+            requestType = 'byId'
+            records = cruder.read({
+                idKey: data.get(idKey),
+            })
+            serialized = GenericSerializer(records)
 
-        records = cruder.read({
-            fk_name: data.get(fk_name),
-        })
-        serialized = GenericSerializer(records, many=True)
-        hasMore = determineHasMore(records, pgntn['page_size'])
+        if requestType is None:
+            raise Exception('Error 830: RLC read requests should only provide CT id or MT id.')        
 
-        return Response(generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+        if requestType == 'byMtId':
+            pgntn = assembleParamsForView(request.query_params)
+            hasMore = determineHasMore(records, pgntn['page_size'])
+            return Response(generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+        
+        if requestType == 'byId':
+            return Response(generateResponse(serialized.data))
+        
+        raise Exception('Error 831: Something went wrong with RLC record(s) retrieval.')   

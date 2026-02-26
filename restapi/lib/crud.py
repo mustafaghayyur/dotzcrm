@@ -10,30 +10,28 @@ from .crud_rlc import RLCOperations
 class Operations():
     def __init__(self):
         self.state = State()
-        self.mapper = None
-        self.state.set('operation', None)
-        self.state.set('crudClass', None)
-        self.state.set('serializerClass', None)
-        self.state.set('dataModel', None)
 
     def setupEnvironment(self, request, operation):
+        """
+            Setup state to hold all pertinent settings
+        """
         if request.data.get('tbl', None) is not None:
             tbl = request.data['tbl']
         else:
-            raise ValidationError("Error 800: Missing required 'tbl' parameter to identify model.")
+            raise ValidationError("Error 870: Missing required 'tbl' parameter to identify model.")
         
         schemaEntry = schema[tbl]
         modelModule = importlib.import_module(schemaEntry['path'])
         Model = getattr(modelModule, schemaEntry['model'])
+        self.state.set('mapper', Model.objects.getMapper())
 
-        serMeta = Model.objects.mapper.serializers(tbl)
+        serMeta = self.state.get('mapper').serializers(tbl)
         serModule = importlib.import_module(serMeta['path'])
 
-        self.mapper = Model.objects.getMapper()
         self.state.set('operation', operation)
-        self.state.set('crudClass', self.mapper.crudClass(tbl))
+        self.state.set('crudClass', self.state.get('mapper').crudClass(tbl))
         self.state.set('serializerClass', getattr(serModule, serMeta['generic']))
-        self.state.set('dataModel', self.mapper.tableTypes(tbl))
+        self.state.set('dataModel', self.state.get('mapper').tableTypes(tbl))
 
         self.state.set('request', request)
         self.state.set('data', request.data)
