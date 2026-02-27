@@ -69,6 +69,23 @@ class BaseMapper(Background):
         info = [tbl for tbl in tablesUsed if tbl in allTablesType and allTablesType[tbl] == tblType]
         return info
 
+
+    def typeOfTable(self, tblKey: str):
+        """
+            Retrieves data-model-type of table-key provided, if it exists in mapper.
+            
+            :param tblKey: [str] table key as defined in schema
+            
+            :returns enum from: 'o2o' | 'm2m' | 'rlc' or None on error
+        """
+        tablesUsed = self.state.get('tablesUsed')
+        allTablesType = self.state.get('types')
+        
+        if tblKey in tablesUsed:
+            return allTablesType[tblKey]
+
+        return None
+
     def tableAbbreviation(self, fullTableName = None):
         """
             Determine single full-table-name's correct abbreviation.
@@ -126,7 +143,6 @@ class BaseMapper(Background):
             fields = self.tableFields(tbl)
 
             if not isinstance(fields, list):
-                misc.log(fields, 'ERROR: fields is not a list')
                 continue
 
             for field in fields:

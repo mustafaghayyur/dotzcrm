@@ -9,6 +9,10 @@ from .drm.querysets import *
 
 #### User Mapper Models ####
 
+class DrmUserManager(UserManager.from_queryset(UserQuerySet)):
+    # shell User Manager to enable our DRM UserQuerySet()
+    pass
+
 class User(AbstractBaseUser, PermissionsMixin):
     """
         We will do our best not to modify columns already set in Django. Only column additions.
@@ -52,12 +56,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
-    objects = UserManager()
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
 
-    objects = UserQuerySet.as_manager()
+    objects = DrmUserManager()
 
     class Meta:
         db_table = 'auth_user'

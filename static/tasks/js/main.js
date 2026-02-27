@@ -23,7 +23,6 @@ Main(async () => {
                     {tbl: 'tata', col: 'update_time', sort: 'desc'},
                     {tbl: 'tast', col: 'create_time', sort: 'desc'}
                 ]).page(1)
-                .translate({debug: true})
                 .execute('personalTabResponse', dashboardTodoList);
 
             $A.query().search('tata')
@@ -36,7 +35,6 @@ Main(async () => {
                     status: ['assigned', 'queued', 'started']
                 })
                 .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
-                .translate({debug: true})
                 .execute('workspacesTabResponse', dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:

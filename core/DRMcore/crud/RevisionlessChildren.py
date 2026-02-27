@@ -45,7 +45,7 @@ class CRUD(Background.Operations):
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Error 2065: Record(s) fetch request for RLC record type [{self.state.get('tbl')}] failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
 
-        model = globals()[self.mapper.models(self.state.get('tbl'))]
+        model = misc.importModule(self.mapper.models(self.state.get('tbl')), f'{self.state.get('app')}.models')  # @todo: make path to models more reliable so if models location changes...
 
         if self.state.get('pk') in definitions:
             rawObjs = model.objects.fetchById(definitions[self.state.get('pk')])  # specific record being sought

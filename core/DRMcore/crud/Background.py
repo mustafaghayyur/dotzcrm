@@ -14,13 +14,18 @@ class Operations():
     state = None
     mapper = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.state = State()
         self.state.set('mtModel', None) 
         
         # submission will hold dictionary of submitted data to use for crud operation in question
         self.state.set('submission', None)
         self.state.set('abrvSize', settings.get('project.mapper.tblKeySize') - 1)
+
+        if kwargs.get('current_user', None) is None:
+            raise Exception('Error 2020: User information could not be parsed.')
+        
+        self.state.set('current_user', kwargs.get('current_user', None))
 
         self.startUpCode()
 
@@ -34,11 +39,7 @@ class Operations():
         # holds all O2O primary keys for given space/module
         self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
         
-        self.state.set('current_user', kwargs.get('current_user', None))
-
-        if self.state.get('current_user') is None:
-            raise Exception('Error 2020: User information could not be parsed.')
-
+        
     def startUpCode(self):
         """
             Used by app-level inheritor classes to run init processes.
@@ -47,7 +48,10 @@ class Operations():
 
 
     def setMasterCrudClass(self, classReference):
-        self.state.set('masterCrudObj', classReference())
+        if self.state.get('current_user') is None:
+            raise Exception('Error 2021: Current User information is missing, cannot set Master CRUD reference.')
+        
+        self.state.set('masterCrudObj', classReference(current_user=self.state.get('current_user')))
 
 
     def saveSubmission(self, operation, submission):

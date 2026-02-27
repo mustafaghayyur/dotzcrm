@@ -44,7 +44,6 @@ class QuerySetManager(BackgroundOperations):
         self.state.set('limitStatement', Limits.parse(self.state, self.mapper))
 
         self.state.set('joinStatements', Joins.parse(self.state, self.mapper))
-        # misc.log(self.state, 'inspection of self.state...')
 
         query = f"""
             SELECT {self.state.get('selectStatement')}
@@ -57,7 +56,7 @@ class QuerySetManager(BackgroundOperations):
         if self.state.get('translations.debug') == True:
             misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
 
-        translationsObj = self.state.get('translations.debug')
+        translationsObj = self.state.get('translations', {})
         if 'debug' in translationsObj:
             del translationsObj['debug']
 

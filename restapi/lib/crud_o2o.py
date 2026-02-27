@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.helpers import crud
+from core.helpers import crud, misc
 from core.lib.state import State
 
 
@@ -13,13 +13,14 @@ class O2OOperations():
     def create(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
+        cruder = CrudClass(current_user=self.state.get('user'))
         serialized = GenericSerializer(data=self.state.get('data'))
 
         if serialized.is_valid():
-            result = CrudClass().create(serialized.validated_data)
+            result = cruder.create(serialized.validated_data)
 
             if result:
-                record = CrudClass().fullRecord(result.id)
+                record = cruder.fullRecord(result.id)
                 retrievedSerialized = GenericSerializer(record[0])
                 return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
             
@@ -31,13 +32,14 @@ class O2OOperations():
     def update(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
+        cruder = CrudClass(current_user=self.state.get('user'))
         serialized = GenericSerializer(data=self.state.get('data'))
 
         if serialized.is_valid():
-            result = CrudClass().update(serialized.validated_data)
+            result = cruder.update(serialized.validated_data)
             
             if result:
-                record = CrudClass().fullRecord(result['tid'])
+                record = cruder.fullRecord(result['tid'])
                 retrievedSerialized = GenericSerializer(record[0])
                 return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
                 
@@ -48,12 +50,13 @@ class O2OOperations():
 
     def delete(self):
         CrudClass = self.state.get('crudClass')
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
         tbl = self.state.get('tbl')
         idField = f'{tbl}_id'
         
         if crud.isValidId(dict(data), idField):
-            CrudClass().delete(data.get(idField, None))
+            cruder.delete(data.get(idField, None))
             return Response(crud.generateResponse({'messages': f'Record(s) with id matching {data.get(idField, None)} have been archived in system.'}), status=status.HTTP_200_OK)
         
         raise Exception('Error 823: Record id not valid. Delete aborted.')
@@ -62,12 +65,12 @@ class O2OOperations():
     def read(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
         tbl = self.state.get('tbl')
         idField = f'{tbl}_id'
-
         if crud.isValidId(dict(data), idField):
-            record = CrudClass().fullRecord(id)
+            record = cruder.fullRecord(data.get(idField, None))
             if record:
                 serialized = GenericSerializer(record[0])
                 return Response(crud.generateResponse(serialized.data))

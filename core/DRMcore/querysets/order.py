@@ -50,20 +50,20 @@ class Ordering():
             return None
 
         if not isinstance(ordering, list):
-            raise TypeError('Error 1030: ordering argument must be a list of dictionary definitions.')
+            raise TypeError('Error 1090: ordering argument must be a list of dictionary definitions.')
 
         if len(ordering) == 0:
             return None
         
         for i in range(len(ordering)):
             if not isinstance(ordering[i], dict):
-                raise TypeError(f'Error 1031: ordering[{i}] is not a valid dictionary.')
+                raise TypeError(f'Error 1091: ordering[{i}] is not a valid dictionary.')
             if 'col' not in ordering[i] or not isinstance(ordering[i]['col'], str) or ordering[i]['col'] == '':
-                raise TypeError(f'Error 1032: ordering[{i}] is mssing a valid col definition.')
+                raise TypeError(f'Error 1092: ordering[{i}] is mssing a valid col definition.')
             if 'tbl' not in ordering[i] or not isinstance(ordering[i]['tbl'], str) or ordering[i]['tbl'] == '':
-                raise TypeError(f'Error 1033: ordering[{i}] is mssing a valid tbl definition.')
+                raise TypeError(f'Error 1093: ordering[{i}] is mssing a valid tbl definition.')
             if 'sort' not in ordering[i] or not isinstance(ordering[i]['sort'], str) or ordering[i]['sort'] == '':
-                raise TypeError(f'Error 1033: ordering[{i}] is mssing a valid sort definition.')
+                raise TypeError(f'Error 1094: ordering[{i}] is mssing a valid sort definition.')
 
         return ordering
     

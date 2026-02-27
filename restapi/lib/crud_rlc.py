@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
+from core.helpers import misc
 from core.helpers.crud import generateError, generateResponse, isValidId
 from core.helpers.pagination import assembleParamsForView, determineHasMore
 from core.lib.state import State
@@ -14,7 +15,7 @@ class RLCOperations():
     def create(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        cruder = CrudClass()
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
         idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
         
@@ -35,7 +36,7 @@ class RLCOperations():
     def update(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        cruder = CrudClass()
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.satte.get('data')
         idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
 
@@ -57,7 +58,7 @@ class RLCOperations():
             @todo: add delateAll end-point as well, for all MT children
         """
         CrudClass = self.state.get('crudClass')
-        cruder = CrudClass()
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
         idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
 
@@ -70,7 +71,7 @@ class RLCOperations():
     def read(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        cruder = CrudClass()
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
         fk_name = cruder.mapper.master('foreignKeyName')
         idKey = self.state.get('tbl') + '_' + self.mapper.column('id')

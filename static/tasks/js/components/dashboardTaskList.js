@@ -44,7 +44,7 @@ export default function (data, containerId) {
                 task.addEventListener('click', async ()=>{
                     const callback = await $A.tasks.load('taskDetails');
 
-                    $A.query().single('tata', {
+                    $A.query().read('tata', {
                         tata_id: id
                     }).execute('taskDetailsModalResponse', callback);
                     $A.router.update('task_id', id);

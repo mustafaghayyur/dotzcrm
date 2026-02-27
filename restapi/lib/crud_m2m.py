@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
+from core.helpers import misc
 from core.helpers.crud import generateError, generateResponse
 from core.helpers.pagination import assembleParamsForView, determineHasMore
 from core.lib.state import State
@@ -14,7 +15,7 @@ class M2MOperations():
     def create(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        cruder = CrudClass()
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
 
         serialized = GenericSerializer(data=data)
@@ -39,7 +40,7 @@ class M2MOperations():
     def delete(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        cruder = CrudClass()
+        cruder = CrudClass(current_user=self.state.get('user'))
         data = self.satte.get('data')
 
         serialized = GenericSerializer(data=data)
@@ -60,7 +61,7 @@ class M2MOperations():
         serialized = GenericSerializer(data=data)
 
         if serialized.is_valid():
-            records = CrudClass().read(serialized.validated_data)
+            records = CrudClass(current_user=self.state.get('user')).read(serialized.validated_data)
             if records:
                 serialized = GenericSerializer(records[0])
 
@@ -71,6 +72,6 @@ class M2MOperations():
                 else:
                     return Response(generateResponse(serialized.data))
                 
-            raise Exception('Error 890: No records found matching provided paramerters.')
+            return Response(generateResponse([], additionalMsg=['No records found']))
         else:
             return Response(generateError(serialized.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)

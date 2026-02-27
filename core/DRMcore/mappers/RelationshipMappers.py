@@ -52,7 +52,7 @@ class RelationshipMappers(BaseMapper):
         if tblKey is not None and tblKey in info:
             return info[tblKey]
 
-        if tblKey == self.tables():
+        if tblKey in self.tables():
             return info['default']
 
         return None
@@ -63,11 +63,11 @@ class RelationshipMappers(BaseMapper):
             
             :param tblKey: [str] key for table
         """
-        info = self._serializers()
+        info = self._crudClasses()
         if tblKey is not None and tblKey in info:
             return info[tblKey]
 
-        if tblKey == self.tables():
+        if tblKey in self.tables():
             return info['default']
 
         return None

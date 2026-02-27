@@ -11,11 +11,11 @@ class CRUD(Background.Operations):
         Many-to-Many CRUD Operations that can be used through out the system.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         # Be sure to define these values in app-level inheritor:
         # self.state.set('tbl', None)  > table key recognized by mapper
         # self.state.set('pk', None)  > primary-key or "tbl_id" for this RLC table.
-        super().__init__(self)
+        super().__init__(self, *args, **kwargs)
         
         cols = self.mapper.m2mFields(self.state.get('tbl'))
         self.state.get('firstCol', cols['firstCol'])
