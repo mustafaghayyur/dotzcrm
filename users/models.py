@@ -5,7 +5,13 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils import timezone
 from django.contrib.auth.models import UserManager, PermissionsMixin
 
+from .drm.querysets import *
+
 #### User Mapper Models ####
+
+class DrmUserManager(UserManager.from_queryset(UserQuerySet)):
+    # shell User Manager to enable our DRM UserQuerySet()
+    pass
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -50,10 +56,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
-    objects = UserManager()
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
+
+    objects = DrmUserManager()
 
     class Meta:
         db_table = 'auth_user'
@@ -77,6 +84,8 @@ class UserProfile(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
+    objects = UserCTQuerySet.as_manager()
+
     def __str__(self):
         return f'{self.legal_first_name} {self.legal_last_name} [{self.user.username}]'
 
@@ -84,11 +93,13 @@ class UserSettings(models.Model):
     """
         RLC Model
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     settings = models.JSONField(null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = UserRLCQuerySet.as_manager()
 
 
 class UserReportsTo(models.Model):
@@ -96,22 +107,26 @@ class UserReportsTo(models.Model):
         User's boss(es). 
         M2M Model.
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
-    reports_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_to')
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    reportsTo = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_to')
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = UserM2MQuerySet.as_manager()
 
 
 class EditLog(models.Model):
     """
         RLC Model
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    log_user = models.ForeignKey(User, on_delete=models.CASCADE)
     change_log = models.JSONField(null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = UserRLCQuerySet.as_manager()
 
 
 
@@ -131,6 +146,8 @@ class Department(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = DepartmentQuerySet.as_manager()
+
 
 class DepartmentUser(models.Model):
     """
@@ -143,14 +160,18 @@ class DepartmentUser(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
+    objects = DepartmentM2MQuerySet.as_manager()
+
 class DepartmentHead(models.Model):
     """
         Assigns head(s) to departments. 
         M2M Model.
     """
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    head = models.ForeignKey(User, on_delete=models.CASCADE)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = DepartmentM2MQuerySet.as_manager()
     

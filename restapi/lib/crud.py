@@ -6,37 +6,40 @@ from core.DRMcore.mappers.schema.main import schema
 from .crud_o2o import O2OOperations
 from .crud_m2m import M2MOperations
 from .crud_rlc import RLCOperations
+from core.helpers import misc
 
 class Operations():
     def __init__(self):
         self.state = State()
-        self.mapper = None
-        self.state.set('operation', None)
-        self.state.set('crudClass', None)
-        self.state.set('serializerClass', None)
-        self.state.set('dataModel', None)
 
     def setupEnvironment(self, request, operation):
+        """
+            Setup state to hold all pertinent settings
+        """
         if request.data.get('tbl', None) is not None:
             tbl = request.data['tbl']
         else:
-            raise ValidationError("Error 800: Missing required 'tbl' parameter to identify model.")
+            raise ValidationError("Error 870: Missing required 'tbl' parameter to identify model.")
         
         schemaEntry = schema[tbl]
         modelModule = importlib.import_module(schemaEntry['path'])
         Model = getattr(modelModule, schemaEntry['model'])
+        self.state.set('mapper', Model.objects.getMapper())
 
-        serMeta = Model.objects.mapper.serializers(tbl)
+        serMeta = self.state.get('mapper').serializers(tbl)
         serModule = importlib.import_module(serMeta['path'])
-
-        self.mapper = Model.objects.getMapper()
-        self.state.set('operation', operation)
-        self.state.set('crudClass', self.mapper.crudClass(tbl))
         self.state.set('serializerClass', getattr(serModule, serMeta['generic']))
-        self.state.set('dataModel', self.mapper.tableTypes(tbl))
 
+        crudMeta = self.state.get('mapper').crudClasses(tbl)
+        crudModule = importlib.import_module(crudMeta['path'])
+        self.state.set('crudClass', getattr(crudModule, crudMeta['name']))
+
+        self.state.set('operation', operation)
+        self.state.set('dataModel', self.state.get('mapper').typeOfTable(tbl))
+        self.state.set('request', request)
         self.state.set('data', request.data)
         self.state.set('user', request.user)
+        self.state.set('tbl', tbl)
 
     def initiateOperation(self):
         if self.state.get('dataModel') == 'o2o':
@@ -48,22 +51,24 @@ class Operations():
         if self.state.get('dataModel') == 'rlc':
             return RLCOperations(self.state)
 
+        return None
+
     def create(self, request):
         self.setupEnvironment(request, 'create')
-        return self.initiateOperation().create(request)
+        return self.initiateOperation().create()
 
     def update(self, request):
         self.setupEnvironment(request, 'update')
-        return self.initiateOperation().update(request)
+        return self.initiateOperation().update()
 
     def delete(self, request):
         """
         @todo: add response message on success
         """
         self.setupEnvironment(request, 'delete')
-        return self.initiateOperation().delete(request)
+        return self.initiateOperation().delete()
 
     def read(self, request):
         self.setupEnvironment(request, 'read')
-        return self.initiateOperation().read(request)
+        return self.initiateOperation().read()
         

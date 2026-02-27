@@ -2,7 +2,7 @@ from django.conf import settings as ds  # stands for django-settings
 from django.utils import timezone
 
 from core.lib.state import State
-from core import dotzSettings
+from core.dotzSettings import settings
 from .validation import Validate
 from .logger import Logger
 from core.helpers import crud
@@ -14,18 +14,23 @@ class Operations():
     state = None
     mapper = None
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.state = State()
         self.state.set('mtModel', None) 
         
         # submission will hold dictionary of submitted data to use for crud operation in question
         self.state.set('submission', None)
-        self.state.set('abrvSize', dotzSettings.project['mapper']['tblKeySize'] - 1)
+        self.state.set('abrvSize', settings.get('project.mapper.tblKeySize') - 1)
+
+        if kwargs.get('current_user', None) is None:
+            raise Exception('Error 2020: User information could not be parsed.')
+        
+        self.state.set('current_user', kwargs.get('current_user', None))
 
         self.startUpCode()
 
         # loads configs related to the module (defined in self.state.get('app'))
-        self.state.set('module', getattr(dotzSettings, self.state.get('app')))
+        self.state.set('module', settings.get(self.state.get('app')))
 
         # setup logger
         self.state.set('log', Logger())
@@ -34,7 +39,7 @@ class Operations():
         # holds all O2O primary keys for given space/module
         self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
         
-
+        
     def startUpCode(self):
         """
             Used by app-level inheritor classes to run init processes.
@@ -43,20 +48,21 @@ class Operations():
 
 
     def setMasterCrudClass(self, classReference):
-        self.state.set('masterCrudObj', classReference())
+        if self.state.get('current_user') is None:
+            raise Exception('Error 2021: Current User information is missing, cannot set Master CRUD reference.')
+        
+        self.state.set('masterCrudObj', classReference(current_user=self.state.get('current_user')))
 
 
     def saveSubmission(self, operation, submission):
-        # First, we do some error checking on the dictionary supplied:
         Validate.dictValidation(self.state.get('app'), operation, submission)
-        
+        submission = Validate.fillCurrentUserIdFields(self.state, self.mapper, submission)
+
         if operation != 'create':
-            # Second, we make sure the master-table-id is included in record:
             submission = Validate.mtIdValidation(self.mapper, self.state.get('app'), operation, submission)
             
-        # Finally, we save the submitted form into state
+        # save the submitted form into state
         self.state.set('submission', submission)
-
 
 
     def checkChildForMultipleLatests(self, modelClass, tbl, tableName, columnsList, fetchedRecords):
@@ -110,8 +116,9 @@ class Operations():
             for each CT.
         """
         self.state.get('log').record(fetchedRecords, 'Error: Full Record Retrieval Found multiple CT records. Commencing pruneLatestRecords()')
-
-        for pk in self.state.get('idCols'):
+        idColumns = self.state.get('idCols')
+        
+        for pk in idColumns:
             tbl = pk[:self.state.get('abrvSize')]  # table abbreviation
 
             if pk == self.mapper.master('abbreviation') + '_' + self.mapper.column('id'):

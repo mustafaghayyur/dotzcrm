@@ -1,8 +1,7 @@
 from django.db import models
 
 from core.lib.state import State
-from core.helpers import strings, misc
-from core.dotzSettings import project
+from core.helpers import strings
 
 class BackgroundOperations(models.QuerySet):
     """
@@ -26,11 +25,9 @@ class BackgroundOperations(models.QuerySet):
         self.state.set('mapperTables', mapperTables)
 
         # save the original mapper fields to state...
-        o2oMapperFields = self.mapper.generateO2OFields()
-        mapperFields = self.mapper.generateAllFields()
-        self.state.set('o2oMapperFields', o2oMapperFields)
-        self.state.set('allMapperFields', mapperFields)
-        
+        self.state.set('o2oMapperFields', self.mapper.generateO2OFields())
+        self.state.set('allMapperFields', self.mapper.generateAllFields())
+
     def getMapper(self):
         return self.mapper
 
@@ -67,8 +64,9 @@ class BackgroundOperations(models.QuerySet):
         allFields = self.mapper.generateAllFields()
         self.state.set('allUsedFields', allFields)
 
-        # save the actual list of used tables (those being used in current query)
-        self.state.set('tablesUsed', usedTables)
+        # save tableUsed from Mapper() state -> to QSM() state
+        tablesUsed = self.mapper.state.get('tablesUsed')
+        self.state.set('tablesUsed', tablesUsed)
 
         # finally compile all tables with 'latest' flags enabled in 'revisionedTables'
         revisioned = self.mapper.tableTypes('m2m')

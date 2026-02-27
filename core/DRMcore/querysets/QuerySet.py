@@ -44,7 +44,6 @@ class QuerySetManager(BackgroundOperations):
         self.state.set('limitStatement', Limits.parse(self.state, self.mapper))
 
         self.state.set('joinStatements', Joins.parse(self.state, self.mapper))
-        # misc.log(self.state, 'inspection of self.state...')
 
         query = f"""
             SELECT {self.state.get('selectStatement')}
@@ -57,7 +56,11 @@ class QuerySetManager(BackgroundOperations):
         if self.state.get('translations.debug') == True:
             misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
 
-        return self.raw(query, self.state.get('parameters'), self.state.get('translations'))
+        translationsObj = self.state.get('translations', {})
+        if 'debug' in translationsObj:
+            del translationsObj['debug']
+
+        return self.raw(query, self.state.get('parameters'), translationsObj)
 
 
     def select(self, selectors):
@@ -101,4 +104,17 @@ class QuerySetManager(BackgroundOperations):
         """
         self.state.set('translations', translations, {})
         return self
+    
+    def enableCurrentUserRestrictions(self, currentUser):
+        """
+            Enables current user restrictions on where condition fields.
+            Needs appropriate definitions in Mapper().currentUserIdFields() setting
+        """
+        if currentUser is None:
+            raise Exception('Error 1190: User information could not be parsed.')
+        
+        self.state.set('current_user', currentUser)
+        return self
+
+
 

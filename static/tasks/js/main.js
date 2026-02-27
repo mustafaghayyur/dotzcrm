@@ -12,8 +12,18 @@ Main(async () => {
             const dashboardTodoList = await $A.tasks.load('dashboardTodoList');
             const dashboardTaskList = await $A.tasks.load('dashboardTaskList');
 
-            request = $A.fetch.route('api.tasks.list', 'private');
-            $A.fetch.body(request, 'personalTabResponse', {}, dashboardTodoList);
+            $A.query().search('tata')
+                .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status')
+                .where({
+                    tata_delete_time: 'is Null',
+                    assignee_id: $A.app.memFetch('user_id'),
+                    visibility: 'private',
+                })
+                .order([
+                    {tbl: 'tata', col: 'update_time', sort: 'desc'},
+                    {tbl: 'tast', col: 'create_time', sort: 'desc'}
+                ]).page(1)
+                .execute('personalTabResponse', dashboardTodoList);
 
             $A.query().search('tata')
                 .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
@@ -25,11 +35,16 @@ Main(async () => {
                     status: ['assigned', 'queued', 'started']
                 })
                 .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
-                .translate({debug: true})
                 .execute('workspacesTabResponse', dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
-        workspaces: () => {},
+        workspaces: () => {
+            // Please implement code, in line with the 'persional' tab above,
+            // to allow for listing of tasks that belong to a specific 'workspace' as defined in 
+            // in the tasks.drm.mappers codebase.
+            
+
+        },
     }, true);
 
     const cleanForm = await $A.tasks.load('cleanFormFunctionality'); 

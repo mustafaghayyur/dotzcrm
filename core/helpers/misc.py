@@ -1,9 +1,54 @@
-from django.utils import timezone
-from django.conf import settings
-from .strings import isPrimitiveType
+import importlib
 import pprint
 import inspect
 import traceback
+
+from django.utils import timezone
+from django.conf import settings
+from .strings import isPrimitiveType
+
+
+def getInfo(name = None, type = 'class', getDunders = True):
+    """
+        List out attributes of class.
+        
+        :param name: [str]
+        :param type: [str]
+        :param getDunders: [bool]
+    """
+    pref = '&*&' if getDunders else '__'
+
+    if type == 'class':
+        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith(pref)]
+
+    if type == 'instance':
+        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith('__')]
+
+
+def mergeDictionaries(leftDictionary, rightDictionary):
+        """
+            Simply merges left dictionary with right dictionary.
+            The right dictionary over-writes the left.
+        """
+        if isinstance(leftDictionary, dict) and isinstance(rightDictionary, dict):
+            meerged = leftDictionary | rightDictionary  # merge provided conditions into the defaults        
+
+            if isinstance(meerged, dict):
+                return meerged
+            
+        return {}
+
+
+def importModule(componentName: str, modulePath: str):
+    """
+        Import certain class/function/obj from module
+
+        :param componentName: [str] name of class/function or obj found in module
+        :param modulePath: [str] string path to module file, e.g. "tasks.drm.crud"
+    """
+    module = importlib.import_module(modulePath)
+    return getattr(module, componentName)
+
 
 def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file = "/Users/mustafa/Sites/python/server1/DEBUGGER.log", crud = False):
     """
@@ -14,7 +59,7 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
             - log_message: additional meta data you wish to tack on
             - level [int]: 1 = simple parse of object. 2 = More introspection. 3 = trace from provided subject (error object)
     """
-    if not settings.DEBUG:
+    if not settings.DEBUG:  # todo: is this correct logic for production? What if we want logs in some cases, even on prod?
         return None  # exit on prod
     
     varType = type(subject)
@@ -69,35 +114,3 @@ Variable type: {varType}
     with open(logger_file, "at") as f:
         f.write(msg)
 
-
-
-def getInfo(name = None, type = 'class', getDunders = True):
-    """
-        List out attributes of class.
-        
-        :param name: [str]
-        :param type: [str]
-        :param getDunders: [bool]
-    """
-    pref = '&*&' if getDunders else '__'
-
-    if type == 'class':
-        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith(pref)]
-
-    if type == 'instance':
-        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith('__')]
-
-
-
-def mergeDictionaries(leftDictionary, rightDictionary):
-        """
-            Simply merges left dictionary with right dictionary.
-            The right dictionary over-writes the left.
-        """
-        if isinstance(leftDictionary, dict) and isinstance(rightDictionary, dict):
-            meerged = leftDictionary | rightDictionary  # merge provided conditions into the defaults        
-
-            if isinstance(meerged, dict):
-                return meerged
-            
-        return {}

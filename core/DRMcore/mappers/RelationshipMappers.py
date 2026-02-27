@@ -1,12 +1,12 @@
-from .base import BaseOperations
+from .base import BaseMapper
 
-class RelationshipMappers(BaseOperations):
+class RelationshipMappers(BaseMapper):
     """
         Along with BaseOperations(), RelationshipMappers() defines meaningful methods to
         access vital schema related info for all your database crud operations.
 
         References to _*() methods in the code point to data-definition functions defined
-        in child classes on app-level.
+        in child classes in app-level.
     """
     def master(self, key = 'all'):
         info = self._master()
@@ -16,6 +16,9 @@ class RelationshipMappers(BaseOperations):
         return self._commonFields()
 
     def ignoreOnUpdates(self, key = 'all'):
+        """
+            @todo: confirm ids should be ignored on rlc & m2ms tables
+        """
         info = self._ignoreOnUpdates()
         allTables = self.state.get('tables')
         if key not in allTables:
@@ -49,7 +52,7 @@ class RelationshipMappers(BaseOperations):
         if tblKey is not None and tblKey in info:
             return info[tblKey]
 
-        if tblKey == self.tables():
+        if tblKey in self.tables():
             return info['default']
 
         return None
@@ -60,15 +63,37 @@ class RelationshipMappers(BaseOperations):
             
             :param tblKey: [str] key for table
         """
-        info = self._serializers()
+        info = self._crudClasses()
         if tblKey is not None and tblKey in info:
             return info[tblKey]
 
-        if tblKey == self.tables():
+        if tblKey in self.tables():
             return info['default']
 
         return None
     
+    def currentUserFields(self):
+        """
+            Returns list of fields which hold current user's id.
+            Should allow limiting of external entries in these fields.
+        """
+        return self._currentUserFields()
+    
+    def bannedFromOpenAccess(self, operation = 'all'):
+        """
+            Carries dictionary of rules on which CRUD operations are permitted
+            on the universal API nodes (restapi.views.list|crud).
+        """
+        rules = self._bannedFromOpenAccess()
+        if rules is None:
+            rules = {
+                'read': {},
+                'create': {},
+                'update': {},
+                'delete': {},
+            }
+
+        return self.returnValue(rules, operation)
     
     def defaults(self, requestedFunc):
         """

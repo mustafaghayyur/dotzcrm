@@ -7,12 +7,6 @@ import $A from "../helper.js";
  */
 export async function createCommentForTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
-
     const callback = await $A.tasks.load('genericRecordDetails');
-    let request = $A.fetch.route('api.tasks.comments_crud', '0', {
-        method: 'POST',
-        body: JSON.stringify(dictionary),
-    });
-
-    $A.fetch.body(request, 'commentsResponse', callback);
+    $A.query().create('taco', dictionary, true).execute('commentsResponse', callback);
 }

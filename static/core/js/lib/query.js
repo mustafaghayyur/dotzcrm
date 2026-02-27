@@ -113,15 +113,15 @@ export default function () {
         },
 
         /**
-         * Retrieve an existing record in specified table with supplied data.
+         * Retrieve an existing record(s) in specified table with supplied data.
          * @param {str} tblKey: system key for table to perform crud operation on
          * @param {obj} data: conditions to retrieve record(s) with. 
          * @param {bool} purified: specify whether data is supplied as a form element or as a dictionary object. Defaults to true (data is supplied as dictionary).
          * @returns 
          */
-        single: (tblKey, data, purified = true) => {
+        read: (tblKey, data, purified = true) => {
             if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
-                throw Error('single() requires table-key argument.');
+                throw Error('read() requires table-key argument.');
             }
 
             if (purified) {
@@ -131,7 +131,7 @@ export default function () {
             }
 
             if ($A.generic.checkVariableType(body) !== 'dictionary') {
-                throw Error('single() requires a dictionary of data to retrieve record.');
+                throw Error('read() requires a dictionary of data to retrieve record.');
             }
 
             tbl = tblKey;

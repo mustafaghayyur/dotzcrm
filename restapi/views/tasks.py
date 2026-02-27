@@ -8,7 +8,7 @@ from core.helpers import pagination, crud, misc
 
 from restapi.lib.helpers import *
 from tasks.drm.crud import *
-from tasks.drm.mapper_values import ValuesMapper
+from tasks.drm.mapper_values import TasksValuesMapper
 from tasks.validators.tasks import TaskO2ORecordSerializerGeneric
 from tasks.validators.comments import CommentSerializerGeneric
 from tasks.validators.watchers import WatcherSerializerGeneric

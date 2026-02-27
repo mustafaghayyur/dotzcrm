@@ -68,5 +68,5 @@ class Joins():
             return {}
         
         if not isinstance(joins, dict):
-            raise TypeError('Error 1012: Joins argument supplied, buts be a valid dictionary.')
+            raise TypeError('Error 1012: Joins argument supplied must be a valid dictionary.')
     

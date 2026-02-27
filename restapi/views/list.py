@@ -55,7 +55,13 @@ def list(request, format=None):
         paginatedLimit = [str(pgntn['offset']), str(pgntn['page_size'])]
 
         # Execute fetch using QuerySetManager
-        records = Model.objects.select(postData.get('selectors', None)).where(postData.get('conditions', None)).orderby(postData.get('ordering', None)).join(postData.get('joins', None)).limit(paginatedLimit).translate(postData.get('translations', None)).fetch()
+        records = (Model.objects.select(postData.get('selectors', None))
+                   .where(postData.get('conditions', None))
+                   .orderby(postData.get('ordering', None))
+                   .join(postData.get('joins', None))
+                   .limit(paginatedLimit)
+                   .translate(postData.get('translations', None))
+                   .enableCurrentUserRestrictions(request.user).fetch())
         
         # Serialize the results
         serialized = Serializer(records, many=True)
@@ -75,12 +81,12 @@ def list(request, format=None):
     
     except ValidationError as e:
         return Response(
-            crud.generateError(e, "Validation errors have been caught."),
+            crud.generateError(e, "Error 802: Validation errors have been caught."),
             status=status.HTTP_400_BAD_REQUEST
         )
     except Exception as e:
         return Response(
-            crud.generateError(e, "An error occurred while fetching records."),
+            crud.generateError(e, "Error 803: An error occurred while fetching records."),
             status=status.HTTP_400_BAD_REQUEST
         )
 

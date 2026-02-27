@@ -1,70 +1,115 @@
 from core.DRMcore.crud import O2ORecords, RevisionlessChildren, M2MChildren
 
-from users.models import *
-from .mappers import UsersMapper
-from .mapper_values import ValuesMapper
+from users import models
+from .users_mapper import UsersMapper
+from .dept_mapper import DepartmentsMapper
 
 class Users(O2ORecords.CRUD):
     """
-        Handles all O2O crud operations for Tasks Module of DotzCRM.
-        Please read the README.md in this folder before using.
+        Handles all O2O crud operations for Users Module.
     """
-    
     def startUpCode(self):
         self.state.set('app', 'users')  # holds the name of current module/space
-        self.state.set('mtModel', User)  # holds the class reference for Master Table's model
-
+        self.state.set('mtModel', models.User)  # holds the class reference for Master Table's model
         self.mapper = UsersMapper()
-        self.mapper.setValuesMapper(ValuesMapper)
         
-
-    def fullRecord(self, task_id):
+    def fullRecord(self, userId):
         """
             fetch full records with all CT records marked 'latest'
         """
         conditions = {
-            # "assignee_id": None,
-            "update_time": None,
             "latest": self.mapper.values.latest('latest'),
-            "visibility": None,
-            "status": None,
-            "tata_id": task_id,
+            "usus_id": userId,
         }
 
         rawObj = self.read(['all'], conditions)
-
         if rawObj:
-            return rawObj  # returns all records found.
+            return rawObj
+        
         return None
 
-class Departments(M2MChildren.CRUD):
-    """
-    """
 
+class UserSettings(RevisionlessChildren.CRUD):
+    """
+        User settings. RLC crud operations
+    """
     def startUpCode(self):
-        self.state.set('pk', 'wid')  # set table_abbrv for use in queries.
-        self.state.set('app', 'users')  # holds the name of current module/space
-        self.state.set('tbl', 'w')
+        self.state.set('app', 'tasks')  # holds the name of current module/space
+        self.state.set('mtModel', models.User)  # holds the class reference for Master Table's model
+        self.state.set('tbl', 'usse')
+        self.state.set('pk', 'usse_id')
+        self.mapper = UsersMapper()
+        self.setMasterCrudClass(Users)
 
+
+class UserLog(RevisionlessChildren.CRUD):
+    """
+        User edit log. RLC crud operations
+    """
+    def startUpCode(self):
+        self.state.set('app', 'tasks')  # holds the name of current module/space
+        self.state.set('mtModel', models.User)  # holds the class reference for Master Table's model
+        self.state.set('tbl', 'used')
+        self.state.set('pk', 'used_id')
+        self.mapper = UsersMapper()
+        self.setMasterCrudClass(Users)
+
+
+class ReportsTo(M2MChildren.CRUD):
+    """
+        ReportsTo M2M
+    """
+    def startUpCode(self):
+        self.state.set('pk', 'usrp_id')  # set table_abbrv for use in queries.
+        self.state.set('app', 'users')  # holds the name of current module/space
+        self.state.set('tbl', 'usrp')
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.state.get('tbl'))
-        self.state.get('firstCol', cols['firstCol'])
-        self.state.get('secondCol', cols['secondCol'])
 
 
-class Hierarchy(M2MChildren.CRUD):
+##### Departments Crud #####
+
+class Departments(O2ORecords.CRUD):
     """
+        Handles all O2O crud operations for Departments Mapper.
     """
-
     def startUpCode(self):
-        self.state.set('pk', 'wid')  # set table_abbrv for use in queries.
         self.state.set('app', 'users')  # holds the name of current module/space
-        self.state.set('tbl', 'w')
+        self.state.set('mtModel', models.Department)  # holds the class reference for Master Table's model
+        self.mapper = DepartmentsMapper()
         
+    def fullRecord(self, deptId):
+        """
+            fetch full records with all CT records marked 'latest'
+        """
+        conditions = {
+            "latest": self.mapper.values.latest('latest'),
+            "dede_id": deptId,
+        }
+
+        rawObj = self.read(['all'], conditions)
+        if rawObj:
+            return rawObj
+        
+        return None
+
+        
+class DepartmentHeads(M2MChildren.CRUD):
+    """
+        Department Heads M2M
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.state.set('pk', 'dehe_id')
+        self.state.set('tbl', 'dehe')
         self.mapper = UsersMapper()
 
-        cols = self.mapper.m2mFields(self.state.get('tbl'))
-        self.state.get('firstCol', cols['firstCol'])
-        self.state.get('secondCol', cols['secondCol'])
-        
+class DepartmentUsers(M2MChildren.CRUD):
+    """
+        Department Users M2M
+    """
+    def startUpCode(self):
+        self.state.set('app', 'users')
+        self.state.set('pk', 'deus_id')
+        self.state.set('tbl', 'deus')
+        self.mapper = UsersMapper()

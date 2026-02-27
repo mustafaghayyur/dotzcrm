@@ -64,11 +64,11 @@ export default function (resultSet, containerId) {
     function assignmentsFunction(resultSet) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
-        
-        $A.fetch.body(
-            $A.fetch.route('api.tasks.watchers_crud', String(resultSet['tata_id'])), 
-            'taskDetailsModalResponse', {}, 
-            (data, id) => {
+        $A.query()
+            .read('tawa', {
+                    task_id: resultSet['tata_id']
+                })
+            .execute('taskDetailsModalResponse', (data, id) => {
                 if ($A.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
                     unwatchbtn.classList.add('d-none');
@@ -76,8 +76,7 @@ export default function (resultSet, containerId) {
                     unwatchbtn.classList.remove('d-none');
                     watchbtn.classList.add('d-none');
                 }
-            }
-        );
+            });
 
         watchbtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -113,10 +112,8 @@ export default function (resultSet, containerId) {
      */
     async function viewCommentsFunction(resultSet) {
         const callback = await $A.tasks.load('commentsList');
-        $A.fetch.body(
-            $A.fetch.route('api.tasks.comments_list', String(resultSet['tata_id'])), 
-            "commentsResponse", {}, 
-            callback
-        );
+        $A.query().read('taco', {
+                    task_id: resultSet['tata_id']
+                }).execute('commentsResponse', callback);
     }
 }

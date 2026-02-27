@@ -16,9 +16,6 @@ class CTQuerySet(QuerySetManager):
         child tables of Master Table (M2M, RLC).
     """
     def __init__(self, *args, **kwargs):
-        """
-            Be sure to inherit parent startUpCode() in child classes
-        """
         super().__init__(*args, **kwargs)
         self.state.set('mtForeignKeyName', self.mapper.master('foreignKeyName'))
         self.state.set('currentTableFullName', self.mapper.tables(self.state.get('current')))
@@ -90,7 +87,7 @@ class RLCQuerySet(CTQuerySet):
         Revision-less Children (RLC) data models. 
 
         These have no revisions, thus no 'latest' field. However, 
-        they too carry a many-to-many relationship with the MT.
+        they too carry a one-to-many relationship with the MT.
     """
     def fetchAllByMasterIdRLC(self, mtId):
         """
@@ -114,16 +111,12 @@ class M2MQuerySet(CTQuerySet):
 
         First and Second cols defined in space's Mappers
     """
-
     def __init__(self, *args, **kwargs):
-        """
-            Be sure to inherit parent startUpCode() in child classes
-        """
         super().__init__(*args, **kwargs)
         cols = self.mapper.m2mFields(self.state.get('current'))
 
         if cols is None:
-            raise Exception('Unable to fetch M2M Fields. Aborting.')
+            raise Exception('Error 290: Unable to fetch M2M Fields. Aborting.')
         
         self.state.set('firstColumn', cols['firstCol'])
         self.state.set('secondColumn', cols['secondCol'])

@@ -1,7 +1,7 @@
 from enum import Enum
 from core.DRMcore.mappers.ValuesMapper import ValuesMapperGeneric
 
-class ValuesMapper(ValuesMapperGeneric):
+class UsersValuesMapper(ValuesMapperGeneric):
     """
         This class will help manage value expectations for certain enum fields.
         Enums will be managed in the application layer.

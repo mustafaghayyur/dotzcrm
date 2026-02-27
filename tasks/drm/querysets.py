@@ -1,5 +1,6 @@
 from core.DRMcore.querysets import master, child
-from .mappers import *
+from .tasks_mapper import TasksMapper
+from .workspaces_mapper import WorkSpacesMapper
 
 
 class TaskQuerySet(master.MTQuerySet):
@@ -13,41 +14,79 @@ class TaskQuerySet(master.MTQuerySet):
 
 
 class DetailQuerySet(child.CTQuerySet):
-    tbl = 'tasks_details'
-    app = 'tasks'
-    mapper = TasksMapper()
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
 
 
 class DeadlineQuerySet(child.CTQuerySet):
-    tbl = 'tasks_deadline'
-    app = 'tasks'
-    mapper = TasksMapper()
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
 
 
 class StatusQuerySet(child.CTQuerySet):
-    tbl = 'tasks_status'
-    app = 'tasks'
-    mapper = TasksMapper()
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
 
 
 class VisibilityQuerySet(child.CTQuerySet):
-    tbl = 'tasks_assignment'
-    app = 'tasks'
-    mapper = TasksMapper()
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
+
+
+class AssignmentQuerySet(child.CTQuerySet):
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
 
 
 class WatcherQuerySet(child.M2MQuerySet):
-    tbl = 'tasks_watcher'
-    app = 'tasks'
-    mapper = TasksMapper()
-
-class AssignmentQuerySet(child.CTQuerySet):
-    tbl = 'tasks_visibility'
-    app = 'tasks'
-    mapper = TasksMapper()
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
 
 class CommentQuerySet(child.RLCQuerySet):
-    tbl = 'tasks_comment'
-    app = 'tasks'
-    mapper = TasksMapper()
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = TasksMapper()
+
+
+#### WorkSpaces QuerySets #####
+
+class WorkSpaceQuerySet(master.MTQuerySet):
+    """
+        WorkSpaceQuerySet allows for highly versatile Select queries to DB.
+        For O2O, M2M and RLC data models (i.e. records).
+    """
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = WorkSpacesMapper()
+
+
+class WorkSpaceCTQuerySet(child.CTQuerySet):
+    """
+        Generic for all O2O CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = WorkSpacesMapper()
+
+class WorkSpaceM2MQuerySet(child.M2MQuerySet):
+    """
+        Generic for all M2M CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = WorkSpacesMapper()
+
+class WorkSpaceRLCQuerySet(child.RLCQuerySet):
+    """
+        Generic for all RLC CT models
+    """
+    def startUpCode(self):
+        self.state.set('app', 'tasks')
+        self.mapper = WorkSpacesMapper()
 

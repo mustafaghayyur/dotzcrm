@@ -9,14 +9,7 @@ const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
  */
 export function UpdateTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
-    
-    $A.fetch.body(
-        $A.fetch.route('api.tasks.crud', '0', {
-            method: 'PUT',
-            body: JSON.stringify(dictionary),
-        }), 
-        'taskEditModalResponse', callback
-    );
+    $A.query().edit('tata', dictionary, true).execute('taskEditModalResponse', callback);
 }
 
 /**
@@ -25,15 +18,7 @@ export function UpdateTask(formId) {
  */
 export function CreateTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
-    
-    $A.fetch.body(
-        $A.fetch.route('api.tasks.crud', '0', {
-            method: 'POST',
-            body: JSON.stringify(dictionary),
-        }), 
-        'taskEditModalResponse', 
-        callback
-    );
+    $A.query().create('tata', dictionary, true).execute('taskEditModalResponse', callback);
 }
 
 /**
@@ -45,11 +30,9 @@ export function DeleteTask(taskId, identifyer) {
         return null;
     }
 
-    const request = $A.fetch.route('api.tasks.crud', String(taskId), {
-        method: 'DELETE',
-    });
-
-    $A.fetch.body(request, 'taskDetailsModalResponse', callback);
+    $A.query().delete('tata', {
+        tata_id: taskId
+    }).execute('taskDetailsModalResponse', callback);
 }
 
 /**
@@ -58,7 +41,7 @@ export function DeleteTask(taskId, identifyer) {
  * @param {str} oldStatus: the status to remove
  */
 export function toggleTodoStatus(record) {
-    const allStatuses = 'queuedcompleted'; // @todo: find a better determining operation ... no pun intended.
+    const allStatuses = 'queuedcompleted'; // @todo: find a better determining operation
     const newStatus = allStatuses.replace(record.status, '');
 
     const dictionary = {
@@ -67,16 +50,7 @@ export function toggleTodoStatus(record) {
         status: newStatus
     };
 
-    let request = $A.fetch.route('api.tasks.crud', '0', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dictionary),
-    });
-
-    $A.fetch.body(request, 'personalTabResponse', callback);
-
+    $A.query().edit('tata', dictionary, true).execute('personalTabResponse', callback);
 }
 
 /**
@@ -89,12 +63,7 @@ export function deleteTodo(todoId, identifyer) {
         return null;
     }
 
-    let request = $A.fetch.route('api.tasks.crud', String(todoId), {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    $A.fetch.body(request, 'personalTabResponse', callback);
+    $A.query().delete('tata', {
+        tata_id: todoId
+    }, true).execute('personalTabResponse', callback);
 }

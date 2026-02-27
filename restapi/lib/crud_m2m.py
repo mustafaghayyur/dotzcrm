@@ -1,67 +1,77 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.helpers import crud
+from core.helpers import misc
+from core.helpers.crud import generateError, generateResponse
+from core.helpers.pagination import assembleParamsForView, determineHasMore
 from core.lib.state import State
 
 
 class M2MOperations():
     def __init__(self, state: State):
         self.state = state
+        self.mapper = self.state.get('mapper')
 
     def create(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        itemId = self.state.get('data').get('item_id', None)
+        cruder = CrudClass(current_user=self.state.get('user'))
+        data = self.state.get('data')
 
-        if crud.isValidId({'id': itemId}, 'id'):
-            dictinary = {
-                'task_id': itemId,
-                'watcher_id': self.state.get('user').id #@todo: remove 1 and add user id.
-            }
-            result = CrudClass().create(dictinary)
+        serialized = GenericSerializer(data=data)
+
+        if serialized.is_valid():
+            result = cruder.create(serialized.validated_data)
+
             if result:
-                return Response(crud.generateResponse({'wid': result.id}), status=status.HTTP_201_CREATED) # @todo: can 201 responses carry payloads?
-            return Response(crud.generateError('Created record could not be fetched.'), status=status.HTTP_400_BAD_REQUEST)
+                record = cruder.fullRecord(result.id)
+                retrievedSerialized = GenericSerializer(record[0])
+                return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
+
+            raise Exception('Error 892: Created record could not be fetched.')
         else:
-            return Response(crud.generateError(None, 'Request could not be processed due to invalid task ID.'), status=status.HTTP_400_BAD_REQUEST)
+            return Response(generateError(serialized.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)
     
 
     def update(self):
-        return Response(crud.generateError('Watcher records cannot be updated.'), status=status.HTTP_400_BAD_REQUEST) 
+        raise Exception('Error 891: M2M records cannot be updated.')
 
 
     def delete(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        itemId = self.state.get('data').get('item_id', None)
+        cruder = CrudClass(current_user=self.state.get('user'))
+        data = self.satte.get('data')
+
+        serialized = GenericSerializer(data=data)
         
-        if crud.isValidId({'id': itemId}, 'id'):
-            dictinary = {
-                'task_id': itemId,
-                'watcher_id': self.state.get('user').id
-            }
-            CrudClass().delete(dictinary)
-            # @todo: confirm if crud is showing deletion
-            return Response(crud.generateResponse([]), status=status.HTTP_204_NO_CONTENT)
-        
-        return Response(crud.generateError('Watcher ID not valid. Delete aborted.'), status=status.HTTP_400_BAD_REQUEST) 
+        if serialized.is_valid():
+            cruder.delete(serialized.validated_data)
+            return Response(generateResponse({'messages': f'Record(s) removed.'}), status=status.HTTP_200_OK)
+        else:
+            return Response(generateError(serialized.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)
 
 
     def read(self):
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
-        itemId = self.state.get('data').get('item_id', None)
+        request = self.state.get('request')
+        data = self.state.get('data')
 
-        if crud.isValidId({'id': itemId}, 'id'):
-            dictinary = {
-                'task_id': itemId,
-                'watcher_id': self.state.get('user').id 
-            }
-            record = CrudClass().read(dictinary)
-            if record:
-                serialized = GenericSerializer(record[0])
-                return Response(crud.generateResponse(serialized.data))
-            return Response(crud.generateResponse([]))
-        return Response(crud.generateError('Watcher Record ID not valid.'), status=status.HTTP_400_BAD_REQUEST)
-        
+        serialized = GenericSerializer(data=data)
+
+        if serialized.is_valid():
+            records = CrudClass(current_user=self.state.get('user')).read(serialized.validated_data)
+            if records:
+                serialized = GenericSerializer(records[0])
+
+                if len(records) > 1:
+                    pgntn = assembleParamsForView(request.query_params)
+                    hasMore = determineHasMore(records, pgntn['page_size'])
+                    return Response(generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
+                else:
+                    return Response(generateResponse(serialized.data))
+                
+            return Response(generateResponse([], additionalMsg=['No records found']))
+        else:
+            return Response(generateError(serialized.errors, "Validation errors occured."), status=status.HTTP_400_BAD_REQUEST)

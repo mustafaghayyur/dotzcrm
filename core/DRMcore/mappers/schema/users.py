@@ -51,8 +51,8 @@ users = {
             'id',
 			'create_time',
 			'delete_time',
-			'reports_to_id',
-			'user_id'
+			'reportsTo_id',
+			'reporter_id'
 			'latest'
         ],
     },
@@ -67,7 +67,7 @@ users = {
 			'create_time',
 			'update_time',
 			'delete_time',
-			'user_id'
+			'owner_id'
         ],
     },
     'used': {
@@ -81,7 +81,7 @@ users = {
 			'create_time',
 			'update_time',
 			'delete_time',
-            'user_id'
+            'log_user_id'
         ],
     },
 }

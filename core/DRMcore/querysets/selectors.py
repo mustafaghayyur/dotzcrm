@@ -1,5 +1,5 @@
+from core.dotzSettings import settings
 from core.helpers import strings
-from core.dotzSettings import project
 
 class Selectors():
     """
@@ -35,7 +35,7 @@ class Selectors():
 
     @staticmethod
     def makeSelectString(state, mapper, field, tbl, inMapper = True):
-        sz = project['mapper']['tblKeySize']
+        sz = settings.get('project.mapper.tblKeySize')
         current = state.get('current')
         string = ''
         addition = ''

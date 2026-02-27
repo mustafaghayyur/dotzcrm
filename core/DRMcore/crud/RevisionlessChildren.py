@@ -37,8 +37,26 @@ class CRUD(Background.Operations):
 
         return Create.childTable(self.state, self.mapper, t['model'], self.state.get('tbl'), t['table'], t['cols'], True)
         
-    def read(self):
-        pass  # defined in individual Module's class extensions.
+    def read(self, definitions):
+        """
+            Takes requirements for retrieval of RLC record. If valid, executes
+            relevant Query. See documentation on definitions formulation.
+        """
+        if not isinstance(definitions, dict) or len(definitions) < 1:
+            raise Exception(f'Error 2065: Record(s) fetch request for RLC record type [{self.state.get('tbl')}] failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
+
+        model = misc.importModule(self.mapper.models(self.state.get('tbl')), f'{self.state.get('app')}.models')  # @todo: make path to models more reliable so if models location changes...
+
+        if self.state.get('pk') in definitions:
+            rawObjs = model.objects.fetchById(definitions[self.state.get('pk')])  # specific record being sought
+
+        else:
+            rawObjs = model.objects.fetchAllByMasterIdRLC(definitions[self.mapper.master('foreignKeyName')])
+        
+        if rawObjs:
+            return rawObjs
+
+        return None
 
     def update(self, dictionary):
         """

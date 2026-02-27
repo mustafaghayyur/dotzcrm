@@ -72,7 +72,7 @@ def retrieveAppSettings(request):
         # User is not authenticated or token is invalid - return anonymous settings
         return Response(crud.generateResponse({
             'messages': "Authentication failed. If this seems to be an error, please contact support.",
-            'errprs': str(e),  # @todo make ui notification for this error msg, should be non-invasive
+            'errors': str(e),  # @todo make ui notification for this error msg, should be non-invasive
             'is_authenticated': False,
             'allowed_routes': {
                 'api': {

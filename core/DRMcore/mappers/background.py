@@ -45,10 +45,8 @@ class Background():
         tables = self.state.get('tables')
 
         if isinstance(additions, list):
-            for tbl in additions:
-                if tbl in tables:
-                    array.append(tbl)
-        
+            array = [tbl for tbl in additions if tbl in tables]
+            
         tablesUsed = list(set(array))  # make list full of unique tbl-keys
         self.state.set('tablesUsed', tablesUsed)
         
