@@ -73,12 +73,65 @@ class DepartmentsMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time']
     
-    def _currentUserFields(self):
+    
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+            @todo fill in
+        """
+        return {
+            'default': {
+                'path': 'tasks.validators.tasks',
+                'generic': 'TaskO2ORecordSerializerGeneric',
+                'lax': 'TaskO2ORecordSerializerLax',
+                'strict': 'TaskO2ORecordSerializerStrict',
+            },
+            'taco': {
+                'path': 'tasks.validators.comments',
+                'generic': 'CommentSerializerGeneric',
+                'lax': 'CommentSerializerLax',
+                'strict': 'CommentSerializerStrict',
+            },
+            'tawa': {
+                'path': 'tasks.validators.watchers',
+                'generic': 'WatcherSerializerGeneric',
+                'lax': 'WatcherSerializerLax',
+                'strict': 'WatcherSerializerStrict',
+            },
+        }
+    
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+            @todo fill in
+        """
+        return {
+            'default': {
+                'path': 'tasks.drm.crud',
+                'name': 'Tasks',
+            },
+            'taco': {
+                'path': 'tasks.drm.crud',
+                'name': 'Comments',
+            },
+            'tawa': {
+                'path': 'tasks.drm.crud',
+                'name': 'Watchers',
+            },
+        }
+    
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
         """
         return ['creator_id', 'user_id', 'head_id']
+    
+    def _currentUserFieldsRead(self):
+        """
+            Only where condition in read queries are impacted
+        """
+        return []
     
     def _bannedFromOpenAccess(self):
         """

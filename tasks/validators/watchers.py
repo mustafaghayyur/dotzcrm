@@ -8,6 +8,7 @@ class WatcherSerializerGeneric(Serializer):
         Generic serializer, all fields must be nullable
     """
     id = IntegerField(**intNullableOpts)
+    tawa_id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
     watcher_id = IntegerField(**intNullableOpts)
     latest = ChoiceField(**latestChoiceOpts)

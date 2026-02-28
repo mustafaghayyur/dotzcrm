@@ -45,8 +45,10 @@ export default function (resultSet, containerId) {
      */
     function editAndDeleteFunction(resultSet) {
         let editBtn = document.getElementById('editTaskBtn');
-        editBtn.addEventListener('click', () => {
+        editBtn.addEventListener('click', async () => {
             $A.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
+            const callback = await $A.tasks.load('loadTaskFormValues');
+            callback(resultSet);
         });
 
         // add delete button functionality

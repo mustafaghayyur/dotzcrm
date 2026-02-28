@@ -8,9 +8,10 @@ class CommentSerializerGeneric(Serializer):
         Generic serializer, all fields must be nullable
     """
     id = IntegerField(**intNullableOpts)
+    taco_id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
     comment = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=6000)
-    creator_user_id = IntegerField(**intNullableOpts)
+    commenter_id = IntegerField(**intNullableOpts)
     parent_id = IntegerField(**intNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     update_time = DateTimeFieldForJS(**datetimeNullableOpts)

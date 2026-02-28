@@ -80,13 +80,65 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time']
     
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+            @todo fill in
+        """
+        return {
+            'default': {
+                'path': 'tasks.validators.tasks',
+                'generic': 'TaskO2ORecordSerializerGeneric',
+                'lax': 'TaskO2ORecordSerializerLax',
+                'strict': 'TaskO2ORecordSerializerStrict',
+            },
+            'taco': {
+                'path': 'tasks.validators.comments',
+                'generic': 'CommentSerializerGeneric',
+                'lax': 'CommentSerializerLax',
+                'strict': 'CommentSerializerStrict',
+            },
+            'tawa': {
+                'path': 'tasks.validators.watchers',
+                'generic': 'WatcherSerializerGeneric',
+                'lax': 'WatcherSerializerLax',
+                'strict': 'WatcherSerializerStrict',
+            },
+        }
     
-    def _currentUserFields(self):
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+            @todo fill in
+        """
+        return {
+            'default': {
+                'path': 'tasks.drm.crud',
+                'name': 'Tasks',
+            },
+            'taco': {
+                'path': 'tasks.drm.crud',
+                'name': 'Comments',
+            },
+            'tawa': {
+                'path': 'tasks.drm.crud',
+                'name': 'Watchers',
+            },
+        }
+    
+    def _currentUserFieldsCud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
         """
         return ['creator_id']
+    
+    def _currentUserFieldsRead(self):
+        """
+            Returns fields that have restrictions so only current user id can be set in search.
+            @todo: implement logic in QuertSetManager conditions()
+        """
+        return []
     
     def _bannedFromOpenAccess(self):
         """

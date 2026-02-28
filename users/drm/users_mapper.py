@@ -74,13 +74,64 @@ class UsersMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time', 'date_joined']
 
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+            @todo fill in
+        """
+        return {
+            'default': {
+                'path': 'tasks.validators.tasks',
+                'generic': 'TaskO2ORecordSerializerGeneric',
+                'lax': 'TaskO2ORecordSerializerLax',
+                'strict': 'TaskO2ORecordSerializerStrict',
+            },
+            'taco': {
+                'path': 'tasks.validators.comments',
+                'generic': 'CommentSerializerGeneric',
+                'lax': 'CommentSerializerLax',
+                'strict': 'CommentSerializerStrict',
+            },
+            'tawa': {
+                'path': 'tasks.validators.watchers',
+                'generic': 'WatcherSerializerGeneric',
+                'lax': 'WatcherSerializerLax',
+                'strict': 'WatcherSerializerStrict',
+            },
+        }
     
-    def _currentUserFields(self):
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+            @todo will in
+        """
+        return {
+            'default': {
+                'path': 'tasks.drm.crud',
+                'name': 'Tasks',
+            },
+            'taco': {
+                'path': 'tasks.drm.crud',
+                'name': 'Comments',
+            },
+            'tawa': {
+                'path': 'tasks.drm.crud',
+                'name': 'Watchers',
+            },
+        }
+    
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
         """
         return ['reporter_id', 'reportsTo_id', 'owner_id', 'log_user_id']
+    
+    def _currentUserFieldsRead(self):
+        """
+            Only where condition in read queries are impacted
+        """
+        return ['owner_id']
     
     def _bannedFromOpenAccess(self):
         """

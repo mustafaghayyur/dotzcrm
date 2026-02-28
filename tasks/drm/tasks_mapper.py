@@ -124,12 +124,19 @@ class TasksMapper(RelationshipMappers):
         }
     
 
-    def _currentUserFields(self):
+    def _currentUserFieldsCud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
         """
-        return ['creator_id', 'watcher_id']
+        return ['creator_id', 'watcher_id', 'commenter_id']
+    
+    def _currentUserFieldsRead(self):
+        """
+            Returns fields that have restrictions so only current user id can be set in search.
+            @todo: implement logic in QuertSetManager conditions()
+        """
+        return []
     
     def _bannedFromOpenAccess(self):
         """

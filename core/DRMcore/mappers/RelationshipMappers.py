@@ -72,13 +72,20 @@ class RelationshipMappers(BaseMapper):
 
         return None
     
-    def currentUserFields(self):
+    def currentUserFields(self, operation = 'cud'):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
+            When operation is set to read, returns fields that have read restrictions.
+
+            :param operation: [str] enum of 'cud' | 'read'
         """
-        return self._currentUserFields()
-    
+        if operation == 'cud':
+            return self._currentUserFieldsCud()
+        if operation == 'read':
+            return self._currentUserFieldsRead()
+
+
     def bannedFromOpenAccess(self, operation = 'all'):
         """
             Carries dictionary of rules on which CRUD operations are permitted
