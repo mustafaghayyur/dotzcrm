@@ -11,7 +11,7 @@ class TasksMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'taco', 'tawa']
+        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'tawo', 'taco', 'tawa']
         self.state.set('mapperTables', tables)
 
         self.setValuesMapper(TasksValuesMapper)
@@ -42,7 +42,9 @@ class TasksMapper(RelationshipMappers):
             'tast': ['id', 'latest', 'create_time'],
             'tavi': ['id', 'latest', 'create_time'],
             'taas': ['id', 'latest', 'create_time'],
+            'tawo': ['id', 'latest', 'create_time'],
             'taco': ['id'],
+            'tawa': ['id'],
         }
     
     def _ignoreOnCreate(self):
@@ -57,6 +59,7 @@ class TasksMapper(RelationshipMappers):
             'tast': ['delete_time', 'create_time', 'latest', 'id'],
             'tavi': ['delete_time', 'create_time', 'latest', 'id'],
             'taas': ['delete_time', 'create_time', 'latest', 'id'],
+            'tawo': ['delete_time', 'create_time', 'latest', 'id'],
             'tawa': ['delete_time', 'create_time', 'latest', 'id'],
             'taco': ['delete_time', 'create_time', 'update_time', 'id'],
         }
@@ -115,11 +118,11 @@ class TasksMapper(RelationshipMappers):
             },
             'taco': {
                 'path': 'tasks.drm.crud',
-                'name': 'Comments',
+                'name': 'TaskComments',
             },
             'tawa': {
                 'path': 'tasks.drm.crud',
-                'name': 'Watchers',
+                'name': 'TaskWatchers',
             },
         }
     

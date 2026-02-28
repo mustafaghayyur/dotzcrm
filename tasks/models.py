@@ -31,7 +31,7 @@ class Details(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = DetailQuerySet.as_manager()
+    objects = TaskCTQuerySet.as_manager()
 
 
 class Deadline(models.Model):
@@ -44,7 +44,7 @@ class Deadline(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = DeadlineQuerySet.as_manager()
+    objects = TaskCTQuerySet.as_manager()
 
 
 class Status(models.Model):
@@ -57,7 +57,7 @@ class Status(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = StatusQuerySet.as_manager()
+    objects = TaskCTQuerySet.as_manager()
 
 
 class Visibility(models.Model):
@@ -70,7 +70,7 @@ class Visibility(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = VisibilityQuerySet.as_manager()
+    objects = TaskCTQuerySet.as_manager()
 
 
 class Assignment(models.Model):
@@ -84,7 +84,7 @@ class Assignment(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = AssignmentQuerySet.as_manager()
+    objects = TaskCTQuerySet.as_manager()
 
 
 class Watcher(models.Model):
@@ -97,7 +97,7 @@ class Watcher(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = WatcherQuerySet.as_manager()
+    objects = TaskM2MQuerySet.as_manager()
 
 
 class Comment(models.Model):
@@ -112,7 +112,7 @@ class Comment(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
 
-    objects = CommentQuerySet.as_manager()
+    objects = TaskRLCQuerySet.as_manager()
 
 
 
@@ -132,6 +132,20 @@ class WorkSpace(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = WorkSpaceQuerySet.as_manager()
+
+
+class TaskWorkSpace(models.Model):
+    """
+        Tasks Mapper model. Placed here to reference WorkSpace model FK
+        O2O Model.
+    """
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
+    objects = TaskCTQuerySet.as_manager()
 
 
 class WorkSpaceDepartment(models.Model):
@@ -159,16 +173,4 @@ class WorkSpaceUser(models.Model):
 
     objects = WorkSpaceM2MQuerySet.as_manager()
 
-
-class WorkSpaceTasks(models.Model):
-    """
-        M2M Model.
-    """
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-
-    objects = WorkSpaceM2MQuerySet.as_manager()
 

@@ -10,7 +10,7 @@ class WorkSpacesMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['wowo', 'wode', 'wous', 'wota']
+        tables = ['wowo', 'wode', 'wous']
         self.state.set('mapperTables', tables)
         
     
@@ -37,7 +37,6 @@ class WorkSpacesMapper(RelationshipMappers):
             'wowo': ['id', 'creator_id'],
             'wode': ['id', 'latest'],
             'wous': ['id', 'latest'],
-            'wota': ['id', 'latest'],
         }
     
     def _ignoreOnCreate(self):
@@ -49,7 +48,6 @@ class WorkSpacesMapper(RelationshipMappers):
             'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
             'wode': ['delete_time', 'create_time', 'latest', 'id'],
             'wous': ['delete_time', 'create_time', 'latest', 'id'],
-            'wota': ['delete_time', 'create_time', 'latest', 'id'],
         }
 
     def _m2mFields(self):
@@ -67,11 +65,6 @@ class WorkSpacesMapper(RelationshipMappers):
                 'secondCol': 'user_id',
                 'tables': ['wowo', 'usus']
             },
-            'wota': {
-                'firstCol': 'workspace_id',
-                'secondCol': 'task_id',
-                'tables': ['wowo', 'tata']
-            },
         }
     
     def _dateFields(self):
@@ -83,46 +76,44 @@ class WorkSpacesMapper(RelationshipMappers):
     def _serializers(self):
         """
             returns serializers relevent to mapper
-            @todo fill in
         """
         return {
             'default': {
                 'path': 'tasks.validators.tasks',
-                'generic': 'TaskO2ORecordSerializerGeneric',
-                'lax': 'TaskO2ORecordSerializerLax',
-                'strict': 'TaskO2ORecordSerializerStrict',
+                'generic': 'WorkSpaceO2ORecordSerializerGeneric',
+                'lax': 'WorkSpaceO2ORecordSerializerLax',
+                'strict': 'WorkSpaceO2ORecordSerializerStrict',
             },
-            'taco': {
+            'wode': {
                 'path': 'tasks.validators.comments',
-                'generic': 'CommentSerializerGeneric',
-                'lax': 'CommentSerializerLax',
-                'strict': 'CommentSerializerStrict',
+                'generic': 'WSDepartmentSerializerGeneric',
+                'lax': 'WSDepartmentSerializerLax',
+                'strict': 'WSDepartmentSerializerStrict',
             },
-            'tawa': {
+            'wous': {
                 'path': 'tasks.validators.watchers',
-                'generic': 'WatcherSerializerGeneric',
-                'lax': 'WatcherSerializerLax',
-                'strict': 'WatcherSerializerStrict',
+                'generic': 'WSUserSerializerGeneric',
+                'lax': 'WSUserSerializerLax',
+                'strict': 'WSUserSerializerStrict',
             },
         }
     
     def _crudClasses(self):
         """
             returns CRUD classes relevent to mapper
-            @todo fill in
         """
         return {
             'default': {
                 'path': 'tasks.drm.crud',
-                'name': 'Tasks',
+                'name': 'WorkSpaces',
             },
-            'taco': {
+            'wode': {
                 'path': 'tasks.drm.crud',
-                'name': 'Comments',
+                'name': 'WorkSpaceUsers',
             },
-            'tawa': {
+            'wous': {
                 'path': 'tasks.drm.crud',
-                'name': 'Watchers',
+                'name': 'WorkSpaceDepartments',
             },
         }
     
@@ -136,7 +127,6 @@ class WorkSpacesMapper(RelationshipMappers):
     def _currentUserFieldsRead(self):
         """
             Returns fields that have restrictions so only current user id can be set in search.
-            @todo: implement logic in QuertSetManager conditions()
         """
         return []
     

@@ -16,6 +16,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     tast_id = IntegerField(**intNullableOpts)
     taas_id = IntegerField(**intNullableOpts)
     tavi_id = IntegerField(**intNullableOpts)
+    tawo_id = IntegerField(**intNullableOpts)
 
     description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
     details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
@@ -29,6 +30,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     parent_id = IntegerField(**intNullableOpts)
     assignor_id = IntegerField(**intNullableOpts)
     assignee_id = IntegerField(**intNullableOpts)
+    workspace_id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
 
     tade_latest = ChoiceField(**latestChoiceOpts)
@@ -36,6 +38,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     tast_latest = ChoiceField(**latestChoiceOpts)
     taas_latest = ChoiceField(**latestChoiceOpts)
     tavi_latest = ChoiceField(**latestChoiceOpts)
+    tawo_latest = ChoiceField(**latestChoiceOpts)
 
     tata_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -43,6 +46,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     tast_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     taas_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tavi_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tawo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     tata_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -50,6 +54,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     tast_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     taas_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tavi_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tawo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     tata_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
 

@@ -3,40 +3,40 @@ from rest_framework.serializers import Serializer, IntegerField, ChoiceField
 from tasks.drm.mapper_values import *
 from restapi.validators.generic import *
 
-class WSDepartmentSerializerGeneric(Serializer):
+class DeptHeadSerializerGeneric(Serializer):
     """
         Generic serializer, all fields must be nullable
     """
     id = IntegerField(**intNullableOpts)
-    wode_id = IntegerField(**intNullableOpts)
-    workspace_id = IntegerField(**intNullableOpts)
+    dehe_id = IntegerField(**intNullableOpts)
     department_id = IntegerField(**intNullableOpts)
+    head_id = IntegerField(**intNullableOpts)
     latest = ChoiceField(**latestChoiceOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
-class WSDepartmentSerializerLax(WSDepartmentSerializerGeneric):
+class DeptHeadSerializerLax(DeptHeadSerializerGeneric):
     pass
-class WSDepartmentSerializerStrict(WSDepartmentSerializerLax):
+class DeptHeadSerializerStrict(DeptHeadSerializerLax):
     pass
 
 
 
 
 
-class WSUserSerializerGeneric(Serializer):
+class DeptUserSerializerGeneric(Serializer):
     """
         Generic serializer, all fields must be nullable
     """
     id = IntegerField(**intNullableOpts)
-    wous_id = IntegerField(**intNullableOpts)
-    workspace_id = IntegerField(**intNullableOpts)
+    deus_id = IntegerField(**intNullableOpts)
+    department_id = IntegerField(**intNullableOpts)
     user_id = IntegerField(**intNullableOpts)
     latest = ChoiceField(**latestChoiceOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
-class WSUserSerializerLax(WSUserSerializerGeneric):
+class DeptUserSerializerLax(DeptUserSerializerGeneric):
     pass
-class WSUserSerializerStrict(WSUserSerializerLax):
+class DeptUserSerializerStrict(DeptUserSerializerLax):
     pass

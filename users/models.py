@@ -91,13 +91,13 @@ class UserProfile(models.Model):
 
 class UserSettings(models.Model):
     """
-        RLC Model
+        O2O Model
     """
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     settings = models.JSONField(null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
-    update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
     objects = UserRLCQuerySet.as_manager()
 
@@ -120,7 +120,7 @@ class EditLog(models.Model):
     """
         RLC Model
     """
-    log_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     change_log = models.JSONField(null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)

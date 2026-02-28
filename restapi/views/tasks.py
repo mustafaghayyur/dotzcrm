@@ -10,8 +10,8 @@ from restapi.lib.helpers import *
 from tasks.drm.crud import *
 from tasks.drm.mapper_values import TasksValuesMapper
 from tasks.validators.tasks import TaskO2ORecordSerializerGeneric
-from tasks.validators.comments import CommentSerializerGeneric
-from tasks.validators.watchers import WatcherSerializerGeneric
+from tasks.validators.taskRLCs import CommentSerializerGeneric
+from tasks.validators.taskM2Ms import WatcherSerializerGeneric
 from .helpers.tasksO2Os import OneToOnes
 from .helpers.taskComments import CommentMethods
 from .helpers.taskWatchers import WatchersMethods

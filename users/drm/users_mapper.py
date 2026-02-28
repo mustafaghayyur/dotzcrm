@@ -77,46 +77,54 @@ class UsersMapper(RelationshipMappers):
     def _serializers(self):
         """
             returns serializers relevent to mapper
-            @todo fill in
         """
         return {
             'default': {
-                'path': 'tasks.validators.tasks',
-                'generic': 'TaskO2ORecordSerializerGeneric',
-                'lax': 'TaskO2ORecordSerializerLax',
-                'strict': 'TaskO2ORecordSerializerStrict',
+                'path': 'users.validators.users',
+                'generic': 'UserO2ORecordSerializerGeneric',
+                'lax': 'UserO2ORecordSerializerLax',
+                'strict': 'UserO2ORecordSerializerStrict',
             },
-            'taco': {
-                'path': 'tasks.validators.comments',
-                'generic': 'CommentSerializerGeneric',
-                'lax': 'CommentSerializerLax',
-                'strict': 'CommentSerializerStrict',
+            'usre': {
+                'path': 'users.validators.usersM2Ms',
+                'generic': 'UserReportingSerializerGeneric',
+                'lax': 'UserReportingSerializerLax',
+                'strict': 'UserReportingSerializerStrict',
             },
-            'tawa': {
-                'path': 'tasks.validators.watchers',
-                'generic': 'WatcherSerializerGeneric',
-                'lax': 'WatcherSerializerLax',
-                'strict': 'WatcherSerializerStrict',
+            'usse': {
+                'path': 'users.validators.usersRLCs',
+                'generic': 'UserSettingsSerializerGeneric',
+                'lax': 'UserSettingsSerializerLax',
+                'strict': 'UserSettingsSerializerStrict',
+            },
+            'used': {
+                'path': 'users.validators.usersRLCs',
+                'generic': 'UserLogSerializerGeneric',
+                'lax': 'UserLogSerializerLax',
+                'strict': 'UserLogSerializerStrict',
             },
         }
     
     def _crudClasses(self):
         """
             returns CRUD classes relevent to mapper
-            @todo will in
         """
         return {
             'default': {
-                'path': 'tasks.drm.crud',
-                'name': 'Tasks',
+                'path': 'users.drm.crud',
+                'name': 'Users',
             },
-            'taco': {
-                'path': 'tasks.drm.crud',
-                'name': 'Comments',
+            'usre': {
+                'path': 'users.drm.crud',
+                'name': 'ReportsTo',
             },
-            'tawa': {
-                'path': 'tasks.drm.crud',
-                'name': 'Watchers',
+            'usse': {
+                'path': 'users.drm.crud',
+                'name': 'UserSettings',
+            },
+            'used': {
+                'path': 'users.drm.crud',
+                'name': 'UserLog',
             },
         }
     
@@ -137,6 +145,7 @@ class UsersMapper(RelationshipMappers):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
+            @todo: implement logic in Universal APIs
         """
         return {
             'read': {

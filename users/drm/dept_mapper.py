@@ -77,46 +77,44 @@ class DepartmentsMapper(RelationshipMappers):
     def _serializers(self):
         """
             returns serializers relevent to mapper
-            @todo fill in
         """
         return {
             'default': {
-                'path': 'tasks.validators.tasks',
-                'generic': 'TaskO2ORecordSerializerGeneric',
-                'lax': 'TaskO2ORecordSerializerLax',
-                'strict': 'TaskO2ORecordSerializerStrict',
+                'path': 'users.validators.departments',
+                'generic': 'DepartmentO2ORecordSerializerGeneric',
+                'lax': 'DepartmentO2ORecordSerializerLax',
+                'strict': 'DepartmentO2ORecordSerializerStrict',
             },
-            'taco': {
-                'path': 'tasks.validators.comments',
-                'generic': 'CommentSerializerGeneric',
-                'lax': 'CommentSerializerLax',
-                'strict': 'CommentSerializerStrict',
+            'dehe': {
+                'path': 'users.validators.departmentM2Ms',
+                'generic': 'DeptHeadSerializerGeneric',
+                'lax': 'DeptHeadSerializerLax',
+                'strict': 'DeptHeadSerializerStrict',
             },
-            'tawa': {
-                'path': 'tasks.validators.watchers',
-                'generic': 'WatcherSerializerGeneric',
-                'lax': 'WatcherSerializerLax',
-                'strict': 'WatcherSerializerStrict',
+            'deus': {
+                'path': 'users.validators.departmentM2Ms',
+                'generic': 'DeptUserSerializerGeneric',
+                'lax': 'DeptUserSerializerLax',
+                'strict': 'DeptUserSerializerStrict',
             },
         }
     
     def _crudClasses(self):
         """
             returns CRUD classes relevent to mapper
-            @todo fill in
         """
         return {
             'default': {
-                'path': 'tasks.drm.crud',
-                'name': 'Tasks',
+                'path': 'users.drm.crud',
+                'name': 'Departments',
             },
-            'taco': {
-                'path': 'tasks.drm.crud',
-                'name': 'Comments',
+            'dehe': {
+                'path': 'users.drm.crud',
+                'name': 'DepartmentHeads',
             },
-            'tawa': {
-                'path': 'tasks.drm.crud',
-                'name': 'Watchers',
+            'deus': {
+                'path': 'users.drm.crud',
+                'name': 'DepartmentUsers',
             },
         }
     
