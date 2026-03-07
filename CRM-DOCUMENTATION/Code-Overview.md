@@ -21,6 +21,7 @@ Once we have access to the Tickets Mapper, which would be defined in tickets.drm
 Continuing with our above example of a create request to 'titi' table for the following POST data:
 
     {
+        tbl: "titi"
         description: "Request to send 500 units of Tangy Green Soaps in next Shipment",
         type: "order-request",
         deadline: "2028-06-15T00:00:00Z",

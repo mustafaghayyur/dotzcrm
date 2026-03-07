@@ -127,26 +127,31 @@ class TasksMapper(RelationshipMappers):
         }
     
 
-    def _currentUserFieldsCud(self):
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
-            Should allow limiting of external entries in these fields.
+            Should allow limiting of external entries in these fields for create, update, delete and read operations.
         """
         return ['creator_id', 'watcher_id', 'commenter_id']
     
-    def _currentUserFieldsRead(self):
+    def _currentUserFieldsSearch(self):
         """
             Returns fields that have restrictions so only current user id can be set in search.
             @todo: implement logic in QuertSetManager conditions()
         """
         return []
     
-    def _bannedFromOpenAccess(self):
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
         """
-        return None
+        return {
+            'default': {
+                'path': 'tasks.permissions.tasks',
+                'name': 'TaskPermissions',
+            },
+        }
 
 
     def _defaults_order_by(self):

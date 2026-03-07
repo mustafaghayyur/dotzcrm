@@ -6,12 +6,18 @@ Concise, actionable guidance to get an AI coding agent productive in this reposi
 ## Big picture (what to know first) ✅
 - Monolithic Django app (Django 5.2.7) with modular apps: `core`, `tasks`, `tickets`, `documents`, `customers`, `restapi`. See `project/settings.py` for installed apps.
 - Single CUD entry point: **all Create/Update/Delete must go through `restapi/`**; views outside `restapi` should only read data. See `restapi/README.md`.
-- Data Relationship Manager (DRM) layer centralizes CRUD logic: look at `core/DRMcore/` (crud classes) and `core/DRMcore/querysets/` (query assembly). DRMs often compose SQL-like selectors/conditions rather than relying directly on Django model convenience.
+- Data Relationship Manager (DRM) layer centralizes CRUD logic: look at `core/DRMcore/crud` (crud classes) and `core/DRMcore/querysets/` (query assembly). DRMs often compose SQL-like selectors/conditions rather than relying directly on Django model convenience.
 - The `app_name/drm/mappers.py` define a loose schema for our system. The mapper classes often define valid ENUM values for DB column fields; or which columns can be ignored in certain CRUD operations, etc... Consider mapper classes (where ever you find them in drm directories) to be a loose schema defining aparatus.
+- We will use the universal CRUD and List api nodes for all api calls from the front-end JS app. Seperate special api nodes can be created for specific needs, however most crud and search queries from the front-end will use the restapi.views.list and restapi.views.crud nodes to retrieve system data.
+- The front-end is built with Bootsrap and an in-house JS library $A. The $A library is a collection of helper modules/functions largely defined in static/core/js/ directory. Most $A library code is well documented with comments.
+  - We use the $A library, typically, with the following notation:
+    $A.someModule.someFunction()
+    For example, $A.query, is a module defined in static/core/js/lib/query.js, so we can use a method like search() found there with the following code:
+    $A.query.search(tableKey);
 
 ## Key patterns & concrete examples ⚠️
 - LAWS OF CRUD: implement CUD in DRM classes and, when applicable, update the corresponding `core/DRMcore/querysets` logic. Example: change in tasks CRUD should touch `tasks/drm/crud.py` and any query logic in `core/DRMcore/querysets` or `tasks/drm/querysets`.
-- Query assembly: QuerySetManager and mapper objects build selectors/conditions (see `core/DRMcore/querysets/background.py`); follow the selectors/conditions/limit style used across `restapi` views (e.g., `restapi/views/tasks.py`).
+- Query assembly: QuerySetManager and mapper objects build selectors/conditions (see `core/DRMcore/querysets/`); follow the selectors/conditions/limit style used across `restapi` views (e.g., `restapi/views/tasks.py`).
 - REST endpoints use DRF `@api_view` and return paginated JSON with `results` — follow the shape in `restapi/views/tasks.py` (use `CRUD().read(...)`, serializers like `TaskO2ORecordSerializerGeneric`).
 - Internal helper views: conventionally, view helpers found in `views/helpers/` directory, are not directly exposed to URLs (see docstring in `restapi/views/tasks.py`).
 - Logging: CRUD validation and logging occur via `core/DRMcore/crud/Validation.py` (calls `misc.log(..., crud=True)`); logs are written to `core/settings.py` configured path (`tasks['crud_logger_file']`, defaults to `/Users/mustafa/Sites/python/server1/CRUD.log`) and only when `DEBUG` is True.

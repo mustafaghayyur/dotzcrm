@@ -8,10 +8,12 @@ from rest_framework.permissions import AllowAny
 
 from restapi.lib.helpers import *
 from core.helpers import crud, misc
+from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def retrieveAppSettings(request):
+def retrieveAppSettings(request, format=None):
     """
     Retrieve API settings based on authentication status.
     - Accessible to both authenticated and anonymous users
@@ -68,7 +70,7 @@ def retrieveAppSettings(request):
         
         return Response(crud.generateResponse(userSettings))
         
-    except (InvalidToken, Exception) as e:        
+    except (InvalidToken, Exception) as e:  
         # User is not authenticated or token is invalid - return anonymous settings
         return Response(crud.generateResponse({
             'messages': "Authentication failed. If this seems to be an error, please contact support.",
@@ -94,3 +96,42 @@ def retrieveAppSettings(request):
             }
         }))
 
+
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def retrieveMapperSettings(request, tbl: str, format=None):
+    """
+        Authenticated users are supplied relevent Mapper settings.
+        Unauthenticated users TBD @ todo
+        
+        :params
+        :request: Request obj
+        :tbl: table key as identified by DRM
+    """
+    try:
+        # Try to authenticate user from JWT cookie
+        user = isUserAuthenticated(request)
+        definition = schema.get(tbl, None)
+
+        if not isinstance(definition, dict):
+            raise Exception('Error 11970: Provided Table key does not exist.')
+        
+        Model = misc.importModule(definition.get('model'), definition.get('path'))
+        mapper = Model().getMapper()
+
+        if not isinstance(mapper, RelationshipMappers):
+            raise Exception('Error 11971: Table key could not fetch valid Mapper.')
+
+        context = {
+            'o2oFields': mapper.generateO2OFields(),
+            'allFields': mapper.generateAllFields(),
+        }
+
+        return Response(crud.generateResponse(context))
+    
+    except (InvalidToken, Exception) as e:
+        context = {}
+        return Response(crud.generateResponse(context))
+    

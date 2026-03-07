@@ -1,4 +1,5 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from .mapper_values import WorkSpacesValuesMapper
 
 class WorkSpacesMapper(RelationshipMappers):
     """
@@ -12,6 +13,7 @@ class WorkSpacesMapper(RelationshipMappers):
         # tables belonging to this mapper
         tables = ['wowo', 'wode', 'wous']
         self.state.set('mapperTables', tables)
+        self.setValuesMapper(WorkSpacesValuesMapper)
         
     
     def _master(self):
@@ -124,18 +126,23 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return ['creator_id']
     
-    def _currentUserFieldsRead(self):
+    def _currentUserFieldsSearch(self):
         """
-            Returns fields that have restrictions so only current user id can be set in search.
+           Only where condition in search queries are impacted
         """
         return []
     
-    def _bannedFromOpenAccess(self):
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
         """
-        return None
+        return {
+            'default': {
+                'path': 'tasks.permissions.workspaces',
+                'name': 'WorkSpacePermissions',
+            },
+        }
 
     def _defaults_order_by(self):
         return [

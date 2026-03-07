@@ -1,6 +1,6 @@
 from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField
 
-from tasks.drm.mapper_values import *
+from tasks.drm.mapper_values import WSType
 from core.helpers import validators
 from restapi.validators.generic import *
 
@@ -12,24 +12,15 @@ class WorkSpaceO2ORecordSerializerGeneric(Serializer):
     id = IntegerField(**intNullableOpts)  # id = wowo_id; but different places require different terms.
     wowo_id = IntegerField(**intNullableOpts)
 
-    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
-    details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
-    
-    status = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Status])
-    visibility = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Visibility])
+    name = CharField(allow_null=True, allow_blank=True, required=False, max_length=1000)
+    type = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in WSType])
 
-    deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
-
+    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=6000)
     creator_id = IntegerField(**intNullableOpts)
-    parent_id = IntegerField(**intNullableOpts)
-    assignor_id = IntegerField(**intNullableOpts)
-    assignee_id = IntegerField(**intNullableOpts)
-    task_id = IntegerField(**intNullableOpts)
-
-
     wowo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     wowo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     wowo_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
+
 
     
 

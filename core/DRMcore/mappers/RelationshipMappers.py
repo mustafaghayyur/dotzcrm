@@ -42,18 +42,19 @@ class RelationshipMappers(BaseMapper):
         """
         return self._dateFields()
     
-    def serializers(self, tblKey = 'default'):
+    def serializers(self, tblKey = 'default', type = 'generic'):
         """
             returns serializer(s) relevent to mapper/table-key
             
             :param tblKey: [str] key for table
+            :param type: [str] enum of ['generic' | 'lax' | 'strict']
         """
         info = self._serializers()
         if tblKey is not None and tblKey in info:
-            return info[tblKey]
+            return self.imported({'path': info[tblKey]['path'], 'name': info[tblKey][type]})
 
         if tblKey in self.tables():
-            return info['default']
+            return self.imported({'path': info['default']['path'], 'name': info['default'][type]})
 
         return None
     
@@ -65,10 +66,10 @@ class RelationshipMappers(BaseMapper):
         """
         info = self._crudClasses()
         if tblKey is not None and tblKey in info:
-            return info[tblKey]
+            return self.imported(info[tblKey])
 
         if tblKey in self.tables():
-            return info['default']
+            return self.imported(info['default'])
 
         return None
     
@@ -86,21 +87,21 @@ class RelationshipMappers(BaseMapper):
             return self._currentUserFieldsRead()
 
 
-    def bannedFromOpenAccess(self, operation = 'all'):
+    def permissions(self, tblKey = 'default'):
         """
-            Carries dictionary of rules on which CRUD operations are permitted
-            on the universal API nodes (restapi.views.list|crud).
-        """
-        rules = self._bannedFromOpenAccess()
-        if rules is None:
-            rules = {
-                'read': {},
-                'create': {},
-                'update': {},
-                'delete': {},
-            }
+            Carries modules handling rules on which CRUD and search operations are permitted
+            on each table of mapper.
 
-        return self.returnValue(rules, operation)
+            :param tblKey: [str] key for table
+        """
+        info = self._permissions()
+        if tblKey is not None and tblKey in info:
+            return self.imported(info[tblKey])
+
+        if tblKey in self.tables():
+            return self.imported(info['default'])
+
+        return None
     
     def defaults(self, requestedFunc):
         """

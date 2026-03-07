@@ -14,6 +14,7 @@ urlpatterns = [
     path('tasks/watchers/<int:taskId>/', tasks.watchers_list),
     path('tasks/watcher/<int:taskId>/', tasks.watcher_crud),
     path('settings-general/', settings.retrieveAppSettings),
+    path('settings-mapper/<str:tbl>/', settings.retrieveMapperSettings),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

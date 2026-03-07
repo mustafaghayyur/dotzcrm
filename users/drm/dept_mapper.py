@@ -125,18 +125,23 @@ class DepartmentsMapper(RelationshipMappers):
         """
         return ['creator_id', 'user_id', 'head_id']
     
-    def _currentUserFieldsRead(self):
+    def _currentUserFieldsSearch(self):
         """
-            Only where condition in read queries are impacted
+            Only where condition in search queries are impacted
         """
         return []
     
-    def _bannedFromOpenAccess(self):
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
         """
-        return None
+        return {
+            'default': {
+                'path': 'users.permissions.depts',
+                'name': 'DepartmentPermissions',
+            },
+        }
 
     def _defaults_order_by(self):
         return [

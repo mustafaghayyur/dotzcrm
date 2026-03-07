@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField
+from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, EmailField, BooleanField
 
 from users.drm.mapper_values import *
 from core.helpers import validators
@@ -11,29 +11,31 @@ class UserO2ORecordSerializerGeneric(Serializer):
     """
     id = IntegerField(**intNullableOpts)  # id = usus_id; but different places require different terms.
     usus_id = IntegerField(**intNullableOpts)
-
-    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
-    details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
+    uspr_id = IntegerField(**intNullableOpts)
     
-    status = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Status])
-    visibility = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Visibility])
-
-    deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])
-
-    creator_id = IntegerField(**intNullableOpts)
-    parent_id = IntegerField(**intNullableOpts)
-    assignor_id = IntegerField(**intNullableOpts)
-    assignee_id = IntegerField(**intNullableOpts)
-    task_id = IntegerField(**intNullableOpts)
-
+    username = CharField(allow_null=True, allow_blank=True, required=False, max_length=150)
+    first_name = CharField(allow_null=True, allow_blank=True, required=False, max_length=150)
+    last_name = CharField(allow_null=True, allow_blank=True, required=False, max_length=150)
+    email = EmailField(allow_null=True, allow_blank=True, required=False)
+    is_staff = BooleanField(required=False)
+    is_active = BooleanField(required=False)
+    user_level = IntegerField(**intNullableOpts)
+    
+    legal_first_name = CharField(allow_null=True, allow_blank=True, required=False, max_length=150)
+    legal_last_name = CharField(allow_null=True, allow_blank=True, required=False, max_length=150)
+    office_phone = CharField(allow_null=True, allow_blank=True, required=False, max_length=15)
+    office_ext = CharField(allow_null=True, allow_blank=True, required=False, max_length=10)
+    cell_phone = CharField(allow_null=True, allow_blank=True, required=False, max_length=15)
+    home_phone = CharField(allow_null=True, allow_blank=True, required=False, max_length=15)
+    office_location = CharField(allow_null=True, allow_blank=True, required=False, max_length=250)
+    
     uspr_latest = ChoiceField(**latestChoiceOpts)
 
+    date_joined = DateTimeFieldForJS(**datetimeNullableOpts)
     usus_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
-
     usus_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-
     usus_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     

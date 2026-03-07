@@ -131,49 +131,27 @@ class UsersMapper(RelationshipMappers):
     def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
-            Should allow limiting of external entries in these fields.
+            Should allow limiting of external entries in these fields in CRUD operations.
         """
         return ['reporter_id', 'reportsTo_id', 'owner_id', 'log_user_id']
     
-    def _currentUserFieldsRead(self):
+    def _currentUserFieldsSearch(self):
         """
-            Only where condition in read queries are impacted
+            Only where condition in search queries are impacted
         """
         return ['owner_id']
     
-    def _bannedFromOpenAccess(self):
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
             @todo: implement logic in Universal APIs
         """
         return {
-            'read': {
-                'usus': ['password', 'last_login', 'is_superuser', 'is_staff', 'date_joined'],
-                'usse': ['settings'],
-                'used': ['change_log']
+            'default': {
+                'path': 'users.permissions.users',
+                'name': 'UserPermissions',
             },
-            'update': {
-                'usus': 'all',
-                'uspr': 'all',
-                'usre': 'all',
-                'usse': 'all',
-                'used': 'all',
-            },
-            'create': {
-                'usus': 'all',
-                'uspr': 'all',
-                'usre': 'all',
-                'usse': 'all',
-                'used': 'all',
-            },
-            'delete': {
-                'usus': 'all',
-                'uspr': 'all',
-                'usre': 'all',
-                'usse': 'all',
-                'used': 'all',
-            }
         }
 
     def _defaults_order_by(self):

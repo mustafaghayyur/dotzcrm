@@ -41,16 +41,15 @@ def list(request, format=None):
         # Dynamically load the model using importlib
         modelModule = importlib.import_module(schemaEntry['path'])
         Model = getattr(modelModule, schemaEntry['model'])
+        mapper = Model.objects.getMapper()
         
         # Get serializer from DRM mappers based on table key
         # Dynamically get the appropriate mapper for serialization
-        serMeta = Model.objects.getMapper().serializers()
-        serModule = importlib.import_module(serMeta['path'])
-        Serializer = getattr(serModule, serMeta['generic'])
+        Serializer = mapper.serializers(tblKey, 'generic')
 
 
         # Handle pagination
-        pgntn = pagination.assembleParamsForView(postData.get('limit', []), Model.objects.getMapper().defaults('limit_value'))
+        pgntn = pagination.assembleParamsForView(postData.get('limit', []), mapper.defaults('limit_value'))
         # Prepare limit parameter for fetch (format: [offset, page_size])
         paginatedLimit = [str(pgntn['offset']), str(pgntn['page_size'])]
 
