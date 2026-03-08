@@ -11,7 +11,7 @@ class TasksMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'taco', 'tawa']
+        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'tawo', 'taco', 'tawa']
         self.state.set('mapperTables', tables)
 
         self.setValuesMapper(TasksValuesMapper)
@@ -42,7 +42,9 @@ class TasksMapper(RelationshipMappers):
             'tast': ['id', 'latest', 'create_time'],
             'tavi': ['id', 'latest', 'create_time'],
             'taas': ['id', 'latest', 'create_time'],
+            'tawo': ['id', 'latest', 'create_time'],
             'taco': ['id'],
+            'tawa': ['id'],
         }
     
     def _ignoreOnCreate(self):
@@ -57,6 +59,7 @@ class TasksMapper(RelationshipMappers):
             'tast': ['delete_time', 'create_time', 'latest', 'id'],
             'tavi': ['delete_time', 'create_time', 'latest', 'id'],
             'taas': ['delete_time', 'create_time', 'latest', 'id'],
+            'tawo': ['delete_time', 'create_time', 'latest', 'id'],
             'tawa': ['delete_time', 'create_time', 'latest', 'id'],
             'taco': ['delete_time', 'create_time', 'update_time', 'id'],
         }
@@ -91,13 +94,13 @@ class TasksMapper(RelationshipMappers):
                 'strict': 'TaskO2ORecordSerializerStrict',
             },
             'taco': {
-                'path': 'tasks.validators.comments',
+                'path': 'tasks.validators.taskRLCs',
                 'generic': 'CommentSerializerGeneric',
                 'lax': 'CommentSerializerLax',
                 'strict': 'CommentSerializerStrict',
             },
             'tawa': {
-                'path': 'tasks.validators.watchers',
+                'path': 'tasks.validators.taskM2Ms',
                 'generic': 'WatcherSerializerGeneric',
                 'lax': 'WatcherSerializerLax',
                 'strict': 'WatcherSerializerStrict',
@@ -115,28 +118,40 @@ class TasksMapper(RelationshipMappers):
             },
             'taco': {
                 'path': 'tasks.drm.crud',
-                'name': 'Comments',
+                'name': 'TaskComments',
             },
             'tawa': {
                 'path': 'tasks.drm.crud',
-                'name': 'Watchers',
+                'name': 'TaskWatchers',
             },
         }
     
 
-    def _currentUserFields(self):
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
-            Should allow limiting of external entries in these fields.
+            Should allow limiting of external entries in these fields for create, update, delete and read operations.
         """
-        return ['creator_id', 'watcher_id']
+        return ['creator_id', 'watcher_id', 'commenter_id']
     
-    def _bannedFromOpenAccess(self):
+    def _currentUserFieldsSearch(self):
+        """
+            Returns fields that have restrictions so only current user id can be set in search.
+            @todo: implement logic in QuertSetManager conditions()
+        """
+        return []
+    
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
         """
-        return None
+        return {
+            'default': {
+                'path': 'tasks.permissions.tasks',
+                'name': 'TaskPermissions',
+            },
+        }
 
 
     def _defaults_order_by(self):
@@ -168,6 +183,11 @@ class TasksMapper(RelationshipMappers):
             },
             {
                 'tbl': 'taas',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'tawo',
                 'col': 'create_time',
                 'sort': 'DESC',
             },

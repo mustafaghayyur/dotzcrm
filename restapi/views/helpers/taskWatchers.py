@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from tasks.validators.watchers import WatcherSerializerGeneric
+from tasks.validators.taskM2Ms import WatcherSerializerGeneric
 from tasks.drm.crud import Watchers
 from core.helpers import crud, misc
 

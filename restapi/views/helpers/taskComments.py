@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 
-from tasks.validators.comments import CommentSerializerGeneric
+from tasks.validators.taskRLCs import CommentSerializerGeneric
 from tasks.drm.crud import Comments
 from core.helpers import crud, misc
 

@@ -8,10 +8,12 @@ from rest_framework.permissions import AllowAny
 
 from restapi.lib.helpers import *
 from core.helpers import crud, misc
+from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def retrieveAppSettings(request):
+def retrieveAppSettings(request, format=None):
     """
     Retrieve API settings based on authentication status.
     - Accessible to both authenticated and anonymous users
@@ -36,18 +38,13 @@ def retrieveAppSettings(request):
                 'api': {
                     'auth': {
                         'login': '/accounts/rest/token/',
-                        'refresh': '/accounts/rest/token/refresh/',
-                        'settings': '/rest/settings-general/',
+                        'refresh': '/accounts/rest/token/refresh/',  
                         'logout': '/accounts/rest/logout/',
                         'change_password': '/accounts/rest/change-password/',
                     },
-                    'tasks': {
-                        'crud': '/rest/tasks/crud/{input1}/',
-                        'list': '/rest/tasks/{input1}/',
-                        'comments_crud': '/rest/tasks/comment/{input1}/',
-                        'comments_list': '/rest/tasks/comments/{input1}/',
-                        'watchers_crud': '/rest/tasks/watcher/{input1}/',
-                        'watchers_list': '/rest/tasks/watchers/{input1}/',
+                    'settings': {
+                        'general': '/rest/settings-general/',
+                        'mappers': '/rest/settings-mapper/{input1}',
                     },
                     'terminal': {
                         'crud': '/rest/all/crud/',
@@ -68,7 +65,7 @@ def retrieveAppSettings(request):
         
         return Response(crud.generateResponse(userSettings))
         
-    except (InvalidToken, Exception) as e:        
+    except (InvalidToken, Exception) as e:  
         # User is not authenticated or token is invalid - return anonymous settings
         return Response(crud.generateResponse({
             'messages': "Authentication failed. If this seems to be an error, please contact support.",
@@ -79,7 +76,10 @@ def retrieveAppSettings(request):
                     'auth': {
                         'login': '/accounts/rest/token/',
                         'refresh': '/accounts/rest/token/refresh/',
-                        'settings': '/rest/settings-general/'
+                    },
+                    'settings': {
+                        'general': '/rest/settings-general/',
+                        'mappers': '/rest/settings-mapper/{input1}',
                     },
                 },
                 'ui': {
@@ -94,3 +94,42 @@ def retrieveAppSettings(request):
             }
         }))
 
+
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def retrieveMapperSettings(request, tbl: str, format=None):
+    """
+        Authenticated users are supplied relevent Mapper settings.
+        Unauthenticated users TBD @ todo
+        
+        :params
+        :request: Request obj
+        :tbl: table key as identified by DRM
+    """
+    try:
+        # Try to authenticate user from JWT cookie
+        user = isUserAuthenticated(request)
+        definition = schema.get(tbl, None)
+
+        if not isinstance(definition, dict):
+            raise Exception('Error 11970: Provided Table key does not exist.')
+        
+        Model = misc.importModule(definition.get('model'), definition.get('path'))
+        mapper = Model.objects.getMapper()
+        
+        if not isinstance(mapper, RelationshipMappers):
+            raise Exception('Error 11971: Table key could not fetch valid Mapper.')
+
+        context = {
+            'o2oFields': list(mapper.generateO2OFields().keys()),
+            'allFields': list(mapper.generateAllFields().keys()),
+        }
+
+        return Response(crud.generateResponse(context))
+    
+    except (InvalidToken, Exception) as e:
+        context = {}
+        return Response(crud.generateResponse(context))
+    

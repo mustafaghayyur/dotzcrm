@@ -13,8 +13,8 @@ import $A from "../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (resultSet, containerId) {
-    const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
-    
+    const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
+    console.log('Checking TasksO2OKeys', TasksO2OKeys);
     TasksO2OKeys.forEach(key => {
         let fieldContainer = document.getElementById(key);
 
@@ -45,8 +45,10 @@ export default function (resultSet, containerId) {
      */
     function editAndDeleteFunction(resultSet) {
         let editBtn = document.getElementById('editTaskBtn');
-        editBtn.addEventListener('click', () => {
+        editBtn.addEventListener('click', async () => {
             $A.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
+            const callback = await $A.tasks.load('loadTaskFormValues');
+            callback(resultSet);
         });
 
         // add delete button functionality

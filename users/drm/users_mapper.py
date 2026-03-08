@@ -74,46 +74,84 @@ class UsersMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time', 'date_joined']
 
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'users.validators.users',
+                'generic': 'UserO2ORecordSerializerGeneric',
+                'lax': 'UserO2ORecordSerializerLax',
+                'strict': 'UserO2ORecordSerializerStrict',
+            },
+            'usre': {
+                'path': 'users.validators.usersM2Ms',
+                'generic': 'UserReportingSerializerGeneric',
+                'lax': 'UserReportingSerializerLax',
+                'strict': 'UserReportingSerializerStrict',
+            },
+            'usse': {
+                'path': 'users.validators.usersRLCs',
+                'generic': 'UserSettingsSerializerGeneric',
+                'lax': 'UserSettingsSerializerLax',
+                'strict': 'UserSettingsSerializerStrict',
+            },
+            'used': {
+                'path': 'users.validators.usersRLCs',
+                'generic': 'UserLogSerializerGeneric',
+                'lax': 'UserLogSerializerLax',
+                'strict': 'UserLogSerializerStrict',
+            },
+        }
     
-    def _currentUserFields(self):
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'users.drm.crud',
+                'name': 'Users',
+            },
+            'usre': {
+                'path': 'users.drm.crud',
+                'name': 'ReportsTo',
+            },
+            'usse': {
+                'path': 'users.drm.crud',
+                'name': 'UserSettings',
+            },
+            'used': {
+                'path': 'users.drm.crud',
+                'name': 'UserLog',
+            },
+        }
+    
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
-            Should allow limiting of external entries in these fields.
+            Should allow limiting of external entries in these fields in CRUD operations.
         """
         return ['reporter_id', 'reportsTo_id', 'owner_id', 'log_user_id']
     
-    def _bannedFromOpenAccess(self):
+    def _currentUserFieldsSearch(self):
+        """
+            Only where condition in search queries are impacted
+        """
+        return ['owner_id']
+    
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
+            @todo: implement logic in Universal APIs
         """
         return {
-            'read': {
-                'usus': ['password', 'last_login', 'is_superuser', 'is_staff', 'date_joined'],
-                'usse': ['settings'],
-                'used': ['change_log']
+            'default': {
+                'path': 'users.permissions.users',
+                'name': 'UserPermissions',
             },
-            'update': {
-                'usus': 'all',
-                'uspr': 'all',
-                'usre': 'all',
-                'usse': 'all',
-                'used': 'all',
-            },
-            'create': {
-                'usus': 'all',
-                'uspr': 'all',
-                'usre': 'all',
-                'usse': 'all',
-                'used': 'all',
-            },
-            'delete': {
-                'usus': 'all',
-                'uspr': 'all',
-                'usre': 'all',
-                'usse': 'all',
-                'used': 'all',
-            }
         }
 
     def _defaults_order_by(self):

@@ -62,6 +62,30 @@ class Background():
         self.values = None  # reset values attribute
         self.values = VMClassInstance()
 
+    def imported(self, definitionsDict):
+        """
+            Helper function. 
+            Attempts to auto-import class from module defined in definitionsDict
+
+            :param definitionsDict: [dict] holds definitions for path and component name
+        """
+        if not isinstance(definitionsDict, dict):
+            raise Exception('Error 1360: Mapper().imported() requires valid dictionary as argument.')
+        if 'path' not in definitionsDict:
+            raise Exception('Error 1361: Mapper().imported() dictionary missing "path" key=>value pair.')
+        if 'name' not in definitionsDict:
+            raise Exception('Error 1362: Mapper().imported() dictionary missing "name" key=>value pair.')
+        if not isinstance(definitionsDict['path'], str):
+            raise Exception('Error 1363: Mapper().imported() dictionary["path"] has to be valid str value.')
+        if not isinstance(definitionsDict['name'], str):
+            raise Exception('Error 1364: Mapper().imported() dictionary["name"] has to be valid str value.')
+
+        try:
+            return misc.importModule(definitionsDict['name'], definitionsDict['path'])
+        except Exception as e:
+            raise Exception(f'Error 1365: Mapper().imported() could not import defined component, raised error: {e}')
+
+
     def returnValue(self, info, key):
         """
             Helper function. Used internally.

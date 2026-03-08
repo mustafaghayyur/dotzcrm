@@ -37,7 +37,7 @@ class Tasks(O2ORecords.CRUD):
         return None
 
 
-class Comments(RevisionlessChildren.CRUD):
+class TaskComments(RevisionlessChildren.CRUD):
     """
         Comments are a RLC table type.
         All CRUD operations for Comments within Task module, are handled by
@@ -53,7 +53,7 @@ class Comments(RevisionlessChildren.CRUD):
         self.setMasterCrudClass(Tasks)
 
 
-class Watchers(M2MChildren.CRUD):
+class TaskWatchers(M2MChildren.CRUD):
     """
        This is a Many-to-Many relations table, where many 'watchers' are
        being assigned to many Tasks' record.
@@ -114,12 +114,3 @@ class WorkSpaceDepartments(M2MChildren.CRUD):
         self.state.set('tbl', 'wode')
         self.mapper = WorkSpacesMapper()
 
-class WorkSpaceTasks(M2MChildren.CRUD):
-    """
-        WorkSpace Tasks. M2M
-    """
-    def startUpCode(self):
-        self.state.set('app', 'tasks')
-        self.state.set('pk', 'wota_id')
-        self.state.set('tbl', 'wota')
-        self.mapper = WorkSpacesMapper()

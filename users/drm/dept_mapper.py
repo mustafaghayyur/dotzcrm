@@ -73,19 +73,75 @@ class DepartmentsMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time']
     
-    def _currentUserFields(self):
+    
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'users.validators.departments',
+                'generic': 'DepartmentO2ORecordSerializerGeneric',
+                'lax': 'DepartmentO2ORecordSerializerLax',
+                'strict': 'DepartmentO2ORecordSerializerStrict',
+            },
+            'dehe': {
+                'path': 'users.validators.departmentM2Ms',
+                'generic': 'DeptHeadSerializerGeneric',
+                'lax': 'DeptHeadSerializerLax',
+                'strict': 'DeptHeadSerializerStrict',
+            },
+            'deus': {
+                'path': 'users.validators.departmentM2Ms',
+                'generic': 'DeptUserSerializerGeneric',
+                'lax': 'DeptUserSerializerLax',
+                'strict': 'DeptUserSerializerStrict',
+            },
+        }
+    
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'users.drm.crud',
+                'name': 'Departments',
+            },
+            'dehe': {
+                'path': 'users.drm.crud',
+                'name': 'DepartmentHeads',
+            },
+            'deus': {
+                'path': 'users.drm.crud',
+                'name': 'DepartmentUsers',
+            },
+        }
+    
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
         """
         return ['creator_id', 'user_id', 'head_id']
     
-    def _bannedFromOpenAccess(self):
+    def _currentUserFieldsSearch(self):
+        """
+            Only where condition in search queries are impacted
+        """
+        return []
+    
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
         """
-        return None
+        return {
+            'default': {
+                'path': 'users.permissions.depts',
+                'name': 'DepartmentPermissions',
+            },
+        }
 
     def _defaults_order_by(self):
         return [

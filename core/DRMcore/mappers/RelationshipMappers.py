@@ -42,18 +42,19 @@ class RelationshipMappers(BaseMapper):
         """
         return self._dateFields()
     
-    def serializers(self, tblKey = 'default'):
+    def serializers(self, tblKey = 'default', type = 'generic'):
         """
             returns serializer(s) relevent to mapper/table-key
             
             :param tblKey: [str] key for table
+            :param type: [str] enum of ['generic' | 'lax' | 'strict']
         """
         info = self._serializers()
         if tblKey is not None and tblKey in info:
-            return info[tblKey]
+            return self.imported({'path': info[tblKey]['path'], 'name': info[tblKey][type]})
 
         if tblKey in self.tables():
-            return info['default']
+            return self.imported({'path': info['default']['path'], 'name': info['default'][type]})
 
         return None
     
@@ -65,35 +66,42 @@ class RelationshipMappers(BaseMapper):
         """
         info = self._crudClasses()
         if tblKey is not None and tblKey in info:
-            return info[tblKey]
+            return self.imported(info[tblKey])
 
         if tblKey in self.tables():
-            return info['default']
+            return self.imported(info['default'])
 
         return None
     
-    def currentUserFields(self):
+    def currentUserFields(self, operation = 'crud'):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
-        """
-        return self._currentUserFields()
-    
-    def bannedFromOpenAccess(self, operation = 'all'):
-        """
-            Carries dictionary of rules on which CRUD operations are permitted
-            on the universal API nodes (restapi.views.list|crud).
-        """
-        rules = self._bannedFromOpenAccess()
-        if rules is None:
-            rules = {
-                'read': {},
-                'create': {},
-                'update': {},
-                'delete': {},
-            }
+            When operation is set to read, returns fields that have read restrictions.
 
-        return self.returnValue(rules, operation)
+            :param operation: [str] enum of 'crud' | 'search'
+        """
+        if operation == 'crud':
+            return self._currentUserFieldsCrud()
+        if operation == 'search':
+            return self._currentUserFieldsSearch()
+
+
+    def permissions(self, tblKey = 'default'):
+        """
+            Carries modules handling rules on which CRUD and search operations are permitted
+            on each table of mapper.
+
+            :param tblKey: [str] key for table
+        """
+        info = self._permissions()
+        if tblKey is not None and tblKey in info:
+            return self.imported(info[tblKey])
+
+        if tblKey in self.tables():
+            return self.imported(info['default'])
+
+        return None
     
     def defaults(self, requestedFunc):
         """

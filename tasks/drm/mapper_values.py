@@ -45,3 +45,28 @@ class Visibility(str, Enum):
     workspaces = 'workspaces'
     assigned = 'assigned' # @todo: future feature implementation
     stakeholders = 'stakeholders' # @todo: future feature implementation
+
+
+
+
+
+class WorkSpacesValuesMapper(ValuesMapperGeneric):
+    """
+        This class will help manage value expectations for certain enum fields.
+        Enums will be managed in the application layer.
+    """
+
+    def type(self, key = 'all'):
+        values = {itm.name: itm.value for itm in WSType}
+
+        if key is not None and key in values:
+            return values[key]
+
+        return values
+
+class WSType(str, Enum):
+    """
+        WorkSpaces Types Enum
+    """
+    private = 'private'
+    open = 'open'

@@ -25,15 +25,9 @@ class Operations():
         modelModule = importlib.import_module(schemaEntry['path'])
         Model = getattr(modelModule, schemaEntry['model'])
         self.state.set('mapper', Model.objects.getMapper())
-
-        serMeta = self.state.get('mapper').serializers(tbl)
-        serModule = importlib.import_module(serMeta['path'])
-        self.state.set('serializerClass', getattr(serModule, serMeta['generic']))
-
-        crudMeta = self.state.get('mapper').crudClasses(tbl)
-        crudModule = importlib.import_module(crudMeta['path'])
-        self.state.set('crudClass', getattr(crudModule, crudMeta['name']))
-
+        self.state.set('serializerClass', self.state.get('mapper').serializers(tbl, 'generic'))
+        self.state.set('crudClass', self.state.get('mapper').crudClasses(tbl))
+        self.state.set('permissions', self.state.get('mapper').permissions(tbl))
         self.state.set('operation', operation)
         self.state.set('dataModel', self.state.get('mapper').typeOfTable(tbl))
         self.state.set('request', request)

@@ -1,4 +1,5 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from .mapper_values import WorkSpacesValuesMapper
 
 class WorkSpacesMapper(RelationshipMappers):
     """
@@ -10,8 +11,9 @@ class WorkSpacesMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['wowo', 'wode', 'wous', 'wota']
+        tables = ['wowo', 'wode', 'wous']
         self.state.set('mapperTables', tables)
+        self.setValuesMapper(WorkSpacesValuesMapper)
         
     
     def _master(self):
@@ -37,7 +39,6 @@ class WorkSpacesMapper(RelationshipMappers):
             'wowo': ['id', 'creator_id'],
             'wode': ['id', 'latest'],
             'wous': ['id', 'latest'],
-            'wota': ['id', 'latest'],
         }
     
     def _ignoreOnCreate(self):
@@ -49,7 +50,6 @@ class WorkSpacesMapper(RelationshipMappers):
             'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
             'wode': ['delete_time', 'create_time', 'latest', 'id'],
             'wous': ['delete_time', 'create_time', 'latest', 'id'],
-            'wota': ['delete_time', 'create_time', 'latest', 'id'],
         }
 
     def _m2mFields(self):
@@ -67,11 +67,6 @@ class WorkSpacesMapper(RelationshipMappers):
                 'secondCol': 'user_id',
                 'tables': ['wowo', 'usus']
             },
-            'wota': {
-                'firstCol': 'workspace_id',
-                'secondCol': 'task_id',
-                'tables': ['wowo', 'tata']
-            },
         }
     
     def _dateFields(self):
@@ -80,20 +75,74 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return ['create_time', 'update_time', 'delete_time']
     
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'tasks.validators.tasks',
+                'generic': 'WorkSpaceO2ORecordSerializerGeneric',
+                'lax': 'WorkSpaceO2ORecordSerializerLax',
+                'strict': 'WorkSpaceO2ORecordSerializerStrict',
+            },
+            'wode': {
+                'path': 'tasks.validators.comments',
+                'generic': 'WSDepartmentSerializerGeneric',
+                'lax': 'WSDepartmentSerializerLax',
+                'strict': 'WSDepartmentSerializerStrict',
+            },
+            'wous': {
+                'path': 'tasks.validators.watchers',
+                'generic': 'WSUserSerializerGeneric',
+                'lax': 'WSUserSerializerLax',
+                'strict': 'WSUserSerializerStrict',
+            },
+        }
     
-    def _currentUserFields(self):
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaces',
+            },
+            'wode': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaceUsers',
+            },
+            'wous': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaceDepartments',
+            },
+        }
+    
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.
         """
         return ['creator_id']
     
-    def _bannedFromOpenAccess(self):
+    def _currentUserFieldsSearch(self):
+        """
+           Only where condition in search queries are impacted
+        """
+        return []
+    
+    def _permissions(self):
         """
             Carries dictionary of rules on which CRUD operations are permitted
             on the universal API nodes (restapi.views.list|crud).
         """
-        return None
+        return {
+            'default': {
+                'path': 'tasks.permissions.workspaces',
+                'name': 'WorkSpacePermissions',
+            },
+        }
 
     def _defaults_order_by(self):
         return [
