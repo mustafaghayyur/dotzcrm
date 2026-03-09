@@ -45,7 +45,7 @@ class Conditions():
 
         for key, value in conditions.items():
             length = Conditions.length(array)
-            [tbl, col] = strings.seperateTableKeyFromField(key, state)
+            [tbl, col] = mapper.prefixedFields(key)  # strings.seperateTableKeyFromField(key, state)
             if tbl is None and col is not None:
                 statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
             if tbl is not None and col is not None:

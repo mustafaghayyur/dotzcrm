@@ -23,7 +23,7 @@ class Selectors():
                     # mapper fields belong to this mapper, need no special processing
                     string += Selectors.makeSelectString(state, mapper, key, mapperFields[key])
                 else:
-                    [tbl, col] = strings.seperateTableKeyFromField(key, state)
+                    [tbl, col] = mapper.prefixedFields(key)  # strings.seperateTableKeyFromField(key, state)
                     if tbl is not None and col is not None:
                         string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
                     else:

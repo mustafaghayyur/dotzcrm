@@ -89,7 +89,7 @@ class BackgroundOperations(models.QuerySet):
                 tables.append(mapperFields[field])
                 continue
             if isinstance(field, str) and field not in mapperFields:
-                [tbl, col] = strings.seperateTableKeyFromField(field, self.state)
+                [tbl, col] = self.mapper.prefixedFields(field)  # strings.seperateTableKeyFromField(field, self.state)
 
                 if isinstance(tbl, str) and isinstance(col, str):
                     fullTableName = self.mapper.state.get('tables.' + tbl)

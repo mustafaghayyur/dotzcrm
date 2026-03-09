@@ -38,6 +38,7 @@ class UsersMapper(RelationshipMappers):
         return {
             'usus': ['id'],
             'uspr': ['id', 'latest'],
+            'usse': ['id', 'latest'],
             'usre': ['id', 'latest'],
             'usse': ['id'],
             'used': ['id'],
@@ -51,8 +52,8 @@ class UsersMapper(RelationshipMappers):
         return {
             'usus': ['delete_time', 'create_time', 'update_time', 'id'],
             'uspr': ['delete_time', 'create_time', 'latest', 'id'],
+            'usse': ['delete_time', 'create_time', 'latest', 'id'],
             'usre': ['delete_time', 'create_time', 'latest', 'id'],
-            'usse': ['delete_time', 'create_time', 'update_time', 'id'],
             'used': ['delete_time', 'create_time', 'update_time', 'id'],
         }
     
@@ -91,12 +92,6 @@ class UsersMapper(RelationshipMappers):
                 'lax': 'UserReportingSerializerLax',
                 'strict': 'UserReportingSerializerStrict',
             },
-            'usse': {
-                'path': 'users.validators.usersRLCs',
-                'generic': 'UserSettingsSerializerGeneric',
-                'lax': 'UserSettingsSerializerLax',
-                'strict': 'UserSettingsSerializerStrict',
-            },
             'used': {
                 'path': 'users.validators.usersRLCs',
                 'generic': 'UserLogSerializerGeneric',
@@ -118,10 +113,6 @@ class UsersMapper(RelationshipMappers):
                 'path': 'users.drm.crud',
                 'name': 'ReportsTo',
             },
-            'usse': {
-                'path': 'users.drm.crud',
-                'name': 'UserSettings',
-            },
             'used': {
                 'path': 'users.drm.crud',
                 'name': 'UserLog',
@@ -133,13 +124,13 @@ class UsersMapper(RelationshipMappers):
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields in CRUD operations.
         """
-        return ['reporter_id', 'reportsTo_id', 'owner_id', 'log_user_id']
+        return ['usre_user_id', 'uspr_user_id', 'usse_user_id', 'used_user_id']
     
     def _currentUserFieldsSearch(self):
         """
             Only where condition in search queries are impacted
         """
-        return ['owner_id']
+        return []
     
     def _permissions(self):
         """
@@ -163,6 +154,11 @@ class UsersMapper(RelationshipMappers):
             },
             {
                 'tbl': 'uspr',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'usse',
                 'col': 'create_time',
                 'sort': 'DESC',
             }

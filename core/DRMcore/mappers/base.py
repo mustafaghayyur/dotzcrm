@@ -1,6 +1,6 @@
 from core.dotzSettings import settings
 from .background import Background
-from ...helpers import misc
+from ...helpers import misc, strings
 
 class BaseMapper(Background):
     """
@@ -186,3 +186,34 @@ class BaseMapper(Background):
             All columns should be referenced through this function.
         """
         return key
+    
+    def prefixedFields(self, fieldName, grab = 'both'):
+        """
+            Determines if fieldName has a table-key prefixed, if so returns one 
+            or both based on options.
+
+            :param fieldName: [str] string carrying fieldname
+            :param grab: [str] enum of ['both', 'tbl', 'field']
+        """
+        if grab not in ['both', 'tbl', 'field']:
+            raise Exception("Error 1062: Mapper().prefixedFields() requires grab to be an enum of ['both', 'tbl', 'field']")
+        
+        tables = self.state.get('tables')
+        parts = fieldName.split('_')
+        tbl = ''
+        field = fieldName
+
+        if parts[0] in tables:
+            tbl = parts[0]
+            field = strings.concatenate(parts[1:], '_')
+
+        if grab == 'both':
+            return [tbl, field]
+        
+        if grab == 'tbl':
+            return tbl
+        
+        if grab == 'field':
+            return field
+
+        return None
