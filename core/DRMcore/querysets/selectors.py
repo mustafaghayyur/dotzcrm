@@ -1,5 +1,5 @@
 from core.dotzSettings import settings
-from core.helpers import strings
+from core.helpers import strings, misc
 
 class Selectors():
     """
@@ -27,7 +27,7 @@ class Selectors():
                     if tbl is not None and col is not None:
                         string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
                     else:
-                        raise KeyError('Error 1022: Some selector(s) are mal-formed. "[tbl]_field" format missing.')
+                        raise KeyError('Error 1022: Some selector(s) are mal-formed. "tbl_field" format missing.')
 
         # chop off the last comma from returned string
         return string[:-1]
@@ -55,10 +55,7 @@ class Selectors():
             field = mapper.prefixedFields(field, 'field')
             string += f' {tbl}.{field} AS {tbl}_{field},'        
         return string
-
-    @staticmethod
-    def makeSelectStringNonMapper(state, mapper, fieldsDict):
-        pass
+    
 
     @staticmethod
     def validate(state, selectors):

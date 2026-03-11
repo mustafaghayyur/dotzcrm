@@ -8,7 +8,7 @@ import $A from "../helper.js";
  */
 export default (taskInfo) => {
     if ($A.generic.checkVariableType(taskInfo) !== 'dictionary' || $A.generic.isVariableEmpty(taskInfo)) {
-        if (!$A.generic.isPrimitiveValue(taskInfo)) {
+        if (!$A.generic.isPrimitiveValue(taskInfo) || $A.generic.isVariableEmpty(taskInfo)) {
             throw Error('Error FA099: WorkSpace id must be provided in primitive data value format.')
         }
         taskInfo = {
@@ -31,8 +31,7 @@ export default (taskInfo) => {
         }).order([
             {tbl:'usus', col: 'last_name', sort: 'asc'},
             {tbl:'usus', col: 'first_name', sort: 'asc'}
-        ]).translate({ debug: true })
-        .execute('taskEditModalResponse', embedUsersDataIntoForm);
+        ]).execute('taskEditModalResponse', embedUsersDataIntoForm);
 
 
     /**

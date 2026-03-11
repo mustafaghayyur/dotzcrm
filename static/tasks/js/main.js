@@ -47,10 +47,20 @@ Main(async () => {
                 .execute('workspacesTabResponse', dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
-        workspaces: () => {
-            // Please implement code, in line with the 'persional' tab above,
-            // to allow for listing of tasks that belong to a specific 'workspace' as defined in 
-            // in the tasks.drm.mappers codebase.
+        workspaces: async () => {
+            console.log('We are initiating WorkSPace tab...');
+            const workspaces = await $A.tasks.load('commentsList');
+
+            $A.query().search('wowo')
+                .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
+                .where({
+                    user_id: $A.app.memFetch('user_id'),
+                    wowo_delete_time: 'is null',
+                })
+                .order([
+                    {tbl: 'wowo', col: 'id', sort: 'desc'},
+                ]).page(1).translate({ debug: true })
+                .execute('personalTabResponse', workspaces);
             
 
         },
@@ -59,11 +69,13 @@ Main(async () => {
     const cleanForms = await $A.tasks.load('cleanFormFunctionality'); 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
     const enableEditFunctionality = await $A.tasks.load('editTaskForm');
-    const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
    
     cleanForms();    // load form clean functionality..
     enableEditFunctionality();  // we must now add edit functionality.
-    loadTaskFormValues(); // @todo: add appropriate workspace logic
+
+    // @todo: add this in appropriate form initiatior...
+    //const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
+    //loadTaskFormValues(); // @todo: add appropriate workspace logic
 
 
     // Allow opening of task-modals from url:

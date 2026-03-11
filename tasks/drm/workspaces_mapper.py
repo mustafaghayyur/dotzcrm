@@ -80,19 +80,19 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return {
             'default': {
-                'path': 'tasks.validators.tasks',
+                'path': 'tasks.validators.workspaces',
                 'generic': 'WorkSpaceO2ORecordSerializerGeneric',
                 'lax': 'WorkSpaceO2ORecordSerializerLax',
                 'strict': 'WorkSpaceO2ORecordSerializerStrict',
             },
             'wode': {
-                'path': 'tasks.validators.comments',
+                'path': 'tasks.validators.workspaceM2Ms',
                 'generic': 'WSDepartmentSerializerGeneric',
                 'lax': 'WSDepartmentSerializerLax',
                 'strict': 'WSDepartmentSerializerStrict',
             },
             'wous': {
-                'path': 'tasks.validators.watchers',
+                'path': 'tasks.validators.workspaceM2Ms',
                 'generic': 'WSUserSerializerGeneric',
                 'lax': 'WSUserSerializerLax',
                 'strict': 'WSUserSerializerStrict',

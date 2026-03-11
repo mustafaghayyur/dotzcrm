@@ -160,6 +160,7 @@ class BaseMapper(Background):
         
         commonFields = self.commonFields()
         mapperTables = self.state.get('mapperTables')
+        mtForeignKeyName = self.master('foreignKeyName')
         dictionary = {}  # open returned dictionary
 
         for tbl in tablesList:
@@ -169,6 +170,9 @@ class BaseMapper(Background):
                 continue
 
             for field in fields:
+                if field == mtForeignKeyName:
+                    continue  # @todo: confirm behavior
+
                 fullName = field
                 if field in commonFields:
                     fullName = f'{tbl}_{field}'
