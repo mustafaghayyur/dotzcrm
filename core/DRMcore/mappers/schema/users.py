@@ -71,7 +71,7 @@ users = {
 			'latest'
         ],
     },
-    'used': {
+    'uslo': {
         'table': 'users_editlog',
         'model': 'EditLog',
         'path': 'users.models',

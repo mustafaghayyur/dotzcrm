@@ -25,6 +25,7 @@ class Selectors():
                 else:
                     [tbl, col] = mapper.prefixedFields(key)  # strings.seperateTableKeyFromField(key, state)
                     if tbl is not None and col is not None:
+
                         string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
                     else:
                         raise KeyError('Error 1022: Some selector(s) are mal-formed. "tbl_field" format missing.')
@@ -39,19 +40,17 @@ class Selectors():
         current = state.get('current')
         string = ''
         addition = ''
-        
         if inMapper:
             if mapper.isCommonField(field, True):
                 # the table abbreviation is conjoined to key name. Separate:
                 field = field[sz:]
                 addition = f' AS {tbl}_{field}'
-                
                 if strings.fieldIdentifier(tbl, field) == current + '_' + mapper.column('id'):
                     # adds the current Model's key as 'id' and 'tblkey_id'
                     addition = f', {tbl}.{field} AS {tbl}_{field}'
-                
             string += f' {tbl}.{field} {addition},'
         else:
+            orig = field
             field = mapper.prefixedFields(field, 'field')
             string += f' {tbl}.{field} AS {tbl}_{field},'        
         return string

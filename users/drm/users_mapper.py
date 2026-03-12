@@ -11,7 +11,7 @@ class UsersMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['usus', 'uspr', 'usre', 'usse', 'used']
+        tables = ['usus', 'uspr', 'usre', 'usse', 'uslo']
         self.state.set('mapperTables', tables)
         
         self.setValuesMapper(UsersValuesMapper)
@@ -39,8 +39,7 @@ class UsersMapper(RelationshipMappers):
             'uspr': ['id', 'latest', 'create_time', 'user_id'],
             'usse': ['id', 'latest', 'create_time', 'user_id'],
             'usre': ['id', 'latest', 'create_time', 'user_id'],
-            'usse': ['id', 'user_id', 'create_time', ],
-            'used': ['id', 'user_id', 'create_time', ],
+            'uslo': ['id', 'user_id', 'create_time', 'user_id'],
         }
     
     def _ignoreOnCreate(self):
@@ -53,7 +52,7 @@ class UsersMapper(RelationshipMappers):
             'uspr': ['delete_time', 'create_time', 'latest', 'id'],
             'usse': ['delete_time', 'create_time', 'latest', 'id'],
             'usre': ['delete_time', 'create_time', 'latest', 'id'],
-            'used': ['delete_time', 'create_time', 'update_time', 'id'],
+            'uslo': ['delete_time', 'create_time', 'update_time', 'id'],
         }
     
     def _m2mFields(self):
@@ -91,7 +90,7 @@ class UsersMapper(RelationshipMappers):
                 'lax': 'UserReportingSerializerLax',
                 'strict': 'UserReportingSerializerStrict',
             },
-            'used': {
+            'uslo': {
                 'path': 'users.validators.usersRLCs',
                 'generic': 'UserLogSerializerGeneric',
                 'lax': 'UserLogSerializerLax',
@@ -112,7 +111,7 @@ class UsersMapper(RelationshipMappers):
                 'path': 'users.drm.crud',
                 'name': 'ReportsTo',
             },
-            'used': {
+            'uslo': {
                 'path': 'users.drm.crud',
                 'name': 'UserLog',
             },
@@ -123,7 +122,7 @@ class UsersMapper(RelationshipMappers):
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields in CRUD operations.
         """
-        return ['usre_user_id', 'uspr_user_id', 'usse_user_id', 'used_user_id']
+        return ['usre_user_id', 'uspr_user_id', 'usse_user_id', 'uslo_user_id']
     
     def _currentUserFieldsSearch(self):
         """

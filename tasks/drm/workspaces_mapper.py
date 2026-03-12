@@ -18,7 +18,7 @@ class WorkSpacesMapper(RelationshipMappers):
     
     def _master(self):
         return {
-            'table': 'users_department',
+            'table': 'tasks_workspace',
             'abbreviation': 'wowo',
             'foreignKeyName': 'workspace_id',
         }

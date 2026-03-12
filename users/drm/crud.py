@@ -49,8 +49,8 @@ class UserLog(RevisionlessChildren.CRUD):
     def startUpCode(self):
         self.state.set('app', 'tasks')  # holds the name of current module/space
         self.state.set('mtModel', models.User)  # holds the class reference for Master Table's model
-        self.state.set('tbl', 'used')
-        self.state.set('pk', 'used_id')
+        self.state.set('tbl', 'uslo')
+        self.state.set('pk', 'uslo_id')
         self.mapper = UsersMapper()
         self.setMasterCrudClass(Users)
 

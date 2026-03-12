@@ -125,9 +125,9 @@ class BaseMapper(Background):
     def isCommonField(self, key, prefix = False):
         """
             Determine whether field is common among children tables.
+            @todo: remove third param 'prefix' from codebase and remove
         """
-        sz = settings.get('project.mapper.tblKeySize')
-        field = key[sz:] if prefix else key  # grab correct fieldName to compare
+        field = self.prefixedFields(key, 'field')
         commons = self.commonFields()
         
         if field in commons:
@@ -225,11 +225,11 @@ class BaseMapper(Background):
             raise Exception("Error 1062: Mapper().prefixedFields() requires grab to be an enum of ['both', 'tbl', 'field']")
         
         tables = self.state.get('tables')
-        parts = fieldName.split('_')
         tbl = None
         field = fieldName
-
-        if parts[0] in tables:
+        parts = fieldName.split('_')
+        
+        if parts[0] is not None and parts[0] in tables:
             tbl = parts[0]
             field = strings.concatenate(parts[1:], '_')
 
