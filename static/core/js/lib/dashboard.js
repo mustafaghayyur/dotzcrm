@@ -27,7 +27,6 @@ export function TabbedDashBoard(containerId, callbackFunctions, singleCall = tru
             let name = tab.dataset.tabName;
             let pane = dashboard.querySelector('#pane-' + name);
             if (name === tabName) {
-                console.log('Inspecting Dashboard...', name, pane, tabName, called);
                 tab.classList.add('active');
                 tab.setAttribute('aria-selected','true');
                 pane.classList.add('active');

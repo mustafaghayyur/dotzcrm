@@ -73,8 +73,10 @@ export default {
 
     /**
      * Embeds provided API data into matching .embed.{key} nodes of containerId.
+     * Does NOT create new nodes.
+     * 
      * @param {*} data: api data reultset
-     * @param {str} containerId: dom id
+     * @param {str} containerId: dom HTML element id (without the '#' prefix)
      */
     embedData: function(data, containerId) {
         const typeData = $A.generic.checkVariableType(data);
@@ -130,7 +132,7 @@ export default {
      * @param {str} key: key to sub into Pane code.
      * @param {str} name: Full name to display in Tab Button content.
      * @param {bool} isDefault: should we treat this Pane as active? 
-     * @returns HTML DOM node.
+     * @returns HTML DOM node for Tab btn.
      */
     makeNewTab: function (tabNodeTemplate, key, name, isDefault = false) {
         if ($A.generic.checkVariableType(tabNodeTemplate) !== 'domelement') {
@@ -139,16 +141,17 @@ export default {
 
         let clone = tabNodeTemplate.cloneNode(true);
         let btn = clone.querySelector('.tab.nav-link');
+        console.log('Inside makeNewTab', clone, btn);
         
         if ($A.generic.checkVariableType(btn) !== 'domelement') {
             throw Error('UI Error: Dom element for makeNewTab() var btn not found.');
         }
 
         // here we set all the variables...
-        const extraText = 'default' ? isDefault : '';
-        const active = 'active' ? isDefault : '';
-        const selected = 'true' ? isDefault : 'false';
-        
+        const extraText = isDefault ? 'default' : '';
+        const active = isDefault ? 'active' : '';
+        const selected = isDefault ? 'true' : 'false';
+
         btn.setAttribute('id', `tab-${key}-btn`);
         btn.classList.add(active);
         btn.setAttribute('data-tab-name', key);
@@ -168,7 +171,7 @@ export default {
      * @param {domElement} paneNodeTemplate: Pane Node to use as template. Must ahve valid keys/nodes.
      * @param {str} key: key to sub into Pane code.
      * @param {bool} isDefault: should we treat this Pane as active? 
-     * @returns HTML DOM node.
+     * @returns HTML DOM node for Pane.
      */
     makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
         if ($A.generic.checkVariableType(paneNodeTemplate) !== 'domelement') {
@@ -178,13 +181,14 @@ export default {
         let clone = paneNodeTemplate.cloneNode(true);
         let pane = clone.querySelector('.tab-pane');
         let results = pane.querySelector('.tab-results');
+        console.log('Inside makeNewPane', pane, results);
 
         if ($A.generic.checkVariableType(pane) !== 'domelement' || $A.generic.checkVariableType(results) !== 'domelement') {
             throw Error('UI Error: Dom elements for Pane and ResultsPane not found in makeNewPane().');
         }
 
         // here we set all the variables...
-        const active = 'active' ? isDefault : '';
+        const active = isDefault ? 'active' : '';
         pane.setAttribute('id', `pane-${key}`);
         pane.classList.add(active);
         pane.setAttribute('aria-labelledby', `tab-${key}-btn`);

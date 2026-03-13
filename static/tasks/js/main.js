@@ -46,9 +46,9 @@ Main(async () => {
                 .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
                 .execute('assignedTasksResponse', dashboardTaskList);
         },
+
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
-            console.log('We are initiating WorkSPace tab...');
             const workspaces = await $A.tasks.load('wp_workspaces');
 
             $A.query().search('wowo')
@@ -61,8 +61,9 @@ Main(async () => {
                     {tbl: 'wowo', col: 'id', sort: 'desc'},
                 ]).page(1).execute('workspacesDashboardResponse', workspaces);
         },
-    });
+    }); /** end of tasks-dashboard */
 
+    // Other configurations for app..
     const cleanForms = await $A.tasks.load('cleanFormFunctionality'); 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
     const enableEditFunctionality = await $A.tasks.load('editTaskForm');
