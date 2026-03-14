@@ -108,7 +108,7 @@ export default {
      */
     loopObject: function (object, callbackFunction) {
         if ($A.generic.checkVariableType(object) !== 'dictionary') {
-            throw Error('Error: loopObject() only accepts objects for loop.');
+            throw Error('UI Error: loopObject() only accepts objects for loop.');
         }
         let dictionary = {}  // define new dictionary to return.
         for (const key in object) {

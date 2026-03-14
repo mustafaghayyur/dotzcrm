@@ -10,7 +10,15 @@ export function TabbedDashBoard(containerId, callbackFunctions, singleCall = tru
         throw Error('UI Error: Dashboard containerId not found: ' + cintainerId);
     }
 
-    const tabs = dashboard.querySelectorAll('.tab.nav-link');
+    const tabsContainer = dashboard.querySelector('.nav-tabs');
+    const panesContainer = dashboard.querySelector('.tab-content');
+
+    if ($A.generic.checkVariableType(tabsContainer) !== 'domelement' || $A.generic.checkVariableType(panesContainer) !== 'domelement') {
+        throw Error('UI Error: Dashboard containerId not found: ' + cintainerId);
+    }
+
+    const allTabs = tabsContainer.querySelectorAll('.tab.nav-link');
+    const tabs = Array.from(allTabs).filter(tab => tab.closest('.nav-tabs') === tabsContainer);
 
     if (tabs && tabs.length < 1) {
         throw Error('UI Error: Dashboard tabs not found: ' + tabs);
@@ -25,15 +33,20 @@ export function TabbedDashBoard(containerId, callbackFunctions, singleCall = tru
     function setActiveTab(tabName) {
         tabs.forEach(tab => {
             let name = tab.dataset.tabName;
-            let pane = dashboard.querySelector('#pane-' + name);
+            let pane = panesContainer.querySelector('#pane-' + name);
+            if (pane && pane.closest('.tab-content') !== panesContainer) pane = null;
+            
+            console.log('inspecting dadhboard lib', name, pane, tabName, tab);
             if (name === tabName) {
                 tab.classList.add('active');
                 tab.setAttribute('aria-selected','true');
                 pane.classList.add('active');
+                console.log('inside dashboard, about to call caller...', callbackFunctions, called);
                 if ($A.generic.checkVariableType(callbackFunctions[name]) === 'function' && called[name] === false) {
                     if (singleCall) {
                         called[name] = true;
                     }
+                    console.log('inside dashboard, about to call caller...', callbackFunctions);
                     callbackFunctions[name]();
                 }
             } else {

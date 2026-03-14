@@ -54,51 +54,33 @@
           <div id="workspacesDashboard">
             <div id="wsTabs">
               <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item" role="presentation">
+                <li class="nav-item d-none" role="presentation">
                   <button class="tab nav-link mx-1" id="tab--btn" type="button" role="tab">Some Tab</button>
                 </li>
               </ul>
               <div class="tab-content mt-3">
-                <div class="tab-pane" role="tabpanel">
+                <div class="tab-pane d-none" role="tabpanel">
                   <div class="tab-results container">
-                    <div id="workspaceDashboardResponse"></div>
-                    <div id="workspaceDashboard">
+                    <div id="WSDBResponse"></div>
+                    <div id="WSDB">
                       <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-3 backlog-col">
                           <h6>backlog</h6>
-                          <div class="card">
+                          <div class="card d-none">
                             <div class="card-body">
                               <h5 class="card-title embed description">Temp Task</h5>
                               <p class="card-text"><span class="embed status"></span><span class="embed assignee_id"></span><span class="embed creator_id"></span><span class="embed deadline"></span></p>
                             </div>
                           </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 started-col">
                           <h6>started</h6>
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title">Temp Task</h5>
-                              <p class="card-text">Lorem ipsum, we will add some text to this task in the future...</p>
-                            </div>
-                          </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 under-review-col">
                           <h6>under review</h6>
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title">Temp Task</h5>
-                              <p class="card-text">Lorem ipsum, we will add some text to this task in the future...</p>
-                            </div>
-                          </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 completed-col">
                           <h6>completed</h6>
-                          <div class="card">
-                            <div class="card-body">
-                              <h5 class="card-title">Temp Task</h5>
-                              <p class="card-text">Lorem ipsum, we will add some text to this task in the future...</p>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>

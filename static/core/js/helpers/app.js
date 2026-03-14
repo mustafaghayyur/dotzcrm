@@ -76,24 +76,33 @@ export default {
      * Does NOT create new nodes.
      * 
      * @param {*} data: api data reultset
-     * @param {str} containerId: dom HTML element id (without the '#' prefix)
+     * @param {str} container: dom HTML element id (without the '#' prefix). Or actual node instance with 'actualNode' flag set to true
+     * @param {bool} actualNode: true if actual DOM node is being passed in container.
      */
-    embedData: function(data, containerId) {
+    embedData: function(data, container, actualNode = false) {
         const typeData = $A.generic.checkVariableType(data);
-        if (typeData !== 'list' || typeData !== 'dictionary') {
+        console.log('inside embedData()', container, typeData);
+
+        if (typeData !== 'list' && typeData !== 'dictionary') {
             throw Error('UI Error: Data provided to embedData() not valid list or dictionary.');
         }
-        
-        const container = $A.app.containerElement(containerId);
+
+        if (actualNode === false) {
+            container = $A.app.containerElement(container);
+        }
 
         if ($A.generic.checkVariableType(container) !== 'domelement') {
-            throw Error('UI Error: Dom element with container id: ' + containerId + ' could not be found in embedData()');
+            throw Error('UI Error: Dom element container could not be used in embedData()');
         }
 
         if (typeData === 'list') {            
+            console.log('inside embedData() - list', data);
             data.forEach((itm) => {
+                console.log('inside embedData() - itm iter', itm);
                 if ($A.generic.checkVariableType(itm) === 'dictionary') {
+                    console.log('inside embedData() - itm is dict');
                     $A.generic.loopObject(itm, (key, value) => {
+                        console.log('inside embedData() - looping itm', key, value);
                         let elem = container.querySelector('.embed.' + key);
                         $A.app.mapKeyValueToDom(elem, key, value);
                     });
@@ -102,6 +111,7 @@ export default {
         }
 
         if (typeData === 'dictionary') {
+            console.log('inside embedData() - obj', data);
             $A.generic.loopObject(data, (key, value) => {
                 let elem = container.querySelector(`.embed.${key}`);
                 $A.app.mapKeyValueToDom(elem, key, value);
@@ -121,6 +131,7 @@ export default {
      */
     mapKeyValueToDom: function (node, key, value) {
         if ($A.generic.checkVariableType(node) === 'domelement') {
+            console.log('inside mapKeyValueToDom()', key, value, node);
             node.textContent = $A.forms.escapeHtml(value);
         }
     },
@@ -136,15 +147,20 @@ export default {
      */
     makeNewTab: function (tabNodeTemplate, key, name, isDefault = false) {
         if ($A.generic.checkVariableType(tabNodeTemplate) !== 'domelement') {
-            throw Error('UI Error: Dom element for makeNewTab() not valid.');
+            throw Error('UI Error: Dom element tabNodeTemplate for makeNewTab() not valid.');
         }
 
         let clone = tabNodeTemplate.cloneNode(true);
+
+        if ($A.generic.checkVariableType(clone) !== 'domelement') {
+            throw Error('UI Error: Dom element clone for makeNewTab() not valid.');
+        }
+
         let btn = clone.querySelector('.tab.nav-link');
         console.log('Inside makeNewTab', clone, btn);
         
         if ($A.generic.checkVariableType(btn) !== 'domelement') {
-            throw Error('UI Error: Dom element for makeNewTab() var btn not found.');
+            throw Error('UI Error: Dom element btn for makeNewTab() not valid.');
         }
 
         // here we set all the variables...
@@ -159,7 +175,8 @@ export default {
         btn.setAttribute('aria-selected', selected);
         btn.setAttribute('data-extra', extraText);
         btn.textContent = name;
-        clone.innerHTML = (btn);
+        clone.appendChild(btn);
+        clone.classList.remove('d-none');
 
         return clone;
     },
@@ -175,26 +192,30 @@ export default {
      */
     makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
         if ($A.generic.checkVariableType(paneNodeTemplate) !== 'domelement') {
-            throw Error('UI Error: Dom element for makeNewPane() not valid.');
+            throw Error('UI Error: Dom element paneNodeTemplate for makeNewPane() not valid.');
         }
 
-        let clone = paneNodeTemplate.cloneNode(true);
-        let pane = clone.querySelector('.tab-pane');
+        let pane = paneNodeTemplate.cloneNode(true);
+        if ($A.generic.checkVariableType(pane) !== 'domelement') {
+            throw Error('UI Error: Dom element pane for makeNewPane() not valid.');
+        }
+        console.log('I made it here 3.9', pane);
         let results = pane.querySelector('.tab-results');
         console.log('Inside makeNewPane', pane, results);
 
-        if ($A.generic.checkVariableType(pane) !== 'domelement' || $A.generic.checkVariableType(results) !== 'domelement') {
-            throw Error('UI Error: Dom elements for Pane and ResultsPane not found in makeNewPane().');
+        if ($A.generic.checkVariableType(results) !== 'domelement') {
+            throw Error('UI Error: Dom element for results in makeNewPane() not valid.');
         }
 
         // here we set all the variables...
         const active = isDefault ? 'active' : '';
         pane.setAttribute('id', `pane-${key}`);
+        pane.classList.remove('d-none');
         pane.classList.add(active);
         pane.setAttribute('aria-labelledby', `tab-${key}-btn`);
         results.setAttribute('id', `${key}Container`);
 
-        pane.innerHTML = results;
+        pane.appendChild(results);
 
         return pane;
     }
