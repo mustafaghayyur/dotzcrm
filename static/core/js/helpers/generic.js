@@ -45,7 +45,7 @@ export default {
         if (variable === null) {
             return 'null';
         }
-        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable)) {
+        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable) && typeof variable === 'number') {
             return 'number';
         }
         if (variable instanceof HTMLElement) {

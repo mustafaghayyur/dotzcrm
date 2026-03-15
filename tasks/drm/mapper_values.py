@@ -40,8 +40,8 @@ class Status(str, Enum):
 class Visibility(str, Enum):
     private = 'private'
     workspaces = 'workspaces'
-    assigned = 'assigned' # @todo: future feature implementation
-    stakeholders = 'stakeholders' # @todo: future feature implementation
+    # assigned = 'assigned' # @todo: future feature implementation
+    # stakeholders = 'stakeholders' # @todo: future feature implementation
 
 
 

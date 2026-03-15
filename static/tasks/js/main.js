@@ -62,19 +62,8 @@ Main(async () => {
                 ]).page(1).execute('workspacesDashboardResponse', workspaces);
         },
     }); /** end of tasks-dashboard */
-
-    // Other configurations for app..
-    const cleanForms = await $A.tasks.load('cleanFormFunctionality'); 
+ 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
-    const enableEditFunctionality = await $A.tasks.load('editTaskForm');
-   
-    cleanForms();    // load form clean functionality..
-    enableEditFunctionality();  // we must now add edit functionality.
-
-    // @todo: add this in appropriate form initiatior...
-    //const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
-    //loadTaskFormValues(); // @todo: add appropriate workspace logic
-
 
     // Allow opening of task-modals from url:
     $A.router.create(

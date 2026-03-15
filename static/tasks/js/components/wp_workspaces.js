@@ -16,6 +16,7 @@ export default (data, containerId) => {
         throw Error('UI Error: Dom element for makeNewPane() not valid.');
     }
 
+    const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
     let tabs = container.querySelector('.nav-tabs');
     let panes = container.querySelector('.tab-content');
     let tabTemplate = container.querySelector('.nav-tabs .nav-item');
@@ -43,16 +44,31 @@ export default (data, containerId) => {
         panes.appendChild($A.app.makeNewPane(paneTemplate, tabKey, isDefault));
         i++;
 
+        let btn = panes.querySelector(`#pane-${tabKey} #newWorkSpaceTask`);
+
+        if ($A.generic.checkVariableType(btn) !== 'domelement') {
+            throw Error('UI Error: While settingup workspace, new task button could not be found.');
+        }
+
+        btn.setAttribute('data-wowo-id', itm.wowo_id);
+
+        btn.addEventListener('click', async ()=>{        
+            $A.tasks.forms.cleanTaskForm('taskEditForm', TasksO2OKeys);
+            const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
+            loadTaskFormValues(itm.wowo_id);
+        });
+
         // finally, we define callbacks for each tab
         caller[tabKey] = async () => {
             $A.query().search('tata')
                 .fields('tata_id', 'description', 'status', 'creator_id', 'assignee_id', 'deadline', 'tata_create_time')
                 .where({
-                    tawo_id: itm.wowo_id,
+                    workspace_id: itm.wowo_id,
                     tata_delete_time: 'is null',
                 }).order([
                     {tbl: 'tata', col: 'id', sort: 'desc'},
-                ]).page(1, 1000).execute('workspacesDashboardResponse', createWorkSpaceDashboard, {key: tabKey, data: itm});
+                ]).page(1, 1000)
+                .execute('workspacesDashboardResponse', createWorkSpaceDashboard, {key: tabKey, data: itm});
         }
     });
 
@@ -132,6 +148,8 @@ export default (data, containerId) => {
             }
         });
 
+        console.log('sortTasksBasedOnProgress(): Buckets filled with tasks: ', buckets);
+
         const sortOrders = {
             backlog: ['created', 'assigned', 'onhold'],
             started: ['started'],
@@ -148,6 +166,8 @@ export default (data, containerId) => {
                 return a.tata_id - b.tata_id;
             });
         });
+
+        console.log('sortTasksBasedOnProgress(): Buckets sorted by actual status + ids: ', buckets);
 
         return buckets;
     }
