@@ -63,8 +63,8 @@ Main(async () => {
         },
     }); /** end of tasks-dashboard */
     
-    const leftSideCanvas = await $A.tasks.load('leftSideCanvas');
-    leftSideCanvas();
+    const rightSideCanvas = await $A.tasks.load('rightSideCanvas');
+    rightSideCanvas();
 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
 

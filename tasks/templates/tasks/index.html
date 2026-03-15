@@ -20,10 +20,11 @@
     <div class="tab-content mt-3">
       <div id="pane-personal" class="tab-pane active" role="tabpanel" aria-labelledby="tab-personal-btn">
         <div id="personalContainer" class="tab-results">
-          <div class="container">
+          <div class="container-fluid">
             <div class="row align-items-start">
-              <div id="personal" class="col-6">
+              <div id="personal" class="col-12 col-md-6 position-relative">
                 <h4 class="mx-2 mt-2">YOUR TODOs...</h4>
+                <span class="position-absolute end-0 top-0 mt-1 me-4"><a class="btn btn-secondary btn-sm bottom-0 start-0" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas"><i class="bi bi-plus-lg"></i></a></span>
                 <div id="personalTabResponse"></div>
                 <ul id="personalTabList" class="list-group m-2">
                   <li class="list-group-item position-relative">
@@ -33,7 +34,7 @@
                   </li>
                 </ul>
               </div>
-              <div id="assigned" class="col-6">
+              <div id="assigned" class="col-12 col-md-6">
                 <h4 class="mx-2 mt-2">ASSIGNED TASKS:</h4>
                 <div id="assignedTasksResponse"></div>
                 <ul id="assignedTasksList" class="list-group  m-2 workspace-tasks">
@@ -60,14 +61,14 @@
               </ul>
               <div class="tab-content mt-3">
                 <div class="tab-pane d-none" role="tabpanel">
-                  <div class="tab-results container">
+                  <div class="tab-results container-fluid">
                     <div id="WSDBResponse"></div>
                     <div id="WSDB" class="position-relative">
-                      <div class="position-absolute top-0 end-0">
-                        <a id="newWorkSpaceTask" class="btn btn-sm btn-secondary open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-vector-pen"></i> new</a>
+                      <div class="position-absolute top-0 end-0 d-none d-sm-block">
+                        <a id="newWorkSpaceTask" class="btn btn-sm btn-secondary open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-plus-lg"></i> new</a>
                       </div>
                       <div class="row">
-                        <div class="col-md-3 backlog-col">
+                        <div class="col-12 col-md-3 backlog-col">
                           <h6>backlog</h6>
                           <div class="card d-none">
                             <div class="card-body">
@@ -76,13 +77,13 @@
                             </div>
                           </div>
                         </div>
-                        <div class="col-md-3 started-col">
+                        <div class="col-12 col-md-3 started-col">
                           <h6>started</h6>
                         </div>
-                        <div class="col-md-3 under-review-col">
+                        <div class="col-12 col-md-3 under-review-col">
                           <h6>under review</h6>
                         </div>
-                        <div class="col-md-3 completed-col">
+                        <div class="col-12 col-md-3 completed-col">
                           <h6>completed</h6>
                         </div>
                       </div>
@@ -96,5 +97,5 @@
       </div>
     </div>
   </div>
-  {% include 'tasks/leftSideCanvas.html' %}
+  {% include 'tasks/rightSideCanvas.html' %}
 {% endblock %}
