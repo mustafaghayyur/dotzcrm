@@ -25,19 +25,19 @@
               <div id="personal" class="col-12 col-md-6 position-relative">
                 <h4 class="mx-2 mt-2">YOUR TODOs...</h4>
                 <span class="position-absolute end-0 top-0 mt-1 me-4"><a class="btn btn-secondary btn-sm bottom-0 start-0" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas"><i class="bi bi-plus-lg"></i></a></span>
-                <div id="personalTabResponse"></div>
-                <ul id="personalTabList" class="list-group m-2">
+                <div id="personalTodosResponse"></div>
+                <ul id="personalTodos" class="list-group m-2">
                   <li class="list-group-item position-relative">
-                    <span id="" class="btn btn-info btn-sm status"><i class="bi bi-clipboard assigned d-none"></i><i class="bi bi-clipboard-check-fill completed d-none"></i></span>
+                    <span id="" class="btn btn-info btn-sm status p-1 me-3"><i class="bi bi-clipboard assigned d-none"></i><i class="bi bi-clipboard-check-fill completed d-none"></i></span>
                     <span id="" class="description" data-task-id=""></span>
-                    <div class="delete position-absolute end-0 top-0"><i class="bi bi-trash3"></i></div>
+                    <div class="delete position-absolute end-0 top-0 mt-2 mx-2"><i class="bi bi-trash3"></i></div>
                   </li>
                 </ul>
               </div>
               <div id="assigned" class="col-12 col-md-6">
                 <h4 class="mx-2 mt-2">ASSIGNED TASKS:</h4>
                 <div id="assignedTasksResponse"></div>
-                <ul id="assignedTasksList" class="list-group  m-2 workspace-tasks">
+                <ul id="assignedTasks" class="list-group  m-2 workspace-tasks">
                   <li class="list-group-item">
                     <a class="link task-details-link description" data-task-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal"></a>
                     <div class="text-muted small"><span class="status"></span> | <span class="tata_update_time"></span> | Deadline: <span class="deadline"></span></div>

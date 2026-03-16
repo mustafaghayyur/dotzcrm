@@ -32,7 +32,7 @@ Main(async () => {
                     {tbl: 'tata', col: 'update_time', sort: 'desc'},
                     {tbl: 'tast', col: 'create_time', sort: 'desc'}
                 ]).page(1)
-                .execute('personalTabResponse', dashboardTodoList);
+                .execute('personalTodosResponse', dashboardTodoList);
 
             $A.query().search('tata')
                 .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')

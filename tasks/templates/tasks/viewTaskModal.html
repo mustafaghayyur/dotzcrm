@@ -27,8 +27,8 @@
           <tr>
             <th colspan="1" class="align-text-bottom">Status:</td>
             <td colspan="1" class="align-text-bottom" id="status"></td>
-            <th colspan="1" class="align-text-bottom">Visibility</td>
-            <td colspan="1" class="align-text-bottom" id="visibility"></td>
+            <th colspan="1" class="align-text-bottom"></td>
+            <td colspan="1" class="align-text-bottom" id=""></td>
           </tr>
           <tr>
             <th colspan="1" class="align-text-bottom">Details:</td>
@@ -54,7 +54,7 @@
               <form class="d-inline-block" method="GET" action="#">
                 <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-pencil-square"></i> edit</button>
               </form>
-              <form class="d-inline-block" action="" method="post">
+              <form class="d-inline-block team-leader" action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="">
                 <button id="deleteTaskBtn" class="btn btn-secondary btn-sm" type="submit" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
@@ -65,8 +65,8 @@
           </tr>
         </table>
         <div id="comments" class="container">
-          <div id="commentsResponse" class=""></div>
           <div id="createComment" class="row">
+            <div id="commentsResponse" class="col-12"></div>
             <div class="col-12">
               <form method="post" id="newCommentForm">
                 {% csrf_token %}

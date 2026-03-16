@@ -6,7 +6,7 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default function (data, containerId) {
-    const ulId = containerId.replace(/Response$/,'List');
+    const ulId = containerId.replace(/Response$/,'');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';

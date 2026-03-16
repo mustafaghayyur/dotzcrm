@@ -9,7 +9,7 @@ import $A from "../helper.js";
 export default function (data, containerId) {
     // I want to take the value held in containerId, and replace 'Responses' with List to get the ul id.
     // @todo: change containerId referencing to w/o 'Response' and make all hard-coded child-references go-away
-    const ulId = containerId.replace(/Response$/,'List');
+    const ulId = containerId.replace(/Response$/,'');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';

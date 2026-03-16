@@ -2,7 +2,7 @@ import $A from "../helper.js";
 
 export default function () {
     const conatiner = document.getElementById('rightSideCanvas');
-    handleOffCanvasBehaviour(conatiner);
+    //handleOffCanvasBehaviour(conatiner);
 
     const form = conatiner.querySelector('#newTodoForm');
     const saveButton = form.querySelector('#newTodoBtn');

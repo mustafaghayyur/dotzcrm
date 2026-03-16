@@ -1,19 +1,21 @@
 import $A from "../helper.js";
 
-export default function (data, containerId) {
+export default function (comments, containerId) {
     let container = $A.app.containerElement(containerId);
-    let commentCreator = container.querySelector('#createComment');
-    let comment = container.querySelector('#commmentContainer');
+    let commentCreator = $A.app.searchElementCorrectly('#createComment', container);
+    let comment = $A.app.searchElementCorrectly('#commmentContainer', container);
+    
     container.innerHTML = '';
     container.appendChild(commentCreator);
 
-    if ($A.generic.checkVariableType(data) === 'list') {
+    if ($A.generic.checkVariableType(comments) === 'list') {
         let newComment = null;
-        data.forEach(item => {
+        comments.forEach(item => {
             newComment = comment.cloneNode(true);    
             newComment.classList.remove('d-none');
+            const user = $A.app.user(item.commenter_id, containerId);
 
-            newComment.querySelector('.creator_id').textContent = '' + item.commenter_id + 'wrote...';
+            newComment.querySelector('.creator_id').textContent = '' + user.username + 'wrote...';
             newComment.querySelector('.create_time').textContent = $A.dates.convertToDisplayLocal(item.create_time);
             newComment.querySelector('.update_time').textContent = $A.dates.convertToDisplayLocal(item.update_time);
             newComment.querySelector('.comment_text').innerHTML = $A.forms.escapeHtml(item.comment);

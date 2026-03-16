@@ -61,7 +61,7 @@ export function toggleTodoStatus(record) {
         status: newStatus
     };
 
-    $A.query().edit('tata', dictionary, true).execute('personalTabResponse', (data, containerId) => {
+    $A.query().edit('tata', dictionary, true).execute('personalTodosResponse', (data, containerId) => {
         let conatiner = document.getElementById(containerId);
 
         conatiner.textContent = 'Your ToDo item has been updated.';
@@ -80,7 +80,7 @@ export function deleteTodo(todoId, identifyer) {
 
     $A.query().delete('tata', {
         tata_id: todoId
-    }, true).execute('personalTabResponse', (data, containerId) => {
+    }, true).execute('personalTodosResponse', (data, containerId) => {
         let conatiner = document.getElementById(containerId);
 
         conatiner.textContent = 'Your ToDo has been removed.';

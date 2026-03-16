@@ -42,8 +42,12 @@ export default {
      * @param {*} value 
      */
     memSave: function (key, value) {
+        if ($A.generic.checkVariableType(key) !== 'string') {
+            throw Error('UI Error: cannot save non-string keys to localstorage.');
+        }
+
         if ($A.generic.isPrimitiveValue(value)) {
-            localStorage.setItem(key, String(value));
+            localStorage.setItem(key, value);
         } else {
             localStorage.setItem(key, JSON.stringify(value));
         }
@@ -62,13 +66,120 @@ export default {
     },
 
     /**
+     * Fetches the user object for specified ID and saves to localstorage.
+     * If user id exists in localstorage, retrieves that value.
+     * @param {number} user_id 
+     * @param {array} fields 
+     */
+    user: function (user_id, conatinerId, returnNull = false, iter = 0) {
+        if (iter > 1) {
+            if (returnNull) {
+                return null;
+            }
+            throw Error('UI Error: could not find user with id: ' + user_id + ' in system.');
+        }
+
+        user_id = Number(user_id);
+
+        const users = $A.app.memFetch('users', true);
+        console.log('item.commenter_id', user_id, conatinerId, users)
+
+        let user = $A.generic.getter(users, user_id);
+
+        if (!user) {
+            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
+                .where({usus_id: user_id, usus_delete_time: null}).execute(conatinerId, (data, conatinerId, mapper) => {
+                    let users = mapper.users;
+
+                    if ($A.generic.checkVariableType(data) === 'list') {
+                        data = data[0];
+                    }
+
+                    if ($A.generic.isVariableEmpty(data)) {
+                        if (returnNull) {
+                            return null;
+                        }
+
+                        throw Error('UI Error: could not find user with id: ' + user_id);
+                    }
+
+                    console.log('inside user fetch respomse///', users, data, conatinerId);
+                    if ($A.generic.checkVariableType(data) === 'dictionary') {
+                        if ($A.generic.getter(data, 'usus_id') && data.usus_id === user_id) {
+                            if ($A.generic.isVariableEmpty(user)) {
+                                console.log('making users obj', users);
+                                users = {};
+                            }
+                            users[user_id] = data;
+                            console.log('users obj updated', users);
+                            $A.app.memSave('users', users);
+                        }
+                    }
+                }, { users: users });
+
+            user = $A.app.user(user_id, conatinerId, returnNull, iter = (iter + 1));
+        }
+
+        if (!user) {
+            if (returnNull) {
+                return null;
+            }
+            throw Error('UI Error: could not find user wit id: ' + user_id + ' in system.');
+        }
+
+        return user;
+    },
+
+    /**
      * Returns a dom element from containerId, while snipping off
      * 'Response' from it's end.
      * @param {str} responseContainerId: dom element id value to use.
      */
     containerElement: function(responseContainerId) {
         const parentId = responseContainerId.replace(/Response$/,'');
-        return document.getElementById(parentId);
+        const container = document.getElementById(parentId);
+
+        if ($A.generic.checkVariableType(container) !== 'domelement') {
+            throw Error(`UI Error: Dom element with id=${parentId} could not be found in containerElement().`);
+        }
+
+        return container;
+    },
+
+    obtainElementCorrectly: function(containerId) {
+        if ($A.generic.checkVariableType(containerId) !== 'string') {
+            throw Error(`UI Error: Provided containerId not in string format: [ ${conatinerId} ] in obtainElementCorrectly()`);
+        }
+
+        const elem = document.getElementById(containerId);
+
+        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+            throw Error(`UI Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
+        }
+
+        return elem;
+    },
+
+    searchElementCorrectly: function(searchString, conatiner = null) {
+        if ($A.generic.checkVariableType(searchString) !== 'string') {
+            throw Error(`UI Error: Provided searchString not in string format: ${searchString}`);
+        }
+
+        if (conatiner === null) {
+            conatiner = document;
+        }
+
+        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
+            throw Error(`UI Error: Dom container-element with id=${conatiner.id} could not be found in searchElementCorrectly().`);
+        }
+
+        const elem = conatiner.querySelector(searchString);
+
+        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+            throw Error(`UI Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
+        }
+
+        return elem;
     },
 
     /**

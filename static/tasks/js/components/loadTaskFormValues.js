@@ -11,11 +11,19 @@ export default (taskInfo) => {
         if (!$A.generic.isPrimitiveValue(taskInfo) || $A.generic.isVariableEmpty(taskInfo)) {
             throw Error('Error FA099: WorkSpace id must be provided in primitive data value format.')
         }
+
         taskInfo = {
             workspace_id: taskInfo
         };
     }
     
+    let container = $A.app.obtainElementCorrectly('taskEditModal');
+    let visibility = $A.app.searchElementCorrectly('form input[name="visibility"]', container);
+    let workspace_id = $A.app.searchElementCorrectly('form input[name="workspace_id"]', container);
+    
+    visibility.value = $A.tasks.data.values.visibility.workspaces;
+    workspace_id.value = taskInfo.workspace_id;
+
     // task list for workspace
     $A.query().search('tata').fields('tata_id', 'description').where({
             workspace_id: taskInfo['workspace_id'],
@@ -32,6 +40,7 @@ export default (taskInfo) => {
             {tbl:'usus', col: 'last_name', sort: 'asc'},
             {tbl:'usus', col: 'first_name', sort: 'asc'}
         ]).execute('taskEditModalResponse', embedUsersDataIntoForm);
+
 
 
     /**
