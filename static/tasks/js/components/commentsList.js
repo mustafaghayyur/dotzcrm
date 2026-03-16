@@ -9,18 +9,17 @@ export default function (comments, containerId) {
     container.appendChild(commentCreator);
 
     if ($A.generic.checkVariableType(comments) === 'list') {
-        let newComment = null;
         comments.forEach(item => {
-            newComment = comment.cloneNode(true);    
-            newComment.classList.remove('d-none');
+            let newComment = $A.app.embedData(item, comment.cloneNode(true), true);
             const user = $A.app.user(item.commenter_id, containerId);
 
+            newComment.classList.remove('d-none');
             newComment.querySelector('.creator_id').textContent = '' + user.username + 'wrote...';
-            newComment.querySelector('.create_time').textContent = $A.dates.convertToDisplayLocal(item.create_time);
-            newComment.querySelector('.update_time').textContent = $A.dates.convertToDisplayLocal(item.update_time);
-            newComment.querySelector('.comment_text').innerHTML = $A.forms.escapeHtml(item.comment);
-
             container.appendChild(newComment);
+            
+            /*newComment.querySelector('.create_time').textContent = $A.dates.convertToDisplayLocal(item.create_time);
+            newComment.querySelector('.update_time').textContent = $A.dates.convertToDisplayLocal(item.update_time);
+            newComment.querySelector('.comment_text').innerHTML = $A.forms.escapeHtml(item.comment);*/
         });
     }
 }

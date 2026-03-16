@@ -1,3 +1,4 @@
+import { container } from "webpack";
 import $A from "../helper.js";
 
 export default {
@@ -76,13 +77,13 @@ export default {
             if (returnNull) {
                 return null;
             }
-            throw Error('UI Error: could not find user with id: ' + user_id + ' in system.');
+            throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.');
         }
 
         user_id = Number(user_id);
 
         const users = $A.app.memFetch('users', true);
-        console.log('item.commenter_id', user_id, conatinerId, users)
+        console.log('Fetching user with id, container_id, and saved-users-list', user_id, conatinerId, users);
 
         let user = $A.generic.getter(users, user_id);
 
@@ -100,18 +101,15 @@ export default {
                             return null;
                         }
 
-                        throw Error('UI Error: could not find user with id: ' + user_id);
+                        throw Error('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.');
                     }
 
-                    console.log('inside user fetch respomse///', users, data, conatinerId);
                     if ($A.generic.checkVariableType(data) === 'dictionary') {
                         if ($A.generic.getter(data, 'usus_id') && data.usus_id === user_id) {
-                            if ($A.generic.isVariableEmpty(user)) {
-                                console.log('making users obj', users);
+                            if ($A.generic.isVariableEmpty(users)) {
                                 users = {};
                             }
                             users[user_id] = data;
-                            console.log('users obj updated', users);
                             $A.app.memSave('users', users);
                         }
                     }
@@ -124,7 +122,7 @@ export default {
             if (returnNull) {
                 return null;
             }
-            throw Error('UI Error: could not find user wit id: ' + user_id + ' in system.');
+            throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
         }
 
         return user;
@@ -140,7 +138,7 @@ export default {
         const container = document.getElementById(parentId);
 
         if ($A.generic.checkVariableType(container) !== 'domelement') {
-            throw Error(`UI Error: Dom element with id=${parentId} could not be found in containerElement().`);
+            throw Error(`DOM Error: Dom element with id=${parentId} could not be found in containerElement().`);
         }
 
         return container;
@@ -148,13 +146,13 @@ export default {
 
     obtainElementCorrectly: function(containerId) {
         if ($A.generic.checkVariableType(containerId) !== 'string') {
-            throw Error(`UI Error: Provided containerId not in string format: [ ${conatinerId} ] in obtainElementCorrectly()`);
+            throw Error(`DOM Error: Provided containerId not in string format: [ ${conatinerId} ] in obtainElementCorrectly()`);
         }
 
         const elem = document.getElementById(containerId);
 
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error(`UI Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
+            throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
         }
 
         return elem;
@@ -162,7 +160,7 @@ export default {
 
     searchElementCorrectly: function(searchString, conatiner = null) {
         if ($A.generic.checkVariableType(searchString) !== 'string') {
-            throw Error(`UI Error: Provided searchString not in string format: ${searchString}`);
+            throw Error(`DOM Error: Provided searchString not in string format: ${searchString}`);
         }
 
         if (conatiner === null) {
@@ -170,13 +168,13 @@ export default {
         }
 
         if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
-            throw Error(`UI Error: Dom container-element with id=${conatiner.id} could not be found in searchElementCorrectly().`);
+            throw Error(`DOM Error: Dom container-element with id=${conatiner.id} could not be found in searchElementCorrectly().`);
         }
 
         const elem = conatiner.querySelector(searchString);
 
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error(`UI Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
+            throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
         }
 
         return elem;
@@ -187,21 +185,19 @@ export default {
      * Does NOT create new nodes.
      * 
      * @param {*} data: api data reultset
-     * @param {str} container: dom HTML element id (without the '#' prefix). Or actual node instance with 'actualNode' flag set to true
+     * @param {str} containerId: dom HTML element id (without the '#' prefix). Or actual node instance with 'actualNode' flag set to true
      * @param {bool} actualNode: true if actual DOM node is being passed in container.
      */
-    embedData: function(data, container, actualNode = false) {
+    embedData: function(data, containerId, actualNode = false) {
         const typeData = $A.generic.checkVariableType(data);
+        let container = containerId;
+
         if (typeData !== 'list' && typeData !== 'dictionary') {
             throw Error('UI Error: Data provided to embedData() not valid list or dictionary.');
         }
 
         if (actualNode === false) {
-            container = $A.app.containerElement(container);
-        }
-
-        if ($A.generic.checkVariableType(container) !== 'domelement') {
-            throw Error('UI Error: Dom element container could not be used in embedData()');
+            container = $A.app.containerElement(containerId);
         }
 
         if (typeData === 'list') {            
@@ -221,6 +217,8 @@ export default {
                 $A.app.mapKeyValueToDom(elem, key, value);
             });
         }
+
+        return container;
     },
 
     /**
@@ -249,22 +247,14 @@ export default {
      * @returns HTML DOM node for Tab btn.
      */
     makeNewTab: function (tabNodeTemplate, key, name, isDefault = false) {
-        if ($A.generic.checkVariableType(tabNodeTemplate) !== 'domelement') {
-            throw Error('UI Error: Dom element tabNodeTemplate for makeNewTab() not valid.');
-        }
-
         let clone = tabNodeTemplate.cloneNode(true);
 
         if ($A.generic.checkVariableType(clone) !== 'domelement') {
-            throw Error('UI Error: Dom element clone for makeNewTab() not valid.');
+            throw Error('DOM Error: Dom element clone for makeNewTab() not valid.');
         }
 
-        let btn = clone.querySelector('.tab.nav-link');
+        let btn = $A.app.searchElementCorrectly('.tab.nav-link', clone);
         
-        if ($A.generic.checkVariableType(btn) !== 'domelement') {
-            throw Error('UI Error: Dom element btn for makeNewTab() not valid.');
-        }
-
         // here we set all the variables...
         const extraText = isDefault ? 'default' : '';
         const active = isDefault ? 'active' : '';
@@ -293,20 +283,14 @@ export default {
      * @returns HTML DOM node for Pane.
      */
     makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
-        if ($A.generic.checkVariableType(paneNodeTemplate) !== 'domelement') {
-            throw Error('UI Error: Dom element paneNodeTemplate for makeNewPane() not valid.');
-        }
-
         let pane = paneNodeTemplate.cloneNode(true);
+        
         if ($A.generic.checkVariableType(pane) !== 'domelement') {
-            throw Error('UI Error: Dom element pane for makeNewPane() not valid.');
+            throw Error('DOM Error: Dom element pane for makeNewPane() not valid.');
         }
         
-        let results = pane.querySelector('.tab-results');
-        if ($A.generic.checkVariableType(results) !== 'domelement') {
-            throw Error('UI Error: Dom element for results in makeNewPane() not valid.');
-        }
-
+        let results = $A.app.searchElementCorrectly('.tab-results', pane);
+        
         // here we set all the variables...
         const active = isDefault ? 'active' : '';
         pane.setAttribute('id', `pane-${key}`);
