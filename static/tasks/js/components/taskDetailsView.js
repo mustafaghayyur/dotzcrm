@@ -10,8 +10,15 @@ import $A from "../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (task, containerId) {
-    const conatiner = $A.app.containerElement(containerId);
-    $A.app.embedData(task, conatiner, true);
+    let container = $A.app.containerElement(containerId);
+    container = $A.app.embedData(task, container, true);
+    const creator = $A.app.user(task.creator_id, containerId);
+    const assignor = $A.app.user(task.assignor_id, containerId);
+    const assignee = $A.app.user(task.assignee_id, containerId);
+    $A.app.searchElementCorrectly('.embed.creator_id', container).textContent = `${creator.first_name} ${creator.last_name}`;
+    console.log('checking assignor', assignor);
+    $A.app.searchElementCorrectly('.embed.assignor_id', container).textContent = `${assignor.first_name} ${assignor.last_name}`;
+    $A.app.searchElementCorrectly('.embed.assignee_id', container).textContent = `${assignee.first_name} ${assignee.last_name}`;
     
     // add functionality on task-details modal...
     editAndDelete(task);
@@ -29,7 +36,7 @@ export default function (task, containerId) {
 
         editBtn.addEventListener('click', async () => {
             $A.tasks.forms.prefillEditForm(task, TasksO2OKeys);
-            const editForm = await $A.tasks.load('taskEditForm');
+            const taskEditForm = await $A.tasks.load('taskEditForm');
             taskEditForm(task);
         });
 
@@ -37,6 +44,7 @@ export default function (task, containerId) {
         const deleteBtn = document.getElementById('deleteTaskBtn');
         deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log('Inspecting task obj in delete call', task, task.tata_id);
             DeleteTask(task.tata_id, 'Task with id #' + task.tata_id);
         });
     }
@@ -103,6 +111,7 @@ export default function (task, containerId) {
                 
                 commentsContainer.innerHTML = '';
                 commentsContainer.appendChild(commentCreator);
+                commentsContainer.appendChild(comment);
 
                 if ($A.generic.checkVariableType(comments) === 'list') {
                     comments.forEach(item => {

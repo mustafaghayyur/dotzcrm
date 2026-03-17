@@ -162,11 +162,12 @@ export default {
             throw Error(`DOM Error: Provided searchString not in string format: ${searchString}`);
         }
 
-        if (conatiner === null) {
-            conatiner = document;
+        if (!conatiner) {
+            const conatiner = document;
         }
 
-        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
+        const conType = $A.generic.checkVariableType(conatiner);
+        if (conType !== 'domelement' && conType !== 'document') {
             throw Error(`DOM Error: Dom container-element with id=${conatiner.id} could not be found in searchElementCorrectly().`);
         }
 

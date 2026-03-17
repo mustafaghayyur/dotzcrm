@@ -12,20 +12,12 @@ import $A from "../helper.js";
 export default (data, containerId) => {
     let container = $A.app.containerElement(containerId);
 
-    if ($A.generic.checkVariableType(container) !== 'domelement') {
-        throw Error('UI Error: Dom element for makeNewPane() not valid.');
-    }
-
     const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
-    let tabs = container.querySelector('.nav-tabs');
-    let panes = container.querySelector('.tab-content');
-    let tabTemplate = container.querySelector('.nav-tabs .nav-item');
-    let paneTemplate = container.querySelector('.tab-content .tab-pane');
+    let tabs = $A.app.searchElementCorrectly('.nav-tabs', container);
+    let panes = $A.app.searchElementCorrectly('.tab-content', container);
+    let tabTemplate = $A.app.searchElementCorrectly('.nav-tabs .nav-item', container);
+    let paneTemplate = $A.app.searchElementCorrectly('.tab-content .tab-pane', container);
     let caller = {};
-
-    if ($A.generic.checkVariableType(panes) !== 'domelement') {
-        throw Error('UI Error: Dom element for makeNewPane() not valid.');
-    }
 
     //reset the tabs and panes so new tabs/panes can be added.
     tabs.innerHTML = '';
@@ -44,12 +36,7 @@ export default (data, containerId) => {
         panes.appendChild($A.app.makeNewPane(paneTemplate, tabKey, isDefault));
         i++;
 
-        let btn = panes.querySelector(`#pane-${tabKey} #newWorkSpaceTask`);
-
-        if ($A.generic.checkVariableType(btn) !== 'domelement') {
-            throw Error('UI Error: While settingup workspace, new task button could not be found.');
-        }
-
+        let btn = $A.app.searchElementCorrectly(`#pane-${tabKey} #newWorkSpaceTask`, panes);
         btn.setAttribute('data-wowo-id', itm.wowo_id);
 
         btn.addEventListener('click', async ()=>{        
@@ -80,12 +67,14 @@ export default (data, containerId) => {
      * and displays a Tasks dashboard for given workspace.
      * 
      * @param {*} data: retrived from API call.
-     * @param {str} containerId: DOM element id value.
+     * @param {str} responseContainerId: DOM element id value for error messages display container.
      */
-    function createWorkSpaceDashboard(tasks, responseContainerId, mapper) {
+    async function createWorkSpaceDashboard(tasks, responseContainerId, mapper) {
         const wsKey = mapper.key;
         const workspace = mapper.data;
-        const template = container.querySelector('.card');
+        const conatiner = $A.app.searchElementCorrectly(`#pane-${wsKey}`, document);
+        const template = $A.app.searchElementCorrectly('.card', conatiner);
+        const taskViewCallback = await $A.tasks.load('taskDetailsView');
 
         if ($A.generic.checkVariableType(tasks) !== 'list') {
             throw Error('UI Error: Inside createWorkSpaceDashboard() - provided tasks data not in correct format.');
@@ -102,16 +91,22 @@ export default (data, containerId) => {
                 throw Error('UI Error: tasks could not be sorted into lists for bucket: ' + key);
             }
 
-            let container = document.querySelector(`#pane-${wsKey} #WSDB .${key}-col`);
-            if ($A.generic.checkVariableType(container) !== 'domelement') {
-                throw Error('UI Error: createWorkSpaceDashboard() could not find valid comtainer for embed operation in bucket: ' + key);
-            }
-
+            let bucketContainer = $A.app.searchElementCorrectly(`.${key}-col`, conatiner);
+            
             list.forEach((task) => {
                 let clone = template.cloneNode(true);
                 clone.classList.remove('d-none');
                 $A.app.embedData(task, clone, true);
-                container.appendChild(clone);
+                let link = $A.app.searchElementCorrectly('.embed.description', clone);
+
+                link.addEventListener('click', async ()=>{
+                    $A.query().read('tata', {
+                        tata_id: task.tata_id
+                    }).execute('taskDetailsModalResponse', taskViewCallback);
+                });
+
+                $A.router.update('task_id', task.tata_id);
+                bucketContainer.appendChild(clone);
             });
         });
     }

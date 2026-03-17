@@ -47,6 +47,9 @@ class O2OOperations():
 
 
     def delete(self):
+        """
+            @todo: attempt to determine how exactly all tasks could be deleted at once? !important
+        """
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')

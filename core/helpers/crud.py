@@ -1,7 +1,7 @@
 import importlib
 from django.conf import settings as ds 
 from django.forms import DateTimeInput
-from . import misc
+from . import misc, strings
 
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     """
@@ -31,6 +31,9 @@ def isValidId(dictionary, idKey):
         :param idKey: [str|int] key from dict to use for valuation
     """
     if idKey in dictionary and dictionary[idKey] is not None:
+        if not strings.isPrimitiveType(dictionary[idKey]):
+            return False
+        
         if isinstance(dictionary[idKey], int) and dictionary[idKey] > 0:
             return True
 
@@ -38,6 +41,7 @@ def isValidId(dictionary, idKey):
             item = int(dictionary[idKey])
             if item > 0:
                 return True
+            
     return False
 
 

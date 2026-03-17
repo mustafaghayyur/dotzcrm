@@ -34,15 +34,14 @@ export default function (data, containerId) {
      * for Task Details Modal to become operational on them.
      * @param {domelement} container - passed by TabbedDashBoard()
      */
-    function addListenersToTasks(container){
+    async function addListenersToTasks(container){
         if(container instanceof HTMLElement){
             // implment listener and fetcher for item details modal...
             let tasks = container.querySelectorAll('.task-details-link');
+            const callback = await $A.tasks.load('taskDetailsView');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
-                task.addEventListener('click', async ()=>{
-                    const callback = await $A.tasks.load('taskDetailsView');
-
+                task.addEventListener('click', ()=>{
                     $A.query().read('tata', {
                         tata_id: id
                     }).execute('taskDetailsModalResponse', callback);

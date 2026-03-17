@@ -49,7 +49,10 @@ export default {
             return 'number';
         }
         if (variable instanceof HTMLElement) {
-            return 'domelement'
+            return 'domelement';
+        }
+        if (variable instanceof Document) {
+            return 'document';
         }
         if (typeof variable === 'object' && variable !== null) {
             if (Object.prototype.toString.call(variable) === '[object Object]') {
