@@ -77,22 +77,17 @@ export default {
      * @param {str} formId: html dom id attr value 
      * @param {list} keys: holds list of all possible fields to expect for form.
      */
-    prefillForms: function (data, formId, keys) {
-        const form = document.getElementById(formId); // Get the form element
+    prefillForms: function (data, formId) {
+        const form = $A.app.searchElementCorrectly(`#${formId}`); // Get the form element
 
-        if ($A.generic.checkVariableType(form) !== 'domelement') {
-            throw Error('UI Error: Dome element with formId not found.');
-        }
-
-        keys.forEach(key => {
-            let value = $A.generic.getter(data, key, undefined);
-            let field = form.elements.namedItem(key);
+        $A.generic.loopObject(data, (key, value) => {
+            const field = form.elements[key];
 
             if (!value || !field) {
                 return; // @todo: should I have better handling here? What about missing values for fields?
             }
 
-            if (this.hasDateTimeData(key)) {
+            if ($A.forms.hasDateTimeData(key, value)) {
                 field.value = $A.dates.convertDateTimeToLocal(value);  // convert to appropriate format first
                 return;
             }
@@ -103,11 +98,13 @@ export default {
 
     /**
      * Determines if field is a DateTime type.
-     * If the key ends with '_time' or contains 'deadline'
+     * 
+     * @todo: improve this function
      * @param {str} key: inidvidual key name which should correlate with a Model column name in Django.
+     * @param {str} value: value to be used for determination
      * @returns 
      */
-    hasDateTimeData: function (key) {
+    hasDateTimeData: function (key, value) {
         return /(_time$)|deadline/.test(key);
     }
 };

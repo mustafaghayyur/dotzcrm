@@ -72,8 +72,8 @@ export default (data, containerId) => {
     async function createWorkSpaceDashboard(tasks, responseContainerId, mapper) {
         const wsKey = mapper.key;
         const workspace = mapper.data;
-        const conatiner = $A.app.searchElementCorrectly(`#pane-${wsKey}`, document);
-        const template = $A.app.searchElementCorrectly('.card', conatiner);
+        const container = $A.app.searchElementCorrectly(`#pane-${wsKey}`, document);
+        const template = $A.app.searchElementCorrectly('.card', container);
         const taskViewCallback = await $A.tasks.load('taskDetailsView');
 
         if ($A.generic.checkVariableType(tasks) !== 'list') {
@@ -91,7 +91,7 @@ export default (data, containerId) => {
                 throw Error('UI Error: tasks could not be sorted into lists for bucket: ' + key);
             }
 
-            let bucketContainer = $A.app.searchElementCorrectly(`.${key}-col`, conatiner);
+            let bucketContainer = $A.app.searchElementCorrectly(`.${key}-col`, container);
             
             list.forEach((task) => {
                 let clone = template.cloneNode(true);
@@ -118,6 +118,7 @@ export default (data, containerId) => {
      * @param {array} tasks: all retrieved tasks from API for given workspace.
      */
     function sortTasksBasedOnProgress(tasks) {
+        console.log('Inside sortTasksBasedOnProgress() checking unsorted tasks: ', tasks);
         const buckets = {
             backlog: [],
             started: [],

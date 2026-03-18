@@ -83,6 +83,7 @@ class Update:
         ignored = mapper.ignoreOnUpdates(tbl)
         rlcFields = {}  # fields for RLC update
         submission = state.get('submission')
+        result = None
 
         for col in columnsList:
             if mapper.isCommonField(col):

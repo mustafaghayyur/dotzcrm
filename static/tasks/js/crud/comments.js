@@ -8,8 +8,8 @@ import $A from "../helper.js";
 export async function createCommentForTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().create('taco', dictionary, true).execute('commentsResponse', (data, containerId) => {
-        let conatiner = document.getElementById(containerId);
+        let container = document.getElementById(containerId);
 
-        conatiner.textContent = 'Your comment has been saved.';
+        container.textContent = 'Your comment has been saved.';
     });
 }

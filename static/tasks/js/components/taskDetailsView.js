@@ -38,29 +38,20 @@ export default function (task, containerId) {
      */
     async function editAndDelete(task) {
         const editBtn = document.getElementById('editTaskBtn');
+        $A.app.wrapEventListeners(editBtn, 'data-task', JSON.stringify(task), 'click', async (e) => {
+            const taskData = JSON.parse(e.currentTarget.getAttribute('data-task'));
+            console.log('Inspecting task data in editAndDelete()', taskData);
+            $A.tasks.forms.prefillEditForm(taskData);
+            const taskEditForm = await $A.tasks.load('taskEditForm');
+            taskEditForm(taskData);
+        });
+
         const deleteBtn = document.getElementById('deleteTaskBtn');
-
-        editBtn.setAttribute('data-task', JSON.stringify(task));
-        deleteBtn.setAttribute('data-task-id', task.tata_id);
-
-        if (!editBtn.hasEditListener) {
-            editBtn.addEventListener('click', async function() {
-                const taskData = JSON.parse(this.getAttribute('data-task'));
-                $A.tasks.forms.prefillEditForm(taskData, TasksO2OKeys);
-                const taskEditForm = await $A.tasks.load('taskEditForm');
-                taskEditForm(taskData);
-            });
-            editBtn.hasEditListener = true;
-        }
-
-        if (!deleteBtn.hasDeleteListener) {
-            deleteBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const taskId = this.getAttribute('data-task-id');
-                DeleteTask(taskId, 'Task with id #' + taskId);
-            });
-            deleteBtn.hasDeleteListener = true;
-        }
+        $A.app.wrapEventListeners(deleteBtn, 'data-task-id', task.tata_id, 'click', (e) => {
+            e.preventDefault();
+            const taskId = e.currentTarget.getAttribute('data-task-id');
+            DeleteTask(taskId, 'Task with id #' + taskId);
+        });
     }
 
     /**
@@ -70,11 +61,24 @@ export default function (task, containerId) {
     function assignments(task) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
-        $A.query()
-            .read('tawa', {
+
+        // add event listeners of watch buttons...
+        $A.app.wrapEventListeners(watchbtn, 'data-task-id', task.tata_id, 'click', async (e) => {
+            e.preventDefault();
+            const taskId = e.currentTarget.getAttribute('data-task-id');
+            createWatcher(taskId, 'addWatcher', 'removeWatcher');
+        });
+
+        $A.app.wrapEventListeners(unwatchbtn, 'data-task-id', task.tata_id, 'click', async (e) => {
+            e.preventDefault();
+            const taskId = e.currentTarget.getAttribute('data-task-id');
+            removeWatcher(taskId, 'addWatcher', 'removeWatcher');
+        });
+
+        // fetch current watch state for user
+        $A.query().read('tawa', {
                     task_id: task.tata_id
-                })
-            .execute('taskDetailsModalResponse', (data, id) => {
+                }).execute('taskDetailsModalResponse', (data, id) => {
                 if ($A.generic.isVariableEmpty(data)) {
                     watchbtn.classList.remove('d-none');
                     unwatchbtn.classList.add('d-none');
@@ -83,27 +87,6 @@ export default function (task, containerId) {
                     watchbtn.classList.add('d-none');
                 }
             });
-
-        watchbtn.setAttribute('data-task-id', task.tata_id);
-        unwatchbtn.setAttribute('data-task-id', task.tata_id);
-
-        if (!watchbtn.hasWatchListener) {
-            watchbtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const taskId = e.target.getAttribute('data-task-id');
-                createWatcher(taskId, 'addWatcher', 'removeWatcher');
-            });
-            watchbtn.hasWatchListener = true;
-        }
-
-        if (!unwatchbtn.hasUnwatchListener) {
-            unwatchbtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const taskId = e.target.getAttribute('data-task-id');
-                removeWatcher(taskId, 'addWatcher', 'removeWatcher');
-            });
-            unwatchbtn.hasUnwatchListener = true;
-        }
     }
 
     /**
@@ -114,18 +97,16 @@ export default function (task, containerId) {
         $A.editor.make('commentEditor');
         let saveCommentBtn = document.getElementById('saveComment');
         saveCommentBtn.setAttribute('data-task-id', task.tata_id);
-        if (!saveCommentBtn.hasSaveListener) {
-            saveCommentBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                let editor = document.querySelector('#newCommentForm #commentEditor');
-                let hiddenCommentInput = document.querySelector('#newCommentForm #' + editor.dataset.fieldId);
-                hiddenCommentInput.value = editor.innerHTML;
-                let taskIdField = document.querySelector('#newCommentForm #task_id');
-                taskIdField.value = e.target.getAttribute('data-task-id');
-                createCommentForTask('newCommentForm');
-            });
-            saveCommentBtn.hasSaveListener = true;
-        }
+        
+        $A.app.wrapEventListeners(saveCommentBtn, 'data-task-id', task.tata_id, 'click', (e) => {
+            e.preventDefault();
+            let editor = document.querySelector('#newCommentForm #commentEditor');
+            let hiddenCommentInput = document.querySelector('#newCommentForm #' + editor.dataset.fieldId);
+            hiddenCommentInput.value = editor.innerHTML;
+            let taskIdField = document.querySelector('#newCommentForm #task_id');
+            taskIdField.value = e.currentTarget.getAttribute('data-task-id');
+            createCommentForTask('newCommentForm');
+        });
     }
 
     /**

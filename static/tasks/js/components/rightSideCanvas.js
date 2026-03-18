@@ -1,10 +1,10 @@
 import $A from "../helper.js";
 
 export default function () {
-    const conatiner = document.getElementById('rightSideCanvas');
-    //handleOffCanvasBehaviour(conatiner);
+    const container = document.getElementById('rightSideCanvas');
+    //handleOffCanvasBehaviour(container);
 
-    const form = conatiner.querySelector('#newTodoForm');
+    const form = container.querySelector('#newTodoForm');
     const saveButton = form.querySelector('#newTodoBtn');
 
     if ($A.generic.checkVariableType(saveButton) !== 'domelement') {
@@ -24,11 +24,11 @@ export default function () {
         dictionary.assignee_id =  $A.app.memFetch('user_id');
         dictionary.assignor_id =  $A.app.memFetch('user_id');
         
-        $A.query().create('tata', dictionary, true).execute('newTodoFormResponse', (data, conatinerId) => {
-            let response = conatiner.querySelector('#' + conatinerId);
+        $A.query().create('tata', dictionary, true).execute('newTodoFormResponse', (data, containerId) => {
+            let response = container.querySelector('#' + containerId);
 
             if ($A.generic.checkVariableType(response) !== 'domelement') {
-                throw Error('UI Error: Cannot find response conatiner in newTodoForm operation.');
+                throw Error('UI Error: Cannot find response container in newTodoForm operation.');
             }
 
             response.textContent = 'Your todo has been added.';

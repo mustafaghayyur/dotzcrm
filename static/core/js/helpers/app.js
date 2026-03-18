@@ -71,7 +71,7 @@ export default {
      * @param {number} user_id 
      * @param {array} fields 
      */
-    user: function (user_id, conatinerId, returnNull = false, iter = 0) {
+    user: function (user_id, containerId, returnNull = false, iter = 0) {
         if (iter > 1) {
             if (returnNull) {
                 return null;
@@ -87,7 +87,7 @@ export default {
 
         if (!user) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
-                .where({usus_id: user_id, usus_delete_time: null}).execute(conatinerId, (data, conatinerId, mapper) => {
+                .where({usus_id: user_id, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
                     let users = mapper.users;
 
                     if ($A.generic.checkVariableType(data) === 'list') {
@@ -113,7 +113,7 @@ export default {
                     }
                 }, { users: users });
 
-            user = $A.app.user(user_id, conatinerId, returnNull, iter = (iter + 1));
+            user = $A.app.user(user_id, containerId, returnNull, iter = (iter + 1));
         }
 
         if (!user) {
@@ -144,7 +144,7 @@ export default {
 
     obtainElementCorrectly: function(containerId) {
         if ($A.generic.checkVariableType(containerId) !== 'string') {
-            throw Error(`DOM Error: Provided containerId not in string format: [ ${conatinerId} ] in obtainElementCorrectly()`);
+            throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
         }
 
         const elem = document.getElementById(containerId);
@@ -156,21 +156,21 @@ export default {
         return elem;
     },
 
-    searchElementCorrectly: function(searchString, conatiner = null) {
+    searchElementCorrectly: function(searchString, container = null) {
         if ($A.generic.checkVariableType(searchString) !== 'string') {
             throw Error(`DOM Error: Provided searchString not in string format: ${searchString}`);
         }
 
-        if (!conatiner) {
-            conatiner = document;
+        if (!container) {
+            container = document;
         }
 
-        const conType = $A.generic.checkVariableType(conatiner);
+        const conType = $A.generic.checkVariableType(container);
         if (conType !== 'domelement' && conType !== 'document') {
-            throw Error(`DOM Error: Dom container-element with id=${conatiner.id} could not be found in searchElementCorrectly().`);
+            throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchElementCorrectly().`);
         }
 
-        const elem = conatiner.querySelector(searchString);
+        const elem = container.querySelector(searchString);
 
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
             throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
@@ -301,6 +301,24 @@ export default {
         pane.appendChild(results);
 
         return pane;
+    },
+
+    /**
+     * Sets everything up to allow for Modals to safely execute events.
+     * Without modal dom duplication causing problems.
+     * 
+     * @param {dom} container: instance of DOM node element
+     * @param {str} dataKey: data-key to pass along. Use e.currentTarget.getAttribute() to get acces to this key
+     * @param {*} dataValue: value for data-key
+     * @param {str} eventType: event-listener string identifyer (click, change, etc)
+     * @param {func} callback: actions to perform on event trigger.
+     */
+    wrapEventListeners: function(container, dataKey, dataValue, eventType, callback) {
+        container.setAttribute(dataKey, dataValue);
+        if (!container.hasDeleteListener) {
+            container.addEventListener(eventType, callback);
+        }
+        container.hasDeleteListener = true;
     }
 };
 

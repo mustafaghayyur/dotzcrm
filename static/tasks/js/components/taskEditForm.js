@@ -45,11 +45,11 @@ export default (taskInfo) => {
 
     // Edit Task Modal: Save Operations Setup...
     const editTaskSaveBtn = $A.app.obtainElementCorrectly('taskEditFormSaveBtn');
-    editTaskSaveBtn.addEventListener('click', (e) => {
+    const tata_id = $A.app.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
+    $A.app.wrapEventListeners(editTaskSaveBtn, 'data-task-id', tata_id.value, 'click', (e) => {
         e.preventDefault();
-        const tata_id = $A.app.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
-
-        if ($A.generic.isVariableEmpty(tata_id.value)) {
+        const tataId = e.currentTarget.getAttribute('data-task-id');
+        if ($A.generic.isVariableEmpty(tataId)) {
             CreateTask('taskEditForm');
         } else {
             UpdateTask('taskEditForm');
