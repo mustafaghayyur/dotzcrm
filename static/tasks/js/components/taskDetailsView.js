@@ -34,6 +34,8 @@ export default function (task, containerId) {
     
     /**
      * Enabled full edit/delete functionality on task item
+     * @todo: research focus and JS interactions: https://reintech.io/blog/bootstrap-5-modals-tips-tricks#focus-management <- might help with duplicate modal dom events
+     * 
      * @param {obj} task: API result set.
      */
     async function editAndDelete(task) {
@@ -137,3 +139,25 @@ export default function (task, containerId) {
             });
     }
 }
+
+/**
+ * @todo: implement this project-wide somehow.
+ * 
+ * > also look into: show.bs.modal event combined with event.relatedTarget
+ * 
+ * Cleaning up after model-hide:
+ * const modalElement = document.getElementById('tempModal');
+
+    modalElement.addEventListener('hidden.bs.modal', function() {
+    // Dispose of Bootstrap instance
+    const modalInstance = bootstrap.Modal.getInstance(this);
+    if (modalInstance) {
+        modalInstance.dispose();
+    }
+    
+    // Remove from DOM if it was dynamically created
+    if (this.dataset.temporary === 'true') {
+        this.remove();
+    }
+    });
+ */

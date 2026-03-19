@@ -106,6 +106,13 @@
   text-align: justify !important;
 }
 
+#buffer {
+  min-height: 500px;
+  display: block;
+  min-width: 70%;
+  position: relative;
+}
+
 /* 
   // Example using media queries for breakpoints (min-width)
   @include media-breakpoint-up(md)

@@ -5,6 +5,7 @@
 export default {
     settingsUrl: '/rest/settings-general/', // always-available settings url
     screens: {
+        xs: 575,
         sm: 576,
         md: 768,
         lg: 992,

@@ -24,6 +24,13 @@ export default (taskInfo) => {
     visibility.value = $A.tasks.data.values.visibility.workspaces;
     workspace_id.value = taskInfo.workspace_id;
 
+    $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
+        // make some room for keyboard in mobile views...
+        let form = $A.app.searchElementCorrectly('form', container);
+        let bufferDiv = $A.app.makeDomElement('div', '', 'buffer');
+        form.insertAdjacentElement('afterend', bufferDiv);
+    });
+
     // task list for workspace
     $A.query().search('tata').fields('tata_id', 'description').where({
             workspace_id: taskInfo['workspace_id'],
