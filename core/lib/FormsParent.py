@@ -21,10 +21,18 @@ class Forms(forms.Form):
             self.setQuerySet(matrix['querysets'])
 
         for field_name, field in self.fields.items():
-            # Add 'form-control' class to all fields
-            field.widget.attrs['class'] = 'form-control some-other-field-class' 
-            original = field.help_text
-            field.help_text = mark_safe(f'<span class="form-text">{original}</span>') 
+            # Add appropriate Bootstrap classes based on field type
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select some-other-field-class'
+            else:
+                field.widget.attrs['class'] = 'form-control some-other-field-class'
+            # Store original help text in widget data attribute and clear help_text to prevent <br/> insertion
+            
+            if field.help_text:
+                field.widget.attrs['data-bs-toggle'] = 'tooltip'
+                field.widget.attrs['data-bs-placement'] = 'left'
+                field.widget.attrs['data-bs-title'] = field.help_text
+            field.help_text = ''  # Clear help_text to prevent Django from adding <br/> 
             
         self.performSetup()
 

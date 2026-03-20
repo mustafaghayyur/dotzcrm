@@ -25,7 +25,7 @@ class TasksEditForm(Forms):
     
     # Use enums from mapper_values for status and visibility choices
     status = forms.ChoiceField(
-        choices=[(item.value, item.name.replace('_', ' ').title()) for item in Status],
+        choices=[(item.name, item.value.replace('_', ' ').title()) for item in Status],
         help_text="Select the current status of the task"
     )
     

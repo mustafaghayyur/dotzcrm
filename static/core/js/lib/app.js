@@ -26,6 +26,9 @@ export function Main(callbackFunction) {
                 }
             });
 
+            /**
+             * Universal implementations can go here...
+             */
             /*let modals = document.querySelectorAll('.modal');
             modals.forEach((modal) => {
                 if ($A.generic.checkVariableType(modal) !== 'domelement') {
@@ -33,6 +36,13 @@ export function Main(callbackFunction) {
                 }
                 modal.addEventListener('hidden.bs.modal', function (event) {});
             });*/
+
+            // initialize tooltips for entire software:
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+                delay: { show: 300, hide: 300 } // 300ms show delay, 7 second hide delay
+            }));
+
         });
 
         function relocateToLogin() {

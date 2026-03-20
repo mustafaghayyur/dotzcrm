@@ -13,7 +13,7 @@ class WorkSpaceEditForm(Forms):
     
     name = forms.CharField(max_length=255)
     type = forms.ChoiceField(
-        choices=[(item.value, item.name.replace('_', ' ').title()) for item in WSType],
+        choices=[(item.name, item.value.replace('_', ' ').title()) for item in WSType],
         help_text="Choose type of WorkSpace"
     )
     

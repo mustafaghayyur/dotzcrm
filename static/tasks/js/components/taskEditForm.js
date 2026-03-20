@@ -139,4 +139,5 @@ export default (taskInfo) => {
             select2.appendChild(elem2);
         });
     }
+    
 }
