@@ -10,11 +10,23 @@ class Forms(forms.Form):
 
     def __init__(self, *args, **kwargs):
         """
-        Setup custom init tasks for our forms.
+            Enabled performSetup(matrix) in Init()
         """
         matrix = kwargs.pop('param_matrix', None)  # 'param_matrix' is a custom kwargs we use to pass parameters for ModelChoiceField poplation
         super().__init__(*args, **kwargs)
-        self.performSetup(matrix)
+
+        if matrix:
+            self.setParams(matrix['params'])
+            self.setQuerySet(matrix['querysets'])
+            
+        self.performSetup()
+
+
+    def performSetup(self):
+        """
+            Should be used in all child classes to perform init() tasks.
+        """
+        pass
 
 
     def setParams(self, params: dict):

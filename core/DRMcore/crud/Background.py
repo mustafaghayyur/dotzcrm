@@ -30,7 +30,7 @@ class Operations():
 
         # setup logger
         self.state.set('log', Logger())
-        self.state.get('log').settings(self.state.get('app'), self.state.get('module')['crud_logger_file'])
+        self.state.get('log').settings(self.state.get('app'))
 
         # holds all O2O primary keys for given space/module
         self.state.set('idCols', Validate.generateIdColumnsForRelationType(self.mapper, 'o2o'))
@@ -87,7 +87,6 @@ class Operations():
         logger.record(recordsByCtId, f'Final recordsByCtId dictionary.')
         
         # For each child table ID, check if there are multiple 'latest' records
-        # latestRecords = [rec for rec in recordsByCtId if getattr(rec, latestField, None) == latestValue]
         latestRecords = [rec for rec in recordsByCtId]
         logger.record(latestRecords, f'Dict-to-List conversion of recs: latestRecords')
 
