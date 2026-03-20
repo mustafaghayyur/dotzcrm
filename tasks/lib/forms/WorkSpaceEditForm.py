@@ -14,11 +14,13 @@ class WorkSpaceEditForm(Forms):
     name = forms.CharField(max_length=255)
     type = forms.ChoiceField(
         choices=[(item.name, item.value.replace('_', ' ').title()) for item in WSType],
+        widget=forms.RadioSelect(),
+        initial='open',
         help_text="Choose type of WorkSpace"
     )
     
-    description = forms.CharField(widget=forms.Textarea, empty_value="Maxiumum length 6000 chars")
-    department_id = forms.ModelChoiceField(queryset=Department.objects.none(), required=False)
+    description = forms.CharField(widget=forms.Textarea, help_text="A brief description outlining pertinent information about this workspace. Maxiumum length 6000 chars.")
+    department_id = forms.ModelChoiceField(queryset=Department.objects.none(), required=False, help_text='Select all departments that have access relations to this WorkSpace.')
     lead_id = forms.ModelChoiceField(queryset=User.objects.none(), empty_label="Select Initial Team Lead")
     
     

@@ -43,6 +43,19 @@ export function Main(callbackFunction) {
                 delay: { show: 300, hide: 300 } // 300ms show delay, 7 second hide delay
             }));
 
+            const forms = $A.dom.searchAllElementsCorrectly('form');
+            if (forms) {
+                forms.forEach((form) => {
+                    let radios = $A.dom.searchAllElementsCorrectly('div.form-check.form-check-inline input[type="radio"]', form);
+                    if (radios) {
+                        radios.forEach((radio) => {
+                            radio.classList.remove('form-check');
+                            radio.classList.remove('form-check-inline');
+                            radio.classList.add('form-check-input');
+                        });
+                    }
+                });
+            }
         });
 
         function relocateToLogin() {

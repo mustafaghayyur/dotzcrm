@@ -53,7 +53,7 @@ export default {
 
     searchElementCorrectly: function(searchString, container = null) {
         if ($A.generic.checkVariableType(searchString) !== 'string') {
-            throw Error(`DOM Error: Provided searchString not in string format: ${searchString}`);
+            throw Error(`DOM Error: Provided searchString not in string format: ${searchString}: searchElementCorrectly()`);
         }
 
         if (!container) {
@@ -69,6 +69,32 @@ export default {
 
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
             throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
+        }
+
+        return elem;
+    },
+
+    searchAllElementsCorrectly: function(searchString, container = null, throwError = false) {
+        if ($A.generic.checkVariableType(searchString) !== 'string') {
+            throw Error(`DOM Error: Provided searchString not in string format: ${searchString}: searchAllElementsCorrectly()`);
+        }
+
+        if (!container) {
+            container = document;
+        }
+
+        const conType = $A.generic.checkVariableType(container);
+        if (conType !== 'domelement' && conType !== 'document') {
+            throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchAllElementsCorrectly().`);
+        }
+
+        const elem = container.querySelectorAll(searchString);
+
+        if ($A.generic.checkVariableType(elem) !== 'nodelist') {
+            if (throwError) {
+                throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchAllElementsCorrectly().`);
+            }
+            return null;
         }
 
         return elem;
