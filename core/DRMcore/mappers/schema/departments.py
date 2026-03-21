@@ -30,7 +30,7 @@ departments = {
         ],
     },
     'deus': {
-        'table': 'users_usertodepartment',
+        'table': 'users_departmentuser',
         'model': 'DepartmentUser',
         'path': 'users.models',
         'type': 'm2m',

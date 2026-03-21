@@ -8,9 +8,6 @@ import $A from "../helper.js";
 export default (wowoData) => {
     let container = $A.dom.obtainElementCorrectly('workSpaceEditModal');
     let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
-    let depts = Array.from(deptsField.selectedOptions);
-    const currentDepts = depts.map(option => option.value);
-    console.log('Checking currentDepts', currentDepts);
 
     // Prefill form with workspace data if provided
     if (wowoData && $A.generic.checkVariableType(wowoData) === 'dictionary') {
@@ -28,31 +25,23 @@ export default (wowoData) => {
     $A.query().search('dede').fields('dede_id', 'name').order([{tbl:'dede', col: 'id', sort: 'desc'}])
         .execute('workSpaceEditModalResponse', embedDepartmentsDataIntoForm);
 
-    /*$A.app.wrapEventListeners(deptsField, 'data-current-depts', currentDepts, 'change', (e) => {
-        const list = e.currentTarget.getAttribute('data-current-depts');
-        if ($A.generic.checkVariableType(list) === 'list' && list.length > 0) {
+    $A.app.wrapEventListeners(deptsField, 'data-current-depts', null, 'change', (e) => {
+        let depts = Array.from(e.currentTarget.selectedOptions);
+        const currentDepts = depts.map(option => option.value);
+        if ($A.generic.checkVariableType(currentDepts) === 'list' && currentDepts.length > 0) {
             // users for workspace
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
                 ).join({
                     'left|usus_id': 'deus_user_id',
                 }).where({
-                    deus_department_id: list,
-                    user_level: '>' + $A.data.user.levels.leader // @todo: add gt/lt operators to conditions
+                    deus_department_id: currentDepts,
+                    user_level: [10, 20, 30, 40, 50] // + $A.data.user.levels.leader // @todo: add gt/lt operators to conditions
                 }).order([
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
                 ]).execute('workSpaceEditModalResponse', embedUsersDataIntoForm);
         }
-    });*/
-
-    // users for workspace
-    $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name')
-        .order([
-            {tbl:'usus', col: 'last_name', sort: 'asc'},
-            {tbl:'usus', col: 'first_name', sort: 'asc'}
-        ]).execute('workSpaceEditModalResponse', embedUsersDataIntoForm);
-
-    
+    });
 
     // Edit Task Modal: Save Operations Setup...
     const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
@@ -123,6 +112,8 @@ export default (wowoData) => {
         if ($A.generic.checkVariableType(data) !== 'list') {
             throw Error('Error FB003: Cannot parse data object.');
         }
+
+        select.innerHTML = '';
 
         data.forEach((itm) => {
             let elem = $A.dom.makeDomElement('option');

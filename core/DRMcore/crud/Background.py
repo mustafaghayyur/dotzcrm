@@ -65,8 +65,6 @@ class Operations():
         """
             For given CT, see if fetched records have multiple entries 
             marked as 'latest' in the DB. If found, archives all but the most recent.
-
-            @todo: not pruning records...fix
         """
         tblIdField = f'{tbl}_{self.mapper.column('id')}'
         createTimeField = f'{tbl}_{self.mapper.column('create_time')}'

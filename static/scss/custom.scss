@@ -3,6 +3,30 @@
  * Do not modify.
  */
 
+
+/* Bootstrap overrides for text sizing */
+body {
+  font-size: 0.8rem; /* Reduce all text size by ~20% */
+  line-height: 1.32; /* Reduce line-height by ~20% from default 1.5 */
+}
+
+.h1, h1 {
+  font-size: 1.625rem; /* 2.5rem * 0.65 (~35% reduction) */
+}
+
+.h2, h2 {
+  font-size: 1.3rem; /* 2rem * 0.65 */
+}
+
+.h3, h3 {
+  font-size: 1.1375rem; /* 1.75rem * 0.65 */
+}
+
+.h4, h4 {
+  font-size: 0.975rem; /* 1.5rem * 0.65 */
+}
+
+
 /* Custom background color utilities */
 .bg-drkblue {
   background-color: $drkblue !important;
