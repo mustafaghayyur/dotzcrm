@@ -3,6 +3,29 @@
  * Do not modify.
  */
 
+/* Custom background color utilities */
+.bg-drkblue {
+  background-color: $drkblue !important;
+}
+
+.bg-drkredone {
+  background-color: $drkredone !important;
+}
+
+.bg-drkredtwo {
+  background-color: $drkredtwo !important;
+}
+
+.bg-drkredthree {
+  background-color: $drkredthree !important;
+}
+
+.btn-info {
+  color: $primary !important;
+  background-color: $drkredthree !important;
+  border-color: $drkredthree !important;
+}
+
 /* reenie-beanie-regular - latin */
 @font-face {
   font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
