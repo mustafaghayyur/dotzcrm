@@ -42,8 +42,6 @@ export default function (task, containerId) {
         const editBtn = document.getElementById('editTaskBtn');
         $A.app.wrapEventListeners(editBtn, 'data-task', JSON.stringify(task), 'click', async (e) => {
             const taskData = JSON.parse(e.currentTarget.getAttribute('data-task'));
-            console.log('Inspecting task data in editAndDelete()', taskData);
-            $A.tasks.forms.prefillEditForm(taskData, 'taskEditForm');
             const taskEditForm = await $A.tasks.load('taskEditForm');
             taskEditForm(taskData);
         });

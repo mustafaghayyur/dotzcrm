@@ -14,6 +14,14 @@ Main(async () => {
             $A.app.memSave('allTaskFields', $A.generic.getter(data, 'allFields'));
     });
 
+    $A.fetch.body(
+        $A.fetch.route('api.settings.mappers', 'wowo'), 
+        'authenticationResponse', {}, 
+        (data, containerId) => {
+            $A.app.memSave('o2oWorkSpaceFields', $A.generic.getter(data, 'o2oFields'));
+            $A.app.memSave('allWorkSpaceFields', $A.generic.getter(data, 'allFields'));
+    });
+
     $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {

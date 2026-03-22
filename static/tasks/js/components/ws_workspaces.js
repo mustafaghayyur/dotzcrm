@@ -1,5 +1,6 @@
 //import _ from 'lodash';
 import $A from "../helper.js";
+import { DeleteWorkSpace } from '../crud/workspaces.js';
 
 /**
  * Implements the entire Tasks' WorkSPaces Dashboard.
@@ -178,11 +179,10 @@ export default (data, containerId) => {
             workspaceEditForm(workspace);
         });
 
-        const deleteBtn = document.getElementById('deleteTaskBtn');
-        $A.app.wrapEventListeners(deleteBtn, 'data-task-id', null, 'click', (e) => {
+        const deleteBtn = document.getElementById('deleteWorkSpace');
+        deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const taskId = null; //e.currentTarget.getAttribute('data-task-id');
-            DeleteTask(taskId, 'Task with id #' + taskId);
+            DeleteWorkSpace(workspace.wowo_id, 'WorkSpace with id #' + workspace.wowo_id);
         });
     }
 }
