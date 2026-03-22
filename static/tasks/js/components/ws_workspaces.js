@@ -175,7 +175,7 @@ export default (data, containerId) => {
     async function editAndDeleteWorkSpaces(workspace, container) {
         const editBtn = document.getElementById('editWorkSpaceBtn');
         editBtn.addEventListener('click', async (e) => {
-            const workspaceEditForm = await $A.tasks.load('workspaceEditForm');
+            const workspaceEditForm = await $A.tasks.load('ws_ProjectEditForm');
             workspaceEditForm(workspace);
         });
 

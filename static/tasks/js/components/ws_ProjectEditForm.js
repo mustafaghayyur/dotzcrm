@@ -1,5 +1,5 @@
 import $A from "../helper.js";
-import { UpdateWorkSpace, CreateWorkSpace } from '../crud/workspaces.js';
+import { UpdateWorkSpace, CreateWorkSpace, UpdateDepartmentsInWorkSpace, UpdateLeaderInWorkSpace, AddDepartmentsToWorkSpace, AddLeaderToWorkSpace } from '../crud/workspaces.js';
 
 /**
  * Enabled all features in Task Edit Form.
@@ -41,12 +41,13 @@ export default (wowoData) => {
         e.preventDefault();
         const wowoId = e.currentTarget.getAttribute('data-workspace-id');
         if ($A.generic.isVariableEmpty(wowoId)) {
-            createWorkSpace('workSpaceEditForm');
+            CreateWorkSpace('workSpaceEditForm');
         } else {
-            UpdateWorkSpace('workSpaceEditForm')
+            UpdateWorkSpace('workSpaceEditForm');
         }
     });
 
+    // handle modal close confirmation...
     $A.app.wrapEventListeners(container, 'null', null, 'hide.bs.modal', (e) => {
         if (!$A.forms.confirm('close WorkSpace Edit Panel', 'Any unsaved data will be lost.')) {
             e.preventDefault();

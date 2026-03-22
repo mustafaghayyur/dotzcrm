@@ -10,7 +10,9 @@ export function UpdateWorkSpace(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, WorkSpaceO2OKeys);
     $A.query().edit('wowo', '', false).execute('workSpaceEditModalResponse', (data, containerId) => {
         const response = $A.dom.obtainElementCorrectly(containerId);
-        response.textContent = `Your workspace changes have been saved.`;
+        response.append(`Your WorkSpace changes have been saved.`);
+        UpdateDepartmentsInWorkSpace('workSpaceEditForm');
+        UpdateLeaderInWorkSpace('workSpaceEditForm');
     });
 }
 
@@ -22,7 +24,9 @@ export function CreateWorkSpace(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().create('wowo', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
         const response = $A.dom.obtainElementCorrectly(containerId);
-        response.textContent = `Your workspace entry has been saved.`;
+        response.append(`Your WorkSpace has been created.`);
+        AddDepartmentsToWorkSpace('workSpaceEditForm');
+        AddLeaderToWorkSpace('workSpaceEditForm');
     });
 }
 
@@ -30,56 +34,52 @@ export function CreateWorkSpace(formId) {
  * Allows submitted form to update existing record.
  * @param {str} formId: dom element id attr value for form 
  */
-export function DeleteWorkSpace(taskId, identifyer) {
-    if (!$A.forms.confirmDeletion(identifyer)) {
+export function DeleteWorkSpace(wowoId, identifyer) {
+    if (!$A.forms.confirm(`close ${identifyer}`, 'This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow smoothe transition.')) {
         return null;
     }
 
-    $A.query().delete('tata', {
-        tata_id: taskId
-    }, true).execute('taskDetailsModalResponse', (data, containerId) => {
+    // @todo: implement 'closing procedure with 24 shut-down time.'
+    /*$A.query().delete('wowo', {
+        wowo_id: wowoId
+    }, true).execute('workSpaceEditModalResponse', (data, containerId) => {
         let container = $A.dom.obtainElementCorrectly(containerId);
-        container.textContent = 'Your Task/ToDo item has been removed.';
+        container.textContent = 'Your WorkSpace has been closed.';
+    });*/
+}
+
+export function AddDepartmentsToWorkSpace (formId) {
+    let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
+    $A.query().create('wode', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
+        const response = $A.dom.obtainElementCorrectly(containerId);
+        response.append(`Departments added to WorkSpace.`);
     });
 }
 
-/**
- * Changes ToDo item's status between 'assigned' and 'completed'
- * @param {str} todoId: database ID for task record.
- * @param {str} oldStatus: the status to remove
- */
-export function toggleTodoStatus(record) {
-    const allStatuses = 'assignedcompleted'; // @todo: find a better determining operation
-    const newStatus = allStatuses.replace(record.status, '');
-
-    const dictionary = {
-        tata_id: record.tata_id,
-        tast_id: record.tast_id,
-        status: newStatus
-    };
-
-    $A.query().edit('tata', dictionary, true).execute('personalTodosResponse', (data, containerId) => {
-        let container = document.getElementById(containerId);
-
-        container.textContent = 'Your ToDo item has been updated.';
+export function AddLeaderToWorkSpace (formId) {
+    let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
+    $A.query().create('wous', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
+        const response = $A.dom.obtainElementCorrectly(containerId);
+        response.append(`Team Leader added to WorkSpace.`);
     });
 }
 
-/**
- * Deletes a Todo based on id provided.
- * @param {int} todoId: database ID for task to delete
- * @param {string} identifyer: any term to identify the ToDo to user during confirmation. 
- */
-export function deleteTodo(todoId, identifyer) {
-    if (!$A.forms.confirmDeletion(identifyer)) {
-        return null;
-    }
-
-    $A.query().delete('tata', {
-        tata_id: todoId
-    }, true).execute('personalTodosResponse', (data, containerId) => {
-        let container = document.getElementById(containerId);
-
-        container.textContent = 'Your ToDo has been removed.';
+export function UpdateDepartmentsInWorkSpace (formId) {
+    let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
+    $A.query().edit('wode', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
+        const response = $A.dom.obtainElementCorrectly(containerId);
+        response.append(`Departments added to WorkSpace.`);
     });
 }
+
+export function UpdateLeaderInWorkSpace (formId) {
+    let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
+    $A.query().edit('wous', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
+        const response = $A.dom.obtainElementCorrectly(containerId);
+        response.append(`Team Leader added to WorkSpace.`);
+    });
+}
+
+
+
+
