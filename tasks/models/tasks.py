@@ -1,8 +1,8 @@
 from django.db import models
 from django.conf import settings as sysconf
 
-from .drm.querysets import * 
-from users.models import User, Department
+from ..drm.querysets import *
+from users.models import User
 
 
 ### Tasks Mapper Models ###
@@ -52,7 +52,7 @@ class Status(models.Model):
         O2O Model.
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20) 
+    status = models.CharField(max_length=20)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -115,62 +115,15 @@ class Comment(models.Model):
     objects = TaskRLCQuerySet.as_manager()
 
 
-
-### WorkSpace Models ###
-
-
-class WorkSpace(models.Model):
-    """
-        O2O Model.
-    """
-    name = models.CharField(max_length=1000)
-    description = models.CharField(max_length=6000)
-    type = models.CharField(max_length=30)  # enum of ['private' | 'open']
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(auto_now_add=True)
-    update_time = models.DateTimeField(auto_now=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-
-    objects = WorkSpaceQuerySet.as_manager()
-
-
 class TaskWorkSpace(models.Model):
     """
         Tasks Mapper model. Placed here to reference WorkSpace model FK
         O2O Model.
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
+    workspace = models.ForeignKey('tasks.WorkSpace', on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
     objects = TaskCTQuerySet.as_manager()
-
-
-class WorkSpaceDepartment(models.Model):
-    """
-        M2M Model.
-    """
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-
-    objects = WorkSpaceM2MQuerySet.as_manager()
-
-
-class WorkSpaceUser(models.Model):
-    """
-        M2M Model.
-    """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-
-    objects = WorkSpaceM2MQuerySet.as_manager()
-
-

@@ -5,13 +5,14 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils import timezone
 from django.contrib.auth.models import UserManager, PermissionsMixin
 
-from .drm.querysets import *
+from users.drm.querysets import *
 
 #### User Mapper Models ####
 
 class DrmUserManager(UserManager.from_queryset(UserQuerySet)):
     # shell User Manager to enable our DRM UserQuerySet()
     pass
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -41,8 +42,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     user_level = models.SmallIntegerField(
         _("access level of user"),
-        default=1, 
-        db_default=1  # 1 = memeber -> 9 = most senior administrator
+        default=1,
+        db_default=1  # 1 = member -> 9 = most senior administrator
     )
     is_active = models.BooleanField(
         _("active"),
@@ -67,6 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _("user")
         verbose_name_plural = _("users")
 
+
 class UserProfile(models.Model):
     """
         Extension of the User model, meant for the user profile sections.
@@ -89,6 +91,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return f'{self.legal_first_name} {self.legal_last_name} [{self.user.username}]'
 
+
 class UserSettings(models.Model):
     """
         O2O Model
@@ -104,7 +107,7 @@ class UserSettings(models.Model):
 
 class UserReportsTo(models.Model):
     """
-        User's boss(es). 
+        User's boss(es).
         M2M Model.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
@@ -127,51 +130,3 @@ class EditLog(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = UserRLCQuerySet.as_manager()
-
-
-
-#### Department Mapper Models ####
-
-class Department(models.Model):
-    """
-        Departments, can be nested. 
-        Master table for Department Mapper.
-        O2O Model
-    """
-    name = models.CharField(max_length=70)
-    description = models.CharField(max_length=1000)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-    create_time = models.DateTimeField(auto_now_add=True)
-    update_time = models.DateTimeField(auto_now=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-
-    objects = DepartmentQuerySet.as_manager()
-
-
-class DepartmentUser(models.Model):
-    """
-        User's associent with departments. 
-        M2M Model.
-    """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-
-    objects = DepartmentM2MQuerySet.as_manager()
-
-class DepartmentHead(models.Model):
-    """
-        Assigns head(s) to departments. 
-        M2M Model.
-    """
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    head = models.ForeignKey(User, on_delete=models.CASCADE)
-    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
-    create_time = models.DateTimeField(auto_now_add=True)
-    delete_time = models.DateTimeField(null=True, blank=True)
-
-    objects = DepartmentM2MQuerySet.as_manager()
-    
