@@ -27,7 +27,7 @@ Concise, actionable guidance to get an AI coding agent productive in this reposi
 
 ## Developer workflows (commands & examples) 🔧
 - Django: use `manage.py` for local tasks (e.g., `python manage.py runserver`, `python manage.py migrate`).
-- Database: MySQL (see `project/settings.py`); recommended server settings in `CRM-DOCUMENTATION/7.MySQL-Server-Settings.md`.
+- Database: MySQL (see `project/settings.py`); recommended server settings in `PROJECTDOCUMENTATION/7.MySQL-Server-Settings.md`.
 - Frontend: inside `static/` run `npm install` and `npm run build` (or `npm run build:core` / `npm run build:tasks`). SASS compile: `sass ./scss/dotzstrap.scss:./css/dotzstrap.css`.
 - Deployment: mod_wsgi is the expected production setup (top-level `README.md`).
 
