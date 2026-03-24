@@ -6,7 +6,7 @@ This document will hold common jargon/acronyms found through out the code base, 
 A
 --
 
-> App: the app is a nearly stand alone section of the CRM. Apps can also be referred to as 'space' or 'module' in some parts of the codebase. The originally conceptualized apps for the DotzCRM were: 
+> App: the app is a nearly stand alone section of the Dotz Enterprise Platform. Apps can also be referred to as 'space' or 'module' in some parts of the codebase. The originally conceptualized apps for the Dotz Enterprise Platform were: 
   1. Tasks Module
   2. Tickets Module (refers to customer queries/requests)
   3. Documents Module
@@ -87,7 +87,7 @@ P
 
 Q
 --
- > QuerySets: querysets hold special meaning to DotzCRM, as we rely heavily on raw queries. These queryset classes can be found in core.DRMcore.querysets. Please see README.md in core.DRMcore for details.
+ > QuerySets: querysets hold special meaning to Dotz Enterprise Platform, as we rely heavily on raw queries. These queryset classes can be found in core.DRMcore.querysets. Please see README.md in core.DRMcore for details.
 
 
 R
@@ -100,7 +100,7 @@ S
 --
  > space: may be used in CRUD operations. Space is another term for a module. See Module above for further info.
 
- > settings: the settings found in core.settings. These are system-wide configurations referenced is various classes for all CRM operations.
+ > settings: the settings found in core.settings. These are system-wide configurations referenced is various classes for all Dotz Enterprise Platform operations.
 
 T
 --

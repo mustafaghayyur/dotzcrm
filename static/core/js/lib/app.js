@@ -2,7 +2,7 @@ import $A from "../helper.js";
 
 /**
  * The APP Module/Library allows for a centeral container for eeach 'app'/core of the 
- * Dotz CRM + PM Software.
+ * Dotz Enterprise Platform.
  */
 export function Main(callbackFunction) {
     try {

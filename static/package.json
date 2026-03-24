@@ -1,5 +1,5 @@
 {
-  "name": "@dotz/crm",
+  "name": "@dotz/enterprise-platform",
   "version": "0.1.0",
   "description": "FrontEnd of CRM + PM Software from Web Dotz",
   "main": "dist/core-bundle.js",

@@ -117,11 +117,49 @@ class Comment(models.Model):
 
 class TaskWorkSpace(models.Model):
     """
-        Tasks Mapper model. Placed here to reference WorkSpace model FK
+        Maps workspaces to tasks.
         O2O Model.
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     workspace = models.ForeignKey('tasks.WorkSpace', on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
+    objects = TaskCTQuerySet.as_manager()
+
+class TermForTask(models.Model):
+    """
+        O2O Model.
+    """
+    term = models.CharField(max_length=200)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
+    objects = TaskCTQuerySet.as_manager()
+
+class PointsForTask(models.Model):
+    """
+        O2O Model.
+    """
+    points = models.IntegerField(null=False, blank=False, default=10)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    create_time = models.DateTimeField(auto_now_add=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+    latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
+
+    objects = TaskCTQuerySet.as_manager()
+
+
+class UserPointsForTask(models.Model):
+    """
+        M2M Model.
+    """
+    rating = models.IntegerField(null=False, blank=False, default=10)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    contributor = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]

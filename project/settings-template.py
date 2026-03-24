@@ -1,5 +1,5 @@
 """
-    Template settings.py file for Dotz CRM + PM Software
+    Template settings.py file for Dotz Enterprise Platform
 """
 
 from pathlib import Path

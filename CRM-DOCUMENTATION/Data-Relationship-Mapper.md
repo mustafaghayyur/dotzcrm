@@ -14,11 +14,11 @@ LAWS OF CRUD (Create Read Update Delete Operations) Operations:
 
  2) If a certain crud operation is missing. It must be added/modified in the DRM files. And the related DRM.querysets folder (which carries the raw SQL queries.)
 
- 3) The django models are not to be touched unless for modifying DB/table structures in the DotzCRM MySQL database.
+ 3) The django models are not to be touched unless for modifying DB/table structures in the Dotz Enterprise Platform MySQL database.
 
-These laws are designed to maintain consistent, reliable data structures within the CRM.
+These laws are designed to maintain consistent, reliable data structures within the Dotz Enterprise Platform.
 
-Since DotzCRM relies heavily on Raw MySQL queries, we need a way to maintain our own order.
+Since Dotz Enterprise Platform relies heavily on Raw MySQL queries, we need a way to maintain our own order.
 
 ### Notes:
  - Due to DRM, all serializers used in our REST-APIs will only use the 'id' field to refer to the App's Master-Record ID. So all table-models in the Tickets App domain, when carrying out CRUD operations with the serializer will hold the ticket-id in the 'id' field. The child table will be referred to with a one-letter-identifyer like 's' for tickets_satus, thus the ticket_status.id will be referred to as 'sid' throughout the crud operations.
@@ -33,7 +33,7 @@ Where Django ORM's standard functions are not used to operate on the MySQL DB, t
 DO NOT use raw queries anywhere outside of QuerySets in this project.
 
 
-# Dotz CRM + PM Software's Relationship Types:
+# Dotz Enterprise Platform's Relationship Types:
 
 ### One-to-One Relationships
 

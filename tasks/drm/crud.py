@@ -7,7 +7,7 @@ from .workspaces_mapper import WorkSpacesMapper
 
 class Tasks(O2ORecords.CRUD):
     """
-        Handles all O2O crud operations for Tasks Module of DotzCRM.
+        Handles all O2O crud operations for Tasks Module of Dotz Enterprise Platform.
         Please read the README.md in this folder before using.
     """
     def startUpCode(self):

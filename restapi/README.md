@@ -2,7 +2,7 @@
 
 Let is it be known:
 
-1) ALL data within DotzCRM + PM Software being created, updated or deleted will be passed to the system through the RestAPIs.
+1) ALL data within Dotz Enterprise Platform being created, updated or deleted will be passed to the system through the RestAPIs.
 
 Therefore, if some end-point is missing in the RESTAPI, you have to create it. There will be no manual CUD operations anywhere in the system.
 

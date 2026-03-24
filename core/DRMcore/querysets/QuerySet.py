@@ -23,7 +23,7 @@ class QuerySetManager(BackgroundOperations):
 
     def fetch(self, selectors = None, conditions = None, ordering = None, limit = None, joins = None, translations = None):
         """
-            Dotz CRM + PM's very own versatile SelectQuery Generator.
+            Dotz Enterprise Platform's very own versatile SelectQuery Generator.
             Manager().select().where().join().orderby().limit().translate().fetch()
             avaialble.
             

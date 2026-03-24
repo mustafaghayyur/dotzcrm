@@ -24,9 +24,9 @@
 
     > (pyEnv): django-admin startproject project
 
- 5) Once setup... you are ready to install our CRM project inside /path/to/django/project. CD into the neawly created project directory, and remove the pre-existing 'project' SUB-DIRECTORY. 
+ 5) Once setup... you are ready to install our Dotz Enterprise Platform project inside /path/to/django/project. CD into the neawly created project directory, and remove the pre-existing 'project' SUB-DIRECTORY. 
 
- 6) Download our CRM project into the 'project' parent directory (you should use our recommended install method). Once downloaded, ensure all files/directories match the git-repo online.
+ 6) Download our Dotz Enterprise Platform project into the 'project' parent directory (you should use our recommended install method). Once downloaded, ensure all files/directories match the git-repo online.
 
  7) Open project/settings-template.py, adjust all settings to match your dev environment, then save the modified file as 'settings.py', removing the -template sufiix from file-name.
 
@@ -34,7 +34,7 @@
 
    > pyhton manage.py
 
-   This should output the default selection screen highliting all available commands the django manage.py script allows. If this command-list shows up with out any errors being thrown, you have successfully configured Dotz-CRM.
+   This should output the default selection screen highliting all available commands the django manage.py script allows. If this command-list shows up with out any errors being thrown, you have successfully configured Dotz Enterprise Platform.
 
  9) Run mugrations in the terminal:
 
@@ -42,7 +42,7 @@
 
   This will ensure all migrations are run in your configured Database.
 
- 10) You are now ready to run the CRM in your current dev environment. Launch the CRM app using WSGI or equivalent service and the Dotz CRM should appear! 
+ 10) You are now ready to run the Dotz Enterprise Platform in your current dev environment. Launch the Dotz Enterprise Platform app using WSGI or equivalent service and the Dotz Enterprise Platform should appear! 
 
  11) Create a super user using @todo add init setup operations and instructions here.
 
