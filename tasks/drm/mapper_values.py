@@ -60,6 +60,22 @@ class WorkSpacesValuesMapper(ValuesMapperGeneric):
             return values[key]
 
         return values
+    
+    def interval_type(self, key = 'all'):
+        values = {itm.name: itm.value for itm in IntervalType}
+
+        if key is not None and key in values:
+            return values[key]
+
+        return values
+    
+    def life_cycle_type(self, key = 'all'):
+        values = {itm.name: itm.value for itm in LifeCycleType}
+
+        if key is not None and key in values:
+            return values[key]
+
+        return values
 
 class WSType(str, Enum):
     """
@@ -67,3 +83,22 @@ class WSType(str, Enum):
     """
     private = 'private'
     open = 'open'
+
+
+class IntervalType(str, Enum):
+    """
+        WorkSpaces Types Enum
+    """
+    day = 'day'
+    week = 'week'
+    month = 'month'
+    year = 'year'
+
+
+class LifeCycleType(str, Enum):
+    """
+        WorkSpaces Types Enum
+    """
+    reset = 'reset'
+    continuance = 'continuance'
+    

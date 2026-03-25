@@ -18,7 +18,7 @@ class TasksListApiOps(APITestCase):
         self.client.force_authenticate(user=self.user1)
 
         # The universal list API endpoint
-        self.url = '/rest/all/list/'
+        self.url = '/rest/all/'
 
         # DRM CRUD instances for data setup
         self.tasksCrud = Tasks(current_user=self.user1)
@@ -40,7 +40,8 @@ class TasksListApiOps(APITestCase):
             'visibility': 'private',
             'deadline': now + datetime.timedelta(days=2),
             'creator_id': self.user1.id,
-            'assignee_id': self.user1.id
+            'assignee_id': self.user1.id,
+            'assignor_id': self.user2.id
         })
         self.tasksCrud.create({
             'description': 'Task 2 workspace visibility',
@@ -49,6 +50,7 @@ class TasksListApiOps(APITestCase):
             'deadline': now + datetime.timedelta(days=10),
             'creator_id': self.user1.id,
             'assignee_id': self.user2.id,
+            'assignor_id': self.user1.id,
             'workspace_id': self.workspace.id
         })
         self.tasksCrud.create({
@@ -57,7 +59,8 @@ class TasksListApiOps(APITestCase):
             'visibility': 'private',
             'deadline': now + datetime.timedelta(days=5),
             'creator_id': self.user2.id,
-            'assignee_id': self.user1.id
+            'assignee_id': self.user1.id,
+            'assignor_id': self.user2.id
         })
         self.tasksCrud.create({
             'description': 'Task 4 another workspace task',
@@ -66,6 +69,7 @@ class TasksListApiOps(APITestCase):
             'deadline': now + datetime.timedelta(days=20),
             'creator_id': self.user2.id,
             'assignee_id': self.user2.id,
+            'assignor_id': self.user1.id,
             'workspace_id': self.workspace.id
         })
         self.tasksCrud.create({
@@ -74,18 +78,26 @@ class TasksListApiOps(APITestCase):
             'visibility': 'private',
             'deadline': now + datetime.timedelta(days=30),
             'creator_id': self.user1.id,
-            'assignee_id': self.user1.id
+            'assignee_id': self.user1.id,
+            'assignor_id': self.user2.id
         })
 
     def oneAllTasks(self):
         """
         Test retrieving all non-deleted tasks. Should be 5.
         """
-        payload = {'tbl': 'tata'}
+        payload = {
+            'tbl': 'tata',
+            'selectors': ['tata_id', 'description', 'status', 'visibility', 'deadline', 'creator_id', 'assignee_id', 'workspace_id'],
+            'conditions': {'delete_time': 'IS NULL'},
+        }
         response = self.client.post(self.url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()
-        self.assertEqual(len(data.get('results', [])), 5, "Should retrieve all 5 created tasks")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, f"Response: {response.content.decode()}")
+        
+        body = response.json()
+        data = body.get('results')
+        self.assertIsInstance(data, list, "Read operation should return a list of records")
+        self.assertEqual(len(data), 5, "Should retrieve all 5 created tasks")
 
     def twoFilterByVisibility(self):
         """
@@ -93,29 +105,34 @@ class TasksListApiOps(APITestCase):
         """
         payload = {
             'tbl': 'tata',
+            'selectors': ['tata_id', 'description', 'status', 'visibility', 'deadline', 'creator_id', 'assignee_id', 'workspace_id'],
             'conditions': {'visibility': 'private'}
         }
         response = self.client.post(self.url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()
-        results = data.get('results', [])
-        self.assertEqual(len(results), 3, "Should find 3 private tasks")
-        for task in results:
+        self.assertEqual(response.status_code, status.HTTP_200_OK, f"Response: {response.content.decode()}")
+        body = response.json()
+        data = body.get('results')
+        self.assertIsInstance(data, list, "Read operation should return a list of records")
+        self.assertEqual(len(data), 3, "Should find 3 private tasks")
+        for task in data:
             self.assertEqual(task['visibility'], 'private')
 
     def threeFilterByDeadline(self):
         """
-        Test searching for tasks with a deadline > 15 days from now. Should find 2.
-        This assumes the backend supports Django-style '__gt' lookups.
+        Test searching for tasks with a deadline between now and 15 days from now. Should find 3.
         """
-        futureDate = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=15)).isoformat()
+        now = datetime.datetime.now(datetime.timezone.utc).date()
+        futureDate = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=15)).date()
         payload = {
             'tbl': 'tata',
-            'conditions': {'deadline__gt': futureDate}
+            'conditions': {'deadline': f'from {now} to {futureDate}'}
         }
         response = self.client.post(self.url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json().get('results', [])), 2, "Should find 2 tasks with a deadline > 15 days")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, f"Response: {response.content.decode()}")
+        body = response.json()
+        data = body.get('results')
+        self.assertIsInstance(data, list, "Read operation should return a list of records")
+        self.assertEqual(len(data), 3, "Should find 3 tasks with a deadline > 15 days")
 
     def fourFilterByWorkspace(self):
         """
@@ -126,8 +143,11 @@ class TasksListApiOps(APITestCase):
             'conditions': {'workspace_id': self.workspace.id}
         }
         response = self.client.post(self.url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json().get('results', [])), 2, "Should find 2 tasks in the specified workspace")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, f"Response: {response.content.decode()}")
+        body = response.json()
+        data = body.get('results')
+        self.assertIsInstance(data, list, "Read operation should return a list of records")
+        self.assertEqual(len(data), 2, "Should find 2 tasks in the specified workspace")
 
     def fiveFreeTextSearch(self):
         """
@@ -139,7 +159,9 @@ class TasksListApiOps(APITestCase):
             'conditions': {'description__icontains': 'special text'}
         }
         response = self.client.post(self.url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        results = response.json().get('results', [])
-        self.assertEqual(len(results), 1, "Should find 1 task via free-text search")
-        self.assertEqual(results[0]['description'], 'Task 5 for special text search')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, f"Response: {response.content.decode()}")
+        body = response.json()
+        data = body.get('results')
+        self.assertIsInstance(data, list, "Read operation should return a list of records")
+        self.assertEqual(len(data), 1, "Should find 1 task via free-text search")
+        self.assertEqual(data[0]['description'], 'Task 5 for special text search')

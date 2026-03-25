@@ -22,19 +22,22 @@ class WorkSpace(models.Model):
     objects = WorkSpaceQuerySet.as_manager()
 
 
-class WorkSpaceCycle(models.Model):
+class ProjectLifeCycle(models.Model):
     """
         O2O Model.
     """
-    amount = models.IntegerField(null=False, blank=False)
-    interval = models.CharField(null=False, blank=False, max_length=50)  # enum of [day | week | month | year]
-    type = models.CharField(null=False, blank=False, max_length=50)  # enum of [reset | continuance]
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    interval_length = models.IntegerField(null=False, blank=False)
+    interval_type = models.CharField(null=False, blank=False, max_length=50)  # enum of [day | week | month | year]
+    life_cycle_type = models.CharField(null=False, blank=False, max_length=50)  # enum of [reset | continuance]
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
     objects = TaskCTQuerySet.as_manager()
+
 
 class WorkSpaceDepartment(models.Model):
     """
