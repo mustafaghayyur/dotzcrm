@@ -103,7 +103,7 @@ export default {
             }
 
             if ($A.forms.hasDateTimeData(key, value)) {
-                field.value = $A.dates.convertDateTimeToLocal(value);  // convert to appropriate format first
+                field.value = $A.dates.convertToDateTimeToLocalField(value);  // convert to appropriate format first
                 return;
             }
 
