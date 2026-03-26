@@ -10,7 +10,6 @@ import Sortable from 'sortablejs';
  * @param (str) containerId: DOM element ID where response would be displayed.
  */
 export default (data, containerId) => {
-
     let container = $A.dom.containerElement(containerId);
     const taskTermSortables = $A.dom.searchAllElementsCorrectly('.sortable', container);
     
@@ -24,6 +23,4 @@ export default (data, containerId) => {
             ghostClass: 'ghost-style-one'
         });
     });
-
-    
 }

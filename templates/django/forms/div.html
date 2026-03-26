@@ -1,0 +1,39 @@
+<!-- CUSTOM DIV TEMPLATE -->
+{{ errors }}
+{% if errors and not fields %}
+  <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+{% endif %}
+
+{% if fields %}
+<div class="row g-3">
+  {% for field, errors in fields %}
+    {% with widget_class=field.field.widget.attrs.class|default:'' %}
+      {% if 'mini-field' in widget_class %}
+        <div class="col-12 col-md-6 mini-field-wrapper">
+      {% else %}
+        <div class="col-12">
+      {% endif %}
+          <div class="row align-items-start gx-2 gy-1">
+            <div class="col-12 col-md-4">
+              {{ field.label_tag }}
+            </div>
+            <div class="col-12 col-md-8">
+              {{ field }}
+              {% if errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+    {% endwith %}
+
+    {% if forloop.last %}
+      {% for field in hidden_fields %}{{ field }}{% endfor %}
+    {% endif %}
+  {% endfor %}
+</div>
+{% else %}
+  {% for field in hidden_fields %}{{ field }}{% endfor %}
+{% endif %}

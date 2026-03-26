@@ -38,4 +38,5 @@ class TasksEditForm(Forms):
 
     
     def performSetup(self):
+        # self.fields['foo'].widget.attrs['class'] += ' mini-field'
         pass

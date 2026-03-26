@@ -8,6 +8,7 @@ class Forms(forms.Form):
     """
     _paramMatrix = {}  # holds any params passed to 'setParms.()' method 
     _querysets = {}  # # holds any params passed to 'setQuerySet.()' method 
+    # template_name = 'templates/django/forms/div.html'
 
     def __init__(self, *args, **kwargs):
         """
@@ -30,14 +31,19 @@ class Forms(forms.Form):
                 field.widget.attrs['class'] = 'form-select some-other-field-class'
             else:
                 field.widget.attrs['class'] = 'form-control some-other-field-class'
+
+            # Mark mini-field fields for template layout support
+            # Developers can set this class in child forms to trigger col-6 behavior.
+            if 'mini-field' in field.widget.attrs.get('class', '').split():
+                field.widget.attrs['data-mini-field'] = 'true'
+
             # Store original help text in widget data attribute and clear help_text to prevent <br/> insertion
-            
             if field.help_text:
                 field.widget.attrs['data-bs-toggle'] = 'tooltip'
                 field.widget.attrs['data-bs-placement'] = 'left'
                 field.widget.attrs['data-bs-title'] = field.help_text
             field.help_text = ''  # Clear help_text to prevent Django from adding <br/> 
-            
+
         self.performSetup()
 
 
@@ -54,7 +60,7 @@ class Forms(forms.Form):
         self._paramMatrix property.
         """
         for key, value in params.items():
-            self._paramMarix[key] = value
+            self._paramMatrix[key] = value
 
     def getParam(self, key: str):
         """
@@ -72,8 +78,6 @@ class Forms(forms.Form):
 
     def getQuerySet(self, key: str):
         """
-        Gets a queryset stored in mem 
+        Gets a queryset stored in memory.
         """
-        if self._querysets[key] is None:
-            return self._querysets[key]
-        return None
+        return self._querysets.get(key, None)

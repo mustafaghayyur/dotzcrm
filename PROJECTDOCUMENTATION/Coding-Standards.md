@@ -18,7 +18,7 @@ Methods and regular functions starting with a lower case first letter, with caml
 
 
 #### HTML DOM Markup in templates/
-HTML (CSS) classes follow Bootstrap standard words-seperated-by-comma naming conventions. While IDs follow camel-casing with first letter (generally) being lower-case.
+HTML (CSS) classes follow Bootstrap standard words-seperated-by-hyphen naming conventions. While IDs follow camel-casing with first letter (generally) being lower-case.
 
 
 ## Use of dictionaries over objects
