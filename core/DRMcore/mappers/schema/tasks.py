@@ -129,4 +129,51 @@ tasks = {
             'latest'
         ],
     },
+
+    'tate': {
+        'table': 'tasks_termfortask',
+        'model': 'TermForTask',
+        'path': 'tasks.models',
+        'type': 'o2o',
+        'cols': [
+            'id',
+			'create_time',
+			'delete_time',
+			'task_id',
+			'term',
+            'latest'
+        ],
+    },
+
+    'tapo': {
+        'table': 'tasks_pointsfortask',
+        'model': 'PointsForTask',
+        'path': 'tasks.models',
+        'type': 'o2o',
+        'cols': [
+            'id',
+			'create_time',
+			'delete_time',
+			'task_id',
+			'points',
+            'latest'
+        ],
+    },
+
+    'taup': {
+        'table': 'tasks_userpointsfortask',
+        'model': 'UserPointsForTask',
+        'path': 'tasks.models',
+        'type': 'm2m',
+        'cols': [
+            'id',
+			'create_time',
+			'delete_time',
+			'task_id',
+			'contributor_id',
+			'rating',
+            'latest'
+        ],
+    },
+
 }

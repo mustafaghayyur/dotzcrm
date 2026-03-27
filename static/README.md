@@ -1,6 +1,6 @@
 # Bootsrap Setup Instructions
 
-We will be using Boostrap for all UI/UX development of Dotz CRM + PM Software.
+We will be using Boostrap for all UI/UX development of Dotz Enterprise Platform.
 
 See more at: https://getbootstrap.com/ 
 
@@ -42,7 +42,7 @@ https://getbootstrap.com/docs/5.3/customize/sass/
 
  # JS Code-base Development Evironment:
 
-Our Dotz CRM + PM Software has turned into a JS quasi-SPA application. What started out as a Django + Bootstrap stack, has been shifting to more JS centered, interms of end-user functionality.
+Our Dotz Enterprise Platform has turned into a JS quasi-SPA application. What started out as a Django + Bootstrap stack, has been shifting to more JS centered, interms of end-user functionality.
 
 Thus we are missing ReactJS, and have developed our own mini-framework, the $A library. All throughout the Javascript code you will find references to $A.someModule.function(). 
 

@@ -46,6 +46,9 @@ class Create:
 
                 if submission[key] == '#make_null#':
                     continue
+
+                if submission[key] is None:
+                    continue
                 
                 fields[col] = submission[key]
                 state.get('log').record([key, submission[key]], 'Field added')
@@ -97,6 +100,13 @@ class Create:
                 
                 if col in mapper.dateFields():
                     submission[key] = Values.fixTimeZones(submission[key])
+                
+                
+                if submission[key] == '#make_null#':
+                    continue
+
+                if submission[key] is None:
+                    continue
                 
                 fields[col] = submission[key]
                 state.get('log').record([key, submission[key]], 'Field added')

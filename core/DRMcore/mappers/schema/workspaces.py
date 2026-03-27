@@ -15,6 +15,23 @@ workspaces = {
 			'delete_time'
         ],
     },
+    'wolc': {
+        'table': 'tasks_projectlifecycle',
+        'model': 'ProjectLifeCycle',
+        'path': 'tasks.models',
+        'type': 'o2o',
+        'cols': [
+            'id',
+			'start',
+			'end',
+			'interval_length',
+			'interval_type',
+            'life_cycle_type',
+            'creator_id',
+			'create_time',
+			'delete_time'
+        ],
+    },
     'wode': {
         'table': 'tasks_workspacedepartment',
         'model': 'WorkSpaceDepartment',

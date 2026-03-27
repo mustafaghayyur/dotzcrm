@@ -17,6 +17,11 @@ export default (taskInfo) => {
         };
     }
     
+    // Prefill form with workspace data if provided
+    if ($A.generic.checkVariableType(taskInfo) === 'dictionary') {
+        $A.tasks.forms.prefillEditForm(taskInfo, 'taskEditForm');
+    }
+    
     let container = $A.dom.obtainElementCorrectly('taskEditModal');
     let visibility = $A.dom.searchElementCorrectly('form input[name="visibility"]', container);
     let workspace_id = $A.dom.searchElementCorrectly('form input[name="workspace_id"]', container);

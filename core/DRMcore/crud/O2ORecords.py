@@ -1,6 +1,6 @@
 from django.db import models
 from . import Background
-from core.helpers import crud
+from core.helpers import crud, misc
 from core.lib.state import EmptyObject
 
 from .create import Create
@@ -62,7 +62,6 @@ class CRUD(Background.Operations):
 
         mId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         idColumns = self.state.get('idCols')
-
         records = self.fullRecord(self.state.get('submission')[mId])
 
         if not records:

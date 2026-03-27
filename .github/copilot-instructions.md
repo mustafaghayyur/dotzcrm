@@ -1,4 +1,4 @@
-# GitHub Copilot / AI Agent Instructions for Dotz CRM + PM Software 🔧
+# GitHub Copilot / AI Agent Instructions for Dotz Enterprise Platform 🔧
 
 ## Purpose
 Concise, actionable guidance to get an AI coding agent productive in this repository quickly. Focus on the architecture, developer workflows, and project-specific conventions (not general best practices).
@@ -15,6 +15,9 @@ Concise, actionable guidance to get an AI coding agent productive in this reposi
     For example, $A.query, is a module defined in static/core/js/lib/query.js, so we can use a method like search() found there with the following code:
     $A.query.search(tableKey);
 
+- Naming convention: we use (Camel Case) camelCase for ALL file names, ALL class names and ALL variable names in BOTH Python & Javascript.
+  - We also use camelCase for most HTML DOM id attribute values.
+
 ## Key patterns & concrete examples ⚠️
 - LAWS OF CRUD: implement CUD in DRM classes and, when applicable, update the corresponding `core/DRMcore/querysets` logic. Example: change in tasks CRUD should touch `tasks/drm/crud.py` and any query logic in `core/DRMcore/querysets` or `tasks/drm/querysets`.
 - Query assembly: QuerySetManager and mapper objects build selectors/conditions (see `core/DRMcore/querysets/`); follow the selectors/conditions/limit style used across `restapi` views (e.g., `restapi/views/tasks.py`).
@@ -24,14 +27,21 @@ Concise, actionable guidance to get an AI coding agent productive in this reposi
 
 ## Developer workflows (commands & examples) 🔧
 - Django: use `manage.py` for local tasks (e.g., `python manage.py runserver`, `python manage.py migrate`).
-- Database: MySQL (see `project/settings.py`); recommended server settings in `CRM-DOCUMENTATION/7.MySQL-Server-Settings.md`.
+- Database: MySQL (see `project/settings.py`); recommended server settings in `PROJECTDOCUMENTATION/7.MySQL-Server-Settings.md`.
 - Frontend: inside `static/` run `npm install` and `npm run build` (or `npm run build:core` / `npm run build:tasks`). SASS compile: `sass ./scss/dotzstrap.scss:./css/dotzstrap.css`.
 - Deployment: mod_wsgi is the expected production setup (top-level `README.md`).
 
 ## Logs & debugging 💡
 - CRUD log: `core/settings.py` -> `tasks['crud_logger_file']` (default `/Users/mustafa/Sites/python/server1/CRUD.log`).
 - Server logs: `logs/httpd/` (httpd) and `logs/mysqld/` (MySQL). Use these when debugging DB/HTTP issues.
-- Note: there are currently no repository test suites detected — add targeted tests when changing DRM or API behavior.
+- TESTING: To run Django tests you may run:
+> python3 manage.py test {app}.tests.{filename}.TestClass.test_name 
+
+Notes about Tests:
+ 1) filename: should be brief: remove 'test' and simply describe prupose in short verbage.
+ 2) TestClass: remove unnecessary 'Test' prefix, just short descriptor signifying purpose of class.
+ 3) test_name: similarly, remove the 'test_' prefix. Instead use 'one_', 'two_', 'three_', etc identifiers, so it's each to pcik which test failed/passed.
+
 
 ## Conventions for AI edits ✍️
 - When changing DB behavior:

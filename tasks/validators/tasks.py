@@ -17,9 +17,13 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     taas_id = IntegerField(**intNullableOpts)
     tavi_id = IntegerField(**intNullableOpts)
     tawo_id = IntegerField(**intNullableOpts)
+    tate_id = IntegerField(**intNullableOpts)
+    tapo_id = IntegerField(**intNullableOpts)
 
-    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
+    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=2000)
     details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
+    term = CharField(allow_null=True, allow_blank=True, required=False, max_length=200)
+    points = IntegerField(**intNullableOpts)
     
     status = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Status])
     visibility = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Visibility])
@@ -39,6 +43,8 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     taas_latest = ChoiceField(**latestChoiceOpts)
     tavi_latest = ChoiceField(**latestChoiceOpts)
     tawo_latest = ChoiceField(**latestChoiceOpts)
+    tate_latest = ChoiceField(**latestChoiceOpts)
+    tapo_latest = ChoiceField(**latestChoiceOpts)
 
     tata_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -47,6 +53,8 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     taas_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tavi_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tawo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tate_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tapo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     tata_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -55,6 +63,8 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     taas_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tavi_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tawo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tate_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    tapo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     tata_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
 

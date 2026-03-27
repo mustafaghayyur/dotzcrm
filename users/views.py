@@ -28,13 +28,14 @@ def login(request):
 def logout(request):
     """
         Handle user logout by destroying JWT tokens.
-        GET: Display logout confirmation page
+        Displays logout confirmation page
     """
     context ={
         'loginRequired': 'false',
+        'loggedOut': 'true',
     }
     # Create response with logout page
-    response = render(request, 'auth/logged_out.html', {'logged_out': 'tTrue'})
+    response = render(request, 'auth/logged_out.html', context)
     
     # Delete authentication cookies
     response.delete_cookie('access_token', path='/')

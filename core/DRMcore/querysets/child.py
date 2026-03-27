@@ -4,7 +4,7 @@ from core.helpers import misc
 """
 =======================================================================
     Children QuerySets will be based on the various data-models we use
-    in DotzCRM...
+    in Dotz Enterprise Platform...
 =====================================================================
 """
 

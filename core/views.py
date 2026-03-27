@@ -5,7 +5,7 @@ from django.shortcuts import render
 def index (request):
     context = {
         'heading': 'Welcome',
-        'content': 'This is a initial view for the CRM + PM Software',
+        'content': 'This is a initial view for the Dotz Enterprise Platform',
         'loginRequired': 'false',
     }
 

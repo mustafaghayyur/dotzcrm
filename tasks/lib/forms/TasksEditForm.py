@@ -38,4 +38,6 @@ class TasksEditForm(Forms):
 
     
     def performSetup(self):
-        pass
+        self.fields['assignor_id'].widget.attrs['class'] += ' mini-field mf-first'
+        self.fields['assignee_id'].widget.attrs['class'] += ' mini-field mf-second'
+        

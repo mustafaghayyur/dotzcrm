@@ -1,7 +1,8 @@
 import importlib
 from django.conf import settings as ds 
 from django.forms import DateTimeInput
-from . import misc, strings
+from . import strings
+from .misc import log
 
 def generateModelInfo(mapper, tbl):  # rdbms, space, tbl):
     """
@@ -81,7 +82,7 @@ def generateError(object, additionalMsg = None):
         dictionary['messages'] = additionalMsg
     
     if ds.DEBUG:
-        misc.log(object, 'Error Trace:', 3) # logs the error with full trace in debug-mode only
+        log(object, 'Error Trace:', 3) # logs the error with full trace in debug-mode only
 
     return dictionary
 

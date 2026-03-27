@@ -1,5 +1,5 @@
 {
-  "name": "@dotz/crm",
+  "name": "@dotz/enterprise-platform",
   "version": "0.1.0",
   "description": "FrontEnd of CRM + PM Software from Web Dotz",
   "main": "dist/core-bundle.js",
@@ -25,6 +25,7 @@
     "https-browserify": "^1.0.0",
     "lodash": "^4.17.21",
     "path-browserify": "^1.0.1",
+    "sortablejs": "^1.15.7",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "url": "^0.11.4",

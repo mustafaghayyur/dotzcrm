@@ -33,9 +33,9 @@ Create Read Update Delete Operations
     And the related DRM.querysets folder (which carries the raw SQL queries.)
 
  3) The django models are not to be touched unless for modifying DB/table structures
-    in the DotzCRM MySQL database.
+    in the Dotz Enterprise Platform MySQL database.
 
-These laws are designed to maintain consistent, reliable data structures within the CRM.
+These laws are designed to maintain consistent, reliable data structures within the Enterprise Platform.
 
-Since DotzCRM relies heavily on Raw MySQL queries, we need a way to maintain our own order.
+Since Dotz Enterprise Platform relies heavily on Raw MySQL queries, we need a way to maintain our own order.
 

@@ -32,4 +32,5 @@ class WorkSpaceEditForm(Forms):
     lead_id = forms.ModelChoiceField(queryset=User.objects.none(), label="Team Leader", help_text="Select Initial Team Lead. More team-leaders and team-members can be added after the WorkSpace has been created.")
     
     def performSetup(self):
+        # self.fields['foo'].widget.attrs['class'] += ' mini-field'
         pass

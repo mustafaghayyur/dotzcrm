@@ -33,19 +33,18 @@ export default {
         }
     },
     /**
-     * Cleans all fields that have a name matching a key provided by the supplied keys const.
+     * Cleans all fields inside form matching formId.
      *
      * @param {string} formId: should be the while id value along with the '#' selector
-     * @param {list} keys: keys is a list of all keys possible in the given form.
      */
-    cleanForm: function (formId, keys) {
+    cleanForm: function (formId, keys = null) {
         const form = document.getElementById(formId);
-        keys.forEach(key => {
-            const field = form.querySelector('[name="'+key+'"]');
-            if (!(field instanceof HTMLElement)){
-                return;  // return only the foreach loop...
+        form.reset(); // Reverts to default
+        Array.from(form.elements).forEach(element => {
+            if (element.type !== 'submit' && element.type !== 'button') {
+                element.value = ''; // Force empty
+                element.checked = false; // Uncheck radio/checkboxes
             }
-            field.value = '';
         });
     },
 
@@ -93,7 +92,6 @@ export default {
      * @param {str} formId: html dom id attr value 
      */
     prefillForms: function (data, formId) {
-        console.log('inspecting prefilledForms()', data, formId);
         const form = $A.dom.obtainElementCorrectly(formId); // Get the form element
 
         $A.generic.loopObject(data, (key, value) => {
@@ -104,7 +102,7 @@ export default {
             }
 
             if ($A.forms.hasDateTimeData(key, value)) {
-                field.value = $A.dates.convertDateTimeToLocal(value);  // convert to appropriate format first
+                field.value = $A.dates.convertToDateTimeToLocalField(value);  // convert to appropriate format first
                 return;
             }
 
