@@ -1,6 +1,7 @@
 import { removeWatcher, createWatcher } from "../crud/watchers.js";
 import { createCommentForTask } from "../crud/comments.js";
 import { DeleteTask } from '../crud/tasks.js';
+import { fetchUserWatchStateForTask, fetchTaskComments } from '../crud/fetch.js';
 import $A from "../helper.js";
 
 /**
@@ -29,7 +30,7 @@ export default function (task, containerId) {
     editAndDelete(task);
     assignments(task);
     newComments(task);
-    viewComments(task);
+    fetchTaskComments(task, 'commentsResponse');
     
     
     /**
@@ -76,17 +77,7 @@ export default function (task, containerId) {
         });
 
         // fetch current watch state for user
-        $A.query().read('tawa', {
-                    task_id: task.tata_id
-                }).execute('taskDetailsModalResponse', (data, id) => {
-                if ($A.generic.isVariableEmpty(data)) {
-                    watchbtn.classList.remove('d-none');
-                    unwatchbtn.classList.add('d-none');
-                } else {
-                    unwatchbtn.classList.remove('d-none');
-                    watchbtn.classList.add('d-none');
-                }
-            });
+        fetchUserWatchStateForTask(task, 'taskDetailsModalResponse');
     }
 
     /**
@@ -107,34 +98,6 @@ export default function (task, containerId) {
             taskIdField.value = e.currentTarget.getAttribute('data-task-id');
             createCommentForTask('newCommentForm');
         });
-    }
-
-    /**
-     * Retrieves & displays, task-level-comments..
-     * @param {obj} task: task object
-     */
-    async function viewComments(task) {
-        $A.query().read('taco', { task_id: task.tata_id })
-            .execute('commentsResponse', (comments, commentsContainerId) => {
-                let commentsContainer = $A.dom.containerElement(commentsContainerId);
-                let commentCreator = $A.dom.searchElementCorrectly('#createComment', commentsContainer);
-                let comment = $A.dom.searchElementCorrectly('#commmentContainer', commentsContainer);
-                
-                commentsContainer.innerHTML = '';
-                commentsContainer.appendChild(commentCreator);
-                commentsContainer.appendChild(comment);
-
-                if ($A.generic.checkVariableType(comments) === 'list') {
-                    comments.forEach(item => {
-                        let newComment = $A.ui.embedData(item, comment.cloneNode(true), true);
-                        const user = $A.app.user(item.commenter_id, commentsContainerId);
-
-                        newComment.classList.remove('d-none');
-                        newComment.querySelector('.embed.creator_id').textContent = '' + user.username + ' wrote...';
-                        commentsContainer.appendChild(newComment);
-                    });
-                }
-            });
     }
 }
 

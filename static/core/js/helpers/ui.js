@@ -26,9 +26,7 @@ export default {
                 if ($A.generic.checkVariableType(itm) === 'dictionary') {
                     $A.generic.loopObject(itm, (key, value) => {
                         let elem = container.querySelector('.embed.' + key);
-                        if ($A.generic.checkVariableType(elem) === 'domelement') {
-                            elem.textContent = $A.forms.escapeHtml(value);
-                        }
+                        $A.ui.displayValueCorrectly(key, value, elem);
                     });
                 }
             });
@@ -37,13 +35,21 @@ export default {
         if (typeData === 'dictionary') {
             $A.generic.loopObject(data, (key, value) => {
                 let elem = container.querySelector(`.embed.${key}`);
-                if ($A.generic.checkVariableType(elem) === 'domelement') {
-                    elem.textContent = $A.forms.escapeHtml(value);
-                }
+                $A.ui.displayValueCorrectly(key, value, elem);
             });
         }
 
         return container;
+    },
+
+    displayValueCorrectly: function (key, value, elem) {
+        if ($A.generic.checkVariableType(elem) === 'domelement') {
+            if ($A.forms.hasDateTimeData(key, value)) {
+                elem.textContent = $A.dates.convertToDisplayLocal(value, null, 'None');
+            } else {
+                elem.textContent = $A.forms.escapeHtml(value);
+            }
+        }
     },
 
     /**

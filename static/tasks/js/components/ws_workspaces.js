@@ -1,6 +1,7 @@
 //import _ from 'lodash';
 import $A from "../helper.js";
 import { DeleteWorkSpace } from '../crud/workspaces.js';
+import { fetchTasksForWorkSpaceArena } from '../crud/fetch.js';
 
 /**
  * Implements the entire Tasks' WorkSpaces Dashboard.
@@ -20,7 +21,6 @@ export default async (data, containerId) => {
     let paneTemplate = $A.dom.searchElementCorrectly('.tab-content .tab-pane', container);
     let WSArenaCallBackStack = {};
     const workspaceEditForm = await $A.tasks.load('ws_ProjectEditForm');
-    const projectArenaModule = await $A.tasks.load('ws_projectArena');
 
 
     //reset the tabs and panes so new tabs/panes can be added.
@@ -58,15 +58,7 @@ export default async (data, containerId) => {
 
         // define callbacks for each WS tab
         WSArenaCallBackStack[tabKey] = () => {
-            $A.query().search('tata')
-                .fields('tata_id', 'description', 'status', 'creator_id', 'assignee_id', 'deadline', 'tata_create_time')
-                .where({
-                    workspace_id: itm.wowo_id,
-                    tata_delete_time: 'is null',
-                }).order([
-                    {tbl: 'tata', col: 'id', sort: 'desc'},
-                ]).page(1, 1000)
-                .execute('workspacesDashboardResponse', projectArenaModule, {key: tabKey, data: itm});
+            fetchTasksForWorkSpaceArena(tabKey, itm, 'workspacesDashboardResponse', 'ws_projectArena');
         }
     });
 
