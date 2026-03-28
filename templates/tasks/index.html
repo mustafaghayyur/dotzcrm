@@ -23,9 +23,20 @@
         <div id="personalContainer" class="tab-results">
           <div class="container-fluid">
             <div class="row align-items-start">
-              <div id="personal" class="col-12 col-md-6 position-relative">
-                <h4 class="mx-2 mt-2">YOUR TODOs...</h4>
-                <span class="position-absolute end-0 top-0 mt-1 me-4"><a class="btn btn-secondary btn-sm bottom-0 start-0" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas"><i class="bi bi-plus-lg"></i></a></span>
+              <div id="personal" class="col-12 col-md-6">
+                <div class="row my-2 align-items-center d-flex">
+                  <div class="col-6">
+                    <h4 class="my-2">YOUR TODOs...</h4>
+                  </div>
+                  <div class="col-4">
+                  </div>
+                  <div class="col-1 align-items-end">
+                    <a id="refreshToDosList" class="btn btn-xs btn-info" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
+                  </div>
+                  <div class="col-1 align-items-end">
+                    <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
+                  </div>
+                </div>
                 <div id="personalTodosResponse"></div>
                 <ul id="personalTodos" class="list-group m-2">
                   <li class="list-group-item row d-flex p-0">
@@ -36,7 +47,16 @@
                 </ul>
               </div>
               <div id="assigned" class="col-12 col-md-6">
-                <h4 class="mx-2 mt-2">ASSIGNED TASKS:</h4>
+                <div class="row px-3 my-2 align-items-center d-flex">
+                  <div class="col-6">
+                    <h4 class="my-2">ASSIGNED TASKS:</h4>
+                  </div>
+                  <div class="col-5">
+                  </div>
+                  <div class="col-1 align-items-end">
+                    <a id="refreshAssignedTasksList" class="btn btn-xs btn-info me-1" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
+                  </div>
+                </div>
                 <div id="assignedTasksResponse"></div>
                 <ul id="assignedTasks" class="list-group  m-2 workspace-tasks">
                   <li class="list-group-item">

@@ -1,5 +1,6 @@
 import { toggleTodoStatus, deleteTodo } from '../crud/tasks.js';
 import $A from "../helper.js";
+import { fetchTodosDashboard } from '../crud/fetch.js';
 
 /**
  * Maps fetched ToDos to page elements.
@@ -16,16 +17,23 @@ export default function (data, containerId) {
 
     toDos.forEach(item => {
         let li = originalLiItem.cloneNode(true);
-        let status = li.querySelector('.status').querySelector('.' + item.status);
-        let desc = li.querySelector('.description');
+        let status = $A.dom.searchAllElementsCorrectly(`.status i.bi`, li);
+        let currStatus = $A.dom.searchElementCorrectly(`.status .${item.status}`, li);
+        let desc = $A.dom.searchElementCorrectly('.description', li);
         desc.dataset.taskId = $A.forms.escapeHtml(item.tata_id);
         desc.textContent = $A.forms.escapeHtml(item.description);
         
+        status.forEach((sts) => {
+            // hide each status btn...
+            sts.classList.remove('d-none');
+            sts.classList.add('d-none');
+        });
+        currStatus.classList.remove('d-none'); // then show currStatus
+        
+
         if (item.status === 'completed') {
             desc.classList.add('text-decoration-line-through');
-        }
-        if (status instanceof HTMLElement) {
-            status.classList.remove('d-none');
+            desc.classList.add('text-muted');
         }
         
         li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item); });
@@ -34,7 +42,16 @@ export default function (data, containerId) {
         ul.appendChild(li);
     });
 
+    // initialize tooltips of dynamic todo items...
     $A.app.initializeTooltips(ul, false); // initialize tooltips
+
+    // activate refresh button...
+    const refreshBtn = $A.dom.obtainElementCorrectly('refreshToDosList');
+    $A.app.wrapEventListeners(refreshBtn, 'null', null, 'click', (e) => {
+        e.preventDefault();
+        fetchTodosDashboard('personalTodosResponse', 'dashboardTodoList');
+    });
+
 
     /**
      * Sorts ToDo records based on assigned first, then completed.

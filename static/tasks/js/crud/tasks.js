@@ -1,4 +1,5 @@
 import $A from "../helper.js";
+import { fetchTodosDashboard } from '../crud/fetch.js';
 
 const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
 
@@ -57,6 +58,7 @@ export function toggleTodoStatus(record) {
 
     $A.query().edit('tata', dictionary, true).execute('personalTodosResponse', (data, containerId) => {
         $A.app.generateResponseToAction(containerId, 'Your ToDo item has been updated.');
+        fetchTodosDashboard('personalTodosResponse', 'dashboardTodoList');
     });
 }
 
@@ -74,5 +76,6 @@ export function deleteTodo(todoId, identifyer) {
         tata_id: todoId
     }, true).execute('personalTodosResponse', (data, containerId) => {
         $A.app.generateResponseToAction(containerId, 'Your ToDo has been removed.');
+        fetchTodosDashboard('personalTodosResponse', 'dashboardTodoList');
     });
 }

@@ -77,7 +77,7 @@ export default function (task, containerId) {
         });
 
         // fetch current watch state for user
-        fetchUserWatchStateForTask(task, 'taskDetailsModalResponse');
+        fetchUserWatchStateForTask(task, watchbtn, unwatchbtn, 'taskDetailsModalResponse');
     }
 
     /**

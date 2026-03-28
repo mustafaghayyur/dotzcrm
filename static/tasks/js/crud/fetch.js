@@ -51,16 +51,16 @@ export async function fetchWorkspacesDashboard(containerId, componentName) {
         ]).page(1).execute(containerId, component);
 }
 
-export async function fetchUserWatchStateForTask(task, containerId) {
+export async function fetchUserWatchStateForTask(task, watchBtn, unwatchBtn, containerId) {
     $A.query().read('tawa', {
             task_id: task.tata_id
         }).execute(containerId, (data, id) => {
         if ($A.generic.isVariableEmpty(data)) {
-            watchbtn.classList.remove('d-none');
-            unwatchbtn.classList.add('d-none');
+            watchBtn.classList.remove('d-none');
+            unwatchBtn.classList.add('d-none');
         } else {
-            unwatchbtn.classList.remove('d-none');
-            watchbtn.classList.add('d-none');
+            unwatchBtn.classList.remove('d-none');
+            watchBtn.classList.add('d-none');
         }
     });
 }
