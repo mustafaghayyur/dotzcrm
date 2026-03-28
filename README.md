@@ -28,7 +28,7 @@ While the exact deadline is months from now. We do hope to have a core suite dev
 
 
 
-# Wiki Setup
+## Wiki Setup
 
 We have setup a Github Wiki for this project:
 https://github.com/mustafaghayyur/dotz-enterprise-platform/wiki

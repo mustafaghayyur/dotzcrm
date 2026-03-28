@@ -22,7 +22,24 @@ export default {
             const module = await import(`../../../${app}/js/components/${componentPath}.js`);
             return module.default;
         } catch (error) {
-            console.error('Error loading component:', error);
+            console.error('App Error: Failed to load component:', error);
+            throw new Error(`App Error: ${component} module not found for: ${app}`);
+        }
+    },
+
+
+    /**
+     * Dynamically loads a fetch module for a given app.
+     * @param {string} appName - The app name (e.g., 'tasks', 'customers')
+     * @returns {Promise<object>} - The fetch module exports
+     */
+    loadFetchModule: async function (appName, fileName = 'Default') {
+        try {
+            const module = await import(`../../../${appName}/js/crud/fetch${fileName}.js`);
+            return module;
+        } catch (error) {
+            console.error(`Failed to load fetch module for app: ${appName}`, error);
+            throw new Error(`App Error: Fetch module not found for: ${appName}`);
         }
     },
 
