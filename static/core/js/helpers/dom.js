@@ -99,5 +99,29 @@ export default {
 
         return elem;
     },
+
+    /**
+     * Returns an array of couples (key/value pairs) that match filter.
+     * Only one of keyFilter of valueFilter should be passed as non-null.
+     * @param {HTMLElement} elem 
+     * @param {str} keyFilter 
+     * @param {*} valueFilter 
+     * @returns 
+     */
+    filterAtrributes: function(elem, keyFilter, valueFilter) {
+        const el = document.querySelector('#myElement');
+        // Finds all data-abc-* attributes
+        const matchingData = Object.entries(elem.dataset)
+        .filter(([key, value]) => {
+            if (keyFilter !== null) {
+                return key.startsWith(keyFilter);
+            }
+            if (valueFilter !== null) {
+                return value === valueFilter;
+            }
+            return false;
+        });
+        return matchingData;
+    }
 };
 

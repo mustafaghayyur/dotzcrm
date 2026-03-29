@@ -33,7 +33,7 @@ export default {
     /**
      * Returns a string based definition of data-type.
      * @param {*} variable: any value type
-     * @returns ['string' | 'list' | 'null' | 'dictionary' | 'undefined' | 'number' | etc..]
+     * @returns ['string' | 'list' | 'date' | 'null' | 'dictionary' | 'undefined' | 'number' | etc..]
      */
     checkVariableType: function (variable) {
         if (typeof variable === 'string') {
@@ -44,6 +44,9 @@ export default {
         }
         if (variable === null) {
             return 'null';
+        }
+        if (value instanceof Date) {
+            return 'date';
         }
         if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable) && typeof variable === 'number') {
             return 'number';
@@ -87,22 +90,7 @@ export default {
         }
         return defaultsTo;
     },
-
-    /**
-     * Display values retrieved from database to front-end.
-     * @param {*} value
-     * @returns front-end friendly display
-     */
-    JSONToString: function (value) {
-        if (this.checkVariableType(value) === 'dictionary') {
-            try {
-                return JSON.stringify(value, null, 2);
-            } catch (e) {
-                return String(value); // just send the value
-            }
-        }
-        return String(value);
-    },
+    
 
     /**
      * Loops through any basic dictionary (single level loop).
@@ -126,15 +114,6 @@ export default {
 
         return dictionary;
     },
-    
-    /**
-     * Returns requested param's value if set in url params.
-     * @param {str} paramStr: which key are you requesting?
-     */
-    getQueryParam: function (paramStr) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(paramStr);
-    },
 
     /**
      * Stringifies variable.
@@ -142,22 +121,61 @@ export default {
      * @returns string
      */
     stringify: function (value) {
-        if (this.checkVariableType(value) === 'dictionary') {
+        // JSON.parse(retrievedString);
+        if ($A.generic.isPrimitiveValue(value)) {
+            return String(value);
+        } else {
             try {
                 return JSON.stringify(value, null, 2);
             } catch (e) {
                 return String(value); // just send the value
             }
         }
-        if (this.checkVariableType(value) === 'list') {
-            try {
-                return JSON.stringify(value, null, 2);
-            } catch (e) {
-                return String(value); // just send the value
-            }
+    },
+
+    /**
+     * Parse JSON variable.
+     * @param {*} value 
+     * @returns JSON|original value on error
+     */
+    parse: function (value) {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return value; // just send the value
+        }
+    },
+
+    /**
+     * Merges two data inputs. dateTwo will overwrite dataOne in case of collision.
+     * @param {*} dataOne 
+     * @param {*} dataTwo 
+     * @returns merged | null on failure
+     */
+    merge: function(dataOne, dataTwo) {
+        const typeOne = $A.generic.checkVariableType(dataOne);
+        const typeTwo = $A.generic.checkVariableType(dataTwo);
+        
+        if (typeOne !== typeTwo) {
+            throw Error('Data Error: merge() was given two different Data Types.');
         }
 
-        return String(value);
+        if (typeOne === 'dictionary') {
+            return {
+                ...dataOne,
+                ...dataTwo
+            };
+        }
+        if (typeOne === 'list') {
+            return [...dataOne, ...dataTwo];
+        }
+        if (typeOne === 'string') {
+            return `${dataOne}${dataTwo}`;
+        }
+        if (typeOne === 'number') {
+            return dataOne + dataTwo;
+        }
+        return null; // boolean, null, undefined, dom elements etc are not supported for merge in this implementation.
     }
 };
 

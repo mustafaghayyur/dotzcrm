@@ -226,6 +226,15 @@ export default {
         }).filter(popover => popover !== null); // Remove null values
 
         return popoverList;
+    },
+    
+    /**
+     * Returns requested param's value if set in url params.
+     * @param {str} paramStr: which key are you requesting?
+     */
+    getQueryParam: function (paramStr) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(paramStr);
     }
 };
 

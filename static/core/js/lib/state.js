@@ -8,27 +8,45 @@ import $A from "../helper.js";
 // Registry to cache loaded fetch modules to avoid repeated imports
 const fetchModuleRegistry = {};
 
-// Internal state memory to persist key/args pairs during session (single session, no localStorage)
+// Internal state memory to persist key/mapper pairs during session (single session, no localStorage)
 const stateMemory = new Map();
 
+
 /**
- * Formulates valid function Name, loads function module file, 
- * and returns requested function component.
+ * Searches and stores in-memory, the fetch function component using fetchFile specified.
+ * @param {*} componentName: fetch function shorthand 
+ * @param {*} appName: current app/module/space 
+ * @param {*} fetchFile: defauls to 'Default' suffix for fetch-file.
+ * @returns fetchFunctionFullName
+ */
+async function findFetchComponent(componentName, appName, fetchFile) {
+    const functionName = 'fetch' + componentName.charAt(0).toUpperCase() + componentName.slice(1);
+    try {
+        if (!fetchModuleRegistry[fetchFile]) {
+            fetchModuleRegistry[fetchFile] = await $A.app.loadFetchModule(appName, fetchFile);
+        }
+        const func = fetchModuleRegistry[fetchFile][functionName];
+    } catch (error) {
+        throw Error('State Error: Could not import fetch component: ' + fetchFile + '.' + functionName + '. ' + error.message);
+    }
+
+    return functionName;
+}
+
+/**
+ * Returns fetchFunction module component from memory.
  * 
- * @param {*} funcName: short-hand function name (without 'fetch' prefix)
+ * @param {*} functionName: proper fetchFunction name
  * @param {*} fileName: file the function component resides in (default is 'Default')
  * @returns 
  */
-async function fetchComponent(funcName, appName, fileName) {
-    const functionName = 'fetch' + funcName.charAt(0).toUpperCase() + funcName.slice(1);
-    if (!fetchModuleRegistry[fileName]) {
-        fetchModuleRegistry[fileName] = await $A.app.loadFetchModule(appName, fileName);
-    }
+function getFetchComponent(functionName, fileName) {
     try {
         return fetchModuleRegistry[fileName][functionName];
     } catch (error) {
-        throw Error('State Error: Could not import fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
+        throw Error('State Error: Could not find fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
     }
+    
 }
 
 /**
@@ -43,15 +61,14 @@ function parseConfigString(key, configString) {
         throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "appName.uniqueContainerIdentifier"`);
     }
     
-    const [appName, uniqueContainerIdentifier] = parts;
-    const containerId = `${uniqueContainerIdentifier}Response`;
-    const componentFunctionName = uniqueContainerIdentifier;
+    const [appName, componentName] = parts;
+    const containerId = `${componentName}Response`;
     
-    if (!appName || !containerId || !componentFunctionName) {
-        throw new Error(`State Error: Cannot determine all four required configuraton parts for key: "${key}". String provided: "${configString}"`);
+    if (!appName || !containerId || !componentName) {
+        throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
     }
     
-    return { appName, containerId, componentFunctionName };
+    return { appName, containerId, componentName };
 }
 
 /**
@@ -60,30 +77,31 @@ function parseConfigString(key, configString) {
  * 
  * @param {string} key - The state key
  * @param {string} configString - configurations: 'appName.uniqueContainerIdentifier'
- * @param {Array} args - Array of additional arguments to pass to the fetch function
+ * @param {obj} mapper - DIctionary of key => val pairs used as arguments passed to the fetch function
  * @returns {Promise<void>}
  */
-async function updateState(key, configString, args = [], fetchFile = 'Default') {
-    if (!Array.isArray(args)) { // Validate arguments
-        console.warn(`State Error: State argument should be an array. Received: ${typeof args}. Wrapping in array.`);
-        args = [args];
+async function updateState(key, configString, mapper = {}, fetchFile = 'Default') {
+    const typeMapper = $A.generic.checkVariableType(mapper);
+    if (typeMapper !== 'dictionary') {
+        throw Error(`State Error: State mapper argument should be an Object. Received: ${typeMapper}.`);
     }
     
     try {
-        const { appName, containerId, componentFunctionName } = parseConfigString(key, configString);
-        const fetchFunction = await fetchComponent(componentFunctionName, appName, fetchFile);
-
+        const { appName, containerId,  componentName } = parseConfigString(key, configString);
+        
+        const fetchFunctionFullName = await findFetchComponent(componentName, appName, fetchFile);
         if (typeof fetchFunction !== 'function') {
-            throw new Error(`State Error: Function "${componentFunctionName}" not found in fetch module for app: "${appName}"`);
+            throw new Error(`State Error: Function "${fetchFunctionFullName}" not found in fetch module for app: "${appName}"`);
         }
         
         // store in memory with short-hand for key:value pairs...
         stateMemory.set(key, {
             appName,
-            args,
+            mapper,
             containerId,
-            componentFunctionName,
-            fetchFunction,
+            componentName,
+            fetchFunctionFullName,
+            fetchFile,
             timestamp: Date.now()
         });
     } catch (error) {
@@ -99,20 +117,25 @@ async function updateState(key, configString, args = [], fetchFile = 'Default') 
  * @param {string} key - The unique key for the state (first part of the state key)
  * @returns {Promise<void>}
  */
-function triggerState(key) {
+function triggerState(key, newMapper = {}) {
     if (!stateMemory.has(key)) {
         throw new Error(`State Error: No state found for key: "${key}". Call updateState() first to initialize this state.`);
     }
     try {
         const stateData = stateMemory.get(key);
-        const { appName, args, containerId, componentFunctionName, fetchFunction } = stateData;
+        const { appName, mapper, containerId,  componentName, fetchFunctionFullName, fetchFile, timestamp } = stateData;
         
-        if (typeof fetchFunction !== 'function') {
-            throw new Error(`State Error: Function "${componentFunctionName}" not found in fetch module for app: "${appName}"`);
+        let args = $A.generic.merge(mapper, newMapper)
+        const page = $A.generic.getter(args, 'page', 1);
+        args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
+
+        const fetchFunction = getFetchComponent(fetchFunctionFullName, fetchFile);
+        if ($A.generic.checkVariableType(fetchFunction) !== 'function') {
+            throw new Error(`State Error: Function "${fetchFunctionFullName}" not found in fetch module for app: "${appName}"`);
         }
 
         // Call the fetch function with the stored args
-        return fetchFunction(...args, containerId, componentFunctionName);
+        return fetchFunction(args, containerId, componentName);
         
     } catch (error) {
         console.error(`State Error: State trigger failed for key: "${key}"`, error);
