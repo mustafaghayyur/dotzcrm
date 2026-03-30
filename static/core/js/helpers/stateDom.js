@@ -1,7 +1,7 @@
 import $A from "../helper.js";
 
 /**
- * Carries operations enabling interactions and UX features
+ * Carries operations enabling State and UX features
  */
 export default {
     triggerAllForTable: function(tbl, container) {

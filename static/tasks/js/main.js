@@ -25,8 +25,8 @@ Main(async () => {
     $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
-            const todos = await $A.state.save('personalTodos', 'tasks.dashboardTodoList');
-            const tasks = await $A.state.save('personalAssignedTasks', 'tasks.dashboardAssignedTaskList');
+            const todos = await $A.state.save('personalTodos', 'tasks.tata.dashboardTodoList');
+            const tasks = await $A.state.save('personalAssignedTasks', 'tasks.tata.dashboardAssignedTaskList');
             $A.state.trigger('personalTodos');
             $A.state.trigger('personalAssignedTasks');            
         },

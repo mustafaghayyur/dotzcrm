@@ -1,99 +1,96 @@
 import $A from "../helper.js";
-
-/**
- * Our own Redux/State Manager
- * Not as sophisticated as ReactJS, but serves the purpose.
- */
+import dom from "../helpers/stateDom.js";
 
 // Registry to cache loaded fetch modules to avoid repeated imports
 const fetchModuleRegistry = {};
-
-// Internal state memory to persist key/mapper pairs during session (single session, no localStorage)
+// Internal state memory holds all state objects
 const stateMemory = new Map();
-
+// holds registtry of all tbls andany State-Keys associated with it
+const tblAndStateKeys = {};
 
 /**
- * Searches and stores in-memory, the fetch function component using fetchFile specified.
- * @param {*} componentName: fetch function shorthand 
- * @param {*} appName: current app/module/space 
- * @param {*} fetchFile: defauls to 'Default' suffix for fetch-file.
- * @returns fetchFunctionFullName
+ * State Manager
+ * Unline ReactJs' key=>value pairing, our state stores fetch functions
+ * defined in static/{app}/js/crud/fetch*.js files. Custom mapers can be passed 
+ * through both save() and trigger() calls allowing some level of versatility.
  */
-async function findFetchComponent(componentName, appName, fetchFile) {
-    const functionName = 'fetch' + componentName.charAt(0).toUpperCase() + componentName.slice(1);
-    try {
-        if (!fetchModuleRegistry[fetchFile]) {
-            fetchModuleRegistry[fetchFile] = await $A.app.loadFetchModule(appName, fetchFile);
+export default {
+    /**
+     * save(key, 'appName.tblKey.uniqueContainerIdentifier', mapperOfArguments)
+     * Stores in state fetch function call.
+     */
+    save: updateState,
+
+    /**
+     * trigger('stateKey', newMapper)
+     * Executes the fetch function with previously stored args (and new ones) for that key.
+     */
+    trigger: triggerState,
+
+    /**
+     * dom helper functions that relate to state management within dom
+     */
+    dom: dom,
+
+    /**
+     * getter functions to access internal State memory
+     */
+    get: {
+        /**
+         * Returns componentName for given valid statekey
+         * @param {str} stateKey 
+         */
+        componentName: function (stateKey) {
+            if (!stateMemory.has(stateKey)) {
+                throw new Error(`State Error: No state found for key: "${stateKey}" in getComponentName().`);
+            }
+            const stateData = stateMemory.get(stateKey);
+            return stateData.componentName;
+        },
+
+        /**
+         * Returns state-keys-list for provided table.
+         * @param {str} tbl 
+         * @returns []
+         */
+        allStatesKeysForTable: function (tbl) {
+            return tblAndStateKeys[tbl];
         }
-        const func = fetchModuleRegistry[fetchFile][functionName];
-    } catch (error) {
-        throw Error('State Error: Could not import fetch component: ' + fetchFile + '.' + functionName + '. ' + error.message);
+    },
+    /**
+     * Memmory management function
+     */
+    clearModuleCache: () => { 
+        Object.keys(fetchModuleRegistry).forEach(key => delete fetchModuleRegistry[key]); 
     }
-
-    return functionName;
-}
-
-/**
- * Returns fetchFunction module component from memory.
- * 
- * @param {*} functionName: proper fetchFunction name
- * @param {*} fileName: file the function component resides in (default is 'Default')
- * @returns 
- */
-function getFetchComponent(functionName, fileName) {
-    try {
-        return fetchModuleRegistry[fileName][functionName];
-    } catch (error) {
-        throw Error('State Error: Could not find fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
-    }
-    
-}
-
-/**
- * Parses the state key into its four components.
- * @param {string} key - Unique key in string form that identifies one fetch 'state' for recurring triggering
- * @param {string} configString - configurations: 'appName.uniqueContainerIdentifier'
- * @returns {object} - { appName, containerId, componentFunctionName }
- */
-function parseConfigString(key, configString) {
-    const parts = configString.split('.');
-    if (parts.length !== 2) {
-        throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "appName.uniqueContainerIdentifier"`);
-    }
-    
-    const [appName, componentName] = parts;
-    const containerId = `${componentName}Response`;
-    
-    if (!appName || !containerId || !componentName) {
-        throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
-    }
-    
-    return { appName, containerId, componentName };
-}
+};
 
 /**
  * Updates the state with fetch function and its arguments, within 
  * in-memory storage for later retrieval via triggerState().
  * 
  * @param {string} key - The state key
- * @param {string} configString - configurations: 'appName.uniqueContainerIdentifier'
- * @param {obj} mapper - DIctionary of key => val pairs used as arguments passed to the fetch function
+ * @param {string} configString - configurations: 'appName.tblKey.uniqueContainerIdentifier'
+ * @param {obj} mapper - Dictionary of key => val pairs used as arguments passed to the fetch function
  * @returns {Promise<void>}
  */
 async function updateState(key, configString, mapper = {}, fetchFile = 'Default') {
+    const typeKey = $A.generic.checkVariableType(key);
+    if (typeKey !== 'string') {
+        throw Error(`State Save Error: State key argument should be a string. Received: ${typeKey}. Raw: ${key}`);
+    }
+    
     const typeMapper = $A.generic.checkVariableType(mapper);
     if (typeMapper !== 'dictionary') {
         throw Error(`State Error: State mapper argument should be an Object. Received: ${typeMapper}.`);
     }
     
     try {
-        const { appName, containerId,  componentName } = parseConfigString(key, configString);
-        
+        const { appName, tblKey, containerId,  componentName } = parseConfigString(key, configString);
         const fetchFunctionFullName = await findFetchComponent(componentName, appName, fetchFile);
-        if (typeof fetchFunction !== 'function') {
-            throw new Error(`State Error: Function "${fetchFunctionFullName}" not found in fetch module for app: "${appName}"`);
-        }
         
+        setStateKeyForTable(tblKey, key);
+
         // store in memory with short-hand for key:value pairs...
         stateMemory.set(key, {
             appName,
@@ -108,18 +105,89 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
         console.error(`State Error: State update failed for key: "${key}"`, error);
         throw error;
     }
+
+
+    /**
+     * Parses the state key into its four components.
+     * @param {string} key - Unique key in string form that identifies one fetch 'state' for recurring triggering
+     * @param {string} configString - configurations: 'appName.tblKey.uniqueContainerIdentifier'
+     * @returns {object} - { appName, containerId, componentFunctionName }
+     */
+    function parseConfigString(key, configString) {
+        const parts = configString.split('.');
+        if (parts.length !== 3) {
+            throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "appName.tblKey.uniqueContainerIdentifier"`);
+        }
+        
+        const [appName, tblKey, componentName] = parts;
+        const containerId = `${componentName}Response`;
+        
+        if (!appName || !tblKey ||  !containerId || !componentName) {
+            throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
+        }
+        
+        return { appName, tblKey, containerId, componentName };
+    }
+
+    /**
+     * Searches and stores in-memory, the fetch function component using fetchFile specified.
+     * @param {*} componentName: fetch function shorthand 
+     * @param {*} appName: current app/module/space 
+     * @param {*} fetchFile: defauls to 'Default' suffix for fetch-file.
+     * @returns fetchFunctionFullName
+     */
+    async function findFetchComponent(componentName, appName, fetchFile) {
+        const functionName = 'fetch' + componentName.charAt(0).toUpperCase() + componentName.slice(1);
+        try {
+            if (!fetchModuleRegistry[fetchFile]) {
+                fetchModuleRegistry[fetchFile] = await $A.app.loadFetchModule(appName, fetchFile);
+            }
+            const func = fetchModuleRegistry[fetchFile][functionName];
+        } catch (error) {
+            throw Error('State Error: Could not import fetch component: ' + fetchFile + '.' + functionName + '. ' + error.message);
+        }
+        return functionName;
+    }
+
+    /**
+     * Adds provided state-key to provided table-key's list
+     * 
+     * @param {str} tblKeys 
+     * @param {str} stateKey 
+     * @returns null
+     */
+    function setStateKeyForTable(tblKeys, stateKey) {
+        if ($A.generic.checkVariableType(tblKeys) === 'string') {
+            const tbl = tblKeys;
+            let registry = $A.generic.getter(tblAndStateKeys, tbl, []);
+            registry.push(stateKey);
+            tblAndStateKeys[tbl] = registry;
+            return null;
+        }
+
+        if ($A.generic.checkVariableType(tblKeys) === 'list') {
+            tblKeys.forEach((tbl) => {
+                let registry = $A.generic.getter(tblAndStateKeys, tbl, []);
+                registry.push(stateKey);
+                tblAndStateKeys[tbl] = registry;
+            });
+            return null;
+        }
+
+        throw Error('State Error: Could not identify tbl-keys in setStateKeyForTable: ' + $A.generic.stringify(tblKeys));
+    }
 }
 
 /**
  * Triggers a previously stored state by its key.
- * This executes the fetch function with the args that were stored when updateState() was called.
+ * This executes the fetch function with the args that were stored when save() was called.
  * 
  * @param {string} key - The unique key for the state (first part of the state key)
- * @returns {Promise<void>}
+ * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
  */
 function triggerState(key, newMapper = {}) {
     if (!stateMemory.has(key)) {
-        throw new Error(`State Error: No state found for key: "${key}". Call updateState() first to initialize this state.`);
+        throw new Error(`State Trigger Error: No state found for key: "${key}". Call updateState() first to initialize this state.`);
     }
     try {
         const stateData = stateMemory.get(key);
@@ -131,7 +199,7 @@ function triggerState(key, newMapper = {}) {
 
         const fetchFunction = getFetchComponent(fetchFunctionFullName, fetchFile);
         if ($A.generic.checkVariableType(fetchFunction) !== 'function') {
-            throw new Error(`State Error: Function "${fetchFunctionFullName}" not found in fetch module for app: "${appName}"`);
+            throw new Error(`State Trigger Error: Function "${fetchFunctionFullName}" not found in fetch module for app: "${appName}"`);
         }
 
         // Call the fetch function with the stored args
@@ -141,21 +209,21 @@ function triggerState(key, newMapper = {}) {
         console.error(`State Error: State trigger failed for key: "${key}"`, error);
         throw error;
     }
+
+
+    /**
+     * Returns fetchFunction module component from memory.
+     * 
+     * @param {*} functionName: proper fetchFunction name
+     * @param {*} fileName: file the function component resides in (default is 'Default')
+     * @returns 
+     */
+    function getFetchComponent(functionName, fileName) {
+        try {
+            return fetchModuleRegistry[fileName][functionName];
+        } catch (error) {
+            throw Error('State Error: Could not find fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
+        }
+        
+    }
 }
-
-/**
- * State Manager
- * 
- * Usage:
- * - update(key, 'appName.uniqueContainerIdentifier', [arg1, arg2, ...])
- *   Stores in state fetch function call.
- * 
- * - trigger('key')
- *   Executes the fetch function with previously stored args for that key.
- */
-export default {
-    save: updateState,
-    trigger: triggerState,
-    clearModuleCache: () => { Object.keys(fetchModuleRegistry).forEach(key => delete fetchModuleRegistry[key]); }
-};
-
