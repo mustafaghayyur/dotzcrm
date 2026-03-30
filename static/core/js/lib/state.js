@@ -86,10 +86,10 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
     }
     
     try {
-        const { appName, tblKey, containerId,  componentName } = parseConfigString(key, configString);
+        const { appName, tblKeys, containerId,  componentName } = parseConfigString(key, configString);
         const fetchFunctionFullName = await findFetchComponent(componentName, appName, fetchFile);
         
-        setStateKeyForTable(tblKey, key);
+        setStateKeyForTable(tblKeys, key);
 
         // store in memory with short-hand for key:value pairs...
         stateMemory.set(key, {
@@ -132,7 +132,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
             throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
         }
         
-        return { appName, tblKey, containerId, componentName };
+        return { appName, tblKeys, containerId, componentName };
     }
 
     /**

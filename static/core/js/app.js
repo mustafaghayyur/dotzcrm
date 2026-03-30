@@ -52,6 +52,8 @@ export function Main(callbackFunction) {
             });
         });
 
+        $A.state.dom.listenForBSEvents();
+
         /*
         Modal close cleanup operations can be defined below...
         let modals = document.querySelectorAll('.modal');

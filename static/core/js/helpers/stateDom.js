@@ -133,6 +133,28 @@ export default {
         }
 
         return data;
+    },
+
+    /**
+     * Listens for BootStrap events of modal, offCanvas and Tab pane open and close.
+     * Allows us to add StateUpdate and StateTrigger events of our own.
+     */
+    listenForBSEvents: function() {
+        // Modal events
+        document.addEventListener('show.bs.modal', (e) => { console.log('I am being called because of show.bs.modal', e); });
+        document.addEventListener('shown.bs.modal', (e) => { console.log('I am being called because of shown.bs.modal', e); });
+        document.addEventListener('hide.bs.modal', (e) => { console.log('I am being called because of hide.bs.modal', e); });
+        document.addEventListener('hidden.bs.modal', (e) => { console.log('I am being called because of hidden.bs.modal', e); });
+
+        // Offcanvas events
+        document.addEventListener('show.bs.offcanvas', (e) => { console.log('I am being called because of show.bs.offcanvas', e); });
+        document.addEventListener('shown.bs.offcanvas', (e) => { console.log('I am being called because of shown.bs.offcanvas', e); });
+        document.addEventListener('hide.bs.offcanvas', (e) => { console.log('I am being called because of hide.bs.offcanvas', e); });
+        document.addEventListener('hidden.bs.offcanvas', (e) => { console.log('I am being called because of hidden.bs.offcanvas', e); });
+
+        // Tab events
+        document.addEventListener('shown.bs.tab', (e) => { console.log('I am being called because of shown.bs.tab', e); });
+        document.addEventListener('hidden.bs.tab', (e) => { console.log('I am being called because of hidden.bs.tab', e); });
     }
 };
 
