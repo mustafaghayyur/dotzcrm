@@ -31,6 +31,8 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
         let container = document.getElementById(containerId);
         try {
             let response = await fetch(reqObj);
+            let callComponent = false;
+            let sendBack = null;
             
             if (!response.ok) {
                 const errorResponse = await response.json();
@@ -47,10 +49,8 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             }
 
             if (typeof callbackFunction === 'function' && response.status === 204) {
-                if ($A.generic.isVariableEmpty(mapper)) {
-                    return await callbackFunction(response, containerId, mapper);
-                }
-                return await callbackFunction(response, containerId);
+                callComponent = true;
+                sendBack = response;
             }
 
             let contentType = response.headers.get('content-type') || '';
@@ -58,17 +58,20 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             if (contentType.includes('application/json')) {
                 let data = await response.json();
                 if (Object.hasOwn(data, 'results') === true) {
-                    if ($A.generic.checkVariableType(callbackFunction) !== 'function') {
-                        throw Error('UI Error: Async Fetcher could not use callback function.');
-                    }
-                    if ($A.generic.isVariableEmpty(mapper)) {
-                        return await callbackFunction(data.results, containerId);
-                    }
-                    return await callbackFunction(data.results, containerId, mapper);
+                    callComponent = true;
+                    sendBack = data.results;
                 }
             } else {
                 let text = await response.text();
-                container.innerHTML = '<pre>' + $A.forms.escapeHtml(text) + '</pre>';
+                $A.app.generateResponseToAction(containerId, $A.forms.escapeHtml(text));
+            }
+
+            if (callComponent) {
+                if ($A.generic.checkVariableType(callbackFunction) !== 'function') {
+                    throw Error('UI Error: Async Fetcher could not use callback function.');
+                }
+                mapper = $A.generic.isVariableEmpty(mapper) ? {} : mapper;
+                return await callbackFunction(sendBack, containerId, mapper);
             }
         } catch (err) {
             container.innerHTML = '<div class="alert alert-danger">' + $A.generic.stringify(err.message) + '</div>';

@@ -119,10 +119,16 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
             throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "appName.tblKey.uniqueContainerIdentifier"`);
         }
         
-        const [appName, tblKey, componentName] = parts;
+        const [appName, tblKeysString, componentName] = parts;
         const containerId = `${componentName}Response`;
+
+        const tblKeys = $A.generic.parse(tblKeysString);
+        if ($A.generic.checkVariableType(tblKeys) !== 'list') {
+            console.error('State Update Error: Table-keys for component could not be parsed as list.', key, componentName, tblKeysString);
+            throw Error('State Update Error: Table-keys for component could not be parsed as list.');
+        }
         
-        if (!appName || !tblKey ||  !containerId || !componentName) {
+        if (!appName || !tblKeys ||  !containerId || !componentName) {
             throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
         }
         

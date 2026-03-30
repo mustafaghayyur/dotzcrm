@@ -7,6 +7,21 @@ import $A from "../helper.js";
  */
 export default {
     /**
+     * Calls $A.state.save() from DOM elements.
+     */
+    updateState: async function() {
+        components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
+        stateKeys = $A.state.get.allStatesKeysForTable('all');
+        components.forEach(async (component) => {
+            data = $A.state.dom.captureComponentAttributesData(component, true);
+            await $A.state.save(data.key, `${data.app}.${$A.generic.getter(data, tbl, '')}.${data.component}`, $A.generic.getter(data, mapper, {}), $A.generic.getter(data, fetchFile, 'Default'));
+            if (data.initialize) {
+                $A.state.trigger(data.key);
+            }
+        });
+    },
+
+    /**
      * Finds all components within (provided) container and attempts to trigger 
      * fetch operation on them. Useful for app-wide state update for certain table.
      * 
@@ -24,7 +39,7 @@ export default {
 
         components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         components.forEach((component) => {
-            data = $A.state.dom.captureComponentAttributesData(component);
+            data = $A.state.dom.captureComponentAttributesData(component, false);
             if (tbl in data.tbl){
                 $A.state.trigger(data.key, $A.generic.getter(data, mapper, {}));
             }
