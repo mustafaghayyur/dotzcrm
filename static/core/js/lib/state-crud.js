@@ -1,0 +1,44 @@
+import $A from "../helper.js";
+
+export default {
+    create: function (element, data) {
+        const i = this.extract(element, data);
+        $A.query().create(i.tblKey, data, true).execute(i.containerId, (response, containerId) => {
+            $A.app.generateResponseToAction(containerId, i.confirmationMessage);
+            $A.state.trigger(i.stateKey);
+        });
+    },
+
+    update: function (element, data) {
+        const i = this.extract(element, data);
+        $A.query().edit(i.tblKey, data, true).execute(i.containerId, (response, containerId) => {
+            $A.app.generateResponseToAction(containerId, i.confirmationMessage);
+            $A.state.trigger(i.stateKey);
+        });
+    },
+
+    delete: function (element, data) {
+        const i = this.extract(element, data);
+
+        if (!$A.forms.confirmDeletion(i.identifierString)) {
+            return null;
+        }
+        
+        $A.query().delete(i.tblKey, data, true).execute(i.containerId, (response, containerId) => {
+            $A.app.generateResponseToAction(containerId, i.confirmationMessage);
+            $A.state.trigger(i.stateKey);
+        });
+    },
+
+    extract: function (element, data) {
+        const params = {};
+        info = $A.state.dom.captureComponentData(element, false);
+        params.tblKey = $A.generic.getter(info, tbl, '');
+        params.stateKey = $A.generic.getter(info, key, '');
+        params.componentName = $A.state.get.componentName(stateKey);
+        params.containerId = `${componentName}Response`;
+        params.confirmationMessage = $A.generic.getter(data, 'confirmationMessage', 'Delete operation perfomed.');
+        params.identifierString = $A.generic.getter(data, 'identifierString', 'Are you sure you want to delete this item?');
+        return params;
+    },
+};

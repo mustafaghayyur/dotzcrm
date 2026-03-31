@@ -1,5 +1,6 @@
 import $A from "../helper.js";
 import dom from "../helpers/stateDom.js";
+import dom from "./state-crud.js";
 
 // Registry to cache loaded fetch modules to avoid repeated imports
 const fetchModuleRegistry = {};
@@ -31,6 +32,11 @@ export default {
      * dom helper functions that relate to state management within dom
      */
     dom: dom,
+
+    /**
+     * State Crud Operations
+     */
+    crud: crud,
 
     /**
      * getter functions to access internal State memory

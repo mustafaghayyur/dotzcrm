@@ -63,7 +63,7 @@ export default async (data, containerId) => {
     });
 
     // finally implement the Tabed (sub) Dashboard for WorkSPaces-Arena
-    $A.dashboard('wsTabs', WSArenaCallBackStack);
+    $A.dashboard('wsTabs', WSArenaCallBackStack, false);
 
     /**
      * Implements edit and delete functionality for WorkSPaces.

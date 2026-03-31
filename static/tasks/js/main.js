@@ -35,7 +35,7 @@ Main(async () => {
         workspaces: async () => {
             fetchWorkspacesDashboard('workspacesDashboardResponse', 'ws_workspaces');
         },
-    }); /** end of tasks-dashboard */
+    }, false); /** end of tasks-dashboard */
     
     const rightSideCanvas = await $A.tasks.load('rightSideCanvas');
     rightSideCanvas();
