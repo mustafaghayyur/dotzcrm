@@ -12,7 +12,9 @@ export default {
     updateState: async function() {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
         components.forEach(async (component) => {
-            data = $A.state.dom.captureComponentData(component, true);
+            console.log('Checking component---------------', component);
+            console.log('------------------------------------');
+            let data = $A.state.dom.captureComponentData(component, true);
             await $A.state.save(data.key, `${data.app}.${$A.generic.getter(data, 'tbl', '')}.${data.component}`, $A.generic.getter(data, 'mapper', {}), $A.generic.getter(data, 'fetchFile', 'Default'));
             if (data.initialize) {
                 $A.state.trigger(data.key);
@@ -57,26 +59,27 @@ export default {
             throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
         }
 
-        let stateAttrs = $A.dom.filterAtrributes(elem, 'data-state', null);
+        let stateAttrs = $A.dom.datasetAtrributes(elem);
         let data = {};
         data.mapper = {};
-        stateAttrs.forEach((attr) => {
-            if (attr[0] === 'data-state-initialize') {
-                data.initialize = attr[1];
+        console.log('INSPECTING attrs: ', stateAttrs);
+        $A.generic.loopObject(stateAttrs, (key, value) => {
+            if (key === 'stateInitialize') {
+                data.initialize = value;
             }
-            if (attr[1].startsWith('data-state-mapper')) {
-                let parts = attr[0].split('-');
+            if (key.startsWith('stateMapper')) {
+                let parts = key.split('-');
                 let key = parts.slice(3).join('-');
-                data.mapper[key] = attr[1];
+                data.mapper[key] = value;
             }
-            if (attr[0] === 'data-state-key') {
-                data.key = attr[1];
+            if (key === 'stateKey') {
+                data.key = value;
             }
-            if (attr[0] === 'data-state-component') {
-                data.component = attr[1];
+            if (key === 'stateComponent') {
+                data.component = value;
             }
-            if (attr[0] === 'data-state-tbl-key') {
-                data.tbl = $A.generic.parse(attr[1]);
+            if (key === 'stateTblKey') {
+                data.tbl = $A.generic.parse(value);
             }
         });
         data.app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
@@ -103,9 +106,10 @@ export default {
             data.component = compId;
         }
 
-        if ($A.generic.checkVariableType($A.generic.getter(data, 'initialize')) !== 'boolean') {
+        const boolOpts = ['true', 'false'];
+        if ($A.generic.checkVariableType($A.generic.getter(data, 'initialize')) !== 'boolean' || !boolOpts.includes($A.generic.getter(data, 'initialize'))) {
             //console.error('State Error: StateInitialize could not be found in DOM.', elem, data);
-            console.warn('State Error: StateInitialize has to be a bool value for component id: ' + data.component +'.');
+            console.warn('State Error: StateInitialize has to be a bool value for component id: ' + data.component +'.', data);
         }
 
         if ($A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {

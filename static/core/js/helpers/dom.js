@@ -109,20 +109,8 @@ export default {
      * @param {*} valueFilter 
      * @returns 
      */
-    filterAtrributes: function(elem, keyFilter, valueFilter) {
-        const el = document.querySelector('#myElement');
-        // Finds all data-abc-* attributes
-        const matchingData = Object.entries(elem.dataset)
-        .filter(([key, value]) => {
-            if (keyFilter !== null) {
-                return key.startsWith(keyFilter);
-            }
-            if (valueFilter !== null) {
-                return value === valueFilter;
-            }
-            return false;
-        });
-        return matchingData;
+    datasetAtrributes: function(elem) {
+        return elem.dataset;
     }
 };
 
