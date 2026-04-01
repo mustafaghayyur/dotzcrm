@@ -152,7 +152,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
         const [appName, tblKeysString, componentName] = parts;
         const containerId = `${componentName}Response`;
 
-        const tblKeys = $A.generic.parse(tblKeysString);
+        const tblKeys = tblKeysString.split('|');
         if ($A.generic.checkVariableType(tblKeys) !== 'list') {
             console.error('State Update Error: Table-keys for component could not be parsed as list.', key, componentName, tblKeysString);
             throw Error('State Update Error: Table-keys for component could not be parsed as list.');

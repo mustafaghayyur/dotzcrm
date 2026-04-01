@@ -79,14 +79,31 @@ export default {
 
     /**
      * Takes an object and key, and returns the value or a default you provide.
+     * @todo: what to do with object-like objects, eg DOMStringMap instances? Decision required..
+     * 
      * @param {obj} object 
      * @param {str} key 
      * @param {*} defaultsTo 
      * @returns 
      */
-    getter: function (object, key, defaultsTo = null) {
-        if (this.checkVariableType(object) === 'dictionary') {
-            return (object && Object.prototype.hasOwnProperty.call(object, key)) ? object[key] : defaultsTo;
+    getter: function (object, key, defaultsTo = null, strict = false) {
+        if (!strict) {
+            if (key in object) {
+                return object[key];
+            }
+        }
+        if (strict) {
+            if (!object || this.checkVariableType(object) !== 'dictionary' || $A.generic.isVariableEmpty(object)) {
+                return defaultsTo;
+            }
+            if (!Object.hasOwn(object, key)) {
+                if (!Object.prototype.hasOwnProperty.call(object, key)) {
+                    if (!(key in object)) {
+                        return defaultsTo;
+                    }
+                }
+            }
+            return object[key];
         }
         return defaultsTo;
     },

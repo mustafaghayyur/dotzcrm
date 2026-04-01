@@ -31,13 +31,10 @@ export default {
     },
 
     readFromCache: async function (record, cacheTime) {
-        if (!$A.generic.isVariableEmpty(data) && ((Date.now() - timestamp) < cacheTime)) {
-                        
-        }
-        if (record) {
+        if (!$A.generic.isVariableEmpty(record) && ((Date.now() - record.timestamp) < cacheTime)) {
             const component = await $A.app.load(record.componentName, record.appName);
             component(record.data, record.containerId);
-            return true;
+            return true;   
         } else {
             //$A.app.generateResponseToAction(record.containerId, `Cache for component ${record.componentName} failed to load. Please refresh page.`, 'warning');
             return false;

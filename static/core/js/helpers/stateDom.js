@@ -12,11 +12,18 @@ export default {
     updateState: async function() {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
         components.forEach(async (component) => {
-            console.log('Checking component---------------', component);
+            //console.log('Checking component---------------', component);
             console.log('------------------------------------');
             let data = $A.state.dom.captureComponentData(component, true);
-            await $A.state.save(data.key, `${data.app}.${$A.generic.getter(data, 'tbl', '')}.${data.component}`, $A.generic.getter(data, 'mapper', {}), $A.generic.getter(data, 'fetchFile', 'Default'));
+            if ($A.generic.isVariableEmpty(data)) {
+                console.warn('Component has no data attributes: ', component, data);
+                return null;
+            }
+            const tables = data.tbl.join('|');
+            console.log('Saving component: ', data.key, data);
+            await $A.state.save(data.key, `${data.app}.${tables}.${data.component}`, data.mapper, data.fetchFile);
             if (data.initialize) {
+                console.log('Triggering component: ', data.key);
                 $A.state.trigger(data.key);
             }
         });
@@ -60,29 +67,26 @@ export default {
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
-        let data = {};
-        data.mapper = {};
-        console.log('INSPECTING attrs: ', stateAttrs);
-        $A.generic.loopObject(stateAttrs, (key, value) => {
-            if (key === 'stateInitialize') {
-                data.initialize = value;
-            }
-            if (key.startsWith('stateMapper')) {
-                let parts = key.split('-');
-                let key = parts.slice(3).join('-');
-                data.mapper[key] = value;
-            }
-            if (key === 'stateKey') {
-                data.key = value;
-            }
-            if (key === 'stateComponent') {
-                data.component = value;
-            }
-            if (key === 'stateTblKey') {
-                data.tbl = $A.generic.parse(value);
-            }
-        });
-        data.app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
+        let data = {
+            initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
+            mapper: $A.generic.getter(stateAttrs, 'stateMapper', {}),
+            key: $A.generic.getter(stateAttrs, 'stateKey', null),
+            component: $A.generic.getter(stateAttrs, 'stateComponent', null),
+            tbl: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKey', '[]')),
+            fetchFile: $A.generic.getter(stateAttrs, 'stateFetchFile', 'Default'),
+            app: $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName,
+        };
+        console.log('Checking data vs stateAttrs', data, stateAttrs.stateInitialize, stateAttrs['stateInitialize']);
+
+        if (!$A.generic.isVariableEmpty(data.mapper) && $A.generic.checkVariableType(data.mapper) === 'dictionary') { 
+            $A.generic.loopObject(stateAttrs, (key, value) => {
+                if (key.startsWith('stateMapper')) {
+                    let parts = key.split('-');
+                    let key = parts.slice(3).join('-');
+                    data.mapper[key] = value;
+                }
+            });
+        }
 
         if (forSetup) {
             data = $A.state.dom.validateComponentData(data, elem);
@@ -91,48 +95,48 @@ export default {
     },
 
     validateComponentData: function(data, elem) {
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'app')) || $A.generic.checkVariableType($A.generic.getter(data, 'app')) !== 'string') {
-            //console.error('State Error: App name could not be found in DOM.', elem, data);
-            console.warn('State Error: App name could not be found in DOM for component, or is not in string format.');
+        if ($A.generic.isVariableEmpty(data.app) || $A.generic.checkVariableType(data.app) !== 'string') {
+            console.warn('State Error: App name could not be found in DOM.', elem, data);
+            return null;
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'key')) && $A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {
+        if ($A.generic.isVariableEmpty(data.key) && $A.generic.isVariableEmpty(data.component)) {
             let compId = elem.id;
             if ($A.generic.isVariableEmpty(compId)) {
-                //console.error('State Error: Component id could not be found in DOM.', elem, data);
-                console.warn('State Error: Component id could not be found in DOM for component.');
+                console.warn('State Error: Component id could not be found in DOM.', elem, data);
+                return null
             }
             data.key = compId;
             data.component = compId;
         }
 
         const boolOpts = ['true', 'false'];
-        if ($A.generic.checkVariableType($A.generic.getter(data, 'initialize')) !== 'boolean' || !boolOpts.includes($A.generic.getter(data, 'initialize'))) {
-            //console.error('State Error: StateInitialize could not be found in DOM.', elem, data);
-            console.warn('State Error: StateInitialize has to be a bool value for component id: ' + data.component +'.', data);
+        if ($A.generic.checkVariableType(data.initialize) !== 'boolean' && !boolOpts.includes(data.initialize)) {
+            console.warn('State Error: StateInitialize could not be found in DOM.', elem, data);
+            return null;
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {
+        if ($A.generic.isVariableEmpty(data.component)) {
             data.component = data.key;
         }
 
-        const tbl = $A.generic.getter(data, 'tbl', []);
+        const tbl = data.tbl;
         if ($A.generic.checkVariableType(tbl) !== 'list') {
-            //console.error('State Error: Component did not specify valid tbl-key list in DOM.', elem, data);
-            console.warn('State Error: Component did not specify valid tbl-key list in DOM.');
+            console.warn('State Error: Component did not specify valid tbl-key list in DOM.', elem, data);
+            return null;
         }
 
         if ($A.generic.isVariableEmpty(tbl)) {
             // @todo: tbl-key missing needs to be handled? Decide with time.
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'key'))) {
+        if ($A.generic.isVariableEmpty(data.key)) {
             data.key = data.component;
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'key')) || $A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {
-            //console.error('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
-            console.warn('State Error: ComponentName or Trigger Key could not be found in DOM for component.');
+        if ($A.generic.isVariableEmpty(data.key) || $A.generic.isVariableEmpty(data.component)) {
+            console.warn('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
+            return null;
         }
 
         return data;
@@ -186,6 +190,10 @@ export default {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
             //pane.dataset.stateInitialize = true;
             pane.dataset.stateActiveArea = true;
+            let children = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', pane);
+            children.forEach((child) => {
+                child.stateInitialize = true;
+            });
             $A.state.dom.updateState();
         }
     },
@@ -194,6 +202,10 @@ export default {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
             //pane.dataset.stateInitialize = false;
             pane.dataset.stateActiveArea = false;
+            let children = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', pane);
+            children.forEach((child) => {
+                child.stateInitialize = false;
+            });
             $A.state.dom.updateState();
         }
     }
