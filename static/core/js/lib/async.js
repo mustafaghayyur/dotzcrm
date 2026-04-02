@@ -81,6 +81,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 $A.state.saveToCache(containerId, sendBack);
             }
         } catch (err) {
+            console.error(err.message, err);
             $A.app.generateResponseToAction(containerId, err.message, 'danger');
         } finally {
             if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {

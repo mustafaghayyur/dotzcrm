@@ -69,27 +69,10 @@ export async function fetchUserWatchStateForTask(task, watchBtn, unwatchBtn, con
  * Retrieves & displays, task-level-comments..
  * @param {obj} task: task object
  */
-export async function fetchTaskComments(task, containerId) {
+export async function fetchTaskComments(task, containerId, componentName) {
+    const component = await $A.tasks.load(componentName);
     $A.query().read('taco', { task_id: task.tata_id })
-        .execute(containerId, (comments, commentsContainerId) => {
-            let commentsContainer = $A.dom.containerElement(commentsContainerId);
-            let commentCreator = $A.dom.searchElementCorrectly('#createComment', commentsContainer);
-            let comment = $A.dom.searchElementCorrectly('#commmentContainer', commentsContainer);
-            
-            commentsContainer.innerHTML = '';
-            commentsContainer.appendChild(commentCreator);
-            commentsContainer.appendChild(comment);
-
-            if ($A.generic.checkVariableType(comments) === 'list') {
-                comments.forEach(item => {
-                    let newComment = $A.ui.embedData(item, comment.cloneNode(true), true);
-                    const user = $A.app.user(item.commenter_id, commentsContainerId);
-                    newComment.querySelector('.embed.creator_id').textContent = '' + user.username + ' wrote...';
-                    newComment.classList.remove('d-none');
-                    commentsContainer.appendChild(newComment);
-                });
-            }
-        });
+        .execute(containerId, componentName);
 }
 
 /**

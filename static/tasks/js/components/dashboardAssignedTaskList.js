@@ -10,24 +10,21 @@ export default function (data, containerId) {
     const container = $A.dom.containerElement(containerId);
     let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
     let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
-    ul.innerHTML = '';    
 
-    if (Array.isArray(data)) {
-        data.forEach(item => {
-            let li = originalLiItem.cloneNode(true);
-            li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tata_id);
-            li.querySelector('.description').textContent = item.description || JSON.stringify(item);
-            li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);
-            li.querySelector('.tata_update_time').textContent = $A.dates.convertToDisplayLocal(item.tata_update_time);
-            li.querySelector('.deadline').textContent = $A.dates.convertToDisplayLocal(item.deadline);
-            ul.appendChild(li);
-        });
+    $A.ui.handleEmptyData(data, ul);
 
-        addListenersToTasks(ul);
-    } else {
-        originalLiItem.innerHTML = '<pre>' + $A.forms.escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
-        container.appendChild(originalLiItem);
-    }
+    data.forEach(item => {
+        let li = originalLiItem.cloneNode(true);
+        li.classList.remove('d-none');
+        li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tata_id);
+        li.querySelector('.description').textContent = item.description || JSON.stringify(item);
+        li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);
+        li.querySelector('.tata_update_time').textContent = $A.dates.convertToDisplayLocal(item.tata_update_time);
+        li.querySelector('.deadline').textContent = $A.dates.convertToDisplayLocal(item.deadline);
+        ul.appendChild(li);
+    });
+
+    addListenersToTasks(ul);
 
     /**
      * Adds read functionality to each fetched task.

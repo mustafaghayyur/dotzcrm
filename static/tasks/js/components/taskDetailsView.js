@@ -33,7 +33,7 @@ export default function (task, containerId) {
     editAndDelete(task);
     assignments(task);
     newComments(task);
-    fetchTaskComments(task, 'commentsResponse');
+    $A.state.trigger('taskComments');
     
     
     /**

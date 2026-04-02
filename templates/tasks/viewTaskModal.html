@@ -68,8 +68,8 @@
           </tr>
         </table>
         <div id="comments" class="container">
-          <div id="createComment" class="row">
-            <div id="commentsResponse" class="col-12"></div>
+          <div id="createComment" class="row" data-state-initialize="false">
+            <div id="createCommentResponse" class="col-12"></div><!--commentsResponse-->
             <div class="col-12">
               <form method="post" id="newCommentForm">
                 {% csrf_token %}
@@ -80,15 +80,18 @@
               </form>
             </div>
           </div>
-          <div id="commmentContainer" class="row m-2 my-3 py-3 d-none">
-            <div id="commentRecord" class="col-11" data-comment-id="">
-              <span class="embed creator_id"></span> | <span class="embed create_time"></span> | <span class="embed update_time"></span>
-              <div class="embed comment"></div>
-              <div class="embed parent_id"></div>
-            </div>
-            <div class="col-1 options">
-              <div id="replyComment" class="btn btn-sm btn-info"><i class="bi bi-reply"></i></div>
-              <div id="deleteComment" class="btn btn-sm btn-info"><i class="bi bi-trash3"></i></div>
+          <div id="taskComments" data-state-initialize="false" data-state-tbl-key='["taco"]'>
+            <div id="taskCommentsResponse" class="col-12"></div>
+            <div id="commmentContainer" class="row m-2 my-3 py-3 d-none">
+              <div id="commentRecord" class="col-11" data-comment-id="">
+                <span class="embed creator_id"></span> | <span class="embed create_time"></span> | <span class="embed update_time"></span>
+                <div class="embed comment"></div>
+                <div class="embed parent_id"></div>
+              </div>
+              <div class="col-1 options">
+                <div id="replyComment" class="btn btn-sm btn-info"><i class="bi bi-reply"></i></div>
+                <div id="deleteComment" class="btn btn-sm btn-info"><i class="bi bi-trash3"></i></div>
+              </div>
             </div>
           </div>
         </div>

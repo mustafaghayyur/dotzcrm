@@ -188,9 +188,41 @@ export default {
 
     activateArea: async function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
-            //pane.dataset.stateInitialize = true;
             pane.dataset.stateActiveArea = true;
-            let children = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', pane);
+            let children = $A.dom.searchAllElementsCorrectly(':scope > [data-state-initialize]', pane);
+            children.forEach((child) => {
+                child.dataset.stateInitialize = true;
+            });
+            console.log('Activated area: ' + pane.id);
+            await $A.state.dom.updateState();
+        }
+    },
+
+    getTopLevelStateInitChildren: function(root) {
+        if ($A.generic.checkVariableType(root) !== 'domelement') {
+            return [];
+        }
+
+        let result = [];
+        let queue = Array.from(root.children);
+
+        while (queue.length > 0) {
+            const node = queue.shift();
+            if (node.hasAttribute('data-state-initialize')) {
+                result.push(node);
+                continue; // do not traverse further inside this subtree
+            }
+            // only traverse if this node is not itself a state-initialize node
+            queue.push(...Array.from(node.children));
+        }
+
+        return result;
+    },
+
+    activateArea: async function(pane) {
+        if ($A.generic.checkVariableType(pane) === 'domelement') {
+            pane.dataset.stateActiveArea = true;
+            let children = $A.state.dom.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
                 child.dataset.stateInitialize = true;
             });
@@ -201,9 +233,8 @@ export default {
 
     deActivateArea: async function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
-            //pane.dataset.stateInitialize = false;
             pane.dataset.stateActiveArea = false;
-            let children = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', pane);
+            let children = $A.state.dom.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
                 child.dataset.stateInitialize = false;
             });
