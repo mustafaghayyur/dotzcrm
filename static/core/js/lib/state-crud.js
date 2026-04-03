@@ -1,20 +1,35 @@
 import $A from "../helper.js";
 
+/**
+ * Allows for standardized crud operations using state operations.
+ */
 export default {
-    create: function (tbl, data, element) {
+    create: function (tbl, data, element, callback = null) {
         const i = this.extract(element, data);
-        $A.query().create(tbl, data, true).execute(i.containerId, (response, respConId) => {
+
+        if ($A.generic.checkVariableType(callback) === 'function') {
+            $A.query().create(tbl, data, true).execute(i.containerId, callback);
+        } else {
+            $A.query().create(tbl, data, true).execute(i.containerId, standardCallback);
+        }
+        const standardCallback = (response, respConId) => {
             $A.app.generateResponseToAction(respConId, i.confirmationMessage);
             $A.state.dom.triggerAllForTable(tbl);
-        });
+        }
     },
 
     update: function (tbl, data, element) {
         const i = this.extract(element, data);
-        $A.query().edit(tbl, data, true).execute(i.containerId, (response, respConId) => {
+
+        if ($A.generic.checkVariableType(callback) === 'function') {
+            $A.query().edit(tbl, data, true).execute(i.containerId, callback);
+        } else {
+            $A.query().edit(tbl, data, true).execute(i.containerId, standardCallback);
+        }
+        const standardCallback = (response, respConId) => {
             $A.app.generateResponseToAction(respConId, i.confirmationMessage);
             $A.state.dom.triggerAllForTable(tbl);
-        });
+        }
     },
 
     delete: function (tbl, data, element) {
@@ -23,11 +38,16 @@ export default {
         if (!$A.forms.confirmDeletion(i.identifierString)) {
             return null;
         }
-        
-        $A.query().delete(tbl, data, true).execute(i.containerId, (response, respConId) => {
+
+        if ($A.generic.checkVariableType(callback) === 'function') {
+            $A.query().delete(tbl, data, true).execute(i.containerId, callback);
+        } else {
+            $A.query().delete(tbl, data, true).execute(i.containerId, standardCallback);
+        }
+        const standardCallback = (response, respConId) => {
             $A.app.generateResponseToAction(respConId, i.confirmationMessage);
             $A.state.dom.triggerAllForTable(tbl);
-        });
+        }
     },
 
     readFromCache: async function (data, timestamp, cacheTime, record) {

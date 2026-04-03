@@ -1,5 +1,4 @@
 import { removeWatcher, createWatcher } from "../../crud/watchers.js";
-import { createCommentForTask } from "../../crud/comments.js";
 import { DeleteTask } from '../../crud/tasks.js';
 import $A from "../../helper.js";
 
@@ -27,7 +26,7 @@ export default function (task, containerId) {
     // add functionality on task-details modal...
     editAndDelete(task);
     $A.state.trigger('taskUserWatchState', { 'tata_id': task.tata_id }, false);
-    newComments(task);
+    $A.state.trigger('taskCreateComment', { 'tata_id': task.tata_id });
     $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
     
     
@@ -61,26 +60,6 @@ export default function (task, containerId) {
             const raw = e.currentTarget.getAttribute('data-state-listener-data');
             $A.state.crud.delete('tata', $A.generic.parse(raw), container);
         }, $A.generic.stringify(delData));
-    }
-
-    /**
-     * implement rich-text editor and comments form.
-     * @param {obj} task 
-     */
-    function newComments(task) {
-        $A.editor.make('commentEditor');
-        let saveCommentBtn = document.getElementById('saveComment');
-        saveCommentBtn.setAttribute('data-task-id', task.tata_id);
-        
-        $A.app.wrapEventListeners(saveCommentBtn, 'data-task-id', task.tata_id, 'click', (e) => {
-            e.preventDefault();
-            let editor = document.querySelector('#newCommentForm #commentEditor');
-            let hiddenCommentInput = document.querySelector('#newCommentForm #' + editor.dataset.fieldId);
-            hiddenCommentInput.value = editor.innerHTML;
-            let taskIdField = document.querySelector('#newCommentForm #task_id');
-            taskIdField.value = e.currentTarget.getAttribute('data-task-id');
-            createCommentForTask('newCommentForm');
-        });
     }
 }
 

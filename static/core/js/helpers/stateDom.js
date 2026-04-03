@@ -9,8 +9,8 @@ export default {
     /**
      * Calls $A.state.save() from DOM elements.
      */
-    updateState: async function() {
-        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
+    updateState: async function(container = document) {
+        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         components.forEach(async (component) => {
             //console.log('Checking component---------------', component);
             console.log('------------------------------------');
@@ -83,6 +83,10 @@ export default {
         };
         console.log('Checking data vs stateAttrs', data, stateAttrs.stateInitialize, stateAttrs['stateInitialize']);
 
+        if (data.initialize === 'decoy') {
+            return {}; // component has yet to be formed
+        }
+        
         if (!$A.generic.isVariableEmpty(data.mapper) && $A.generic.checkVariableType(data.mapper) === 'dictionary') { 
             $A.generic.loopObject(stateAttrs, (key, value) => {
                 if (key.startsWith('stateMapper')) {

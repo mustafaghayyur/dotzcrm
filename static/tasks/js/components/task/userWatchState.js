@@ -1,3 +1,5 @@
+import $A from "../../helper.js";
+
 /**
  * Handles current state of user watching task
  * 
@@ -18,15 +20,23 @@ export default function(data, containerId) {
     }
 
     // add event listeners of watch buttons...
-    $A.app.wrapEventListeners(watchbtn, 'data-task-id', task.tata_id, 'click', async (e) => {
+    $A.app.eventListener('click', watchBtn, async (e) => {
         e.preventDefault();
-        const taskId = e.currentTarget.getAttribute('data-task-id');
-        createWatcher(taskId, 'addWatcher', 'removeWatcher');
-    });
+        const taskId = e.currentTarget.dataset.listenerData.task_id;
+        $A.state.crud.create('tawa', { task_id: taskId }, container, (resp, conId) => {
+            watchBtn.classList.add('d-none');
+            unwatchBtn.classList.remove('d-none');
+            $A.app.generateResponseToAction(conId, 'Added to watcher list.');
+        });
+    }, {'task_id': data.task_id});
 
-    $A.app.wrapEventListeners(unwatchbtn, 'data-task-id', task.tata_id, 'click', async (e) => {
+    $A.app.eventListener('click', unwatchBtn, async (e) => {
         e.preventDefault();
-        const taskId = e.currentTarget.getAttribute('data-task-id');
-        removeWatcher(taskId, 'addWatcher', 'removeWatcher');
-    });
+        const taskId = e.currentTarget.dataset.listenerData.task_id;
+        $A.state.crud.delete('tawa', { task_id: taskId }, container, (resp, conId) => {
+            watchBtn.classList.remove('d-none');
+            unwatchBtn.classList.add('d-none');
+            $A.app.generateResponseToAction(containerId, 'Removed from watcher list.');
+        });
+    }, {'task_id': data.task_id});
 }

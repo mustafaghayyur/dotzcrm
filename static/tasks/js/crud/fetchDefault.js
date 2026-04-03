@@ -120,3 +120,8 @@ export async function fetchUsersForDepartment(containerId, componentName) {
         .execute(containerId, component);
 }
 
+export async function fetchDefault(mapper, containerId, componentName) {
+    const component = await $A.tasks.load(componentName);
+    return component(mapper, containerId);
+}
+

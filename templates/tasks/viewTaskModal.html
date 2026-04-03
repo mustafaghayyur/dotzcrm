@@ -71,15 +71,15 @@
           </tr>
         </table>
         <div id="comments" class="container">
-          <div id="taskCreateComment" class="row" data-state-initialize="false" data-state-component="task|createComment">
+          <div id="taskCreateComment" class="row" data-state-initialize="false" data-state-component="task|createComment" data-state-fetch-file="none">
             <div id="taskCreateCommentResponse" class="col-12"></div><!--commentsResponse-->
             <div class="col-12">
-              <form method="post" id="newCommentForm">
+              <form method="post" id="taskCreateComment">
                 {% csrf_token %}
-                <div id="commentEditor" class="rich-editor" data-field-id="comment" contenteditable="true" placeholder="add comment..."></div>
+                <div id="commentEditor" class="rich-editor"  contenteditable="true" placeholder="add comment..."></div>
                 <input type="hidden" id="comment" maxlength="7000" name="comment">
                 <input type="hidden" id="task_id" name="task_id">
-                <button id="saveComment" class="btn btn-info btn-sm" type="button"><i class="bi bi-pencil-square"></i> comment</button>
+                <button id="saveComment" class="btn btn-info btn-sm" type="button" data-state-key="taskCreateComment"><i class="bi bi-pencil-square"></i> comment</button>
               </form>
             </div>
           </div>

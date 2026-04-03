@@ -106,7 +106,8 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
     try {
         const { appName, tblKeys, containerId,  componentName, componentPath } = parseConfigString(key, configString);
         const fetchFunctionFullName = await findFetchComponent(componentName, appName, fetchFile);
-        
+        fetchFile = (fetchFile === 'none') ? 'Default' : fetchFile;
+
         setStateKeyForTable(tblKeys, key);
 
         // store in memory with short-hand for key:value pairs...
@@ -149,7 +150,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
 
         const [componentName, componentPath] = $A.state.dom.extractComponentName(componentNameString);
         const containerId = `${componentName}Response`;
-        
+
         if (!appName || !tblKeys ||  !containerId || !componentName || !componentPath) {
             throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
         }
@@ -165,6 +166,14 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
      * @returns fetchFunctionFullName
      */
     async function findFetchComponent(componentName, appName, fetchFile) {
+        if (fetchFile === 'none') {
+            // no API involved used fetchDefault()...
+            if (!fetchModuleRegistry['Default']) {
+                fetchModuleRegistry['Default'] = await $A.app.loadFetchModule(appName, 'Default');
+            }
+            return 'fetchDefault';
+        }
+        
         const functionName = 'fetch' + componentName.charAt(0).toUpperCase() + componentName.slice(1);
         try {
             if (!fetchModuleRegistry[fetchFile]) {

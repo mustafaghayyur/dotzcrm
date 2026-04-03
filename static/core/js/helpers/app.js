@@ -153,18 +153,17 @@ export default {
      * Sets everything up to allow for Modals to safely execute events.
      * Without modal dom duplication causing problems.
      * 
-     * @param {dom} container: instance of DOM node element
-     * @param {str} dataKey: data-key to pass along. Use e.currentTarget.getAttribute() to get acces to this key
-     * @param {*} dataValue: value for data-key
      * @param {str} eventType: event-listener string identifyer (click, change, etc)
-     * @param {func} callback: actions to perform on event trigger.
+     * @param {dom} elem: instance of DOM node element to add listener on
+     * @param {func} callback: callback actions to perform on event trigger.
+     * @param {obj} dictionary: key/val pairs in stringify format to pass to listener
      */
-    wrapEventListeners: function(container, dataKey, dataValue, eventType, callback) {
-        container.setAttribute(dataKey, dataValue);
-        if (!container.hasDeleteListener) {
-            container.addEventListener(eventType, callback);
+    eventListener: function(eventType, elem, callback, dictionary) {
+        elem.setAttribute('data-listener-data', dictionary);
+        if (!elem.hasGenericListener) {
+            elem.addEventListener(eventType, callback);
         }
-        container.hasDeleteListener = true;
+        elem.hasGenericListener = true;
     },
 
     /**
