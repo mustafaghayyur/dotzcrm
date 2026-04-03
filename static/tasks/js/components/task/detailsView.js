@@ -84,24 +84,3 @@ export default function (task, containerId) {
     }
 }
 
-/**
- * @todo: implement this project-wide somehow.
- * 
- * > also look into: show.bs.modal event combined with event.relatedTarget
- * 
- * Cleaning up after model-hide:
- * const modalElement = document.getElementById('tempModal');
-
-    modalElement.addEventListener('hidden.bs.modal', function() {
-    // Dispose of Bootstrap instance
-    const modalInstance = bootstrap.Modal.getInstance(this);
-    if (modalInstance) {
-        modalInstance.dispose();
-    }
-    
-    // Remove from DOM if it was dynamically created
-    if (this.dataset.temporary === 'true') {
-        this.remove();
-    }
-    });
- */

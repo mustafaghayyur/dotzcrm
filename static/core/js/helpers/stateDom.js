@@ -79,6 +79,7 @@ export default {
             tbl: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKey', '[]')),
             fetchFile: $A.generic.getter(stateAttrs, 'stateFetchFile', 'Default'),
             app: $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName,
+            trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
         };
         console.log('Checking data vs stateAttrs', data, stateAttrs.stateInitialize, stateAttrs['stateInitialize']);
 
@@ -94,6 +95,11 @@ export default {
         if (forSetup) {
             data = $A.state.dom.validateComponentData(data, elem);
         }
+
+        if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.key)){
+            data.key = data.trigger;
+        }
+
         return data;
     },
 
@@ -189,40 +195,31 @@ export default {
                 $A.state.dom.deActivateArea(pane);
             });
         });
-    },
 
-    activateArea: async function(pane) {
-        if ($A.generic.checkVariableType(pane) === 'domelement') {
-            pane.dataset.stateActiveArea = true;
-            let children = $A.dom.searchAllElementsCorrectly(':scope > [data-state-initialize]', pane);
-            children.forEach((child) => {
-                child.dataset.stateInitialize = true;
-            });
-            console.log('Activated area: ' + pane.id);
-            await $A.state.dom.updateState();
-        }
-    },
 
-    getTopLevelStateInitChildren: function(root) {
-        if ($A.generic.checkVariableType(root) !== 'domelement') {
-            return [];
-        }
+        /**
+         * @todo: implement this project-wide somehow.
+         * 
+         * > also look into: show.bs.modal event combined with event.relatedTarget
+         * 
+         * Cleaning up after model-hide:
+         * const modalElement = document.getElementById('tempModal');
 
-        let result = [];
-        let queue = Array.from(root.children);
-
-        while (queue.length > 0) {
-            const node = queue.shift();
-            if (node.hasAttribute('data-state-initialize')) {
-                result.push(node);
-                continue; // do not traverse further inside this subtree
+            modalElement.addEventListener('hidden.bs.modal', function() {
+            // Dispose of Bootstrap instance
+            const modalInstance = bootstrap.Modal.getInstance(this);
+            if (modalInstance) {
+                modalInstance.dispose();
             }
-            // only traverse if this node is not itself a state-initialize node
-            queue.push(...Array.from(node.children));
-        }
-
-        return result;
+            
+            // Remove from DOM if it was dynamically created
+            if (this.dataset.temporary === 'true') {
+                this.remove();
+            }
+            });
+        */
     },
+
 
     activateArea: async function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
@@ -246,6 +243,27 @@ export default {
             console.log('Deactivated area: ' + pane.id);
             await $A.state.dom.updateState();
         }
+    },
+
+    getTopLevelStateInitChildren: function(root) {
+        if ($A.generic.checkVariableType(root) !== 'domelement') {
+            return [];
+        }
+
+        let result = [];
+        let queue = Array.from(root.children);
+
+        while (queue.length > 0) {
+            const node = queue.shift();
+            if (node.hasAttribute('data-state-initialize')) {
+                result.push(node);
+                continue; // do not traverse further inside this subtree
+            }
+            // only traverse if this node is not itself a state-initialize node
+            queue.push(...Array.from(node.children));
+        }
+
+        return result;
     },
 
     /**
@@ -280,5 +298,24 @@ export default {
         }
         elem.hasStateListener = true;
     },
+
+
+    activateTriggers: function (container = document) {
+        // activate triggers throughout software...
+        const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
+        triggerBtns.forEach((btn) => {
+            let dict = $A.state.dom.captureComponentData(btn, false);
+            $A.state.dom.eventListener('click', btn, (e) => {
+                e.preventDefault();
+                const raw = e.currentTarget.dataset.stateListenerData;
+                const data = $A.generic.parse(raw);
+                const state = $A.state.get.record(data.key);
+                if ($A.generic.getter(state, component) === null) {
+                    return null;
+                }
+                $A.state.trigger(data.key, data.mapper, false);
+            }, $A.generic.stringify(dict));
+        });
+    }
 };
 
