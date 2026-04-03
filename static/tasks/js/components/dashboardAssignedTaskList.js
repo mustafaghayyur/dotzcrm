@@ -36,13 +36,10 @@ export default function (data, containerId) {
         if(container instanceof HTMLElement){
             // implment listener and fetcher for item details modal...
             let tasks = container.querySelectorAll('.task-details-link');
-            const callback = await $A.tasks.load('taskDetailsView');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
                 task.addEventListener('click', ()=>{
-                    $A.query().read('tata', {
-                        tata_id: id
-                    }).execute('taskDetailsModalResponse', callback);
+                    $A.state.trigger('taskDetailsView');
                     $A.router.update('task_id', id);
                 });
             });

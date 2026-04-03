@@ -1,8 +1,5 @@
-<!-- Button trigger modal -->
-<!--a class="btn btn-primary task-details-link" data-taskId="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
-
-<!-- Modal -->
-<div class="modal fade" id="taskEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="taskEditFormLabel" aria-hidden="true" data-state-initialize="false">
+<!-- Task Edit form Component Modal -->
+<div class="modal fade" id="taskEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="taskEditFormLabel" aria-hidden="true" data-state-component="task|editForm" data-state-initialize="false">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
@@ -12,12 +9,12 @@
       </div>
       <div class="modal-body">
         <div id="taskEditFormResponse"></div>
-        <form method="post" id="taskEditForm_Form">
+        <form method="post" id="taskEditFormForm">
             {% csrf_token %}
             {{ taskForm.as_div }}
             <div class="row bg-body-secondary mt-3 p-2">
               <div class="col-12 d-flex justify-content-end">
-                <input type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form." id="taskEditFormSaveBtn" class="btn btn-info btn-sm">
+                <input id="taskEditFormSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
               </div>
             </div>
         </form>

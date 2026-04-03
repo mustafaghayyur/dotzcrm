@@ -71,7 +71,7 @@ export default {
 
         let data = {
             initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
-            mapper: $A.generic.getter(stateAttrs, 'stateMapper', {}),
+            mapper: {},
             key: $A.generic.getter(stateAttrs, 'stateKey', null),
             component: componentName,
             componentPath: componentPath,
@@ -85,9 +85,8 @@ export default {
         if (!$A.generic.isVariableEmpty(data.mapper) && $A.generic.checkVariableType(data.mapper) === 'dictionary') { 
             $A.generic.loopObject(stateAttrs, (key, value) => {
                 if (key.startsWith('stateMapper')) {
-                    let parts = key.split('-');
-                    let key = parts.slice(3).join('-');
-                    data.mapper[key] = value;
+                    let id = $A.generic.lowercaseFirstLetter(key.slice(11));
+                    data.mapper[id] = value;
                 }
             });
         }

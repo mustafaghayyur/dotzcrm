@@ -1,9 +1,9 @@
-import $A from "../helper.js";
+import $A from "../../helper.js";
 
 
 export default function (comments, containerId) {
     let commentsContainer = $A.dom.containerElement(containerId);
-    let commentCreator = $A.dom.searchElementCorrectly('#createComment', commentsContainer);
+    let commentCreator = $A.dom.searchElementCorrectly('#taskCreateComment', commentsContainer);
     let comment = $A.dom.searchElementCorrectly('#commmentContainer', commentsContainer);
     
     $A.ui.handleEmptyData(comments, commentsContainer);

@@ -1,5 +1,5 @@
-import $A from "../helper.js";
-import { UpdateTask, CreateTask } from '../crud/tasks.js';
+import $A from "../../helper.js";
+import { UpdateTask, CreateTask } from '../../crud/tasks.js';
 
 /**
  * Enabled all features in Task Edit Form.

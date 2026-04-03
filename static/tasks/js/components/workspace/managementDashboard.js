@@ -1,4 +1,4 @@
-import $A from "../helper.js";
+import $A from "../../helper.js";
 //import _ from 'lodash';
 import Sortable from 'sortablejs';
 

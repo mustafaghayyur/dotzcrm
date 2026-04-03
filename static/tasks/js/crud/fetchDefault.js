@@ -51,6 +51,11 @@ export async function fetchWorkspacesDashboard(containerId, componentName) {
         ]).page(1).execute(containerId, component);
 }
 
+export async function fetchTaskDetailsView (mapper, containerId, componentName) {
+    const component = await $A.tasks.load(componentName);
+    $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, component);
+}
+
 export async function fetchUserWatchStateForTask(task, watchBtn, unwatchBtn, containerId) {
     $A.query().read('tawa', {
             task_id: task.tata_id

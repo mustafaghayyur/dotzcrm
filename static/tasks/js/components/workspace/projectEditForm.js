@@ -1,5 +1,5 @@
-import $A from "../helper.js";
-import { UpdateWorkSpace, CreateWorkSpace, UpdateDepartmentsInWorkSpace, UpdateLeaderInWorkSpace, AddDepartmentsToWorkSpace, AddLeaderToWorkSpace } from '../crud/workspaces.js';
+import $A from "../../helper.js";
+import { UpdateWorkSpace, CreateWorkSpace, UpdateDepartmentsInWorkSpace, UpdateLeaderInWorkSpace, AddDepartmentsToWorkSpace, AddLeaderToWorkSpace } from '../../crud/workspaces.js';
 
 /**
  * Enabled all features in Task Edit Form.

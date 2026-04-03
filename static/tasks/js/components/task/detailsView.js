@@ -1,8 +1,8 @@
-import { removeWatcher, createWatcher } from "../crud/watchers.js";
-import { createCommentForTask } from "../crud/comments.js";
-import { DeleteTask } from '../crud/tasks.js';
-import { fetchUserWatchStateForTask, fetchTaskComments } from '../crud/fetchDefault.js';
-import $A from "../helper.js";
+import { removeWatcher, createWatcher } from "../../crud/watchers.js";
+import { createCommentForTask } from "../../crud/comments.js";
+import { DeleteTask } from '../../crud/tasks.js';
+import { fetchUserWatchStateForTask, fetchTaskComments } from '../../crud/fetchDefault.js';
+import $A from "../../helper.js";
 
 /**
  * Displays complete task record. With all functionality for that pane.

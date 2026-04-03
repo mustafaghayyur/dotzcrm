@@ -2,7 +2,7 @@
 <!--a class="btn btn-primary task-details-link" data-task-id="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
 
 <!-- Modal -->
-<div class="modal fade" id="taskDetailsView" tabindex="-1" aria-labelledby="taskDetailsViewLabel" aria-hidden="true" data-bs-keyboard="true" data-state-initialize="false" data-state-tbl-key='["tata"]'>
+<div id="taskDetailsView" class="modal fade" tabindex="-1" aria-labelledby="taskDetailsViewLabel" aria-hidden="true" data-bs-keyboard="true" data-state-initialize="false" data-state-tbl-key='["tata"]' data-state-component="task|detailsView">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
@@ -68,8 +68,8 @@
           </tr>
         </table>
         <div id="comments" class="container">
-          <div id="createComment" class="row" data-state-initialize="false">
-            <div id="createCommentResponse" class="col-12"></div><!--commentsResponse-->
+          <div id="taskCreateComment" class="row" data-state-initialize="false" data-state-component="task|createComment">
+            <div id="taskCreateCommentResponse" class="col-12"></div><!--commentsResponse-->
             <div class="col-12">
               <form method="post" id="newCommentForm">
                 {% csrf_token %}
@@ -80,7 +80,7 @@
               </form>
             </div>
           </div>
-          <div id="taskComments" data-state-initialize="false" data-state-tbl-key='["taco"]'>
+          <div id="taskComments" data-state-initialize="false" data-state-tbl-key='["taco"]' data-state-component="task|comments">
             <div id="taskCommentsResponse" class="col-12"></div>
             <div id="commmentContainer" class="row m-2 my-3 py-3 d-none">
               <div id="commentRecord" class="col-11" data-comment-id="">
