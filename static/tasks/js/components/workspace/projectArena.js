@@ -39,6 +39,7 @@ export default async (tasks, responseContainerId, mapper) => {
             $A.ui.embedData(task, clone, true);
             let link = $A.dom.searchElementCorrectly('.embed.description', clone);
 
+            $A.state.dom.addMapperArguments(link, 'task-id', task.tata_id);
             link.addEventListener('click', async ()=>{
                 $A.query().read('tata', {
                     tata_id: task.tata_id
